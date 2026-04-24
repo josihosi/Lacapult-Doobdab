@@ -6,6 +6,8 @@ Short execution queue only.
 
 Active target: `Lacapult Doobdad v0.2.0 release installer plus first backend setup options`.
 
+Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order.
+
 1. Confirm source/import state
    - Verify this repo is local-only and has no inherited `.git` history from Dabdoob.
    - Commit the imported source plus canon docs once attribution files are present.

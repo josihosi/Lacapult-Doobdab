@@ -93,3 +93,8 @@ OpenVINO is the specialized third backend and remains parked after API/Ollama un
 Dabdoob already has mod, soundpack, and tileset management. Lacapult should preserve this first rather than rewriting it. The first C-AOL-specific step is to inspect where inherited mod metadata and compatibility rules live, then define a compatibility-summary shape.
 
 Future NPC/LLM-facing mod summaries should describe what an installed mod adds or changes in terms useful for context: factions, items, monsters, locations, professions, tone, and any world assumptions. That is not runtime integration in v0; it is a metadata direction to prevent future context soup.
+
+
+## Product north star
+
+The detailed one-shot installer direction lives in `doc/lacapult-one-shot-installer-vision.md`. Treat it as product guidance, not permission to skip proof order. Release metadata/install proof comes before backend cleverness; backend setup comes before deeper mod/NPC integration.

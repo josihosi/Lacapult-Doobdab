@@ -12,6 +12,8 @@ This repo is a standalone C-AOL-specific launcher/installer derived from Dabdoob
 - **TESTING.md** - validation policy and current proof requirements
 - **TechnicalTome.md** - durable technical facts and architecture notes
 - **ATTRIBUTION.md** - credits and license/lineage obligations
+- **doc/lacapult-one-shot-installer-vision.md** - product north star for the one-shot installer
+- **doc/lacapult-v02-release-backend-modding-contract.md** - active scope amendment for v0.2.0/backend/modding work
 
 ## Current active target
 
@@ -22,6 +24,8 @@ This repo is a standalone C-AOL-specific launcher/installer derived from Dabdoob
 Build from the local standalone repo at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdad`, then turn the first product slice into a C-AOL-specific launcher that can fetch and install the existing `v0.2.0` C-AOL releases from `josihosi/Cataclysm-AOL`.
 
 The active scope now includes first-pass LLM backend setup options for **API** and **Ollama** after the v0.2.0 release install path is proven. **OpenVINO** stays parked as the specialized third backend unless it is cheap to stub/detect. Modding support stays inherited for now, with a bounded compatibility/NPC-summary investigation behind the installer proof.
+
+Product north star: `doc/lacapult-one-shot-installer-vision.md`. It is greenlit as direction, but execution still follows proof order: v0.2.0 release metadata/install path first, backend skeleton second, mod compatibility investigation third.
 
 ### Product intent
 
