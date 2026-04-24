@@ -112,3 +112,4 @@ The detailed one-shot installer direction lives in `doc/lacapult-one-shot-instal
 - `scripts/SettingsUI.gd` creates a small runtime backend setup section in the existing Settings tab. It supports API, Ollama, and parked OpenVINO; API mode intentionally stores endpoint/model metadata only and not secrets.
 - `doc/caol-mod-compatibility-summary.md` records the first compatibility-summary shape for inherited mod support and future NPC/LLM context use.
 - Warning status calls use the actual `Enums.MSG_WARN` member. The inherited `Enums.MSG_WARNING` spelling was not defined and would fail if installer/filesystem/mod warning branches executed.
+- `tools/prove_caol_release.py --all-platforms` now proves the v0.2.0 asset contract for Linux, macOS, and Windows in one live GitHub API read while preserving the default current-host proof mode.

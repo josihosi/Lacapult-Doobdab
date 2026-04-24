@@ -99,3 +99,13 @@ Before claiming v0 is done, Andi should record:
 - Re-ran Ollama cheap detection: `command -v ollama` is `/opt/homebrew/bin/ollama`; local server probe returned JSON with 8 models. No model pull or secret-bearing API smoke was attempted.
 - Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are still unavailable on this Mac, so no GUI/project-load smoke was claimed.
 - `git diff --check` passed for the backend surface changes.
+
+## Evidence - 2026-04-25 all-platform v0.2.0 asset proof
+
+- Extended `tools/prove_caol_release.py` with `--all-platforms`, still using one live GitHub API read and no archive downloads.
+- Ran `python3 tools/prove_caol_release.py --all-platforms`:
+  - Found `josihosi/Cataclysm-AOL` release `v0.2.0` / `Cataclysm - Arsenic and Old Lace v0.2.0` with 12 assets.
+  - Linux filter `_linux.tar.gz` matched 4 assets and produced an installable metadata shape.
+  - macOS filters `_macos.dmg`, `_macos.tar.gz`, `_macos.zip` matched 4 DMG assets and produced an installable metadata shape.
+  - Windows filter `_windows.zip` matched 4 assets and produced an installable metadata shape.
+  - Each platform result included `name`, `url`, `filename`, `published_at`, and `has_any_assets` for the installer handoff shape.

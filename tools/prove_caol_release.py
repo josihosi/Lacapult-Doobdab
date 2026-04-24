@@ -3,14 +3,19 @@
 
 No release archive is downloaded. This only reads GitHub JSON and filters asset names
 using the same platform substrings wired in scripts/ReleaseManager.gd.
+
+By default it proves the current host platform. Pass ``--all-platforms`` to prove the
+v0.2.0 asset contract for Linux, macOS, and Windows in one API read.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import platform
 import sys
 import urllib.request
+from typing import Any
 
 RELEASES_URL = "https://api.github.com/repos/josihosi/Cataclysm-AOL/releases"
 FILTERS = {
@@ -20,11 +25,52 @@ FILTERS = {
 }
 
 
+def select_asset(release: dict[str, Any], system: str) -> dict[str, Any]:
+    substrings = FILTERS[system]
+    matches = []
+    for asset in release.get("assets", []):
+        name = asset.get("name", "")
+        if any(s in name for s in substrings):
+            matches.append(asset)
+
+    selected = matches[0] if matches else None
+    installer_shape = {
+        "name": release.get("name") or release.get("tag_name"),
+        "url": selected.get("browser_download_url", "") if selected else "",
+        "filename": selected.get("name", "") if selected else "",
+        "published_at": release.get("published_at", ""),
+        "has_any_assets": bool(release.get("assets")),
+    }
+    return {
+        "platform": system,
+        "filters": substrings,
+        "match_count": len(matches),
+        "installable": bool(installer_shape["url"] and installer_shape["filename"]),
+        "installer_shape": installer_shape,
+        "matching_assets": [
+            {
+                "name": asset.get("name", ""),
+                "size": asset.get("size", 0),
+                "url": asset.get("browser_download_url", ""),
+            }
+            for asset in matches
+        ],
+    }
+
+
 def main() -> int:
-    system = platform.system()
-    substrings = FILTERS.get(system)
-    if not substrings:
-        print(f"unsupported platform for proof: {system}", file=sys.stderr)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--all-platforms",
+        action="store_true",
+        help="prove Linux, macOS, and Windows v0.2.0 asset filters instead of only this host",
+    )
+    args = parser.parse_args()
+
+    systems = list(FILTERS) if args.all_platforms else [platform.system()]
+    unsupported = [system for system in systems if system not in FILTERS]
+    if unsupported:
+        print(f"unsupported platform(s) for proof: {', '.join(unsupported)}", file=sys.stderr)
         return 2
 
     req = urllib.request.Request(RELEASES_URL, headers={"User-Agent": "Lacapult-Doobdab-proof"})
@@ -36,30 +82,17 @@ def main() -> int:
         print("v0.2.0 release not found", file=sys.stderr)
         return 1
 
-    selected = None
-    for asset in v020.get("assets", []):
-        name = asset.get("name", "")
-        if any(s in name for s in substrings):
-            selected = asset
-            break
-
-    installer_shape = {
-        "name": v020.get("name") or v020.get("tag_name"),
-        "url": selected.get("browser_download_url", "") if selected else "",
-        "filename": selected.get("name", "") if selected else "",
-        "published_at": v020.get("published_at", ""),
-        "has_any_assets": bool(v020.get("assets")),
-    }
-
-    print(json.dumps({
+    platform_results = [select_asset(v020, system) for system in systems]
+    proof = {
         "release": v020.get("tag_name"),
-        "platform": system,
-        "filters": substrings,
+        "release_name": v020.get("name"),
+        "published_at": v020.get("published_at", ""),
         "asset_count": len(v020.get("assets", [])),
-        "installer_shape": installer_shape,
-    }, indent=2))
+        "platform_results": platform_results,
+    }
+    print(json.dumps(proof, indent=2))
 
-    if not installer_shape["url"] or not installer_shape["filename"]:
+    if not all(result["installable"] for result in platform_results):
         return 1
     return 0
 
