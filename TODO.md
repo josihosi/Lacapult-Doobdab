@@ -25,10 +25,11 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - [x] Add platform asset filters for C-AOL `v0.2.0` assets: `_linux.tar.gz`, `_macos.dmg`, `_windows.zip`.
    - [x] Wire fetch/list/install path so a C-AOL v0.2.0 asset becomes the existing installer metadata shape.
 
-4. First LLM backend setup options — first safe skeleton landed 2026-04-24
+4. First LLM backend setup options — first safe skeleton landed 2026-04-24; Settings surface landed 2026-04-25
    - [x] Add API as a selectable setup/config path without exposing secrets.
    - [x] Add Ollama as a selectable setup/config path with local command/server detection where safe.
    - [x] Keep OpenVINO parked/specialized unless a cheap placeholder/detection hook falls out naturally.
+   - [x] Expose the backend setup selector/status/save path in the existing Settings tab without scene-node surgery.
 
 5. Modding compatibility investigation — first note landed 2026-04-24
    - [x] Preserve inherited mod/soundpack/tileset support.

@@ -108,5 +108,7 @@ The detailed one-shot installer direction lives in `doc/lacapult-one-shot-instal
   - macOS: `_macos.dmg`, with fallback tolerance for `_macos.tar.gz` / `_macos.zip`.
 - `scripts/settings_manager.gd` defaults the launcher to `game = "caol"`, `channel = "release"`, and keeps backend setup fields for API/Ollama without secrets.
 - `scripts/BackendConfigManager.gd` is a safe first backend setup skeleton. It writes launcher-side metadata only, detects the Ollama command cheaply, and explicitly parks OpenVINO as specialized future work.
+- `BackendConfig` is autoloaded in `project.godot` so Settings UI code can read supported backends and write launcher-side backend metadata.
+- `scripts/SettingsUI.gd` creates a small runtime backend setup section in the existing Settings tab. It supports API, Ollama, and parked OpenVINO; API mode intentionally stores endpoint/model metadata only and not secrets.
 - `doc/caol-mod-compatibility-summary.md` records the first compatibility-summary shape for inherited mod support and future NPC/LLM context use.
 - Warning status calls use the actual `Enums.MSG_WARN` member. The inherited `Enums.MSG_WARNING` spelling was not defined and would fail if installer/filesystem/mod warning branches executed.

@@ -12,6 +12,12 @@ var _themes := [
 ]
 
 var _proxy_options := ["off", "on", "download"]
+var _backend_modes := ["api", "ollama", "openvino"]
+
+var _backend_mode_button: OptionButton = null
+var _backend_endpoint: LineEdit = null
+var _backend_model: LineEdit = null
+var _backend_status: Label = null
 
 onready var _root = $"/root/Catapult"
 onready var _tabs = $"/root/Catapult/Main/Tabs"
@@ -61,6 +67,130 @@ func _ready() -> void:
 	$ScaleOverride/cbScaleOverrideEnable.pressed = Settings.read("ui_scale_override_enabled")
 	$ScaleOverride/sbScaleOverride.editable = Settings.read("ui_scale_override_enabled")
 	$ScaleOverride/sbScaleOverride.value = (Settings.read("ui_scale_override") as float) * 100.0
+	_add_backend_setup_controls()
+
+
+func _add_backend_setup_controls() -> void:
+	if has_node("BackendSetup"):
+		return
+
+	var section = VBoxContainer.new()
+	section.name = "BackendSetup"
+	section.hint_tooltip = "C-AOL NPC backend setup metadata. API secrets are not stored by Lacapult v0."
+	add_child(section)
+
+	var title = Label.new()
+	title.text = "C-AOL NPC backend setup"
+	section.add_child(title)
+
+	var mode_row = HBoxContainer.new()
+	mode_row.name = "BackendMode"
+	section.add_child(mode_row)
+	var mode_label = Label.new()
+	mode_label.text = "Backend"
+	mode_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	mode_row.add_child(mode_label)
+	_backend_mode_button = OptionButton.new()
+	_backend_mode_button.rect_min_size = Vector2(180, 0)
+	_backend_mode_button.size_flags_horizontal = SIZE_SHRINK_END
+	_backend_mode_button.add_item("API backend")
+	_backend_mode_button.add_item("Ollama backend")
+	_backend_mode_button.add_item("OpenVINO (parked)")
+	_backend_mode_button.connect("item_selected", self, "_on_BackendMode_item_selected")
+	mode_row.add_child(_backend_mode_button)
+
+	var endpoint_row = HBoxContainer.new()
+	endpoint_row.name = "BackendEndpoint"
+	section.add_child(endpoint_row)
+	var endpoint_label = Label.new()
+	endpoint_label.text = "Endpoint"
+	endpoint_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	endpoint_row.add_child(endpoint_label)
+	_backend_endpoint = LineEdit.new()
+	_backend_endpoint.rect_min_size = Vector2(260, 0)
+	_backend_endpoint.placeholder_text = "API base URL or http://127.0.0.1:11434"
+	_backend_endpoint.size_flags_horizontal = SIZE_EXPAND_FILL
+	_backend_endpoint.connect("text_changed", self, "_on_BackendEndpoint_text_changed")
+	endpoint_row.add_child(_backend_endpoint)
+
+	var model_row = HBoxContainer.new()
+	model_row.name = "BackendModel"
+	section.add_child(model_row)
+	var model_label = Label.new()
+	model_label.text = "Model"
+	model_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	model_row.add_child(model_label)
+	_backend_model = LineEdit.new()
+	_backend_model.rect_min_size = Vector2(260, 0)
+	_backend_model.placeholder_text = "Optional model name"
+	_backend_model.size_flags_horizontal = SIZE_EXPAND_FILL
+	_backend_model.connect("text_changed", self, "_on_BackendModel_text_changed")
+	model_row.add_child(_backend_model)
+
+	_backend_status = Label.new()
+	_backend_status.autowrap = true
+	section.add_child(_backend_status)
+
+	var save_button = Button.new()
+	save_button.text = "Save backend setup metadata"
+	save_button.connect("pressed", self, "_on_SaveBackendSetup_pressed")
+	section.add_child(save_button)
+
+	_refresh_backend_setup_controls()
+
+
+func _refresh_backend_setup_controls() -> void:
+	if _backend_mode_button == null:
+		return
+	var mode = Settings.read("backend_mode")
+	var mode_idx = _backend_modes.find(mode)
+	if mode_idx < 0:
+		mode_idx = 0
+		mode = _backend_modes[mode_idx]
+	_backend_mode_button.select(mode_idx)
+
+	var endpoint_setting = "backend_api_endpoint" if mode == "api" else "backend_ollama_endpoint"
+	var model_setting = "backend_api_model" if mode == "api" else "backend_ollama_model"
+	_backend_endpoint.text = "" if mode == "openvino" else Settings.read(endpoint_setting)
+	_backend_model.text = "" if mode == "openvino" else Settings.read(model_setting)
+	_backend_endpoint.editable = mode != "openvino"
+	_backend_model.editable = mode != "openvino"
+
+	var status = "OpenVINO is parked/specialized for a later slice."
+	if mode == "api":
+		status = "API mode saves endpoint/model metadata only; Lacapult v0 never stores API keys."
+	elif mode == "ollama":
+		for backend in BackendConfig.get_supported_backends():
+			if backend.get("id", "") == "ollama":
+				status = "Ollama status: %s" % backend.get("status", "unknown")
+	_backend_status.text = status
+
+
+func _store_backend_field(setting_prefix: String, value: String) -> void:
+	var mode = Settings.read("backend_mode")
+	if mode == "api" or mode == "ollama":
+		Settings.store("backend_%s_%s" % [mode, setting_prefix], value)
+
+
+func _on_BackendMode_item_selected(index: int) -> void:
+	Settings.store("backend_mode", _backend_modes[index])
+	_refresh_backend_setup_controls()
+
+
+func _on_BackendEndpoint_text_changed(new_text: String) -> void:
+	_store_backend_field("endpoint", new_text)
+
+
+func _on_BackendModel_text_changed(new_text: String) -> void:
+	_store_backend_field("model", new_text)
+
+
+func _on_SaveBackendSetup_pressed() -> void:
+	var mode = Settings.read("backend_mode")
+	var endpoint = "" if _backend_endpoint == null else _backend_endpoint.text
+	var model = "" if _backend_model == null else _backend_model.text
+	var result = BackendConfig.write_launcher_backend_config(mode, endpoint, model)
+	_backend_status.text = "Backend setup save result: %s" % result
 
 
 func _on_obtnLanguage_item_selected(index: int) -> void:

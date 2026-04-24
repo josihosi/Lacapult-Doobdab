@@ -8,9 +8,9 @@ Status: **ACTIVE**
 
 Done only when all are true:
 
-- [ ] Local standalone repo exists at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdab` with no inherited Dabdoob `.git` history.
+- [x] Local standalone repo exists at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdab` with no inherited Dabdoob `.git` history.
 - [x] Original MIT license notice is preserved.
-- [ ] `ATTRIBUTION.md` credits qrrk/Catapult, Hihahahalol/Dabdoob, CDDA, CTLG, BN if still inherited/mentioned, and C-AOL.
+- [x] `ATTRIBUTION.md` credits qrrk/Catapult, Hihahahalol/Dabdoob, CDDA, CTLG, BN if still inherited/mentioned, and C-AOL.
 - [x] README presents Lacapult Doobdab as C-AOL-specific and clearly derived from Dabdoob/Catapult.
 - [x] Godot project/window identity says Lacapult Doobdab.
 - [x] Self-update check no longer points at `Hihahahalol/Catapult_Dabdoob` unless explicitly shown as upstream credit, not update source.
@@ -21,6 +21,7 @@ Done only when all are true:
 - [x] Launch/install paths know plausible C-AOL executable names for the current platform.
 - [x] API backend appears as a first supported setup/config option without leaking secrets.
 - [x] Ollama backend appears as a first supported setup/config option with safe local detection or a recorded blocker.
+- [x] Backend setup has a visible Settings-tab selector/status/save path.
 - [x] OpenVINO is explicitly parked or stubbed as a specialized later backend.
 - [x] Inherited mod/soundpack/tileset support is preserved or any temporary breakage is documented.
 - [x] First C-AOL mod compatibility / future NPC-summary investigation note exists.

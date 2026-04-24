@@ -89,3 +89,13 @@ Before claiming v0 is done, Andi should record:
   - These now use the existing `Enums.MSG_WARN` member from `scripts/Enums.gd`, avoiding a runtime failure when those warning branches execute.
 - Re-ran `python3 tools/prove_caol_release.py`; it still selects the Darwin `v0.2.0` DMG and produces installer metadata without downloading it.
 - Re-ran Ollama cheap detection: `command -v ollama` is `/opt/homebrew/bin/ollama`; local server probe returned JSON with 8 models. No model pull or secret-bearing API smoke was attempted.
+
+## Evidence - 2026-04-25 backend settings surface
+
+- Added `BackendConfig` as a Godot autoload and wired the Settings tab to create a small C-AOL NPC backend setup section at runtime.
+- Static UI proof: `grep -R "BackendConfig=\|BackendSetup\|Save backend setup metadata\|C-AOL NPC backend setup\|OpenVINO is parked\|API mode saves" -n project.godot scripts/SettingsUI.gd scripts/BackendConfigManager.gd`
+  - Shows the autoload, runtime-created backend setup section, save button, API no-secret warning, Ollama status readout, and parked OpenVINO copy.
+- Re-ran `python3 tools/prove_caol_release.py`; it still selects `caol_cdda-0-h_2026-03-29-1556_macos.dmg` for Darwin `v0.2.0` and produces installer metadata without downloading it.
+- Re-ran Ollama cheap detection: `command -v ollama` is `/opt/homebrew/bin/ollama`; local server probe returned JSON with 8 models. No model pull or secret-bearing API smoke was attempted.
+- Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are still unavailable on this Mac, so no GUI/project-load smoke was claimed.
+- `git diff --check` passed for the backend surface changes.
