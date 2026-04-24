@@ -61,3 +61,23 @@ Before claiming v0 is done, Andi should record:
 - Existing mod/soundpack/tileset code assumes multiple Cataclysm game IDs; hiding other games is safer than deleting support everywhere in the first slice.
 - Mod compatibility/NPC summaries are investigation/docs first, not runtime integration in v0.
 - Existing self-update URL points to Dabdoob and must not silently offer Dabdoob releases as Lacapult updates.
+
+## Evidence - 2026-04-24 v0.2.0 release/backend proof slice
+
+- Live release parser proof: `python3 tools/prove_caol_release.py`
+  - Found `josihosi/Cataclysm-AOL` release `v0.2.0` on Darwin.
+  - Matched macOS filter `_macos.dmg` against `caol_cdda-0-h_2026-03-29-1556_macos.dmg`.
+  - Produced installer metadata shape with `name`, `url`, `filename`, `published_at`, and `has_any_assets` without downloading the archive.
+- Backend local detection proof:
+  - `command -v ollama` -> `/opt/homebrew/bin/ollama`
+  - `curl -fsS --max-time 2 http://127.0.0.1:11434/api/tags` -> running
+  - API backend remains config-shape only; no secrets were used, stored, or logged.
+  - OpenVINO remains parked as `parked_specialized_future` in `scripts/BackendConfigManager.gd`.
+- Godot availability check:
+  - `godot --version`, `godot3 --version`, and `godot4 --version` were not found on this machine, so no GUI/project-load smoke was claimed.
+- Static identity/release proof:
+  - `grep -R "caol-release\|josihosi/Cataclysm-AOL\|_macos.dmg\|_linux.tar.gz\|_windows.zip\|backend_ollama\|backend_api\|OpenVINO\|Lacapult Doobdad" -n README.md project.godot scripts text/en doc tools`
+  - Shows Lacapult project identity/defaults, C-AOL release URL and asset filters, API/Ollama settings, and OpenVINO parked note.
+- Mod support proof:
+  - Inherited entry points remain present: `scripts/ModManager.gd`, `scripts/ModsUI.gd`, `scripts/SoundpackManager.gd`, `scripts/SoundpacksUI.gd`, `scripts/TilesetManager.gd`, `scripts/TilesetsUI.gd`.
+  - First C-AOL compatibility/NPC-summary note added at `doc/caol-mod-compatibility-summary.md`.

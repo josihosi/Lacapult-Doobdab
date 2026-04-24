@@ -52,7 +52,7 @@ var _easter_egg_counter := 0
 var _game_process: OSExecWrapper = null
 var _launcher_should_close_after_game := false
 
-const VERSION_CHECK_URL = "https://api.github.com/repos/Hihahahalol/Catapult_Dabdoob/releases/latest"
+const VERSION_CHECK_URL = "" # Lacapult public self-update is disabled until a Lacapult release repo exists.
 var _latest_version = ""
 var _is_update_available = false
 var _release_page_url = ""
@@ -162,7 +162,9 @@ func assign_localized_text() -> void:
 	_lbl_changelog.bbcode_text = tr("lbl_changelog")
 	
 	var game = Settings.read("game")
-	if game == "dda":
+	if game == "caol":
+		_game_desc.bbcode_text = tr("desc_caol")
+	elif game == "dda":
 		_game_desc.bbcode_text = tr("desc_dda")
 	elif game == "bn":
 		_game_desc.bbcode_text = tr("desc_bn")
@@ -314,8 +316,9 @@ func _on_GamesList_item_selected(index: int) -> void:
 
 	match index:
 		0:
-			Settings.store("game", "dda")
-			_game_desc.bbcode_text = tr("desc_dda")
+			Settings.store("game", "caol")
+			Settings.store("channel", "release")
+			_game_desc.bbcode_text = tr("desc_caol")
 		1:
 			Settings.store("game", "tlg")
 			_game_desc.bbcode_text = tr("desc_tlg")
@@ -505,6 +508,9 @@ func _get_release_key() -> String:
 	# from settings.
 
 	var game = Settings.read("game")
+	if game == "caol":
+		return "caol-release"
+
 	var key = game + "-" + Settings.read("channel")
 
 	if key == "bn-experimental" and Settings.read("bn_rolling_experimental"):
@@ -576,7 +582,14 @@ func apply_game_choice() -> void:
 	if game == "bn":
 		_cb_bn_rolling.pressed = Settings.read("bn_rolling_experimental")
 
-	if (game == "dda") or (game == "bn"):
+	if game == "caol":
+		Settings.store("channel", "release")
+		_rbtn_exper.pressed = false
+		_rbtn_stable.pressed = true
+		_rbtn_exper.disabled = true
+		_rbtn_stable.disabled = true
+		_btn_refresh.disabled = false
+	elif (game == "dda") or (game == "bn"):
 		_rbtn_exper.disabled = false
 		_rbtn_stable.disabled = false
 		if channel == "stable":
@@ -590,6 +603,9 @@ func apply_game_choice() -> void:
 		_btn_refresh.disabled = false
 
 	match game:
+		"caol":
+			_lst_games.select(0)
+			_game_desc.bbcode_text = tr("desc_caol")
 		"dda":
 			_lst_games.select(0)
 			_game_desc.bbcode_text = tr("desc_dda")
@@ -1037,7 +1053,11 @@ func _activate_easter_egg() -> void:
 
 func _on_BtnCheck_pressed() -> void:
 	var current_version = Settings.get_hardcoded_version()
-	Status.post(tr("Checking for Dabdoob updates... Current version: v%s") % current_version)
+	if VERSION_CHECK_URL == "":
+		Status.post(tr("Lacapult self-update is disabled until public Lacapult releases exist. Current version: v%s") % current_version)
+		_btn_update.disabled = true
+		return
+	Status.post(tr("Checking for Lacapult updates... Current version: v%s") % current_version)
 	
 	# Disable the update button while checking
 	_btn_update.disabled = true
@@ -1086,7 +1106,7 @@ func _on_version_check_completed(result, response_code, headers, body):
 		if "html_url" in response:
 			_release_page_url = response["html_url"]
 		else:
-			_release_page_url = "https://github.com/Hihahahalol/Catapult_Dabdoob/releases/latest"
+			_release_page_url = "https://github.com/josihosi/Cataclysm-AOL/releases"
 		
 		# Find downloadable assets in the response
 		_download_urls = []
@@ -1555,6 +1575,8 @@ func _find_macos_executable(game_dir: String) -> Dictionary:
 			exe_names = ["cataclysm-eod-tiles", "cataclysm-tiles"]
 		"tish":
 			exe_names = ["cataclysm-tish-tiles", "cataclysm-tiles"]
+		"caol":
+			exe_names = ["cataclysm-tiles", "cataclysm-tiles.exe", "Cataclysm-AOL"]
 		_:
 			exe_names = ["cataclysm-tiles"]
 	

@@ -129,7 +129,9 @@ func _looks_like_game_directory(dir_path: String) -> bool:
 	# Look for common game executable patterns
 	var game_executables = [
 		"cataclysm-tiles", "cataclysm-bn-tiles", "cataclysm-tlg-tiles",
-		"cataclysm-tiles.exe", "cataclysm-bn-tiles.exe", "cataclysm-tlg-tiles.exe"
+		"cataclysm-eod-tiles", "cataclysm-tish-tiles",
+		"cataclysm-tiles.exe", "cataclysm-bn-tiles.exe", "cataclysm-tlg-tiles.exe",
+		"cataclysm-eod-tiles.exe", "cataclysm-tish-tiles.exe"
 	]
 	
 	for exe in game_executables:

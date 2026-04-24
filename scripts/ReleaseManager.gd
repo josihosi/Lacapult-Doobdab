@@ -20,6 +20,8 @@ const _RELEASE_URLS = {
 		"https://api.github.com/repos/Cataclysm-TISH-team/Cataclysm-TISH/releases",
 	"tlg-experimental":
 		"https://api.github.com/repos/Cataclysm-TLG/Cataclysm-TLG/releases",
+	"caol-release":
+		"https://api.github.com/repos/josihosi/Cataclysm-AOL/releases",
 }
 
 const _CATACLYSM_DB_BASE_URL = "https://github.com/SrGnis/cataclysm-db/releases/download/latest/"
@@ -86,6 +88,19 @@ const _ASSET_FILTERS = {
 		"field": "name",
 		"substring": "ctlg-osx-tiles",
 	},
+	"caol-release-linux": {
+		"field": "name",
+		"substring": "_linux.tar.gz",
+	},
+	"caol-release-win": {
+		"field": "name",
+		"substring": "_windows.zip",
+	},
+	"caol-release-mac": {
+		"field": "name",
+		"substring": "_macos.dmg",
+		"fallback_substrings": ["_macos.tar.gz", "_macos.zip"],
+	},
 }
 
 
@@ -102,6 +117,7 @@ var releases = {
 	#"tish-stable": [], Does not exist?
 	"tish-experimental": [],
 	"tlg-experimental":[],
+	"caol-release": [],
 }
 
 
@@ -214,6 +230,20 @@ func _on_request_completed_tlg(result: int, response_code: int,
 	else:
 		_parse_builds(body, releases["tlg-experimental"], _ASSET_FILTERS["tlg-experimental-" + _platform])
 	
+	emit_signal("done_fetching_releases")
+
+
+func _on_request_completed_caol(result: int, response_code: int,
+		headers: PoolStringArray, body: PoolByteArray) -> void:
+
+	Status.post(tr("msg_http_request_info") %
+			[result, response_code, headers], Enums.MSG_DEBUG)
+
+	if result:
+		Status.post(tr("msg_releases_request_failed"), Enums.MSG_WARN)
+	else:
+		_parse_builds(body, releases["caol-release"], _ASSET_FILTERS["caol-release-" + _platform])
+
 	emit_signal("done_fetching_releases")
 
 
@@ -414,10 +444,18 @@ func _parse_builds(data: PoolByteArray, write_to: Array, filter: Dictionary) -> 
 		build["published_at"] = rec.get("published_at", "")
 		build["has_any_assets"] = len(rec["assets"]) > 0
 
+		var substrings = [filter["substring"]]
+		if "fallback_substrings" in filter:
+			substrings.append_array(filter["fallback_substrings"])
+
 		for asset in rec["assets"]:
-			if filter["substring"] in asset[filter["field"]]:
-				build["url"] = asset["browser_download_url"]
-				build["filename"] = asset["name"]
+			for substring in substrings:
+				if substring in asset[filter["field"]]:
+					build["url"] = asset["browser_download_url"]
+					build["filename"] = asset["name"]
+					break
+			if build["url"] != "":
+				break
 
 		# Include all releases, even those without matching assets
 		tmp_arr.append(build)
@@ -471,5 +509,8 @@ func fetch(release_key: String) -> void:
 		"tlg-experimental":
 			Status.post(tr("msg_fetching_releases_tlg"))
 			_request_releases($HTTPRequest_TLG, "tlg-experimental")
+		"caol-release":
+			Status.post(tr("msg_fetching_releases_caol"))
+			_request_releases($HTTPRequest_CAOL, "caol-release")
 		_:
 			Status.post((tr("msg_invalid_fetch_func_param") % [release_key] ), Enums.MSG_ERROR)

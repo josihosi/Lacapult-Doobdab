@@ -1,12 +1,18 @@
 extends Node
 
 
-const _SETTINGS_FILENAME = "catapult_settings.json"
+const _SETTINGS_FILENAME = "lacapult_settings.json"
 
 const _HARDCODED_DEFAULTS = {
-	"version": "28.2",
-	"game": "dda",
-	"channel": "stable",  # Currently used only for DDA.
+	"version": "0.2.0-dev",
+	"game": "caol",
+	"channel": "release",  # C-AOL uses curated GitHub releases.
+	"active_install_caol": "",
+	"backend_mode": "api",
+	"backend_api_endpoint": "",
+	"backend_api_model": "",
+	"backend_ollama_endpoint": "http://127.0.0.1:11434",
+	"backend_ollama_model": "",
 	"active_install_dda": "Cataclysm-DDA experimental build 2022-07-26-0606",
 	"active_install_bn": "",
 	"active_install_eod": "",

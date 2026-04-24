@@ -19,21 +19,21 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - Update `project.godot` name/description.
    - Replace or disable Dabdoob self-update URL until Lacapult has its own public releases.
 
-3. C-AOL-only v0.2.0 release path
-   - Add `caol` / C-AOL as the default and only visible game target.
-   - Add release URL for `josihosi/Cataclysm-AOL`.
-   - Add platform asset filters for C-AOL `v0.2.0` assets: `_linux.tar.gz`, `_macos.dmg`, `_windows.zip`.
-   - Wire fetch/list/install path so a C-AOL v0.2.0 asset becomes the existing installer metadata shape.
+3. C-AOL-only v0.2.0 release path — proof landed 2026-04-24
+   - [x] Add `caol` / C-AOL as the default and only visible game target.
+   - [x] Add release URL for `josihosi/Cataclysm-AOL`.
+   - [x] Add platform asset filters for C-AOL `v0.2.0` assets: `_linux.tar.gz`, `_macos.dmg`, `_windows.zip`.
+   - [x] Wire fetch/list/install path so a C-AOL v0.2.0 asset becomes the existing installer metadata shape.
 
-4. First LLM backend setup options
-   - Add API as a selectable setup/config path without exposing secrets.
-   - Add Ollama as a selectable setup/config path with local command/server detection where safe.
-   - Keep OpenVINO parked/specialized unless a cheap placeholder/detection hook falls out naturally.
+4. First LLM backend setup options — first safe skeleton landed 2026-04-24
+   - [x] Add API as a selectable setup/config path without exposing secrets.
+   - [x] Add Ollama as a selectable setup/config path with local command/server detection where safe.
+   - [x] Keep OpenVINO parked/specialized unless a cheap placeholder/detection hook falls out naturally.
 
-5. Modding compatibility investigation
-   - Preserve inherited mod/soundpack/tileset support.
-   - Identify inherited mod metadata/compatibility entry points.
-   - Write the first compatibility-summary direction for C-AOL mods and future NPC/LLM summaries.
+5. Modding compatibility investigation — first note landed 2026-04-24
+   - [x] Preserve inherited mod/soundpack/tileset support.
+   - [x] Identify inherited mod metadata/compatibility entry points.
+   - [x] Write the first compatibility-summary direction for C-AOL mods and future NPC/LLM summaries.
 
 6. Minimal validation
    - Prove release JSON parsing selects correct platform asset(s) from live C-AOL v0.2.0 releases.

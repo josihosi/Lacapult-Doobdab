@@ -40,10 +40,10 @@ func _get_own_dir() -> String:
 		var home_dir = OS.get_environment("HOME")
 		var dabdoob_dir = ""
 		if home_dir != "":
-			dabdoob_dir = home_dir.plus_file("Library").plus_file("Application Support").plus_file("Dabdoob")
+			dabdoob_dir = home_dir.plus_file("Library").plus_file("Application Support").plus_file("Lacapult Doobdad")
 		else:
 			# Fallback if HOME environment variable is not available
-			dabdoob_dir = OS.get_user_data_dir().get_base_dir().get_base_dir().get_base_dir().get_base_dir().plus_file("Application Support").plus_file("Dabdoob")
+			dabdoob_dir = OS.get_user_data_dir().get_base_dir().get_base_dir().get_base_dir().get_base_dir().plus_file("Application Support").plus_file("Lacapult Doobdad")
 		
 		# Ensure the directory exists with proper permissions
 		var d = Directory.new()
@@ -53,9 +53,9 @@ func _get_own_dir() -> String:
 				# Set proper permissions for the newly created directory
 				var chmod_result = OS.execute("chmod", ["755", dabdoob_dir], true)
 				if chmod_result != 0:
-					print("Warning: Could not set permissions for Dabdoob directory")
+					print("Warning: Could not set permissions for Lacapult Doobdad directory")
 			else:
-				print("Error creating Dabdoob directory: ", err)
+				print("Error creating Lacapult Doobdad directory: ", err)
 		
 		return dabdoob_dir
 	else:
@@ -83,7 +83,7 @@ func _get_installs_summary() -> Dictionary:
 		push_error("Own directory is empty, cannot get installs summary")
 		return {}
 	
-	for game in ["dda", "tlg", "bn", "eod", "tish"]:
+	for game in ["caol", "dda", "tlg", "bn", "eod", "tish"]:
 		var installs = {}
 		var base_dir = own_directory.plus_file(game)
 		

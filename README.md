@@ -1,61 +1,40 @@
-# Dabdoob
+# Lacapult Doobdad
 
-**Dabdoob** is a cross-platform launcher and content manager for [Cataclysm: Dark Days Ahead](https://github.com/CleverRaven/Cataclysm-DDA) and its forks, such as [Cataclysm: The Last Generation](https://github.com/Cataclysm-TLG/Cataclysm-TLG/) and [Cataclysm: Bright Nights](https://github.com/cataclysmbnteam/Cataclysm-BN). It is based on [qrrk's Catapult launcher](https://github.com/qrrk/Catapult) to resume its development and to create the "perfect" launcher that does everything you could hope for.
+**Lacapult Doobdad** is a local-first installer and setup helper for [Cataclysm: Arsenic and Old Lace](https://github.com/josihosi/Cataclysm-AOL).
 
-[**Download latest release**](https://github.com/Hihahahalol/Catapult_Dabdoob/releases/latest)  |  [**See all releases**](https://github.com/Hihahahalol/Catapult_Dabdoob/releases)
+It is derived from [Hihahahalol's Dabdoob / Catapult_Dabdoob](https://github.com/Hihahahalol/Catapult_Dabdoob), which is based on [qrrk's Catapult launcher](https://github.com/qrrk/Catapult). The inherited launcher code remains MIT licensed; see `LICENSE` and `ATTRIBUTION.md`.
 
+> Current development target: fetch and install existing C-AOL `v0.2.0` GitHub release assets, then add first safe backend setup paths for API and Ollama. OpenVINO is parked as a specialized future path.
 
+## What v0 is meant to do
 
-![Dabdoob UI](./.github/Dabdoob_ui.gif)
+- Show C-AOL as the only first-class game target.
+- Fetch releases from `josihosi/Cataclysm-AOL`.
+- Select platform-appropriate assets:
+  - Linux: `_linux.tar.gz`
+  - Windows: `_windows.zip`
+  - macOS: `_macos.dmg` (with future tolerance for `_macos.tar.gz` / `_macos.zip`)
+- Reuse Dabdoob's install/update path while preserving saves, config, mods, soundpacks, and tilesets where possible.
+- Provide safe first-pass backend setup metadata for:
+  - API backend, without storing or logging secrets.
+  - Ollama backend, with local detection/config guidance.
+- Preserve inherited mod/soundpack/tileset support while C-AOL-specific compatibility work is investigated.
 
-## Features
+## Local development status
 
-- Automatic game download and installation (stable or experimental releases).
-- Ability to install multiple versions of the game and switch between them.
-- Updating the game while preserving user data (saved games, settings, mods, etc).
-- Mod management: Select and download from our list of mods that are verified to be working for the version of Cataclysm you selected.
-- Automatic download and installation of soundpacks and tilesets.
-- Customization of game fonts.
-- Automatic and manual saved game backups (30 times faster than Catapult too!).
-- Multilingual interface.
-- Fully portable and can be carried on a removable drive.
-- Good support for HiDPI displays: UI is automatically scaled with screen DPI, with ability to adjust the scale manually.
+This repository is currently local-only. Do not treat this README as a public release page yet: public repo creation, pushing, publishing releases, or contacting upstream requires fresh explicit clearance from Josef/Schani.
 
 ## Installation
 
-None required. The launcher is a single, self-contained executable. Just [download](https://github.com/Hihahahalol/Catapult_TLG/releases/latest) it to a separate folder and run.
+No Lacapult Doobdad packaged release exists yet. For development, open the Godot project locally and run `scenes/Catapult.tscn` if a compatible Godot binary is available.
 
-### Linux
-- You need write permission in the folder that contains the Dabdoob executable.
-- The Dabdoob executable [should have execution permission enabled](https://askubuntu.com/a/485001).
-- The game needs the following dependencies, Some distros come with these preinstalled, but others don't.: `sdl2`, `sdl2_image`, `sdl2_ttf`, `sdl2_mixer`, `freetype2`, `zip`
-    - On Debian based distros (Ubuntu, Mint, etc.): `sudo apt install libsdl2-image libsdl2-ttf libsdl2-mixer libfreetype6 zip`
-    - On Arch based distros `sudo pacman -S sdl2 sdl2_image sdl2_ttf sdl2_mixer zip`
-    - On Fedora based distros `sudo dnf install SDL2 SDL2_image SDL2_ttf SDL2_mixer freetype zip`
+## Credits
 
-#### Packaging
+Lacapult Doobdad stands on existing open-source Cataclysm launcher work:
 
-- For Arch Linux, an [official AUR package](https://aur.archlinux.org/packages/catapult-bin) is available.
+- Catapult by qrrk
+- Dabdoob / Catapult_Dabdoob by Hihahahalol
+- Cataclysm: Arsenic and Old Lace by josihosi and contributors
+- Cataclysm: Dark Days Ahead, Cataclysm: The Last Generation, and Cataclysm: Bright Nights, where inherited code/support/text still applies
 
-### Mac OS (Beta)
-
- - You only need to disable gatekeeper for Dabdoob, or disable it altogether. Check this guide for more information: https://disable-gatekeeper.github.io/
-
-## System requirements
-
-- 64-bit operating system.
-- Windows 7+ or Linux.
-- OpenGL 2.1 support.
-
-## Can you include my mod/tileset/soundpack/etc?
-
-Of course! Please check [Content_Request](Content_Request.md) for the requirements and what you need to do
-
-## Contact
-
-Feel free to create an issue on the Github. You can also find me on [TLG's Discord](https://discord.com/invite/zT9sXmZNCK)
-
-## Contributing
-
-While this will likely change, for the time being, the launcher is solo maintained by me. Consider buying me a [ko-fi](https://ko-fi.com/hihahahalol)
-
+See `ATTRIBUTION.md` for details.

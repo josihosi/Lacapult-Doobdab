@@ -98,3 +98,14 @@ Future NPC/LLM-facing mod summaries should describe what an installed mod adds o
 ## Product north star
 
 The detailed one-shot installer direction lives in `doc/lacapult-one-shot-installer-vision.md`. Treat it as product guidance, not permission to skip proof order. Release metadata/install proof comes before backend cleverness; backend setup comes before deeper mod/NPC integration.
+
+## 2026-04-24 implementation notes
+
+- C-AOL release channel key is now `caol-release`.
+- `scripts/ReleaseManager.gd` fetches `https://api.github.com/repos/josihosi/Cataclysm-AOL/releases` and filters assets by platform substring:
+  - Linux: `_linux.tar.gz`
+  - Windows: `_windows.zip`
+  - macOS: `_macos.dmg`, with fallback tolerance for `_macos.tar.gz` / `_macos.zip`.
+- `scripts/settings_manager.gd` defaults the launcher to `game = "caol"`, `channel = "release"`, and keeps backend setup fields for API/Ollama without secrets.
+- `scripts/BackendConfigManager.gd` is a safe first backend setup skeleton. It writes launcher-side metadata only, detects the Ollama command cheaply, and explicitly parks OpenVINO as specialized future work.
+- `doc/caol-mod-compatibility-summary.md` records the first compatibility-summary shape for inherited mod support and future NPC/LLM context use.
