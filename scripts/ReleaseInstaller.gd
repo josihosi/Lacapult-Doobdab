@@ -116,7 +116,7 @@ func _find_game_root_directory(temp_dir: String) -> String:
 			return full_path
 	
 	# Fallback to the first directory if no obvious game directory found
-	Status.post(tr("msg_install_using_first_dir") % potential_dirs[0], Enums.MSG_WARNING)
+	Status.post(tr("msg_install_using_first_dir") % potential_dirs[0], Enums.MSG_WARN)
 	return temp_dir.plus_file(potential_dirs[0])
 
 
@@ -169,7 +169,7 @@ func _set_executable_permissions(install_dir: String) -> void:
 			if result == 0:
 				Status.post(tr("msg_install_set_executable") % exe_name, Enums.MSG_DEBUG)
 			else:
-				Status.post(tr("msg_install_chmod_failed") % [exe_name, result], Enums.MSG_WARNING)
+				Status.post(tr("msg_install_chmod_failed") % [exe_name, result], Enums.MSG_WARN)
 	
 	# Also check for .app bundles and set permissions on their executables
 	if OS.get_name() == "OSX":
@@ -202,7 +202,7 @@ func _set_app_bundle_permissions(install_dir: String) -> void:
 							if result == 0:
 								Status.post(tr("msg_install_set_app_executable") % [item, exe_file], Enums.MSG_DEBUG)
 							else:
-								Status.post(tr("msg_install_app_chmod_failed") % [item, exe_file, result], Enums.MSG_WARNING)
+								Status.post(tr("msg_install_app_chmod_failed") % [item, exe_file, result], Enums.MSG_WARN)
 
 
 func remove_release_by_name(name: String) -> void:

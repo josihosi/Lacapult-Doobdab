@@ -109,3 +109,4 @@ The detailed one-shot installer direction lives in `doc/lacapult-one-shot-instal
 - `scripts/settings_manager.gd` defaults the launcher to `game = "caol"`, `channel = "release"`, and keeps backend setup fields for API/Ollama without secrets.
 - `scripts/BackendConfigManager.gd` is a safe first backend setup skeleton. It writes launcher-side metadata only, detects the Ollama command cheaply, and explicitly parks OpenVINO as specialized future work.
 - `doc/caol-mod-compatibility-summary.md` records the first compatibility-summary shape for inherited mod support and future NPC/LLM context use.
+- Warning status calls use the actual `Enums.MSG_WARN` member. The inherited `Enums.MSG_WARNING` spelling was not defined and would fail if installer/filesystem/mod warning branches executed.

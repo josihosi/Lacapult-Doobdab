@@ -50,7 +50,7 @@ func download_file(url: String, target_dir: String, target_filename: String) -> 
 		if OS.get_name() == "OSX":
 			var chmod_result = OS.execute("chmod", ["755", target_dir], true)
 			if chmod_result != 0:
-				Status.post("Warning: Could not set directory permissions for %s" % target_dir, Enums.MSG_WARNING)
+				Status.post("Warning: Could not set directory permissions for %s" % target_dir, Enums.MSG_WARN)
 	
 	Status.post(tr("msg_downloading_file") % target_filename)
 	emit_signal("download_started")

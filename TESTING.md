@@ -81,3 +81,11 @@ Before claiming v0 is done, Andi should record:
 - Mod support proof:
   - Inherited entry points remain present: `scripts/ModManager.gd`, `scripts/ModsUI.gd`, `scripts/SoundpackManager.gd`, `scripts/SoundpacksUI.gd`, `scripts/TilesetManager.gd`, `scripts/TilesetsUI.gd`.
   - First C-AOL compatibility/NPC-summary note added at `doc/caol-mod-compatibility-summary.md`.
+
+## Evidence - 2026-04-24 warning enum cleanup
+
+- Static warning enum proof: `grep -R "Enums.MSG_WARNING" -n scripts || true`
+  - Before cleanup, this found warning posts in installer, download, filesystem, mod, soundpack, and tileset paths.
+  - These now use the existing `Enums.MSG_WARN` member from `scripts/Enums.gd`, avoiding a runtime failure when those warning branches execute.
+- Re-ran `python3 tools/prove_caol_release.py`; it still selects the Darwin `v0.2.0` DMG and produces installer metadata without downloading it.
+- Re-ran Ollama cheap detection: `command -v ollama` is `/opt/homebrew/bin/ollama`; local server probe returned JSON with 8 models. No model pull or secret-bearing API smoke was attempted.

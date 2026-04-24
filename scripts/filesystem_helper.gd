@@ -281,7 +281,7 @@ func extract(path: String, dest_dir: String) -> void:
 		if OS.get_name() == "OSX":
 			var chmod_result = OS.execute("chmod", ["755", dest_dir], true)
 			if chmod_result != 0:
-				Status.post("Warning: Could not set extraction directory permissions", Enums.MSG_WARNING)
+				Status.post("Warning: Could not set extraction directory permissions", Enums.MSG_WARN)
 		
 	Status.post(tr("msg_extracting_file") % path.get_file())
 	Status.post("[debug] Extract command: " + str(command), Enums.MSG_DEBUG)
@@ -461,7 +461,7 @@ func _extract_dmg(dmg_path: String, dest_dir: String) -> void:
 	yield(unmount_oew, "process_exited")
 	
 	if unmount_oew.exit_code != 0:
-		Status.post(tr("msg_dmg_unmount_warning") % unmount_oew.exit_code, Enums.MSG_WARNING)
+		Status.post(tr("msg_dmg_unmount_warning") % unmount_oew.exit_code, Enums.MSG_WARN)
 	
 	last_extract_result = 0
 	emit_signal("extract_done")
@@ -524,7 +524,7 @@ func _check_extraction_tool_available(tool_name: String) -> bool:
 	if OS.get_name() == "OSX" and tool_name.ends_with("7za"):
 		var chmod_result = OS.execute("chmod", ["+x", tool_name], true)
 		if chmod_result != 0:
-			Status.post("Warning: Could not set executable permissions for 7za", Enums.MSG_WARNING)
+			Status.post("Warning: Could not set executable permissions for 7za", Enums.MSG_WARN)
 		
 		# Verify it's now executable
 		var test_result = OS.execute("test", ["-x", tool_name], true)

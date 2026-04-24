@@ -714,7 +714,7 @@ func _process_downloaded_mod(body: PoolByteArray, mod_name: String) -> void:
 		if OS.get_name() == "OSX":
 			var chmod_result = OS.execute("chmod", ["755", mods_dir], true)
 			if chmod_result != 0:
-				Status.post("Warning: Could not set mods directory permissions", Enums.MSG_WARNING)
+				Status.post("Warning: Could not set mods directory permissions", Enums.MSG_WARN)
 	
 	# Save the downloaded data to cache
 	var file = File.new()
@@ -730,7 +730,7 @@ func _process_downloaded_mod(body: PoolByteArray, mod_name: String) -> void:
 	if OS.get_name() == "OSX":
 		var chmod_result = OS.execute("chmod", ["644", archive], true)
 		if chmod_result != 0:
-			Status.post("Warning: Could not set archive file permissions", Enums.MSG_WARNING)
+			Status.post("Warning: Could not set archive file permissions", Enums.MSG_WARN)
 	
 	# Extract the mod
 	FS.extract(archive, tmp_dir)
@@ -796,12 +796,12 @@ func _fix_mod_permissions_macos(mod_path: String) -> void:
 	# Set directory permissions recursively
 	var chmod_result = OS.execute("chmod", ["-R", "755", mod_path], true)
 	if chmod_result != 0:
-		Status.post("Warning: Could not set mod directory permissions for %s" % mod_path, Enums.MSG_WARNING)
+		Status.post("Warning: Could not set mod directory permissions for %s" % mod_path, Enums.MSG_WARN)
 	
 	# Set file permissions recursively  
 	var find_result = OS.execute("find", [mod_path, "-type", "f", "-exec", "chmod", "644", "{}", "+"], true)
 	if find_result != 0:
-		Status.post("Warning: Could not set mod file permissions for %s" % mod_path, Enums.MSG_WARNING)
+		Status.post("Warning: Could not set mod file permissions for %s" % mod_path, Enums.MSG_WARN)
 
 
 func _download_and_install_mod(download_url: String, mod_name: String) -> void:

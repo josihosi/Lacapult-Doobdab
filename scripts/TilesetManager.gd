@@ -130,7 +130,7 @@ func install_tileset(tileset_index: int, from_file = null, reinstall = false, ke
 				var installed_tileset_path = tileset_dir.plus_file(tileset["name"])
 				var chmod_result = OS.execute("chmod", ["-R", "755", installed_tileset_path], true)
 				if chmod_result != 0:
-					Status.post("Warning: Could not set tileset directory permissions", Enums.MSG_WARNING)
+					Status.post("Warning: Could not set tileset directory permissions", Enums.MSG_WARN)
 			
 			Status.post(tr("msg_tileset_installed"))
 		else:

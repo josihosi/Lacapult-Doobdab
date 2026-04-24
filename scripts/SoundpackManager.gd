@@ -275,7 +275,7 @@ func install_pack(soundpack_index: int, from_file = null, reinstall = false, kee
 		var installed_pack_path = sound_dir.plus_file(pack["name"])
 		var chmod_result = OS.execute("chmod", ["-R", "755", installed_pack_path], true)
 		if chmod_result != 0:
-			Status.post("Warning: Could not set soundpack directory permissions", Enums.MSG_WARNING)
+			Status.post("Warning: Could not set soundpack directory permissions", Enums.MSG_WARN)
 	
 	FS.rm_dir(tmp_dir)
 	yield(FS, "rm_dir_done")
