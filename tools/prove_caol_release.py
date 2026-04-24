@@ -27,7 +27,7 @@ def main() -> int:
         print(f"unsupported platform for proof: {system}", file=sys.stderr)
         return 2
 
-    req = urllib.request.Request(RELEASES_URL, headers={"User-Agent": "Lacapult-Doobdad-proof"})
+    req = urllib.request.Request(RELEASES_URL, headers={"User-Agent": "Lacapult-Doobdab-proof"})
     with urllib.request.urlopen(req, timeout=30) as resp:
         releases = json.load(resp)
 

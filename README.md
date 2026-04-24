@@ -1,6 +1,6 @@
-# Lacapult Doobdad
+# Lacapult Doobdab
 
-**Lacapult Doobdad** is a local-first installer and setup helper for [Cataclysm: Arsenic and Old Lace](https://github.com/josihosi/Cataclysm-AOL).
+**Lacapult Doobdab** is a local-first installer and setup helper for [Cataclysm: Arsenic and Old Lace](https://github.com/josihosi/Cataclysm-AOL).
 
 It is derived from [Hihahahalol's Dabdoob / Catapult_Dabdoob](https://github.com/Hihahahalol/Catapult_Dabdoob), which is based on [qrrk's Catapult launcher](https://github.com/qrrk/Catapult). The inherited launcher code remains MIT licensed; see `LICENSE` and `ATTRIBUTION.md`.
 
@@ -20,17 +20,17 @@ It is derived from [Hihahahalol's Dabdoob / Catapult_Dabdoob](https://github.com
   - Ollama backend, with local detection/config guidance.
 - Preserve inherited mod/soundpack/tileset support while C-AOL-specific compatibility work is investigated.
 
-## Local development status
+## Development status
 
-This repository is currently local-only. Do not treat this README as a public release page yet: public repo creation, pushing, publishing releases, or contacting upstream requires fresh explicit clearance from Josef/Schani.
+This repository is early development. It is public for transparency and collaboration, but no packaged Lacapult Doobdab release exists yet.
 
 ## Installation
 
-No Lacapult Doobdad packaged release exists yet. For development, open the Godot project locally and run `scenes/Catapult.tscn` if a compatible Godot binary is available.
+No Lacapult Doobdab packaged release exists yet. For development, open the Godot project locally and run `scenes/Catapult.tscn` if a compatible Godot binary is available.
 
 ## Credits
 
-Lacapult Doobdad stands on existing open-source Cataclysm launcher work:
+Lacapult Doobdab stands on existing open-source Cataclysm launcher work:
 
 - Catapult by qrrk
 - Dabdoob / Catapult_Dabdoob by Hihahahalol

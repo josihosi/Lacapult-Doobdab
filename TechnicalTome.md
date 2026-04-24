@@ -1,10 +1,10 @@
 # TechnicalTome
 
-Durable technical notes for Lacapult Doobdad.
+Durable technical notes for Lacapult Doobdab.
 
 ## Lineage
 
-Lacapult Doobdad starts from `Hihahahalol/Catapult_Dabdoob`, which itself is based on qrrk's Catapult launcher.
+Lacapult Doobdab starts from `Hihahahalol/Catapult_Dabdoob`, which itself is based on qrrk's Catapult launcher.
 
 License is MIT. Preserve upstream license text and attribution.
 

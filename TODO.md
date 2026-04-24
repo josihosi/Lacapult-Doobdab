@@ -4,7 +4,7 @@ Short execution queue only.
 
 ## Now
 
-Active target: `Lacapult Doobdad v0.2.0 release installer plus first backend setup options`.
+Active target: `Lacapult Doobdab v0.2.0 release installer plus first backend setup options`.
 
 Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order.
 
@@ -15,7 +15,7 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
 2. Public identity and attribution cleanup
    - Preserve `LICENSE` MIT notice for qrrk and Dabdoob.
    - Add/update `ATTRIBUTION.md`.
-   - Rewrite README top section for Lacapult Doobdad as a C-AOL-specific launcher/installer.
+   - Rewrite README top section for Lacapult Doobdab as a C-AOL-specific launcher/installer.
    - Update `project.godot` name/description.
    - Replace or disable Dabdoob self-update URL until Lacapult has its own public releases.
 

@@ -44,7 +44,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="Lacapult Doobdad"
+config/name="Lacapult Doobdab"
 config/description="A C-AOL release installer and backend setup helper derived from Dabdoob/Catapult"
 run/main_scene="res://scenes/Catapult.tscn"
 run/low_processor_mode=true

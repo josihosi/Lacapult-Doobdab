@@ -1,4 +1,4 @@
-# Lacapult Doobdad one-shot installer vision
+# Lacapult Doobdab one-shot installer vision
 
 Status: **GREENLIT PRODUCT NORTH STAR / EXECUTE IN PROOF ORDER**
 
@@ -21,7 +21,7 @@ If the installer cannot fully automate a step, it should still guide and verify 
 
 ### 1. Welcome / target
 
-- Product name: Lacapult Doobdad.
+- Product name: Lacapult Doobdab.
 - Target: Cataclysm: Arsenic and Old Lace.
 - Short explanation: installs C-AOL releases and helps set up the NPC LLM backend.
 - Credits link visible from this screen or About.

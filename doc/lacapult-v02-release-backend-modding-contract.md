@@ -1,14 +1,14 @@
-# Lacapult Doobdad v0.2.0 release + backend + modding contract
+# Lacapult Doobdab v0.2.0 release + backend + modding contract
 
 Status: **GREENLIT / ACTIVE AMENDMENT**
 
 ## Normalized contract
 
-title: Lacapult Doobdad v0.2.0 release installer plus first backend setup options
+title: Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
 request_kind: greenlight / active-scope amendment
 
-summary: Lacapult Doobdad v0 should specifically install the existing C-AOL `v0.2.0` release assets, then grow the first practical LLM backend setup surface. The launcher remains C-AOL-specific for now, with possible future ports to other games. It should preserve inherited mod-management support and begin a bounded mod-compatibility investigation, including whether mod summaries can support NPC/LLM context later.
+summary: Lacapult Doobdab v0 should specifically install the existing C-AOL `v0.2.0` release assets, then grow the first practical LLM backend setup surface. The launcher remains C-AOL-specific for now, with possible future ports to other games. It should preserve inherited mod-management support and begin a bounded mod-compatibility investigation, including whether mod summaries can support NPC/LLM context later.
 
 classification: active, with backend and modding sub-slices sequenced behind the v0.2.0 release install proof
 

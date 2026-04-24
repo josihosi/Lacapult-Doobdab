@@ -1,10 +1,10 @@
-# AGENTS.md - Lacapult Doobdad
+# AGENTS.md - Lacapult Doobdab
 
-This repo lives at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdad`.
+This repo lives at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdab`.
 
 ## Role
 
-You are working on Lacapult Doobdad: a C-AOL-specific launcher/installer derived from Dabdoob/Catapult.
+You are working on Lacapult Doobdab: a C-AOL-specific launcher/installer derived from Dabdoob/Catapult.
 
 ## Read order
 

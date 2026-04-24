@@ -1,6 +1,6 @@
 # TESTING
 
-Current validation policy and evidence for Lacapult Doobdad.
+Current validation policy and evidence for Lacapult Doobdab.
 
 ## Validation policy
 
@@ -21,14 +21,14 @@ Initial source audit from Schani:
 - Source tech is Godot/GDScript with helper Python/Shell scripts.
 - Source `LICENSE` includes qrrk and Dabdoob copyright notices.
 - Source README credits CDDA, CTLG, BN, and qrrk Catapult.
-- Local scaffold created at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdad` by copying source without inherited `.git` history and initializing a new local git repo.
+- Local scaffold created at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdab` by copying source without inherited `.git` history and initializing a new local git repo.
 
 ## Required v0 proof packet
 
 Before claiming v0 is done, Andi should record:
 
 1. Identity/attribution proof
-   - `grep -R` evidence that public identity points to Lacapult Doobdad/C-AOL.
+   - `grep -R` evidence that public identity points to Lacapult Doobdab/C-AOL.
    - Remaining Dabdoob/Catapult references are credits or internal filenames intentionally left for later.
 
 2. Release parsing proof
@@ -76,7 +76,7 @@ Before claiming v0 is done, Andi should record:
 - Godot availability check:
   - `godot --version`, `godot3 --version`, and `godot4 --version` were not found on this machine, so no GUI/project-load smoke was claimed.
 - Static identity/release proof:
-  - `grep -R "caol-release\|josihosi/Cataclysm-AOL\|_macos.dmg\|_linux.tar.gz\|_windows.zip\|backend_ollama\|backend_api\|OpenVINO\|Lacapult Doobdad" -n README.md project.godot scripts text/en doc tools`
+  - `grep -R "caol-release\|josihosi/Cataclysm-AOL\|_macos.dmg\|_linux.tar.gz\|_windows.zip\|backend_ollama\|backend_api\|OpenVINO\|Lacapult Doobdab" -n README.md project.godot scripts text/en doc tools`
   - Shows Lacapult project identity/defaults, C-AOL release URL and asset filters, API/Ollama settings, and OpenVINO parked note.
 - Mod support proof:
   - Inherited entry points remain present: `scripts/ModManager.gd`, `scripts/ModsUI.gd`, `scripts/SoundpackManager.gd`, `scripts/SoundpacksUI.gd`, `scripts/TilesetManager.gd`, `scripts/TilesetsUI.gd`.

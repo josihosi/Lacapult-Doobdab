@@ -1,18 +1,18 @@
 # SUCCESS
 
-Success-state ledger for Lacapult Doobdad.
+Success-state ledger for Lacapult Doobdab.
 
-## Lacapult Doobdad v0.2.0 release installer plus first backend setup options
+## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
 Status: **ACTIVE**
 
 Done only when all are true:
 
-- [ ] Local standalone repo exists at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdad` with no inherited Dabdoob `.git` history.
+- [ ] Local standalone repo exists at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdab` with no inherited Dabdoob `.git` history.
 - [x] Original MIT license notice is preserved.
 - [ ] `ATTRIBUTION.md` credits qrrk/Catapult, Hihahahalol/Dabdoob, CDDA, CTLG, BN if still inherited/mentioned, and C-AOL.
-- [x] README presents Lacapult Doobdad as C-AOL-specific and clearly derived from Dabdoob/Catapult.
-- [x] Godot project/window identity says Lacapult Doobdad.
+- [x] README presents Lacapult Doobdab as C-AOL-specific and clearly derived from Dabdoob/Catapult.
+- [x] Godot project/window identity says Lacapult Doobdab.
 - [x] Self-update check no longer points at `Hihahahalol/Catapult_Dabdoob` unless explicitly shown as upstream credit, not update source.
 - [x] Settings default to C-AOL (`caol`) and the visible game selection is C-AOL-only or hidden.
 - [x] Release manager fetches from `https://api.github.com/repos/josihosi/Cataclysm-AOL/releases`.

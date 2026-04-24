@@ -1,6 +1,6 @@
 # Attribution
 
-Lacapult Doobdad is a Cataclysm: Arsenic and Old Lace launcher/installer derived from existing Cataclysm launcher work.
+Lacapult Doobdab is a Cataclysm: Arsenic and Old Lace launcher/installer derived from existing Cataclysm launcher work.
 
 ## Upstream launcher lineage
 
@@ -18,6 +18,6 @@ The inherited launcher code is MIT licensed. See `LICENSE` for the preserved cop
 
 C-AOL builds on CDDA and CTLG. Dabdoob's inherited launcher support and documentation also reference Bright Nights; keep that credit while any inherited support, assets, text, or behavior remains.
 
-## Lacapult Doobdad modifications
+## Lacapult Doobdab modifications
 
-Lacapult Doobdad adapts the inherited launcher into a C-AOL-specific install and setup tool. New Lacapult-specific changes should be credited in commit history and, before public release, in the README/license notes as appropriate.
+Lacapult Doobdab adapts the inherited launcher into a C-AOL-specific install and setup tool. New Lacapult-specific changes should be credited in commit history and, before public release, in the README/license notes as appropriate.

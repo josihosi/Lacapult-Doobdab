@@ -1,6 +1,6 @@
 # Plan
 
-Canonical roadmap for Lacapult Doobdad.
+Canonical roadmap for Lacapult Doobdab.
 
 This repo is a standalone C-AOL-specific launcher/installer derived from Dabdoob / Catapult under the MIT license. It should feel like the front door for Cataclysm: Arsenic and Old Lace, not a generic Cataclysm launcher with a hat glued on.
 
@@ -17,11 +17,11 @@ This repo is a standalone C-AOL-specific launcher/installer derived from Dabdoob
 
 ## Current active target
 
-### Lacapult Doobdad v0.2.0 release installer plus first backend setup options
+### Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
 **Status:** GREENLIT / ACTIVE
 
-Build from the local standalone repo at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdad`, then turn the first product slice into a C-AOL-specific launcher that can fetch and install the existing `v0.2.0` C-AOL releases from `josihosi/Cataclysm-AOL`.
+Build from the local standalone repo at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdab`, then turn the first product slice into a C-AOL-specific launcher that can fetch and install the existing `v0.2.0` C-AOL releases from `josihosi/Cataclysm-AOL`.
 
 The active scope now includes first-pass LLM backend setup options for **API** and **Ollama** after the v0.2.0 release install path is proven. **OpenVINO** stays parked as the specialized third backend unless it is cheap to stub/detect. Modding support stays inherited for now, with a bounded compatibility/NPC-summary investigation behind the installer proof.
 
@@ -29,10 +29,10 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. It is greenlit 
 
 ### Product intent
 
-Lacapult Doobdad should install and launch C-AOL releases with the minimum friction possible.
+Lacapult Doobdab should install and launch C-AOL releases with the minimum friction possible.
 
 The player-facing v0 story:
-1. Download/open Lacapult Doobdad.
+1. Download/open Lacapult Doobdab.
 2. See C-AOL as the only real game target.
 3. Refresh available C-AOL releases.
 4. Pick a platform-appropriate `v0.2.0` asset from GitHub releases.
@@ -103,7 +103,7 @@ Preserve MIT license notice and attribution. Do not make the repo look like an u
 
 - Keep original `LICENSE` MIT text and copyright notices.
 - Add/maintain `ATTRIBUTION.md`.
-- Rewrite README to explain Lacapult Doobdad as a C-AOL installer derived from Dabdoob/Catapult.
+- Rewrite README to explain Lacapult Doobdab as a C-AOL installer derived from Dabdoob/Catapult.
 - Keep credits near the top, not buried in a legal cellar.
 - Update `project.godot` name/description.
 - Replace self-update URL in `scripts/Catapult.gd` with a Lacapult placeholder or disable update check cleanly until releases exist.
@@ -185,7 +185,7 @@ Minimum evidence for v0 handoff:
 The v0 target is done when:
 - local repo exists and is committed locally
 - docs/README/LICENSE/ATTRIBUTION tell the truth
-- launcher identity says Lacapult Doobdad / C-AOL, not generic Dabdoob except in credits
+- launcher identity says Lacapult Doobdab / C-AOL, not generic Dabdoob except in credits
 - C-AOL `v0.2.0` releases are fetched from `josihosi/Cataclysm-AOL`
 - platform asset matching works for current `v0.2.0` assets
 - install/update/launch paths are at least plausibly wired and tested to the smallest honest extent available on this Mac
