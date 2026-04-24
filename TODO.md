@@ -4,7 +4,7 @@ Short execution queue only.
 
 ## Now
 
-Active target: `Lacapult Doobdad v0 standalone scaffold and C-AOL release installer`.
+Active target: `Lacapult Doobdad v0.2.0 release installer plus first backend setup options`.
 
 1. Confirm source/import state
    - Verify this repo is local-only and has no inherited `.git` history from Dabdoob.
@@ -17,18 +17,31 @@ Active target: `Lacapult Doobdad v0 standalone scaffold and C-AOL release instal
    - Update `project.godot` name/description.
    - Replace or disable Dabdoob self-update URL until Lacapult has its own public releases.
 
-3. C-AOL-only release path
+3. C-AOL-only v0.2.0 release path
    - Add `caol` / C-AOL as the default and only visible game target.
    - Add release URL for `josihosi/Cataclysm-AOL`.
-   - Add platform asset filters for C-AOL release assets.
-   - Wire fetch/list/install path so a C-AOL release asset becomes the existing installer metadata shape.
+   - Add platform asset filters for C-AOL `v0.2.0` assets: `_linux.tar.gz`, `_macos.dmg`, `_windows.zip`.
+   - Wire fetch/list/install path so a C-AOL v0.2.0 asset becomes the existing installer metadata shape.
 
-4. Minimal validation
-   - Prove release JSON parsing selects correct platform asset(s) from live C-AOL releases.
+4. First LLM backend setup options
+   - Add API as a selectable setup/config path without exposing secrets.
+   - Add Ollama as a selectable setup/config path with local command/server detection where safe.
+   - Keep OpenVINO parked/specialized unless a cheap placeholder/detection hook falls out naturally.
+
+5. Modding compatibility investigation
+   - Preserve inherited mod/soundpack/tileset support.
+   - Identify inherited mod metadata/compatibility entry points.
+   - Write the first compatibility-summary direction for C-AOL mods and future NPC/LLM summaries.
+
+6. Minimal validation
+   - Prove release JSON parsing selects correct platform asset(s) from live C-AOL v0.2.0 releases.
+   - Prove backend config/detection paths at static or safe local-detection level.
    - Run the smallest Godot/static check available on this machine.
    - If full GUI launch is possible, smoke launch to the release list; otherwise record the exact missing tool/blocker.
 
-5. Park next slices
-   - LLM backend setup tab/installer.
-   - C-AOL-specific mod/soundpack/tileset recommendations.
+7. Park next slices
+   - OpenVINO full setup.
+   - Real model install/model-pull automation.
+   - C-AOL-specific mod/soundpack/tileset recommendation packs.
+   - NPC/LLM runtime integration of mod summaries.
    - Public GitHub repo creation and first push, only after explicit clearance.

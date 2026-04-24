@@ -76,3 +76,20 @@ Future `LLM backend` work should probably add:
 - smoke test button that confirms the selected backend can answer a trivial request or that the local runner starts
 
 This is not v0 unless only a harmless stub is added.
+
+
+## Backend setup direction
+
+First supported setup options for the active v0 target are API and Ollama.
+
+API path should focus on choosing API mode, writing/checking C-AOL config, and validating config shape without exposing secrets. Live API smoke tests that need real keys are later unless Josef explicitly provides/clears that path.
+
+Ollama path should detect whether the `ollama` command exists and whether the local server responds. It may write/check C-AOL config for Ollama. It must not pull large models or run heavyweight installs without explicit clearance.
+
+OpenVINO is the specialized third backend and remains parked after API/Ollama unless a cheap placeholder or detector can be added safely.
+
+## Mod compatibility / NPC summary direction
+
+Dabdoob already has mod, soundpack, and tileset management. Lacapult should preserve this first rather than rewriting it. The first C-AOL-specific step is to inspect where inherited mod metadata and compatibility rules live, then define a compatibility-summary shape.
+
+Future NPC/LLM-facing mod summaries should describe what an installed mod adds or changes in terms useful for context: factions, items, monsters, locations, professions, tone, and any world assumptions. That is not runtime integration in v0; it is a metadata direction to prevent future context soup.
