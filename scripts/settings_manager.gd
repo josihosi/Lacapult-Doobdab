@@ -1,0 +1,154 @@
+extends Node
+
+
+const _SETTINGS_FILENAME = "catapult_settings.json"
+
+const _HARDCODED_DEFAULTS = {
+	"version": "28.2",
+	"game": "dda",
+	"channel": "stable",  # Currently used only for DDA.
+	"active_install_dda": "Cataclysm-DDA experimental build 2022-07-26-0606",
+	"active_install_bn": "",
+	"active_install_eod": "",
+	"active_install_tish": "",
+	"active_install_tlg":"",
+	"update_current_when_installing": true,
+	"launcher_locale": "",
+	"launcher_theme": "Godot_3.res",
+	"window_state": {},
+	"print_tips_of_the_day": true,
+	"update_to_same_build_allowed": false,
+	"shorten_release_names": false,
+	"always_show_installs": false,
+	"num_releases_to_request": 10,
+	"num_prs_to_request": 50,
+	"ui_scale_override": 1.0,
+	"ui_scale_override_enabled": false,
+	"show_stock_mods": false,
+	"show_installed_mods_in_available": false,
+	"show_obsolete_mods": false,
+	"update_mods_with_game": false,
+
+	"show_stock_sound": false,
+	"show_stock_tilesets": true,
+	"font_preview_cyrillic": false,
+	"show_game_desc": true,
+	"keep_open_after_starting_game": true,
+	"keep_cache": false,
+	"ignore_cache": false,
+	"proxy_option": "off",
+	"proxy_host": "",
+	"proxy_port": 0,
+	"debug_mode": false,
+	"backup_before_launch": false,
+	"backup_after_closing": false,
+	"max_auto_backups": 5,
+	"mod_download_dates": {},
+	"bn_rolling_experimental": false,
+}
+
+var _settings_file = ""
+var _current = {}
+var _initialized = false
+
+
+func _ready() -> void:
+	# Eagerly initialize settings on startup to avoid race conditions
+	if not _initialized:
+		_load()
+		_initialized = true
+
+
+func get_hardcoded_version() -> String:
+	"""
+	Returns the hardcoded default version from the script instead of reading from JSON file.
+	This is used by the update checker to get the current launcher version.
+	"""
+	return _HARDCODED_DEFAULTS["version"]
+
+
+func _exit_tree() -> void:
+	_write_to_file(_current, _settings_file)
+
+
+func _load() -> void:
+	# Guard against recursive calls during initialization
+	if _initialized:
+		return
+	
+	_settings_file = Paths.own_dir.plus_file(_SETTINGS_FILENAME)
+	
+	# Ensure the directory exists before trying to read/write
+	var dir = Directory.new()
+	var own_dir = Paths.own_dir
+	if not dir.dir_exists(own_dir):
+		var err = dir.make_dir_recursive(own_dir)
+		if err != OK:
+			push_error("Failed to create settings directory: " + str(err))
+			_current = _HARDCODED_DEFAULTS
+			_initialized = true
+			return
+	
+	if File.new().file_exists(_settings_file):
+		_current = _read_from_file(_settings_file)
+		# If reading failed, use defaults
+		if _current.empty():
+			_current = _HARDCODED_DEFAULTS
+			_write_to_file(_HARDCODED_DEFAULTS, _settings_file)
+	else:
+		_current = _HARDCODED_DEFAULTS
+		_write_to_file(_HARDCODED_DEFAULTS, _settings_file)
+	
+	_initialized = true
+
+
+func _read_from_file(path: String) -> Dictionary:
+	
+	var f = File.new()
+	
+	if not f.file_exists(path):
+		Status.post(tr("msg_nonexistent_attempt") % path, Enums.MSG_ERROR)
+		return {}
+		
+	f.open(path, File.READ)
+	var s = f.get_as_text()
+	var result: JSONParseResult = JSON.parse(s)
+	
+	if result.error:
+		Status.post(tr("msg_settings_parse_error") % [result.error_line, result.error_string], Enums.MSG_ERROR)
+		return {}
+	else:
+		return result.result
+
+
+func _write_to_file(data: Dictionary, path: String) -> void:
+	
+	var f = File.new()
+	var content = JSON.print(data, "    ")
+	var err = f.open(path, File.WRITE)
+	if err != OK:
+		push_error("Failed to write settings file: " + str(err))
+		return
+	f.store_string(content)
+	f.close()
+
+
+func read(setting_name: String):
+	
+	# Ensure settings are loaded (should be done in _ready, but check anyway)
+	if not _initialized:
+		_load()
+	
+	if not setting_name in _current:
+		if setting_name in _HARDCODED_DEFAULTS:
+			_current[setting_name] = _HARDCODED_DEFAULTS[setting_name]
+		else:
+			Status.post(tr("msg_nonexisting_setting") % setting_name, Enums.MSG_ERROR)
+			return null
+	
+	return _current[setting_name]
+
+
+func store(setting_name: String, setting_value) -> void:
+	
+	_current[setting_name] = setting_value

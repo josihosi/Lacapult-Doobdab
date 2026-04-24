@@ -1,0 +1,5 @@
+"keys","tr"
+,
+"msg_nonexistent_attempt","Var olmayan %s dosyasından ayar yükleme girişimi"
+"msg_settings_parse_error","JSON'dan ayarları ayrıştırırken hata, satır %s, mesaj: %s"
+"msg_nonexisting_setting","Var olmayan \"%s\" ayarını okuma girişimi"

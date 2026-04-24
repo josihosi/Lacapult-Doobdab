@@ -1,0 +1,17 @@
+/.import
+export_presets.cfg
+Dabdoob.x86_64
+Dabdoob.exe
+*.translation
+*~lock*
+
+# Godot Git plugin
+/bin
+git_api.gdnlib
+git_api.gdns
+
+# vscode
+.vscode
+
+# Claude Code
+.claude

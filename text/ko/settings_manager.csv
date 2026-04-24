@@ -1,0 +1,5 @@
+keys,ko
+,
+msg_nonexistent_attempt,존재하지 않는 파일 %s에서 설정을 로드하려고 시도했습니다
+msg_settings_parse_error,JSON에서 설정을 구문 분석하는 중 오류가 발생했습니다. 줄 %s, 메시지: %s
+msg_nonexisting_setting,존재하지 않는 설정 \"%s\"을(를) 읽으려고 시도했습니다
