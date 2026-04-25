@@ -119,3 +119,9 @@ The detailed one-shot installer direction lives in `doc/lacapult-one-shot-instal
 - `scripts/ReleaseManager.gd` now carries optional `asset_size` and `release_page_url` fields in release metadata alongside the installer-critical `name`, `url`, `filename`, `published_at`, and `has_any_assets` fields.
 - `scripts/Catapult.gd` formats release-list rows with selected asset name, size, and readiness; non-installable releases remain visible but disabled with a tooltip explaining whether there are no assets or no matching platform asset.
 - The install button selection handler now checks for a download URL before enabling install/update actions, closing the gap where a non-installable visible release could be selected.
+
+## 2026-04-25 installer launchability guard
+
+- `scripts/ReleaseInstaller.gd` now re-checks the moved target directory before posting install/update success, so an extracted archive must still look like a launchable game directory after the final move.
+- macOS DMG/app-bundle extraction keeps top-level `.app` bundles inside the install directory instead of installing the bundle itself as the root. This matches the launcher lookup path, which searches for `.app` bundles inside `Paths.game_dir`.
+- The install-root probe and Unix chmod pass now include the C-AOL-specific `Cataclysm-AOL` executable name alongside inherited `cataclysm-tiles` names.

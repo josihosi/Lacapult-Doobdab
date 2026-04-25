@@ -121,3 +121,15 @@ Before claiming v0 is done, Andi should record:
   - Installer shape now includes asset sizes and the v0.2.0 release page URL without downloading archives.
 - Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are still unavailable on this Mac, so no GUI/project-load smoke was claimed.
 - `git diff --check` passed.
+
+## Evidence - 2026-04-25 installer launchability guard
+
+- Added a post-move launchability guard in `scripts/ReleaseInstaller.gd`: install/update success is no longer posted unless the final target directory still looks like a launchable game root.
+- Added macOS `.app` install-root handling for DMG-style extraction: a top-level `.app` keeps the containing temp directory as the game root, so the final install directory contains the bundle where launcher lookup expects it.
+- Added `Cataclysm-AOL` to installer executable probes/permission fixups alongside inherited `cataclysm-tiles` names.
+- Re-ran `python3 tools/prove_caol_release.py --all-platforms`:
+  - v0.2.0 found with 12 assets.
+  - Linux, macOS, and Windows each matched 4 platform assets and produced installable metadata without archive downloads.
+- Static proof: `grep -n "top-level macOS app bundles\|not _looks_like_game_directory(target_dir)\|Cataclysm-AOL" scripts/ReleaseInstaller.gd` shows the new app-bundle root handling, final target guard, and C-AOL executable probes.
+- `git diff --check` passed.
+- Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are still unavailable on this Mac, so no GUI/project-load smoke was claimed.
