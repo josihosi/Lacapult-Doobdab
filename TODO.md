@@ -6,7 +6,7 @@ Short execution queue only.
 
 Active target: `Lacapult Doobdab v0.2.0 release installer plus first backend setup options`.
 
-Current checkpoint: local proof packet, first Godot GUI smoke, controlled selected-macOS-DMG mount/launchability-shape proof, sandboxed Lacapult-style DMG install-shape proof, Godot 3.6.2 project-load revalidation, a headless Godot `ReleaseInstaller.install_release()` pass, a full-scene Godot Install-button signal pass, a physical clicked GUI install pass against the selected cached macOS DMG, backend triad, first C-AOL mod compatibility inventory, and local Godot export-pack/PCK release-prep proof are complete as of 2026-04-25. Schani greenlit the next bounded non-release decision item: a C-AOL game-launch smoke from an isolated installed app bundle. Do not install Godot export templates, sign/notarize, publish, solve full OpenVINO automation, or curate C-AOL mod downloads in this lane.
+Current checkpoint: local proof packet, first Godot GUI smoke, controlled selected-macOS-DMG mount/launchability-shape proof, sandboxed Lacapult-style DMG install-shape proof, Godot 3.6.2 project-load revalidation, a headless Godot `ReleaseInstaller.install_release()` pass, a full-scene Godot Install-button signal pass, a physical clicked GUI install pass against the selected cached macOS DMG, backend triad, first C-AOL mod compatibility inventory, and local Godot export-pack/PCK release-prep proof are complete as of 2026-04-25. The next bounded C-AOL game-launch smoke from an isolated installed app bundle was attempted and is blocked by the selected upstream C-AOL macOS app binary linking unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`. Do not install Godot export templates, sign/notarize, publish, solve full OpenVINO automation, patch upstream packaging, or curate C-AOL mod downloads in this lane without fresh clearance.
 
 Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order.
 
@@ -52,7 +52,7 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
 
 7. Park next slices
    - [x] Local Godot export-pack/PCK release-prep proof for macOS/Linux/Windows using temporary safe presets; full app exports are blocked until Godot 3.6.2 export templates are installed.
-   - C-AOL game-launch smoke from the clicked install, only when Schani/Josef wants that heavier proof; the physical clicked install, headless Godot installer path, full-scene Install-button signal path, and sandboxed copy/move shape are already proven.
+   - [x] C-AOL game-launch smoke from an isolated installed app bundle attempted; sandbox install still succeeds, but actual game startup aborts before running because the selected macOS binary depends on unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`.
    - OpenVINO full setup/installer automation beyond selectable v0 status metadata.
    - Real model install/model-pull automation.
    - C-AOL-specific mod/soundpack/tileset recommendation packs.
