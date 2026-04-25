@@ -79,18 +79,16 @@ Preferred target path for named/context overrides is `<active_mod>/npcs/Backgrou
 
 Do not promise automatic NPC/LLM consumption yet. The useful v0 behavior is to preserve inherited mod/soundpack/tileset support, make C-AOL compatibility status honest in the launcher, and keep future runtime summary packs compatible with C-AOL's existing loader.
 
-## Next bounded modding-good lane
+## Active next bounded modding-good lane
 
 Modding is not solved yet. The current Lacapult state is intentionally read-only: it inventories packaged C-AOL mods, distinguishes obsolete blockers, and points future generated summary packs at C-AOL-native `npcs/Backgrounds/Summaries_short` / `npcs/Backgrounds/Summaries_extra` roots.
 
-The next useful lane should be a sandboxed, feature-complete mod summarizer/apply UX proof:
+The active next-lane planning packet is now `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`. It promotes the sketch above into a feature-complete execution family:
 
-1. Start after a mod install/enable flow exists or is being proven in a sandbox.
-2. Offer a Summarizer button/pop-up for enabled mods with extra NPC/content context.
-3. Show whether summaries already exist, whether extra NPC/content is unsummarized, and whether generation/apply succeeded or failed.
-4. Generate a tiny summary-pack mod or summary overlay for one non-obsolete packaged mod.
-5. Enable/apply it only inside a sandboxed C-AOL user/world config, not Josef's real saves.
-6. Prove C-AOL's runtime summary loader sees the active mod root and consumes the summary file.
-7. Only after that, design the normal Lacapult UI for applying/enabling generated packs.
+1. Discovery/status model for stock packaged, user-installed, custom-catalog, and world-specific mods.
+2. UX/status surface with Summarizer pop-up/button and “all enabled extra NPC/content summarized” status.
+3. Sandboxed generated summary-pack apply proof using C-AOL-native roots.
+4. C-AOL runtime consumption proof in a sandbox/harness if feasible, or an explicit C-AOL-side blocker.
+5. Error/backup/rollback proof for obsolete mods, broken metadata, dependency chains, partial/stale/conflicting summaries, backend-not-ready, and apply failure cases.
 
-This belongs mostly on the Lacapult side for user-facing apply/enable UX, pop-up/status handling, and sandbox proofs, but schema and runtime consumption remain on the C-AOL side through `Summaries_short` / `Summaries_extra`. Do not fake it with launcher-only metadata; if NPCs cannot consume it in-game, the modding bridge is just a little museum label, na bravo.
+This belongs mostly on the Lacapult side for user-facing apply/enable UX, pop-up/status handling, backend readiness, and sandbox proofs, but schema and runtime consumption remain on the C-AOL side through `Summaries_short` / `Summaries_extra`. Do not fake it with launcher-only metadata; if NPCs cannot consume it in-game, the modding bridge is just a little museum label, na bravo.
