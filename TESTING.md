@@ -54,6 +54,17 @@ Before claiming v0 is done, Andi should record:
    - show the release object handed to installer has `name`, `url`, `filename`, `published_at`, `has_any_assets`.
    - do not download a huge release archive unless Schani/Josef explicitly wants that proof.
 
+## Evidence - 2026-04-25 controlled macOS DMG shape proof
+
+- Added `tools/prove_caol_macos_dmg.py` to prove the selected C-AOL `v0.2.0` macOS DMG shape from live GitHub metadata. Default mode is metadata-only; `--download` performs the bounded download/mount/inspect/detach proof.
+- Ran `python3 tools/prove_caol_macos_dmg.py --download`; it selected `caol_cdda-0-h_2026-03-29-1556_macos.dmg` from `josihosi/Cataclysm-AOL` `v0.2.0`, downloaded 271,265,739 bytes into ignored `.proof-cache/`, mounted read-only/no-browse with `hdiutil`, inspected `/Volumes/Cataclysm DDA`, and detached successfully.
+- DMG shape proof found top-level `Cataclysm.app` plus `Applications`. Inside `Cataclysm.app`, Lacapult's current app-bundle guard can match `Contents/MacOS/Cataclysm.sh` and preferred C-AOL executable `Contents/Resources/cataclysm-tiles`; `looks_launchable` was true.
+- This proves the selected macOS asset has a launchable app-bundle shape compatible with the current installer/launcher guards. It does **not** claim a full in-launcher install into Lacapult's install folder or a game launch smoke.
+- Re-ran `python3 tools/prove_caol_release.py --all-platforms`; Linux, macOS, and Windows still produced installable `v0.2.0` metadata without archive downloads.
+- Re-ran `python3 tools/prove_caol_backend_contract.py`; C-AOL option names still match local `src/options.cpp`, no secret-bearing fields are introduced, and the patch remains preview-only.
+- `godot --version` returned `3.6.2.stable.official.3cd3caab6`; this run did not need a new GUI screenshot because the changed seam was the external DMG shape proof.
+- Re-ran `git diff --check`; it passed.
+
 ## Evidence - 2026-04-25 cron revalidation
 
 - Re-ran `python3 tools/prove_caol_release.py --all-platforms`; live `josihosi/Cataclysm-AOL` `v0.2.0` data still has 12 assets, and Linux, macOS, and Windows each matched 4 platform assets with installer metadata containing `name`, `url`, `filename`, `asset_size`, `release_page_url`, `published_at`, and `has_any_assets` without downloading archives.

@@ -15,3 +15,6 @@ git_api.gdns
 
 # Claude Code
 .claude
+
+# Local proof artifacts
+.proof-cache/

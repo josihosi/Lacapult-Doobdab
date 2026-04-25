@@ -19,9 +19,9 @@ This repo is a standalone C-AOL-specific launcher/installer derived from Dabdoob
 
 ### Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-**Status:** GUI SMOKE COMPLETE / AWAITING REAL INSTALL PASS OR RELEASE-PREP DECISION
+**Status:** CONTROLLED DMG SHAPE PROVEN / AWAITING GUI INSTALL PASS OR RELEASE-PREP DECISION
 
-Build from the local standalone repo at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdab`, then turn the first product slice into a C-AOL-specific launcher that can fetch and install the existing `v0.2.0` C-AOL releases from `josihosi/Cataclysm-AOL`. The local proof packet is complete as of 2026-04-25, and a Godot 3.6.2 GUI smoke now proves the project launches, surfaces the prioritized C-AOL `v0.2.0` macOS DMG first, and exposes the Settings-tab backend setup controls.
+Build from the local standalone repo at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdab`, then turn the first product slice into a C-AOL-specific launcher that can fetch and install the existing `v0.2.0` C-AOL releases from `josihosi/Cataclysm-AOL`. The local proof packet is complete as of 2026-04-25, a Godot 3.6.2 GUI smoke proves the project launches, surfaces the prioritized C-AOL `v0.2.0` macOS DMG first, and exposes the Settings-tab backend setup controls, and a controlled DMG mount/inspection proof now confirms the selected macOS asset exposes a launchable `.app` shape without launching the game.
 
 The active scope now includes first-pass LLM backend setup options for **API** and **Ollama** after the v0.2.0 release install path is proven. **OpenVINO** stays parked as the specialized third backend unless it is cheap to stub/detect. Modding support stays inherited for now, with a bounded compatibility/NPC-summary investigation behind the installer proof.
 

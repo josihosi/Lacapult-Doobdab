@@ -160,3 +160,9 @@ Godot 3.6.2 is available as `godot` on this Mac. A GUI smoke launched the projec
 - The disabled self-update button now says `Update Lacapult` instead of inherited `Update Dabdoob`.
 
 The next heavier proof is an actual controlled macOS DMG download/extraction/install pass for the selected `v0.2.0` asset. Do not treat the GUI smoke as proof that DMG extraction or `.app` launchability succeeded; it only proved the selected release metadata and visible setup surface.
+
+## 2026-04-25 controlled macOS DMG shape proof
+
+Added `tools/prove_caol_macos_dmg.py` as a repeatable proof for the selected C-AOL `v0.2.0` macOS DMG. In default mode it only proves live metadata; with `--download` it downloads the selected DMG into `.proof-cache/`, mounts it read-only/no-browse with `hdiutil`, inspects the top-level `.app` bundle and executable candidates, then detaches the image.
+
+The selected asset `caol_cdda-0-h_2026-03-29-1556_macos.dmg` exposes `Cataclysm.app` plus an Applications symlink. Inside the app bundle, Lacapult's current launchability guard can match both `Contents/MacOS/Cataclysm.sh` via the single-file `Contents/MacOS` fallback and `Contents/Resources/cataclysm-tiles` via the preferred C-AOL executable list. This proves the downloaded DMG has a launchable shape compatible with the existing app-bundle installer/launcher guards, without claiming a full in-launcher install or launch smoke.
