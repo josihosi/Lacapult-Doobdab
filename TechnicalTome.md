@@ -140,3 +140,7 @@ The detailed one-shot installer direction lives in `doc/lacapult-one-shot-instal
 - API mode stores `CATA_API_KEY` as the environment-variable name only; Lacapult still does not store API secrets.
 - `LLM_INTENT_ENABLE` is intentionally not changed by the preview patch. Enabling NPC LLM calls should remain a clear player/apply-step decision until the installer has a real installed-game config writer.
 - `tools/prove_caol_backend_contract.py` validates this mapping against a local C-AOL checkout without running Godot, mutating game config, using API secrets, pulling models, or downloading release archives.
+
+## 2026-04-25 public-facing identity cleanup
+
+Remaining non-credit player-facing text now says Lacapult Doobdab rather than Dabdoob in English startup tips, settings copy, font-help copy, the DOTD note, the macOS permission helper, and dormant self-update status/updater-script strings. Dabdoob/Catapult references remain intentionally in attribution, docs, inherited internal filenames/comments, and lineage copy.

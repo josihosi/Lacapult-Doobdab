@@ -80,7 +80,7 @@ done
 
 echo ""
 echo "🎉 Permission fixing complete!"
-echo "💡 Tip: The Dabdoob launcher should automatically fix permissions when downloading games,"
+echo "💡 Tip: Lacapult Doobdab should automatically fix permissions when downloading games,"
 echo "   but you can run this script manually if needed."
 echo ""
 echo "🚀 You should now be able to run your Cataclysm game executable." 

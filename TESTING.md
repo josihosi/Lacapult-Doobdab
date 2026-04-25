@@ -153,3 +153,13 @@ Before claiming v0 is done, Andi should record:
 - Re-ran cheap Ollama detection: `command -v ollama` returned `/opt/homebrew/bin/ollama`; `ollama list` printed the local model table. No model pull, install, remote API call, or API secret was used.
 - Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are still unavailable on this Mac, so no GUI/project-load smoke was claimed.
 - `git diff --check` passed.
+
+## Evidence - 2026-04-25 public-facing Dabdoob string cleanup
+
+- Replaced remaining non-credit, player-facing Dabdoob references in English tips/settings/help text, startup DOTD copy, macOS permission helper output, and dormant self-update status/updater-script text with Lacapult Doobdab wording.
+- Preserved Dabdoob/Catapult/Hihahahalol references where they are attribution, lineage, docs, or internal inherited filenames/comments.
+- Static proof: `grep -R "Dabdoob\\|Catapult_Dabdoob\\|Hihahahalol" -n README.md project.godot scripts text/en doc Plan.md TODO.md SUCCESS.md TESTING.md TechnicalTome.md ATTRIBUTION.md | head -120` now shows remaining hits as lineage/credits/docs, one About formatting helper, or the intentional Lacapult lineage note.
+- Re-ran `python3 tools/prove_caol_release.py --all-platforms`; Linux, macOS, and Windows still produced installable v0.2.0 metadata without archive downloads.
+- Re-ran `python3 tools/prove_caol_backend_contract.py`; C-AOL option names still match local `src/options.cpp`, no secret-bearing fields are introduced, and the patch remains preview-only.
+- Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are still unavailable on this Mac, so no GUI/project-load smoke was claimed.
+- `git diff --check` passed.

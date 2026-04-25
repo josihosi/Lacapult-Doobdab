@@ -1158,7 +1158,7 @@ func _on_version_check_completed(result, response_code, headers, body):
 		_latest_version = response["name"]
 		var current_version = Settings.get_hardcoded_version()
 		
-		Status.post(tr("Dabdoob's latest version available: v%s") % _latest_version)
+		Status.post(tr("Lacapult Doobdab's latest version available: v%s") % _latest_version)
 		
 		# Store the browser download URL from the API response
 		if "html_url" in response:
@@ -1183,11 +1183,11 @@ func _on_version_check_completed(result, response_code, headers, body):
 			_btn_update.disabled = false
 			_is_update_available = true
 		else:
-			Status.post(tr("You have Dabdoob's latest version!"), Enums.MSG_SUCCESS)
+			Status.post(tr("You have Lacapult Doobdab's latest version!"), Enums.MSG_SUCCESS)
 			_btn_update.disabled = true
 			_is_update_available = false
 	else:
-		Status.post(tr("Could not determine Dabdoob's latest version"), Enums.MSG_ERROR)
+		Status.post(tr("Could not determine Lacapult Doobdab's latest version"), Enums.MSG_ERROR)
 		_btn_update.disabled = false  # Re-enable button on error
 
 func _is_newer_version(latest: String, current: String) -> bool:
@@ -1352,7 +1352,7 @@ func _create_bash_updater(downloaded_file: String) -> void:
 	var proc_name = current_exe.get_file()
 
 	var sh_script = """#!/bin/bash
-# Dabdoob Update Script - Linux Updater
+# Lacapult Doobdab Update Script - Linux Updater
 LOG_FILE="%s"
 DOWNLOADED="%s"
 TARGET="%s"
@@ -1407,7 +1407,7 @@ fi
 
 	OS.execute("chmod", ["+x", sh_path], true)
 
-	Status.post(tr("Update ready! Dabdoob will restart to complete the update."))
+	Status.post(tr("Update ready! Lacapult Doobdab will restart to complete the update."))
 	Status.post(tr("Update logs will be saved to: %s") % log_path)
 
 	OS.execute("bash", [sh_path], false)
@@ -1420,19 +1420,19 @@ func _create_powershell_updater(downloaded_file):
 	
 	# Create a much simpler PowerShell script for updating just the executable
 	var ps_script = """
-# Dabdoob Update Script - Single Executable Updater
+# Lacapult Doobdab Update Script - Single Executable Updater
 $ErrorActionPreference = "Stop"
 
 # Log function
 function Log-Message {
 	param([string]$Message)
 	$timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-	"$timestamp - $Message" | Out-File -FilePath "$env:USERPROFILE\\AppData\\Roaming\\Godot\\app_userdata\\Dabdoob\\update_log.txt" -Append
+	"$timestamp - $Message" | Out-File -FilePath "$env:USERPROFILE\\AppData\\Roaming\\Godot\\app_userdata\\Lacapult Doobdab\\update_log.txt" -Append
 }
 
 # Clear previous log and start a new one
-if (Test-Path "$env:USERPROFILE\\AppData\\Roaming\\Godot\\app_userdata\\Dabdoob\\update_log.txt") {
-	Remove-Item -Path "$env:USERPROFILE\\AppData\\Roaming\\Godot\\app_userdata\\Dabdoob\\update_log.txt" -Force
+if (Test-Path "$env:USERPROFILE\\AppData\\Roaming\\Godot\\app_userdata\\Lacapult Doobdab\\update_log.txt") {
+	Remove-Item -Path "$env:USERPROFILE\\AppData\\Roaming\\Godot\\app_userdata\\Lacapult Doobdab\\update_log.txt" -Force
 }
 
 Log-Message "Starting update process"
@@ -1537,7 +1537,7 @@ powershell -ExecutionPolicy Bypass -WindowStyle Hidden -File "%s"
 	file.close()
 	
 	# Log
-	Status.post(tr("Update ready! Dabdoob will restart to complete the update."))
+	Status.post(tr("Update ready! Lacapult Doobdab will restart to complete the update."))
 	Status.post(tr("Update logs will be saved to: %s") % OS.get_user_data_dir().plus_file("update_log.txt"))
 	
 	# Execute the batch file and exit

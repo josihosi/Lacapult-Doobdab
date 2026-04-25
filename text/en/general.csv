@@ -3,7 +3,7 @@
 "window_title","Lacapult Doobdab — Cataclysm: Arsenic and Old Lace"
 "str_welcome","Welcome to Lacapult Doobdab!"
 "str_tip_of_the_day","\n\n[u]Tip of the day:[/u]\n"
-"str_donor_of_the_day","\n\n[color=#f5c842][b]— Message from a donor —[/b][/color]\n"
+"str_donor_of_the_day","\n\n[color=#f5c842][b]— Lacapult note —[/b][/color]\n"
 "msg_theme_load_error","Could not load theme %s."
 "debug_test","This is a debug text to test translation retrieval."
 ,

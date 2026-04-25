@@ -4,7 +4,7 @@ extends Node
 
 
 const _DONORS = [
-	"[i]\"You can request a message to be shown here by donating to the Dabdoob project!\"[/i]\n    — [color=#f5c842][b]Hihahahalol The Dabdoob[/b][/color]",
+	"[i]\"Lacapult Doobdab preserves its Dabdoob/Catapult lineage while acting as the front door for C-AOL.\"[/i]\n    — [color=#f5c842][b]Lacapult Doobdab[/b][/color]",
 ]
 
 
