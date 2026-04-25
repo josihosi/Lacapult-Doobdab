@@ -474,10 +474,15 @@ func _on_BuildsList_item_selected(index: int) -> void:
 	
 	var info = Paths.installs_summary
 	var game = Settings.read("game")
+	var release = _releases.releases[_get_release_key()][index]
+	var has_download_url = release.get("url", "") != ""
 	
-	if (not Settings.read("update_to_same_build_allowed")) \
+	if not has_download_url:
+		_btn_install.disabled = true
+		_cb_update.disabled = true
+	elif (not Settings.read("update_to_same_build_allowed")) \
 			and (game in info) \
-			and (_releases.releases[_get_release_key()][index]["name"] in info[game]):
+			and (release["name"] in info[game]):
 		_btn_install.disabled = true
 		_cb_update.disabled = true
 	else:
@@ -567,8 +572,61 @@ func reload_builds_list() -> void:
 	
 	_lst_builds.clear()
 	for rec in _releases.releases[_get_release_key()]:
-			_lst_builds.add_item(rec["name"])
+		_lst_builds.add_item(_format_release_list_item(rec))
+		var idx = _lst_builds.get_item_count() - 1
+		_lst_builds.set_item_tooltip(idx, _format_release_tooltip(rec))
+		_lst_builds.set_item_disabled(idx, rec.get("url", "") == "")
 	_refresh_currently_installed()
+
+
+func _format_release_list_item(rec: Dictionary) -> String:
+	var title = rec.get("name", "")
+	var filename = rec.get("filename", "")
+	if rec.get("url", "") != "":
+		var size_label = _format_asset_size(rec.get("asset_size", 0))
+		if filename != "" and size_label != "":
+			return "%s — %s (%s) — ready" % [title, filename, size_label]
+		elif filename != "":
+			return "%s — %s — ready" % [title, filename]
+		return "%s — ready" % title
+	if not rec.get("has_any_assets", true):
+		return "%s — no release assets yet" % title
+	return "%s — no asset for this platform" % title
+
+
+func _format_release_tooltip(rec: Dictionary) -> String:
+	var lines = [rec.get("name", "")]
+	if rec.get("published_at", "") != "":
+		lines.append("Published: %s" % rec.get("published_at", ""))
+	if rec.get("filename", "") != "":
+		lines.append("Asset: %s" % rec.get("filename", ""))
+		var size_label = _format_asset_size(rec.get("asset_size", 0))
+		if size_label != "":
+			lines.append("Size: %s" % size_label)
+	elif not rec.get("has_any_assets", true):
+		lines.append("Installability: no release assets are attached.")
+	else:
+		lines.append("Installability: no asset matches this platform.")
+	if rec.get("release_page_url", "") != "":
+		lines.append("Release page: %s" % rec.get("release_page_url", ""))
+	var tooltip_lines = PoolStringArray()
+	for line in lines:
+		tooltip_lines.append(str(line))
+	return tooltip_lines.join("\n")
+
+
+func _format_asset_size(bytes) -> String:
+	var size = float(bytes)
+	if size <= 0:
+		return ""
+	var units = ["B", "KiB", "MiB", "GiB"]
+	var unit_idx = 0
+	while size >= 1024.0 and unit_idx < units.size() - 1:
+		size /= 1024.0
+		unit_idx += 1
+	if unit_idx == 0:
+		return "%d %s" % [int(size), units[unit_idx]]
+	return "%.1f %s" % [size, units[unit_idx]]
 
 
 func apply_game_choice() -> void:

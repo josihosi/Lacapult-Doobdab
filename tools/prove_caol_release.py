@@ -38,6 +38,8 @@ def select_asset(release: dict[str, Any], system: str) -> dict[str, Any]:
         "name": release.get("name") or release.get("tag_name"),
         "url": selected.get("browser_download_url", "") if selected else "",
         "filename": selected.get("name", "") if selected else "",
+        "asset_size": selected.get("size", 0) if selected else 0,
+        "release_page_url": release.get("html_url", ""),
         "published_at": release.get("published_at", ""),
         "has_any_assets": bool(release.get("assets")),
     }

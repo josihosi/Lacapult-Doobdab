@@ -113,3 +113,9 @@ The detailed one-shot installer direction lives in `doc/lacapult-one-shot-instal
 - `doc/caol-mod-compatibility-summary.md` records the first compatibility-summary shape for inherited mod support and future NPC/LLM context use.
 - Warning status calls use the actual `Enums.MSG_WARN` member. The inherited `Enums.MSG_WARNING` spelling was not defined and would fail if installer/filesystem/mod warning branches executed.
 - `tools/prove_caol_release.py --all-platforms` now proves the v0.2.0 asset contract for Linux, macOS, and Windows in one live GitHub API read while preserving the default current-host proof mode.
+
+## 2026-04-25 release list installability metadata
+
+- `scripts/ReleaseManager.gd` now carries optional `asset_size` and `release_page_url` fields in release metadata alongside the installer-critical `name`, `url`, `filename`, `published_at`, and `has_any_assets` fields.
+- `scripts/Catapult.gd` formats release-list rows with selected asset name, size, and readiness; non-installable releases remain visible but disabled with a tooltip explaining whether there are no assets or no matching platform asset.
+- The install button selection handler now checks for a download URL before enabling install/update actions, closing the gap where a non-installable visible release could be selected.

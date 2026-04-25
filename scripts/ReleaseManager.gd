@@ -308,6 +308,8 @@ func _parse_stable_builds_from_db(data: PoolByteArray, write_to: Array) -> void:
 			build["name"] = build["name"].split(" ")[-1]
 		build["url"] = ""
 		build["filename"] = ""
+		build["asset_size"] = 0
+		build["release_page_url"] = rec.get("html_url", "")
 		build["published_at"] = rec.get("published_at", "")
 		build["has_any_assets"] = len(rec.get("assets", [])) > 0
 
@@ -327,6 +329,7 @@ func _parse_stable_builds_from_db(data: PoolByteArray, write_to: Array) -> void:
 		if best_asset != null:
 			build["url"] = best_asset.get("download_url", "")
 			build["filename"] = best_asset.get("name", "")
+			build["asset_size"] = best_asset.get("size", 0)
 
 		tmp_arr.append(build)
 
@@ -410,6 +413,8 @@ func _parse_rolling_build(data: PoolByteArray, write_to: Array) -> void:
 		build["name"] = build["name"].split(" ")[-1]
 	build["url"] = ""
 	build["filename"] = ""
+	build["asset_size"] = 0
+	build["release_page_url"] = json.get("html_url", "")
 	build["published_at"] = json.get("published_at", "")
 	build["has_any_assets"] = len(json.get("assets", [])) > 0
 
@@ -417,6 +422,7 @@ func _parse_rolling_build(data: PoolByteArray, write_to: Array) -> void:
 		if filter["substring"] in asset[filter["field"]]:
 			build["url"] = asset["browser_download_url"]
 			build["filename"] = asset["name"]
+			build["asset_size"] = asset.get("size", 0)
 
 	write_to.clear()
 	write_to.append(build)
@@ -441,6 +447,8 @@ func _parse_builds(data: PoolByteArray, write_to: Array, filter: Dictionary) -> 
 			build["name"] = build["name"].split(" ")[-1]
 		build["url"] = ""
 		build["filename"] = ""
+		build["asset_size"] = 0
+		build["release_page_url"] = rec.get("html_url", "")
 		build["published_at"] = rec.get("published_at", "")
 		build["has_any_assets"] = len(rec["assets"]) > 0
 
@@ -453,6 +461,7 @@ func _parse_builds(data: PoolByteArray, write_to: Array, filter: Dictionary) -> 
 				if substring in asset[filter["field"]]:
 					build["url"] = asset["browser_download_url"]
 					build["filename"] = asset["name"]
+					build["asset_size"] = asset.get("size", 0)
 					break
 			if build["url"] != "":
 				break

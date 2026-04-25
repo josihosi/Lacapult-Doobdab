@@ -109,3 +109,15 @@ Before claiming v0 is done, Andi should record:
   - macOS filters `_macos.dmg`, `_macos.tar.gz`, `_macos.zip` matched 4 DMG assets and produced an installable metadata shape.
   - Windows filter `_windows.zip` matched 4 assets and produced an installable metadata shape.
   - Each platform result included `name`, `url`, `filename`, `published_at`, and `has_any_assets` for the installer handoff shape.
+
+## Evidence - 2026-04-25 release list installability metadata
+
+- Added release-list display metadata so each fetched C-AOL release row can show the selected platform asset name, file size, release-page tooltip, and a clear non-installable state when no matching asset exists.
+- Install button guard now also checks selected release `url`, so a release row with no platform asset cannot enable installation just by being selected.
+- Extended installer metadata proof with `asset_size` and `release_page_url` while preserving the existing handoff fields: `name`, `url`, `filename`, `published_at`, and `has_any_assets`.
+- Re-ran `python3 tools/prove_caol_release.py --all-platforms`:
+  - v0.2.0 found with 12 assets.
+  - Linux, macOS, and Windows each matched 4 platform assets.
+  - Installer shape now includes asset sizes and the v0.2.0 release page URL without downloading archives.
+- Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are still unavailable on this Mac, so no GUI/project-load smoke was claimed.
+- `git diff --check` passed.
