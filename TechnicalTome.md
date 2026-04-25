@@ -253,8 +253,24 @@ This is the first honest "backend-good" bar for Lacapult: setup/config/status/ap
 
 ## 2026-04-25 mod install/enable + Summarizer feature plan
 
-`doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` is the active next-lane planning packet after backend-good hardening. It promotes the read-only packaged-mod bridge into a feature-complete mod/Summarizer implementation family, but does not implement it yet.
+`doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` is the active next-lane plan after backend-good hardening. It promotes the read-only packaged-mod bridge into a feature-complete mod/Summarizer implementation family, but does not implement it yet. The durable architecture rule is simple: C-AOL owns runtime truth; Lacapult owns installer help.
 
-The responsibility split is explicit: C-AOL owns runtime truth (`mods.json` active order, active mod roots, world custom mods, `npcs/Backgrounds/Summaries_short`, `npcs/Backgrounds/Summaries_extra`, summary parsing/override behavior, and eventual prompt consumption proof). Lacapult owns installer/helper behavior: discovering stock/user/catalog/world mods, showing enabled/disabled and summary coverage status, prompting after mod install/enable, gating generation on backend readiness, staging generated packs, applying/rolling back C-AOL-native companion summary mods or world custom packs, and explaining weird mod errors without mutating real user data in proofs.
+C-AOL runtime truth:
+
+- Active world mods live in each world's `mods.json` and are loaded into `world_generator->active_world->active_mod_order`.
+- `src/llm_intent.cpp` builds background-summary roots from core `data/json`, active mod roots, and the world custom-mod root.
+- Runtime summary files must live under `npcs/Backgrounds/Summaries_short` or `npcs/Backgrounds/Summaries_extra` and use existing C-AOL legacy text or `npc_personality_summary`/bundle JSON shapes.
+- C-AOL owns summary parsing/override behavior, cache/runtime fixes, and eventual proof that generated summary roots reach prompt construction.
+
+Lacapult's next implementation family:
+
+- Discover stock packaged, user-installed, custom-catalog, and world-specific mods.
+- Report world-aware enabled/disabled state plus obsolete, broken metadata, dependency, partial, stale, conflict, and summary coverage states.
+- Offer a Summarizer button/pop-up after install/enable when contextual mod content lacks summaries.
+- Gate generation on API/Ollama/OpenVINO backend readiness from `BackendConfigManager.gd` without storing secrets, pulling models, installing OpenVINO, or making implicit remote calls.
+- Stage generated packs as reversible C-AOL-native companion mods or world custom mods with manifest, backup, and rollback.
+- Prove C-AOL runtime consumption in a sandbox/harness before claiming the feature is complete.
+
+The preferred generated-pack shape is a companion user mod such as `userdata/mods/lacapult_summary_<source_mod_id>/` containing `modinfo.json`, `npcs/Backgrounds/Summaries_extra/generated_<source_mod_id>.json`, optional `Summaries_short` output, and a Lacapult manifest. Stock packaged mod folders should not be mutated.
 
 The plan is deliberately sliced: discovery/status model first, then visible UX/prompting, then sandboxed C-AOL-native summary-pack generation/apply with manifest/backup/rollback, then C-AOL runtime consumption proof, then fixture coverage for obsolete mods, parse errors, dependency blockers, partial/stale/conflicting summaries, backend-not-ready states, and rollback failures. This keeps the Summarizer button from becoming button-shaped theater before Lacapult can accurately report whether a mod is active, broken, stale, or unsummarized.
