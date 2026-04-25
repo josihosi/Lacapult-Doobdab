@@ -49,7 +49,7 @@ Parked backend:
 
 ## Non-goals
 
-- Do not create/push the public GitHub repo without fresh explicit clearance.
+- Public repo exists at `https://github.com/josihosi/Lacapult-Doobdab`, but do not push, publish releases, or contact upstream without fresh explicit clearance.
 - Do not attempt all three backend installers before v0.2.0 release installation works.
 - Do not fully solve OpenVINO in this slice.
 - Do not promise automatic Ollama installation unless the path is safe and verified.

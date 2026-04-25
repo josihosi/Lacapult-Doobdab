@@ -8,6 +8,8 @@ Lacapult Doobdab starts from `Hihahahalol/Catapult_Dabdoob`, which itself is bas
 
 License is MIT. Preserve upstream license text and attribution.
 
+Public repo: `https://github.com/josihosi/Lacapult-Doobdab`. Public pushes, release publication, or upstream contact require fresh Schani/Josef clearance.
+
 ## Source shape
 
 - Godot project: `project.godot`
@@ -144,3 +146,7 @@ The detailed one-shot installer direction lives in `doc/lacapult-one-shot-instal
 ## 2026-04-25 public-facing identity cleanup
 
 Remaining non-credit player-facing text now says Lacapult Doobdab rather than Dabdoob in English startup tips, settings copy, font-help copy, the DOTD note, the macOS permission helper, and dormant self-update status/updater-script strings. Dabdoob/Catapult references remain intentionally in attribution, docs, inherited internal filenames/comments, and lineage copy.
+
+## 2026-04-25 local proof packet closure
+
+Release metadata, installer-shape proof, backend API/Ollama preview config, OpenVINO parked status, mod compatibility note, and identity cleanup are all locally proven. The remaining validation gap is not a code claim: this Mac has no `godot`, `godot3`, or `godot4` binary, so GUI/project-load smoke must happen elsewhere or after Godot is installed.

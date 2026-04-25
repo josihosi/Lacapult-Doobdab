@@ -11,7 +11,7 @@ Use the smallest evidence that honestly matches the change.
 - UI node-path changes: Godot parse/load or GUI smoke if Godot is available; otherwise record missing Godot binary as blocker and prove paths by inspection.
 - Installer/download changes: avoid huge downloads unless needed; first prove metadata shape and asset selection, especially for C-AOL `v0.2.0`.
 - Backend setup changes: prove config shape and safe local detection; do not require real API secrets or large model downloads for v0 evidence.
-- Public repo creation/push: external action, requires explicit clearance.
+- Public pushes/release publication/upstream contact: external actions, require explicit clearance.
 
 ## Current evidence
 
@@ -62,6 +62,14 @@ Before claiming v0 is done, Andi should record:
 - Re-ran `python3 tools/prove_caol_release.py --all-platforms`; v0.2.0 still produced installable metadata for Linux, macOS, and Windows without downloading archives.
 - Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are still unavailable on this Mac, so no GUI/project-load smoke was claimed.
 - `git diff --check` passed.
+
+## Evidence - 2026-04-25 local proof packet closure
+
+- Re-ran `python3 tools/prove_caol_release.py --all-platforms`; live GitHub data for `josihosi/Cataclysm-AOL` still includes `v0.2.0` with 12 assets, and Linux, macOS, and Windows each produced installable metadata with `name`, `url`, `filename`, `asset_size`, `release_page_url`, `published_at`, and `has_any_assets` without archive downloads.
+- Re-ran `python3 tools/prove_caol_backend_contract.py`; the local C-AOL checkout still contains `LLM_INTENT_BACKEND`, `LLM_INTENT_OLLAMA_URL`, `LLM_INTENT_OLLAMA_MODEL`, `LLM_INTENT_API_KEY_ENV`, and `LLM_INTENT_API_MODEL`; Lacapult references all of them, stores no forbidden secret-bearing field tokens, and keeps the options patch preview-only.
+- Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are unavailable on this Mac, so no GUI/project-load smoke is claimed.
+- Re-ran `git diff --check`; it passed.
+- Canon now records that the public repo exists at `https://github.com/josihosi/Lacapult-Doobdab`, while public pushes/releases/contact remain blocked on fresh Schani/Josef clearance.
 
 ## Known risk spots
 

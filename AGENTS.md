@@ -25,7 +25,7 @@ The active target is the v0 standalone scaffold and C-AOL release installer. Do 
 
 ## External/public actions
 
-Do not create a GitHub repo, push to GitHub, publish releases, or contact upstream without fresh explicit clearance from Josef/Schani.
+The public repo exists at `https://github.com/josihosi/Lacapult-Doobdab`, but do not push to GitHub, publish releases, or contact upstream without fresh explicit clearance from Josef/Schani.
 
 ## Attribution
 

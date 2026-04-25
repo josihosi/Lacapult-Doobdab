@@ -6,6 +6,8 @@ Short execution queue only.
 
 Active target: `Lacapult Doobdab v0.2.0 release installer plus first backend setup options`.
 
+Current checkpoint: local proof packet is complete as of 2026-04-25. The next honest step is a Godot GUI/project-load smoke on a machine with Godot installed, or explicit Schani/Josef clearance for a public push/release-prep pass.
+
 Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order.
 
 1. Confirm source/import state
@@ -45,8 +47,9 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - If full GUI launch is possible, smoke launch to the release list; otherwise record the exact missing tool/blocker.
 
 7. Park next slices
+   - Godot GUI/project-load smoke when Godot is available.
    - OpenVINO full setup.
    - Real model install/model-pull automation.
    - C-AOL-specific mod/soundpack/tileset recommendation packs.
    - NPC/LLM runtime integration of mod summaries.
-   - Public GitHub repo creation and first push, only after explicit clearance.
+   - Public GitHub push/release publication, only after explicit clearance.
