@@ -46,5 +46,5 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [x] Full-scene Godot Install-button signal pass for the selected cached macOS DMG inside an isolated HOME, without touching the real Application Support install state or launching the game.
 - [x] Physical clicked GUI macOS DMG extraction/install pass, without launching the game.
 - [x] Local Godot export-pack/PCK release-prep proof for macOS/Linux/Windows into ignored `.proof-cache/`, with `export_presets.cfg` restored afterward.
-- [ ] C-AOL game-launch smoke from an installed app bundle.
+- [ ] C-AOL game-launch smoke from an isolated installed app bundle (greenlit next; no real user state mutation).
 - [ ] Full app exports / signed packaged Lacapult releases for Windows/Linux/macOS; currently blocked locally on missing Godot 3.6.2 export templates and later signing/notarization choices.
