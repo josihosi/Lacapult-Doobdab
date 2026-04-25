@@ -218,3 +218,9 @@ On Josef's Mac mini, the selected `caol_cdda-0-h_2026-03-29-1556_macos.dmg` inst
 `scripts/SettingsUI.gd` now surfaces the packaged C-AOL mod compatibility/summarizer bridge as read-only Settings status near the backend controls. It exposes the current report counts and generated-report reference, explicitly says no generated summary packs are applied and no mods are enabled from this block, and keeps future summary-pack language tied to C-AOL active mod roots: `npcs/Backgrounds/Summaries_short` and `npcs/Backgrounds/Summaries_extra`.
 
 This is intentionally not a new metadata or application system. The repeatable proof report remains generated under ignored `.proof-cache/caol-mod-bridge/` by `python3 tools/prove_caol_mod_inventory.py`; committed canon stays in `doc/caol-mod-compatibility-summary.md`.
+
+## 2026-04-25 read-only C-AOL macOS launch preflight status
+
+`scripts/Catapult.gd` now creates a read-only Game-tab launch preflight label for the active C-AOL install on macOS. The check reuses Lacapult's app-bundle executable discovery, runs `otool -L` against the launch binary, and classifies absolute local dylib paths under `/opt/local`, `/usr/local`, or `/opt/homebrew`. Missing local dylibs block Play/Resume and post an explanatory status; present local dylibs are reported as a portability warning; unavailable `otool` does not pretend to prove launchability.
+
+For the selected C-AOL `v0.2.0` macOS DMG, the preflight distinguishes the layers clearly: Lacapult install/copy succeeds, `Cataclysm.app` exists, and the actual `Contents/Resources/cataclysm-tiles` binary is blocked by missing `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`. This is launcher-side UX/status only. It does not rebuild, bundle, sign, notarize, publish, install MacPorts/Homebrew libraries, contact upstream, or mutate real Application Support state.

@@ -30,6 +30,7 @@ import prove_caol_macos_dmg as dmg_proof
 
 DEFAULT_OBSERVE_SECONDS = 8.0
 INFO_FILENAME = dmg_proof.INFO_FILENAME
+NONPORTABLE_DYLIB_PREFIXES = ("/opt/local/", "/usr/local/", "/opt/homebrew/")
 
 
 def install_from_mount_keep(mount_point: str, release_name: str, sandbox_root: Path) -> tuple[Path, dict[str, Any]]:
@@ -64,6 +65,81 @@ def install_from_mount_keep(mount_point: str, release_name: str, sandbox_root: P
         "chmodded_app_executables": chmodded,
     }
     return install_dir, proof
+
+
+def find_app_launch_binary(install_dir: Path) -> Path:
+    apps = sorted(child for child in install_dir.iterdir() if child.is_dir() and child.name.endswith(".app"))
+    if not apps:
+        raise RuntimeError(f"no .app bundle found in {install_dir}")
+    app = apps[0]
+    preferred_names = ["cataclysm-tiles", "cataclysm-tiles.exe", "Cataclysm-AOL"]
+    search_dirs = [app / "Contents" / "MacOS", app / "Contents" / "Resources"]
+    for search_dir in search_dirs:
+        if not search_dir.is_dir():
+            continue
+        files = sorted(child for child in search_dir.iterdir() if child.is_file())
+        for preferred_name in preferred_names:
+            for child in files:
+                if child.name == preferred_name:
+                    return child
+    for search_dir in search_dirs:
+        if not search_dir.is_dir():
+            continue
+        files = sorted(child for child in search_dir.iterdir() if child.is_file())
+        if files:
+            return files[0]
+    raise RuntimeError(f"no launch binary found inside {app}")
+
+
+def parse_nonportable_dylibs(otool_output: str) -> list[str]:
+    deps: list[str] = []
+    for raw_line in otool_output.splitlines():
+        line = raw_line.strip()
+        if not line or line.endswith(":"):
+            continue
+        dep = line.split(" (", 1)[0]
+        if not dep.startswith("/") or ".dylib" not in dep:
+            continue
+        if dep.startswith(NONPORTABLE_DYLIB_PREFIXES) and dep not in deps:
+            deps.append(dep)
+    return deps
+
+
+def run_launch_preflight(binary: Path) -> dict[str, Any]:
+    proof: dict[str, Any] = {
+        "executable": str(binary),
+        "otool_available": shutil.which("otool") is not None,
+        "nonportable_dylibs": [],
+        "missing_nonportable_dylibs": [],
+        "present_nonportable_dylibs": [],
+        "status": "ok",
+        "blocks_launch": False,
+    }
+    if not proof["otool_available"]:
+        proof["status"] = "preflight_unavailable"
+        return proof
+
+    proc = subprocess.run(["otool", "-L", str(binary)], text=True, capture_output=True, check=False)
+    proof["otool_returncode"] = proc.returncode
+    proof["otool_stderr_tail"] = proc.stderr[-2000:]
+    if proc.returncode != 0:
+        proof["status"] = "preflight_unavailable"
+        return proof
+
+    deps = parse_nonportable_dylibs(proc.stdout)
+    proof["nonportable_dylibs"] = deps
+    for dep in deps:
+        if Path(dep).exists():
+            proof["present_nonportable_dylibs"].append(dep)
+        else:
+            proof["missing_nonportable_dylibs"].append(dep)
+
+    if proof["missing_nonportable_dylibs"]:
+        proof["status"] = "blocked_missing_nonportable_dylibs"
+        proof["blocks_launch"] = True
+    elif proof["present_nonportable_dylibs"]:
+        proof["status"] = "nonportable_dylibs_present_locally"
+    return proof
 
 
 def find_app_launch_script(install_dir: Path) -> Path:
@@ -137,6 +213,8 @@ def main() -> int:
     parser.add_argument("--cache-dir", type=Path, default=dmg_proof.DEFAULT_CACHE_DIR)
     parser.add_argument("--observe-seconds", type=float, default=DEFAULT_OBSERVE_SECONDS)
     parser.add_argument("--keep-sandbox", action="store_true", help="print and keep the temporary install root for inspection")
+    parser.add_argument("--preflight-only", action="store_true", help="inspect the launch binary with otool -L and do not launch the app")
+    parser.add_argument("--expect-blocker", action="store_true", help="fail unless preflight detects missing non-portable local dylibs")
     args = parser.parse_args()
 
     if sys.platform != "darwin":
@@ -171,22 +249,33 @@ def main() -> int:
         proof["mount_point"] = mount_point
         install_dir, install_proof = install_from_mount_keep(mount_point, release.get("name") or dmg_proof.PREFERRED_TAG, sandbox_root)
         proof["install"] = install_proof
-        script = find_app_launch_script(install_dir)
-        proof["launch"] = launch_and_observe(script, sandbox_root, args.observe_seconds)
+        binary = find_app_launch_binary(install_dir)
+        proof["launch_preflight"] = run_launch_preflight(binary)
+        if not args.preflight_only:
+            script = find_app_launch_script(install_dir)
+            proof["launch"] = launch_and_observe(script, sandbox_root, args.observe_seconds)
     finally:
         if mount_point:
             dmg_proof.detach_dmg(mount_point)
             proof["detached"] = True
 
-    launch = proof.get("launch", {})
-    success = bool(proof.get("install", {}).get("looks_launchable_after_move")) and (
-        launch.get("was_running_after_observe") or launch.get("immediate_success_exit")
-    )
+    install_ok = bool(proof.get("install", {}).get("looks_launchable_after_move"))
+    preflight = proof.get("launch_preflight", {})
+    if args.preflight_only:
+        success = install_ok and bool(preflight)
+        if args.expect_blocker and preflight.get("status") != "blocked_missing_nonportable_dylibs":
+            success = False
+    else:
+        launch = proof.get("launch", {})
+        success = install_ok and (launch.get("was_running_after_observe") or launch.get("immediate_success_exit"))
     print(json.dumps(proof, indent=2))
     if sandbox_context is not None:
         sandbox_context.cleanup()
     if not success:
-        print("C-AOL app launch smoke did not reach a running/successfully exiting app process", file=sys.stderr)
+        if args.preflight_only:
+            print("C-AOL launch preflight did not detect the expected package status", file=sys.stderr)
+        else:
+            print("C-AOL app launch smoke did not reach a running/successfully exiting app process", file=sys.stderr)
         return 1
     return 0
 

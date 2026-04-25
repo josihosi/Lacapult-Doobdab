@@ -51,8 +51,10 @@ var _easter_egg_counter := 0
 # Game process monitoring
 var _game_process: OSExecWrapper = null
 var _launcher_should_close_after_game := false
+var _launch_preflight_status: Label = null
 
 const VERSION_CHECK_URL = "" # Lacapult public self-update is disabled until a Lacapult release repo exists.
+const CAOL_NONPORTABLE_DYLIB_PREFIXES = ["/opt/local/", "/usr/local/", "/opt/homebrew/"]
 var _latest_version = ""
 var _is_update_available = false
 var _release_page_url = ""
@@ -564,8 +566,27 @@ func _setup_ui() -> void:
 	_cb_bn_rolling.connect("toggled", self, "_on_CbBNRolling_toggled")
 	# Had to leave these signals unconnected in the editor and only connect
 	# them now from code to avoid cyclic calls of apply_game_choice.
+	_add_launch_preflight_status_controls()
 	
 	_refresh_currently_installed()
+
+
+func _add_launch_preflight_status_controls() -> void:
+	var active_install = get_node_or_null("Main/Tabs/Game/ActiveInstall")
+	if active_install == null:
+		return
+	if active_install.has_node("LaunchPreflightStatus"):
+		_launch_preflight_status = active_install.get_node("LaunchPreflightStatus")
+		return
+
+	_launch_preflight_status = Label.new()
+	_launch_preflight_status.name = "LaunchPreflightStatus"
+	_launch_preflight_status.autowrap = true
+	_launch_preflight_status.visible = false
+	_launch_preflight_status.hint_tooltip = "Read-only launch preflight status for the active C-AOL install."
+	active_install.add_child(_launch_preflight_status)
+	# Place the status between the active install name and the Play/Resume row.
+	active_install.move_child(_launch_preflight_status, 2)
 
 
 func reload_builds_list() -> void:
@@ -875,9 +896,17 @@ func _start_game(world := "") -> void:
 				cmd_string += " --world \"%s\"" % world
 			command_args = ["/C", cmd_string]
 		"OSX":
-			# macOS - Check for cataclysm-launcher first, like Linux
+			# macOS - Check for known package-level launch blockers before starting the app.
 			var launcher_path = Paths.game_dir.plus_file("cataclysm-launcher")
 			var d = Directory.new()
+			var caol_preflight = _get_caol_macos_launch_preflight(Paths.game_dir)
+			if caol_preflight.get("blocks_launch", false):
+				var preflight_message = _format_launch_preflight_status(caol_preflight)
+				Status.post(preflight_message, Enums.MSG_ERROR)
+				if _launch_preflight_status != null:
+					_launch_preflight_status.text = preflight_message
+					_launch_preflight_status.visible = true
+				return
 			
 			if d.file_exists(launcher_path):
 				# Use cataclysm-launcher if available (like Linux)
@@ -1047,8 +1076,10 @@ func _refresh_currently_installed() -> void:
 
 	if game in _installs:
 		_lbl_build.text = active_name
-		_btn_play.disabled = false
-		_btn_resume.disabled = not (Directory.new().file_exists(Paths.config.plus_file("lastworld.json")))
+		var launch_preflight = _refresh_launch_preflight_status()
+		var launch_blocked = launch_preflight.get("blocks_launch", false)
+		_btn_play.disabled = launch_blocked
+		_btn_resume.disabled = launch_blocked or not (Directory.new().file_exists(Paths.config.plus_file("lastworld.json")))
 		_btn_game_dir.visible = true
 		_btn_user_dir.visible = true
 		if has_valid_selection:
@@ -1065,6 +1096,7 @@ func _refresh_currently_installed() -> void:
 
 	else:
 		_lbl_build.text = tr("lbl_none")
+		_clear_launch_preflight_status()
 		_btn_install.disabled = not has_download_url
 		_cb_update.disabled = true
 		_btn_play.disabled = true
@@ -1083,6 +1115,130 @@ func _refresh_currently_installed() -> void:
 	
 	_update_wiki_button()
 	_update_soundpack_tab_color()
+
+
+func _clear_launch_preflight_status() -> void:
+	if _launch_preflight_status != null:
+		_launch_preflight_status.text = ""
+		_launch_preflight_status.visible = false
+
+
+func _refresh_launch_preflight_status() -> Dictionary:
+	if _launch_preflight_status == null:
+		return {}
+	if Settings.read("game") != "caol" or OS.get_name() != "OSX":
+		_clear_launch_preflight_status()
+		return {"status": "skipped", "blocks_launch": false}
+
+	var preflight = _get_caol_macos_launch_preflight(Paths.game_dir)
+	_launch_preflight_status.text = _format_launch_preflight_status(preflight)
+	_launch_preflight_status.visible = _launch_preflight_status.text != ""
+	return preflight
+
+
+func _get_caol_macos_launch_preflight(game_dir: String) -> Dictionary:
+	var d = Directory.new()
+	var result = {
+		"status": "ok",
+		"blocks_launch": false,
+		"install_dir": game_dir,
+		"app_bundle_present": false,
+		"app_name": "",
+		"executable": "",
+		"missing_nonportable_dylibs": [],
+		"present_nonportable_dylibs": [],
+		"otool_exit_code": 0
+	}
+
+	if OS.get_name() != "OSX" or Settings.read("game") != "caol":
+		result["status"] = "skipped"
+		return result
+
+	if game_dir == "" or not d.dir_exists(game_dir):
+		result["status"] = "missing_install_dir"
+		result["blocks_launch"] = true
+		return result
+
+	var exe_info = _find_macos_executable(game_dir)
+	if exe_info.empty():
+		result["status"] = "missing_executable"
+		result["blocks_launch"] = true
+		return result
+
+	result["executable"] = exe_info.get("path", "")
+	result["app_bundle_present"] = exe_info.get("type", "") == "app_bundle"
+	result["app_name"] = exe_info.get("app_name", "")
+
+	var output = []
+	var exit_code = OS.execute("otool", ["-L", result["executable"]], true, output, true)
+	result["otool_exit_code"] = exit_code
+	if exit_code != 0:
+		result["status"] = "preflight_unavailable"
+		return result
+
+	var deps = _extract_nonportable_dylibs_from_otool(_join_text(output))
+	for dep in deps:
+		if d.file_exists(dep):
+			result["present_nonportable_dylibs"].append(dep)
+		else:
+			result["missing_nonportable_dylibs"].append(dep)
+
+	if result["missing_nonportable_dylibs"].size() > 0:
+		result["status"] = "blocked_missing_nonportable_dylibs"
+		result["blocks_launch"] = true
+	elif result["present_nonportable_dylibs"].size() > 0:
+		result["status"] = "nonportable_dylibs_present_locally"
+
+	return result
+
+
+func _extract_nonportable_dylibs_from_otool(otool_output: String) -> Array:
+	var deps = []
+	for raw_line in otool_output.split("\n"):
+		var line = raw_line.strip_edges()
+		if line == "" or line.ends_with(":"):
+			continue
+		var paren_index = line.find(" (")
+		var dep = line.substr(0, paren_index) if paren_index >= 0 else line
+		if not dep.begins_with("/") or dep.find(".dylib") == -1:
+			continue
+		for prefix in CAOL_NONPORTABLE_DYLIB_PREFIXES:
+			if dep.begins_with(prefix) and not deps.has(dep):
+				deps.append(dep)
+	return deps
+
+
+func _format_launch_preflight_status(preflight: Dictionary) -> String:
+	var status = preflight.get("status", "")
+	match status:
+		"skipped":
+			return ""
+		"missing_install_dir":
+			return "Launch preflight: active C-AOL install folder is missing. Reinstall or choose another install."
+		"missing_executable":
+			return "Launch preflight: active C-AOL install exists, but Lacapult could not find a game executable inside it."
+		"preflight_unavailable":
+			return "Launch preflight: active C-AOL install exists, but otool could not inspect the launch binary. Lacapult will still try to launch it."
+		"blocked_missing_nonportable_dylibs":
+			return "Launch preflight: Lacapult install/copy succeeded and %s is present, but %s needs missing local dylibs: %s. This is a C-AOL macOS package portability issue; Lacapult can report it, not repair it." % [_preflight_app_label(preflight), preflight.get("executable", "game executable").get_file(), _join_text(preflight.get("missing_nonportable_dylibs", []))]
+		"nonportable_dylibs_present_locally":
+			return "Launch preflight: C-AOL app bundle is present. The launch binary links local machine dylibs (%s); they exist here, but the package is not portable to clean Macs." % _join_text(preflight.get("present_nonportable_dylibs", []))
+		"ok":
+			return "Launch preflight: C-AOL install and %s are present; no missing non-portable local dylibs were found in %s." % [_preflight_app_label(preflight), preflight.get("executable", "game executable").get_file()]
+	return "Launch preflight: %s" % status
+
+
+func _preflight_app_label(preflight: Dictionary) -> String:
+	if preflight.get("app_bundle_present", false):
+		return preflight.get("app_name", "Cataclysm.app")
+	return "the game executable"
+
+
+func _join_text(items: Array) -> String:
+	var pool = PoolStringArray()
+	for item in items:
+		pool.append(str(item))
+	return pool.join(", ")
 
 
 func _on_InfoIcon_gui_input(event: InputEvent) -> void:
