@@ -131,3 +131,12 @@ The detailed one-shot installer direction lives in `doc/lacapult-one-shot-instal
 - `scripts/BackendConfigManager.gd` now uses a platform-aware `which`/`where` command lookup for Ollama instead of assuming a Unix shell helper on every platform.
 - When the Ollama command exists, the Godot-side detector runs `ollama list` as the cheap server/status probe. It reports `ollama_command_present_server_running` on success or `ollama_command_present_server_unreachable` when the command exists but the local server is not responding.
 - The probe does not pull models, install anything, call remote APIs, or log/store API secrets.
+
+## 2026-04-25 C-AOL backend option contract preview
+
+- `scripts/BackendConfigManager.gd` now includes a preview-only C-AOL options patch inside `caol_backend_setup.json` and writes the same patch separately as `caol_llm_options_patch.json`.
+- This is still a safe launcher-side artifact, not an installed-game mutation. It records the C-AOL `config/options.json` names Lacapult would set once an explicit apply step exists.
+- Current mapped option names are `LLM_INTENT_BACKEND`, `LLM_INTENT_OLLAMA_URL`, `LLM_INTENT_OLLAMA_MODEL`, `LLM_INTENT_API_KEY_ENV`, and `LLM_INTENT_API_MODEL`.
+- API mode stores `CATA_API_KEY` as the environment-variable name only; Lacapult still does not store API secrets.
+- `LLM_INTENT_ENABLE` is intentionally not changed by the preview patch. Enabling NPC LLM calls should remain a clear player/apply-step decision until the installer has a real installed-game config writer.
+- `tools/prove_caol_backend_contract.py` validates this mapping against a local C-AOL checkout without running Godot, mutating game config, using API secrets, pulling models, or downloading release archives.

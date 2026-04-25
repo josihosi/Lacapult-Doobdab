@@ -142,3 +142,14 @@ Before claiming v0 is done, Andi should record:
 - Static proof: `grep -n "top-level macOS app bundles\|not _looks_like_game_directory(target_dir)\|Cataclysm-AOL" scripts/ReleaseInstaller.gd` shows the new app-bundle root handling, final target guard, and C-AOL executable probes.
 - `git diff --check` passed.
 - Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are still unavailable on this Mac, so no GUI/project-load smoke was claimed.
+
+## Evidence - 2026-04-25 C-AOL backend option contract preview
+
+- Tightened `scripts/BackendConfigManager.gd` so saving API/Ollama backend setup now also writes a preview-only `caol_llm_options_patch.json` next to `caol_backend_setup.json`.
+- The preview patch uses real C-AOL option names discovered in the local C-AOL source: `LLM_INTENT_BACKEND`, `LLM_INTENT_OLLAMA_URL`, `LLM_INTENT_OLLAMA_MODEL`, `LLM_INTENT_API_KEY_ENV`, and `LLM_INTENT_API_MODEL`.
+- The patch is explicitly `preview_only_not_applied`; it does not mutate an installed game's `config/options.json` yet and does not flip `LLM_INTENT_ENABLE` without a future explicit apply step.
+- Added `tools/prove_caol_backend_contract.py` and ran it against `/Users/josefhorvath/Schanigarten/Cataclysm-AOL`; it proved the option names exist in `src/options.cpp`, Lacapult references them, no forbidden secret-bearing field tokens are present, and the patch remains preview-only.
+- Re-ran `python3 tools/prove_caol_release.py --all-platforms`; Linux, macOS, and Windows still produced installable v0.2.0 metadata without archive downloads.
+- Re-ran cheap Ollama detection: `command -v ollama` returned `/opt/homebrew/bin/ollama`; `ollama list` printed the local model table. No model pull, install, remote API call, or API secret was used.
+- Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are still unavailable on this Mac, so no GUI/project-load smoke was claimed.
+- `git diff --check` passed.

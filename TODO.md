@@ -28,6 +28,7 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
 4. First LLM backend setup options — first safe skeleton landed 2026-04-24; Settings surface landed 2026-04-25
    - [x] Add API as a selectable setup/config path without exposing secrets.
    - [x] Add Ollama as a selectable setup/config path with local command/server detection where safe.
+   - [x] Record preview-only C-AOL option patch names for API/Ollama (`LLM_INTENT_*`) without mutating installed game config.
    - [x] Keep OpenVINO parked/specialized unless a cheap placeholder/detection hook falls out naturally.
    - [x] Expose the backend setup selector/status/save path in the existing Settings tab without scene-node surgery.
 
@@ -39,6 +40,7 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
 6. Minimal validation
    - Prove release JSON parsing selects correct platform asset(s) from live C-AOL v0.2.0 releases.
    - Prove backend config/detection paths at static or safe local-detection level.
+   - Prove Lacapult backend option names against local C-AOL `src/options.cpp` without secrets or installed-game mutation.
    - Run the smallest Godot/static check available on this machine.
    - If full GUI launch is possible, smoke launch to the release list; otherwise record the exact missing tool/blocker.
 
