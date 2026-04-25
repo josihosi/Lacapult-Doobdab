@@ -15,10 +15,10 @@ It is derived from [Hihahahalol's Dabdoob / Catapult_Dabdoob](https://github.com
   - Windows: `_windows.zip`
   - macOS: `_macos.dmg` (with future tolerance for `_macos.tar.gz` / `_macos.zip`)
 - Reuse Dabdoob's install/update path while preserving saves, config, mods, soundpacks, and tilesets where possible.
-- Provide safe first-pass backend setup metadata for:
-  - API backend, without storing or logging secrets.
-  - Ollama backend, with local command/server detection and config guidance.
-  - OpenVINO backend, selectable in v0 with honest placeholder/status metadata only; full runtime setup is not automated yet.
+- Provide v0-safe backend setup/config/status for:
+  - API backend, storing provider/model/API-key env-var names only, checking Python/AnyLLM readiness without using secrets.
+  - Ollama backend, checking local command/server/model-list state without pulling models.
+  - OpenVINO backend, Windows-first for v0, checking Python imports/model-dir/device metadata without installing runtimes or downloading models.
 - Preserve inherited mod/soundpack/tileset support while C-AOL-specific compatibility work is investigated and clearly marked as supported, untested, broken, or unknown for C-AOL.
 
 ## Development status
@@ -36,6 +36,12 @@ Do not treat the raw Godot project or generated `.pck` files as user-facing inst
 Run `python3 tools/prove_lacapult_export_packaging.py` for the current local packaging proof. It exports Godot PCK packs plus real unsigned macOS/Linux/Windows app/executable artifacts into ignored `.proof-cache/` output, creates unsigned archive/package shapes, records sizes/hashes/shape checks in a manifest, and restores temporary export presets.
 
 As of the current local proof, Godot 3.6.2 plus installed export templates can assemble the cross-platform PCK packs and local unsigned app/package artifacts. Signing, notarization, GitHub release publication, upstream contact, OpenVINO runtime setup, model pulls, and API-secret smoke tests are separate decisions and are not performed by this proof.
+
+## Backend setup validation
+
+Run `python3 tools/prove_caol_backend_contract.py` for the current backend contract proof. It audits the local C-AOL checkout, verifies Lacapult's API/Ollama/OpenVINO option mapping, and writes sandbox copies of C-AOL `config/options.json` under `.proof-cache/caol-backend-contract/` for all three backend modes.
+
+Current local backend status: setup/config/status/apply-proof is good for v0; live readiness still depends on the user's environment. AnyLLM/API and Ollama/llama-family are intended to work on Windows/macOS/Linux when their dependencies are installed. OpenVINO is Windows-first for v0 and should be presented that way. This Mac currently has Ollama running, but the default Python is missing `any_llm` and OpenVINO packages, so API/OpenVINO need a configured Python/venv plus secrets/model files before live inference can honestly work.
 
 ## Credits
 

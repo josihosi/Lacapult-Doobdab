@@ -6,7 +6,7 @@ Short execution queue only.
 
 Active target: `Lacapult Doobdab v0.2.0 release installer plus first backend setup options`.
 
-Current checkpoint: local proof packet, first Godot GUI smoke, controlled selected-macOS-DMG mount/launchability-shape proof, sandboxed Lacapult-style DMG install-shape proof, Godot 3.6.2 project-load revalidation, a headless Godot `ReleaseInstaller.install_release()` pass, a full-scene Godot Install-button signal pass, a physical clicked GUI install pass against the selected cached macOS DMG, backend triad, first C-AOL mod compatibility inventory, per-mod C-AOL summarizer bridge report, read-only Settings status surfacing for that report, local Godot export-pack plus unsigned app/executable/package release-prep proof, and read-only C-AOL macOS launch preflight/status are complete as of 2026-04-25. The C-AOL game-launch smoke from an isolated installed app bundle remains blocked by the selected upstream C-AOL macOS app binary linking unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`. Do not sign/notarize, publish, solve full OpenVINO automation, patch upstream packaging, apply generated summary packs, or curate C-AOL mod downloads in this lane without fresh clearance.
+Current checkpoint: local proof packet, first Godot GUI smoke, controlled selected-macOS-DMG mount/launchability-shape proof, sandboxed Lacapult-style DMG install-shape proof, Godot 3.6.2 project-load revalidation, a headless Godot `ReleaseInstaller.install_release()` pass, a full-scene Godot Install-button signal pass, a physical clicked GUI install pass against the selected cached macOS DMG, backend triad with v0-safe readiness/config plus sandbox C-AOL options apply proof, first C-AOL mod compatibility inventory, per-mod C-AOL summarizer bridge report, read-only Settings status surfacing for that report, local Godot export-pack plus unsigned app/executable/package release-prep proof, and read-only C-AOL macOS launch preflight/status are complete as of 2026-04-25. The C-AOL game-launch smoke from an isolated installed app bundle remains blocked by the selected upstream C-AOL macOS app binary linking unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`. Do not sign/notarize, publish, solve full OpenVINO automation, patch upstream packaging, apply generated summary packs, or curate C-AOL mod downloads in this lane without fresh clearance.
 
 Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order. Lacapult's own cross-platform installability is part of the product bar: Windows/macOS/Linux users should be able to install/open the launcher without developer tooling. Keep that evidence separate from C-AOL game-package launchability.
 
@@ -31,9 +31,12 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - [x] Add API as a selectable setup/config path without exposing secrets.
    - [x] Add Ollama as a selectable setup/config path with local command/server detection where safe.
    - [x] Expose API, Ollama, and OpenVINO in the existing Settings-tab backend selector without scene-node surgery.
-   - [x] Record preview-only C-AOL option patch names for API/Ollama (`LLM_INTENT_*`) without mutating installed game config.
-   - [x] Make OpenVINO selection save/report an honest v0 placeholder/detection/status artifact instead of acting like a dead parked row.
-   - [x] Revalidate the selector/status/save behavior for all three backend choices with a headless Godot backend-triad smoke.
+   - [x] Record preview-only C-AOL option patch names for API/Ollama/OpenVINO (`LLM_INTENT_*`) without mutating installed game config.
+   - [x] Make OpenVINO selection save/report honest v0 detection/config/status metadata instead of acting like a dead parked row.
+   - [x] Surface the shared `LLM_INTENT_PYTHON` runner path honestly as Python/venv for every backend, not just as an OpenVINO wording accident.
+   - [x] Add safe readiness checks for API/AnyLLM Python imports, Ollama command/server/model-list state, and Windows-first OpenVINO Python imports/model-dir presence.
+   - [x] Prove sandboxed C-AOL `config/options.json` apply output for API, Ollama, and OpenVINO without touching Josef's real Application Support config.
+   - [x] Revalidate the selector/status/save/apply-proof behavior for all three backend choices with a headless Godot backend-triad smoke.
 
 5. Modding compatibility investigation — active follow-up
    - [x] Preserve inherited mod/soundpack/tileset support.
@@ -57,9 +60,9 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - [ ] Signed/notarized/public Lacapult release publication and normal-player install QA remain separate release decisions.
    - [x] C-AOL game-launch smoke from an isolated installed app bundle attempted; sandbox install still succeeds, but actual game startup aborts before running because the selected macOS binary depends on unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`.
    - [x] Launcher-side read-only C-AOL macOS launch preflight/status added; it distinguishes successful Lacapult install/app-bundle presence from missing non-portable upstream dylib dependencies and blocks Play/Resume with an explanatory status instead of launching into an abort.
-   - OpenVINO full setup/installer automation beyond selectable v0 status metadata.
+   - OpenVINO full setup/installer automation beyond v0-safe detection/config/status metadata.
    - Real model install/model-pull automation.
    - C-AOL-specific mod/soundpack/tileset recommendation packs.
-   - Generated summary-pack install/apply flow after the read-only report status surface.
-   - NPC/LLM runtime integration of mod summaries.
+   - Feature-complete mod install/enable plus Summarizer UX after the read-only report status surface: post-mod-install Summarizer button/pop-up, extra NPC/content summary status, generation/apply status, and sandbox-proven C-AOL-native `Summaries_short` / `Summaries_extra` application.
+   - NPC/LLM runtime integration proof that active mod summaries are consumed by C-AOL, with schema/runtime behavior kept on the C-AOL side and Lacapult acting as UX/status/apply helper.
    - Public GitHub push/release publication, only after explicit clearance.

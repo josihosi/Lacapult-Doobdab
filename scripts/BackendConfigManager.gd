@@ -1,7 +1,8 @@
 extends Node
 
 # Safe first-pass backend setup helper for C-AOL.
-# This deliberately writes only launcher-side metadata and never stores API keys.
+# This deliberately stores launcher-side metadata and environment-variable names,
+# never API keys. Installed-game options writes are proof-only/sandbox-guarded in v0.
 
 const BACKEND_API = "api"
 const BACKEND_OLLAMA = "ollama"
@@ -9,28 +10,62 @@ const BACKEND_OPENVINO = "openvino"
 const BACKEND_CONFIG_FILENAME = "caol_backend_setup.json"
 const C_AOL_OPTIONS_PATCH_FILENAME = "caol_llm_options_patch.json"
 
+const DEFAULT_API_PROVIDER = "openai"
+const DEFAULT_API_KEY_ENV = "CATA_API_KEY"
+const DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
+const DEFAULT_OPENVINO_DEVICE = "AUTO"
+
 func get_supported_backends() -> Array:
+	var python_path = _setting_or_default("backend_python_path", "")
+	var api_model = _setting_or_default("backend_api_model", "")
+	var api_provider = _setting_or_default("backend_api_provider", DEFAULT_API_PROVIDER)
+	var api_key_env = _setting_or_default("backend_api_key_env", DEFAULT_API_KEY_ENV)
+	var ollama_endpoint = _setting_or_default("backend_ollama_endpoint", DEFAULT_OLLAMA_URL)
+	var ollama_model = _setting_or_default("backend_ollama_model", "")
+	var openvino_model_dir = _setting_or_default("backend_openvino_model_dir", "")
+	var openvino_device = _setting_or_default("backend_openvino_device", DEFAULT_OPENVINO_DEVICE)
 	return [
 		{
 			"id": BACKEND_API,
 			"label": "API backend",
-			"status": "configurable",
-			"secrets_policy": "Do not store or log API keys in Lacapult v0."
+			"status": _detect_api_status(python_path, api_provider, api_model, api_key_env),
+			"guidance": get_backend_guidance(BACKEND_API),
+			"python_path": python_path,
+			"api_provider": api_provider,
+			"api_key_env": api_key_env,
+			"secrets_policy": "Do not store or log API keys in Lacapult v0. Only the env-var name is stored."
 		},
 		{
 			"id": BACKEND_OLLAMA,
 			"label": "Ollama backend",
-			"status": _detect_ollama_status(),
-			"endpoint": Settings.read("backend_ollama_endpoint")
+			"status": _detect_ollama_status(ollama_endpoint, ollama_model),
+			"guidance": get_backend_guidance(BACKEND_OLLAMA),
+			"endpoint": ollama_endpoint,
+			"model": ollama_model,
+			"python_path": python_path
 		},
 		{
 			"id": BACKEND_OPENVINO,
 			"label": "OpenVINO backend",
-			"status": _detect_openvino_status()
+			"status": _detect_openvino_status(python_path, openvino_model_dir),
+			"guidance": get_backend_guidance(BACKEND_OPENVINO),
+			"python_path": python_path,
+			"model_dir": openvino_model_dir,
+			"device": openvino_device
 		},
 	]
 
-func write_launcher_backend_config(mode: String, endpoint: String = "", model: String = "") -> String:
+func get_backend_guidance(mode: String) -> String:
+	if mode == BACKEND_API:
+		return "Install Python plus the AnyLLM package/provider extra in the Python/venv selected here; set the named API-key environment variable outside Lacapult. Lacapult can check imports and env-var presence, but never reads or stores the secret."
+	if mode == BACKEND_OLLAMA:
+		return "Install Ollama for this OS, start the local server, and select a model already present in `ollama list`. Lacapult checks presence only and will not pull models without permission."
+	if mode == BACKEND_OPENVINO:
+		return "OpenVINO is Windows-first for Lacapult v0. Select a Windows Python/venv with OpenVINO packages and a local model directory; Lacapult checks imports/model path but does not install runtimes or download models."
+	return "Unsupported backend."
+
+
+func write_launcher_backend_config(mode: String, endpoint: String = "", model: String = "", python_path: String = "", api_provider: String = DEFAULT_API_PROVIDER, api_key_env: String = DEFAULT_API_KEY_ENV, openvino_model_dir: String = "", openvino_device: String = DEFAULT_OPENVINO_DEVICE) -> String:
 	if not mode in [BACKEND_API, BACKEND_OLLAMA, BACKEND_OPENVINO]:
 		return "unsupported_backend"
 
@@ -40,22 +75,25 @@ func write_launcher_backend_config(mode: String, endpoint: String = "", model: S
 		if err != OK:
 			return "config_dir_error_%s" % err
 
-	var status = "configured_without_secret"
-	if mode == BACKEND_OLLAMA:
-		status = _detect_ollama_status()
-	elif mode == BACKEND_OPENVINO:
-		status = _detect_openvino_status()
-
+	var normalized = _normalize_backend_fields(mode, endpoint, model, python_path, api_provider, api_key_env, openvino_model_dir, openvino_device)
+	var status = _detect_backend_status(mode, normalized)
+	var options_patch = _build_caol_options_patch(mode, normalized)
 	var safe_config = {
 		"backend": mode,
 		"status": status,
-		"endpoint": "" if mode == BACKEND_OPENVINO else endpoint,
-		"model": "" if mode == BACKEND_OPENVINO else model,
+		"readiness": status,
+		"endpoint": normalized.get("endpoint", ""),
+		"model": normalized.get("model", ""),
+		"python_path": normalized.get("python_path", ""),
+		"api_provider": normalized.get("api_provider", DEFAULT_API_PROVIDER),
+		"api_key_env": normalized.get("api_key_env", DEFAULT_API_KEY_ENV),
+		"openvino_model_dir": normalized.get("openvino_model_dir", ""),
+		"openvino_device": normalized.get("openvino_device", DEFAULT_OPENVINO_DEVICE),
 		"last_check": OS.get_datetime(),
 		"notes": _backend_notes(mode),
-		"caol_options_patch": _build_caol_options_patch(mode, endpoint, model)
+		"guidance": get_backend_guidance(mode),
+		"caol_options_patch": options_patch
 	}
-	var options_patch = safe_config["caol_options_patch"]
 	if not Helpers.save_to_json_file(safe_config, Paths.config.plus_file(BACKEND_CONFIG_FILENAME)):
 		return "config_write_error"
 	if not Helpers.save_to_json_file(options_patch, Paths.config.plus_file(C_AOL_OPTIONS_PATCH_FILENAME)):
@@ -63,12 +101,44 @@ func write_launcher_backend_config(mode: String, endpoint: String = "", model: S
 	return "ok"
 
 
-func _build_caol_options_patch(mode: String, endpoint: String, model: String) -> Dictionary:
+func write_sandboxed_options_config(options_path: String, mode: String, endpoint: String = "", model: String = "", python_path: String = "", api_provider: String = DEFAULT_API_PROVIDER, api_key_env: String = DEFAULT_API_KEY_ENV, openvino_model_dir: String = "", openvino_device: String = DEFAULT_OPENVINO_DEVICE) -> String:
+	# v0 guardrail: this is for repeatable proofs only. The UI does not call it,
+	# and it refuses normal-looking user/Application Support paths.
+	if not _is_sandbox_options_path(options_path):
+		return "unsafe_options_path_refused"
+	var normalized = _normalize_backend_fields(mode, endpoint, model, python_path, api_provider, api_key_env, openvino_model_dir, openvino_device)
+	var patch = _build_caol_options_patch(mode, normalized)
+	return _apply_options_patch_to_file(options_path, patch)
+
+
+func _normalize_backend_fields(mode: String, endpoint: String, model: String, python_path: String, api_provider: String, api_key_env: String, openvino_model_dir: String, openvino_device: String) -> Dictionary:
+	var normalized = {
+		"endpoint": endpoint.strip_edges(),
+		"model": model.strip_edges(),
+		"python_path": python_path.strip_edges(),
+		"api_provider": api_provider.strip_edges() if api_provider.strip_edges() != "" else DEFAULT_API_PROVIDER,
+		"api_key_env": api_key_env.strip_edges() if api_key_env.strip_edges() != "" else DEFAULT_API_KEY_ENV,
+		"openvino_model_dir": openvino_model_dir.strip_edges(),
+		"openvino_device": openvino_device.strip_edges().to_upper() if openvino_device.strip_edges() != "" else DEFAULT_OPENVINO_DEVICE
+	}
+	if mode == BACKEND_OLLAMA and normalized["endpoint"] == "":
+		normalized["endpoint"] = DEFAULT_OLLAMA_URL
+	if mode == BACKEND_OPENVINO:
+		normalized["endpoint"] = ""
+		normalized["model"] = ""
+	return normalized
+
+
+func _build_caol_options_patch(mode: String, fields: Dictionary) -> Dictionary:
 	var patch = {
 		"format": "c-aol-options-patch-v1",
 		"source": "Lacapult Doobdab",
 		"apply_status": "preview_only_not_applied",
-		"notes": "These are the C-AOL option names Lacapult would set after an installed game config path is chosen. API keys are referenced by environment variable only, never stored here. LLM_INTENT_ENABLE is intentionally left for the player/game UI until Lacapult has an explicit apply step.",
+		"notes": "These are the C-AOL option names Lacapult can set once an installed game config path is chosen. API keys are referenced by environment variable only, never stored here. LLM_INTENT_ENABLE is intentionally left for the player/game UI until Lacapult has an explicit apply step. LLM_INTENT_PYTHON is the shared Python/venv path used by C-AOL to launch tools/llm_runner/runner.py, not only OpenVINO.",
+		"metadata_only": {
+			"api_provider": fields.get("api_provider", DEFAULT_API_PROVIDER),
+			"api_provider_note": "C-AOL's current runtime path hardcodes openai in src/llm_intent.cpp; Lacapult stores provider intent without storing secrets."
+		},
 		"options": [
 			{
 				"name": "LLM_INTENT_BACKEND",
@@ -78,49 +148,124 @@ func _build_caol_options_patch(mode: String, endpoint: String, model: String) ->
 		]
 	}
 
+	if fields.get("python_path", "") != "":
+		patch["options"].append({
+			"name": "LLM_INTENT_PYTHON",
+			"value": fields.get("python_path", ""),
+			"reason": "Python executable or venv path used to launch C-AOL's tools/llm_runner/runner.py for every backend."
+		})
+
 	if mode == BACKEND_API:
 		patch["options"].append({
 			"name": "LLM_INTENT_API_KEY_ENV",
-			"value": "CATA_API_KEY",
+			"value": fields.get("api_key_env", DEFAULT_API_KEY_ENV),
 			"reason": "C-AOL reads the API key from this environment variable; Lacapult v0 does not store the secret."
 		})
-		if model.strip_edges() != "":
+		if fields.get("model", "") != "":
 			patch["options"].append({
 				"name": "LLM_INTENT_API_MODEL",
-				"value": model,
+				"value": fields.get("model", ""),
 				"reason": "Selected API model name."
 			})
 	elif mode == BACKEND_OLLAMA:
 		patch["options"].append({
 			"name": "LLM_INTENT_OLLAMA_URL",
-			"value": endpoint if endpoint.strip_edges() != "" else "http://127.0.0.1:11434",
+			"value": fields.get("endpoint", DEFAULT_OLLAMA_URL),
 			"reason": "Local Ollama server URL."
 		})
-		if model.strip_edges() != "":
+		if fields.get("model", "") != "":
 			patch["options"].append({
 				"name": "LLM_INTENT_OLLAMA_MODEL",
-				"value": model,
+				"value": fields.get("model", ""),
 				"reason": "Selected Ollama model tag."
 			})
+	elif mode == BACKEND_OPENVINO:
+		if fields.get("openvino_model_dir", "") != "":
+			patch["options"].append({
+				"name": "LLM_INTENT_MODEL_DIR",
+				"value": fields.get("openvino_model_dir", ""),
+				"reason": "OpenVINO model directory. Lacapult v0 detects this path but does not download models."
+			})
+		patch["options"].append({
+			"name": "LLM_INTENT_DEVICE",
+			"value": fields.get("openvino_device", DEFAULT_OPENVINO_DEVICE),
+			"reason": "OpenVINO target device. Lacapult v0 does not install runtimes or force hardware choices."
+		})
 
 	return patch
 
 func _backend_notes(mode: String) -> String:
+	if mode == BACKEND_API:
+		return "API setup checks the configured/default Python can import any_llm without using API secrets. Lacapult stores provider/model/env-var names only."
+	if mode == BACKEND_OLLAMA:
+		return "Ollama setup checks command/server/model-list readiness without pulling models. C-AOL still launches runner.py through Python."
 	if mode == BACKEND_OPENVINO:
-		return "OpenVINO is selectable in Lacapult v0, but full setup automation is not implemented yet. This file records the user's intent without installing runtimes or pulling models."
-	return "Launcher-side C-AOL backend setup metadata. API secrets are intentionally not stored here."
+		return "OpenVINO setup is Windows-first for Lacapult v0 and checks Python imports/model-dir presence only. It does not install runtimes or download models."
+	return "Launcher-side C-AOL backend setup metadata."
 
 
-func _detect_openvino_status() -> String:
-	var output = []
-	var command_lookup = "where" if OS.get_name() == "Windows" else "which"
-	var exit_code = OS.execute(command_lookup, ["openvino"], true, output, true)
-	if exit_code == 0:
-		return "openvino_command_present_setup_not_automated"
-	return "openvino_selectable_setup_not_automated"
+func _detect_backend_status(mode: String, fields: Dictionary) -> String:
+	if mode == BACKEND_API:
+		return _detect_api_status(fields.get("python_path", ""), fields.get("api_provider", DEFAULT_API_PROVIDER), fields.get("model", ""), fields.get("api_key_env", DEFAULT_API_KEY_ENV))
+	if mode == BACKEND_OLLAMA:
+		return _detect_ollama_status(fields.get("endpoint", DEFAULT_OLLAMA_URL), fields.get("model", ""))
+	if mode == BACKEND_OPENVINO:
+		return _detect_openvino_status(fields.get("python_path", ""), fields.get("openvino_model_dir", ""))
+	return "unsupported_backend"
 
 
-func _detect_ollama_status() -> String:
+func _detect_api_status(python_path: String, provider: String, model: String, api_key_env: String) -> String:
+	var py = _resolve_python(python_path)
+	if not py.get("ok", false):
+		return "api_python_missing_runner_requires_python"
+	var import_status = _python_import_status(py.get("command", ""), ["any_llm"])
+	if import_status != "imports_ok":
+		return "api_python_ready_any_llm_missing_%s" % import_status
+	var parts = ["api_python_ready_any_llm_import_ok"]
+	if provider.strip_edges() == "":
+		parts.append("provider_missing")
+	else:
+		parts.append("provider_%s" % provider.strip_edges())
+	if model.strip_edges() == "":
+		parts.append("model_missing")
+	else:
+		parts.append("model_configured")
+	if api_key_env.strip_edges() == "":
+		parts.append("api_key_env_missing")
+	elif OS.get_environment(api_key_env.strip_edges()) == "":
+		parts.append("api_key_env_not_set_no_secret_used")
+	else:
+		parts.append("api_key_env_present_secret_not_read")
+	return "_".join(parts)
+
+
+func _detect_openvino_status(python_path: String, model_dir: String = "") -> String:
+	var py = _resolve_python(python_path)
+	if not py.get("ok", false):
+		return "openvino_python_missing_runner_requires_python"
+	var import_status = _python_import_status(py.get("command", ""), ["openvino", "openvino_genai"])
+	var parts = []
+	if OS.get_name() != "Windows":
+		parts.append("openvino_v0_windows_first_non_windows_detect_only")
+	else:
+		parts.append("openvino_v0_windows_target")
+	parts.append("python_ready_%s" % import_status)
+	if _python_import_status(py.get("command", ""), ["openvino_tokenizers"]) == "imports_ok":
+		parts.append("tokenizers_present")
+	else:
+		parts.append("tokenizers_missing_or_packaged_differently")
+	if model_dir.strip_edges() == "":
+		parts.append("model_dir_missing")
+	else:
+		var d = Directory.new()
+		if d.dir_exists(model_dir.strip_edges()):
+			parts.append("model_dir_present")
+		else:
+			parts.append("model_dir_missing")
+	return "_".join(parts)
+
+
+func _detect_ollama_status(ollama_url: String = DEFAULT_OLLAMA_URL, model: String = "") -> String:
 	var output = []
 	var command_lookup = "where" if OS.get_name() == "Windows" else "which"
 	var exit_code = OS.execute(command_lookup, ["ollama"], true, output, true)
@@ -129,6 +274,85 @@ func _detect_ollama_status() -> String:
 
 	output.clear()
 	exit_code = OS.execute("ollama", ["list"], true, output, true)
+	if exit_code != 0:
+		return "ollama_command_present_server_unreachable"
+	if model.strip_edges() == "":
+		return "ollama_command_present_server_running_model_not_selected"
+	var list_text = "\n".join(output)
+	if list_text.find(model.strip_edges()) >= 0:
+		return "ollama_command_present_server_running_model_present"
+	return "ollama_command_present_server_running_model_missing_no_pull_attempted"
+
+
+func _resolve_python(python_path: String) -> Dictionary:
+	var candidates = []
+	if python_path.strip_edges() != "":
+		candidates.append(python_path.strip_edges())
+	else:
+		if OS.get_name() == "Windows":
+			candidates = ["python", "py"]
+		else:
+			candidates = ["python3", "python"]
+	for candidate in candidates:
+		var output = []
+		var exit_code = OS.execute(candidate, ["-c", "import sys; print(sys.executable)"], true, output, true)
+		if exit_code == 0:
+			return {"ok": true, "command": candidate, "executable": "\n".join(output).strip_edges()}
+	return {"ok": false, "command": "", "executable": ""}
+
+
+func _python_import_status(python_command: String, modules: Array) -> String:
+	if python_command == "":
+		return "python_missing"
+	var output = []
+	var code = "import importlib.util, sys\nmissing=[m for m in sys.argv[1:] if importlib.util.find_spec(m) is None]\nprint('missing=' + ','.join(missing))\nsys.exit(1 if missing else 0)"
+	var args = ["-c", code]
+	args.append_array(modules)
+	var exit_code = OS.execute(python_command, args, true, output, true)
 	if exit_code == 0:
-		return "ollama_command_present_server_running"
-	return "ollama_command_present_server_unreachable"
+		return "imports_ok"
+	var text = "\n".join(output).strip_edges()
+	if text.find("missing=") >= 0:
+		return text.replace("missing=", "missing_").replace(",", "_")
+	return "imports_failed"
+
+
+func _apply_options_patch_to_file(options_path: String, patch: Dictionary) -> String:
+	var options = Helpers.load_json_file(options_path)
+	if typeof(options) != TYPE_ARRAY:
+		return "options_json_not_array"
+	var changed = 0
+	for patch_option in patch.get("options", []):
+		var option_name = patch_option.get("name", "")
+		var option_value = str(patch_option.get("value", ""))
+		if option_name == "":
+			continue
+		var found = false
+		for option in options:
+			if typeof(option) == TYPE_DICTIONARY and option.get("name", "") == option_name:
+				option["value"] = option_value
+				changed += 1
+				found = true
+				break
+		if not found:
+			options.append({
+				"name": option_name,
+				"value": option_value,
+				"info": "Added by Lacapult sandbox backend proof from %s." % patch.get("source", "Lacapult Doobdab")
+			})
+			changed += 1
+	if not Helpers.save_to_json_file(options, options_path):
+		return "options_write_error"
+	return "ok_changed_%s" % changed
+
+
+func _is_sandbox_options_path(path: String) -> bool:
+	var p = path.replace("\\", "/")
+	return p.find("/.proof-cache/") >= 0 or p.find("/tmp/") == 0 or p.find("sandbox") >= 0
+
+
+func _setting_or_default(name: String, default_value: String) -> String:
+	var value = Settings.read(name)
+	if value == null:
+		return default_value
+	return str(value)

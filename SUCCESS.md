@@ -4,7 +4,7 @@ Success-state ledger for Lacapult Doobdab.
 
 ## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-Status: **CLICKED INSTALL + BACKEND TRIAD + MOD UI STATUS + LOCAL UNSIGNED APP/PACKAGE EXPORTS PROVEN + LAUNCH PREFLIGHT STATUS PROVEN / GAME-LAUNCH BLOCKED ON C-AOL DYLIBS / SIGNING+PUBLIC RELEASE NOT CLAIMED**
+Status: **CLICKED INSTALL + BACKEND TRIAD V0-SAFE CONFIG/READINESS + SANDBOX OPTIONS APPLY PROVEN + MOD UI STATUS + LOCAL UNSIGNED APP/PACKAGE EXPORTS PROVEN + LAUNCH PREFLIGHT STATUS PROVEN / GAME-LAUNCH BLOCKED ON C-AOL DYLIBS / SIGNING+PUBLIC RELEASE NOT CLAIMED**
 
 Done only when all are true:
 
@@ -19,11 +19,13 @@ Done only when all are true:
 - [x] Platform filters select current C-AOL `v0.2.0` release assets for Linux (`_linux.tar.gz`), macOS (`_macos.dmg`), and Windows (`_windows.zip`).
 - [x] Installer receives valid metadata (`name`, `url`, `filename`, `published_at`, `has_any_assets`) for at least one real C-AOL `v0.2.0` release asset.
 - [x] Launch/install paths know plausible C-AOL executable names for the current platform.
-- [x] API backend appears as a first supported setup/config option without leaking secrets.
-- [x] Ollama backend appears as a first supported setup/config option with safe local detection or a recorded blocker.
-- [x] Backend setup has a visible Settings-tab selector/status/save path.
+- [x] API backend appears as a first supported setup/config option without leaking secrets; Lacapult stores provider/model/API-key env-var names only.
+- [x] API readiness checks the configured/default Python path for `any_llm` importability without making remote calls or reading API secrets.
+- [x] Ollama backend appears as a first supported setup/config option with safe command/server/model-list detection and no model pulls.
+- [x] Backend setup has a visible Settings-tab selector/status/save path, including the shared C-AOL Python/venv runner path.
 - [x] API, Ollama, and OpenVINO are visible as backend choices.
-- [x] OpenVINO selection saves/reports an honest v0 placeholder/detection/status artifact without pretending full setup exists.
+- [x] OpenVINO selection saves/reports honest v0 Windows-first Python-import/model-dir/device detection/config metadata without pretending runtime install/download/live inference exists.
+- [x] Sandboxed C-AOL `config/options.json` apply proof verifies API, Ollama, and OpenVINO option patches without mutating Josef's real C-AOL Application Support config.
 - [x] Inherited mod/soundpack/tileset support is preserved or any temporary breakage is documented.
 - [x] First C-AOL mod compatibility / future NPC-summary investigation note exists.
 - [x] C-AOL mod compatibility investigation records inherited source assumptions and marks first useful compatibility statuses as supported, untested, broken, or unknown.
@@ -39,11 +41,11 @@ Done only when all are true:
 
 These are not part of v0 unless Josef/Schani explicitly reopens them:
 
-- [ ] OpenVINO full setup path beyond selectable v0 status metadata.
+- [ ] OpenVINO full setup path beyond v0-safe detection/config/status metadata.
 - [ ] Large model download/model-pull automation.
 - [ ] API-key/backend live smoke test requiring real secrets.
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.
-- [ ] Generated-summary-pack application flow; the current Settings surface is read-only and does not apply packs or enable mods.
+- [ ] Feature-complete mod install/enable plus Summarizer UX; after mod install/enable, Lacapult should offer a Summarizer button/pop-up, show whether extra NPC/content summaries exist, handle generation/apply status, and write C-AOL-native `Summaries_short` / `Summaries_extra` data through a sandbox-proven flow. The current Settings surface is read-only and does not apply packs or enable mods.
 - [ ] NPC/LLM runtime consumption of mod compatibility summaries.
 - [x] Controlled selected macOS DMG download/mount/launchability-shape proof, without launching or installing the game.
 - [x] Sandboxed Lacapult-style macOS DMG copy/move install-shape proof, without touching the real Application Support install state or launching the game.

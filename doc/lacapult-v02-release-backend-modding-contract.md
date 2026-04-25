@@ -38,7 +38,7 @@ The visible backend selector has three choices, with v0 honesty about capability
    - Offer setup guidance and config-writing first; only automate install if the safe platform-specific path is clear.
 3. **OpenVINO backend**
    - Selectable third option in the UI.
-   - v0 should save/report an honest placeholder, detection, or status artifact if feasible.
+   - v0 should save/report honest Windows-first detection/config/status metadata if feasible.
    - Full OpenVINO setup/installer automation remains later.
 
 ### Modding support
@@ -52,7 +52,7 @@ The visible backend selector has three choices, with v0 honesty about capability
 
 - Public repo exists at `https://github.com/josihosi/Lacapult-Doobdab`, but do not push, publish releases, or contact upstream without fresh explicit clearance.
 - Do not attempt all three backend installers before v0.2.0 release installation works.
-- Do not fully solve OpenVINO in this slice; make it selectable and honest, not fake-complete.
+- Do not fully solve OpenVINO in this slice; make it selectable, Windows-first, and honest, not fake-complete.
 - Do not promise automatic Ollama installation unless the path is safe and verified.
 - Do not rewrite all inherited mod infrastructure before proving the release installer.
 - Do not make NPC summary generation part of the installer v0; only define the compatibility-summary direction.
@@ -65,7 +65,7 @@ Done when:
 - At least one v0.2.0 asset produces valid installer metadata.
 - The launcher is C-AOL-specific in visible identity and defaults.
 - API, Ollama, and OpenVINO appear as the visible backend choices in canon and UI.
-- API/Ollama have safe config/status paths; OpenVINO has an honest selectable placeholder/detection/status path without pretending full setup exists.
+- API/Ollama have safe config/status paths; OpenVINO has an honest selectable Windows-first detection/config/status path without pretending full setup exists.
 - Inherited modding support is not accidentally broken by C-AOL-only changes.
 - The mod-compatibility/NPC-summary investigation records inherited sources, C-AOL assumptions, and next proof needs without pretending runtime NPC integration exists.
 
@@ -85,6 +85,30 @@ Needed:
 Sequence the work:
 1. Get v0.2.0 release listing/filter/install metadata working.
 2. Rebrand and C-AOL-only defaults enough that the launcher surface is honest.
-3. Add API + Ollama backend setup plan/stub/config path, and keep OpenVINO visible as the third selectable v0-honest option.
+3. Add API + Ollama backend setup plan/stub/config path, and keep OpenVINO visible as the third selectable Windows-first v0-honest option.
 4. Inspect inherited mod support deeply enough to mark C-AOL compatibility assumptions and next proof needs.
 5. Park full OpenVINO automation and deeper mod/NPC runtime integration as next slices unless explicitly reopened.
+
+## 2026-04-25 backend-good hardening result
+
+The backend slice has moved from a nice-looking triad selector to a v0-safe setup/config/status path.
+
+Now proven:
+
+- API, Ollama, and OpenVINO all write launcher-side backend metadata and C-AOL `LLM_INTENT_*` option patches.
+- API stores provider/model/API-key env-var names only; Lacapult does not store API secrets or make live API calls in the proof.
+- API readiness checks the configured/default Python for `any_llm` importability.
+- Ollama readiness checks command presence, server/list response, and whether a configured model appears in the local list; it does not pull models.
+- OpenVINO readiness is Windows-first for v0 and checks Python imports, tokenizers presence where detectable, model-dir presence, and device metadata; it does not install runtimes or download models.
+- A sandbox-guarded options writer applies generated patches to copied C-AOL `config/options.json` files for all three backends under isolated proof paths.
+
+Still not solved / later lanes:
+
+- Live API smoke with real secrets.
+- Installing `any_llm`/provider extras for the user.
+- Pulling Ollama models.
+- Installing OpenVINO runtimes or downloading/converting OpenVINO models.
+- C-AOL runtime consumption of arbitrary AnyLLM providers; the current C-AOL runtime path still hardcodes provider `openai` even though Lacapult stores provider intent.
+- Mutating Josef's real installed C-AOL config from the launcher UI.
+
+Modding remains separate: current Lacapult modding status is read-only packaged-mod inventory plus C-AOL-native summary-root guidance. The next bounded modding-good lane should be feature-complete UX, not a hidden metadata trick: after mod install/enable, Lacapult should offer a Summarizer button/pop-up, show whether extra NPC/content summaries exist, track generation/apply status, write/apply C-AOL-native `Summaries_short` / `Summaries_extra` data, and prove C-AOL runtime summary loading sees it in a sandbox. Schema/runtime behavior stays on the C-AOL side; Lacapult is the UX/status/apply helper. Do not mix that with the current backend hardening lane, because the soup is already trying to become architecture.

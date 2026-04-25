@@ -15,8 +15,12 @@ var _proxy_options := ["off", "on", "download"]
 var _backend_modes := ["api", "ollama", "openvino"]
 
 var _backend_mode_button: OptionButton = null
+var _backend_endpoint_label: Label = null
 var _backend_endpoint: LineEdit = null
+var _backend_model_label: Label = null
 var _backend_model: LineEdit = null
+var _backend_python_path: LineEdit = null
+var _backend_api_key_env: LineEdit = null
 var _backend_status: Label = null
 var _caol_mod_bridge_status: Label = null
 
@@ -104,10 +108,10 @@ func _add_backend_setup_controls() -> void:
 	var endpoint_row = HBoxContainer.new()
 	endpoint_row.name = "BackendEndpoint"
 	section.add_child(endpoint_row)
-	var endpoint_label = Label.new()
-	endpoint_label.text = "Endpoint"
-	endpoint_label.size_flags_horizontal = SIZE_EXPAND_FILL
-	endpoint_row.add_child(endpoint_label)
+	_backend_endpoint_label = Label.new()
+	_backend_endpoint_label.text = "Endpoint"
+	_backend_endpoint_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	endpoint_row.add_child(_backend_endpoint_label)
 	_backend_endpoint = LineEdit.new()
 	_backend_endpoint.rect_min_size = Vector2(260, 0)
 	_backend_endpoint.placeholder_text = "API base URL or http://127.0.0.1:11434"
@@ -118,16 +122,44 @@ func _add_backend_setup_controls() -> void:
 	var model_row = HBoxContainer.new()
 	model_row.name = "BackendModel"
 	section.add_child(model_row)
-	var model_label = Label.new()
-	model_label.text = "Model"
-	model_label.size_flags_horizontal = SIZE_EXPAND_FILL
-	model_row.add_child(model_label)
+	_backend_model_label = Label.new()
+	_backend_model_label.text = "Model"
+	_backend_model_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	model_row.add_child(_backend_model_label)
 	_backend_model = LineEdit.new()
 	_backend_model.rect_min_size = Vector2(260, 0)
 	_backend_model.placeholder_text = "Optional model name"
 	_backend_model.size_flags_horizontal = SIZE_EXPAND_FILL
 	_backend_model.connect("text_changed", self, "_on_BackendModel_text_changed")
 	model_row.add_child(_backend_model)
+
+	var python_row = HBoxContainer.new()
+	python_row.name = "BackendPython"
+	section.add_child(python_row)
+	var python_label = Label.new()
+	python_label.text = "Python / venv"
+	python_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	python_row.add_child(python_label)
+	_backend_python_path = LineEdit.new()
+	_backend_python_path.rect_min_size = Vector2(260, 0)
+	_backend_python_path.placeholder_text = "Optional Python executable or venv path for C-AOL runner.py"
+	_backend_python_path.size_flags_horizontal = SIZE_EXPAND_FILL
+	_backend_python_path.connect("text_changed", self, "_on_BackendPython_text_changed")
+	python_row.add_child(_backend_python_path)
+
+	var api_env_row = HBoxContainer.new()
+	api_env_row.name = "BackendApiKeyEnv"
+	section.add_child(api_env_row)
+	var api_env_label = Label.new()
+	api_env_label.text = "API key env"
+	api_env_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	api_env_row.add_child(api_env_label)
+	_backend_api_key_env = LineEdit.new()
+	_backend_api_key_env.rect_min_size = Vector2(260, 0)
+	_backend_api_key_env.placeholder_text = "CATA_API_KEY"
+	_backend_api_key_env.size_flags_horizontal = SIZE_EXPAND_FILL
+	_backend_api_key_env.connect("text_changed", self, "_on_BackendApiKeyEnv_text_changed")
+	api_env_row.add_child(_backend_api_key_env)
 
 	_backend_status = Label.new()
 	_backend_status.autowrap = true
@@ -189,20 +221,48 @@ func _refresh_backend_setup_controls() -> void:
 		mode = _backend_modes[mode_idx]
 	_backend_mode_button.select(mode_idx)
 
-	var endpoint_setting = "backend_api_endpoint" if mode == "api" else "backend_ollama_endpoint"
-	var model_setting = "backend_api_model" if mode == "api" else "backend_ollama_model"
-	_backend_endpoint.text = "" if mode == "openvino" else Settings.read(endpoint_setting)
-	_backend_model.text = "" if mode == "openvino" else Settings.read(model_setting)
-	_backend_endpoint.editable = mode != "openvino"
-	_backend_model.editable = mode != "openvino"
-
-	var status = "OpenVINO is selectable in v0; Lacapult records the choice but does not install runtimes or pull models yet."
 	if mode == "api":
-		status = "API mode saves endpoint/model metadata only; Lacapult v0 never stores API keys."
+		_backend_endpoint_label.text = "API base URL"
+		_backend_model_label.text = "API model"
+		_backend_endpoint.placeholder_text = "Optional; C-AOL currently uses provider/model/env key"
+		_backend_model.placeholder_text = "gpt-4.1-mini"
+		_backend_endpoint.text = Settings.read("backend_api_endpoint")
+		_backend_model.text = Settings.read("backend_api_model")
+		_backend_api_key_env.get_parent().visible = true
 	elif mode == "ollama":
-		for backend in BackendConfig.get_supported_backends():
-			if backend.get("id", "") == "ollama":
-				status = "Ollama status: %s" % backend.get("status", "unknown")
+		_backend_endpoint_label.text = "Ollama URL"
+		_backend_model_label.text = "Ollama model"
+		_backend_endpoint.placeholder_text = "http://127.0.0.1:11434"
+		_backend_model.placeholder_text = "qwen2.5:3b, mistral, llama..."
+		_backend_endpoint.text = Settings.read("backend_ollama_endpoint")
+		_backend_model.text = Settings.read("backend_ollama_model")
+		_backend_api_key_env.get_parent().visible = false
+	else:
+		_backend_endpoint_label.text = "Model dir"
+		_backend_model_label.text = "Device"
+		_backend_endpoint.placeholder_text = "OpenVINO model directory"
+		_backend_model.placeholder_text = "AUTO, CPU, GPU, NPU"
+		_backend_endpoint.text = Settings.read("backend_openvino_model_dir")
+		_backend_model.text = Settings.read("backend_openvino_device")
+		_backend_api_key_env.get_parent().visible = false
+
+	_backend_endpoint.editable = true
+	_backend_model.editable = true
+	_backend_python_path.text = Settings.read("backend_python_path")
+	_backend_api_key_env.text = Settings.read("backend_api_key_env")
+
+	var status = "Backend status: unknown"
+	for backend in BackendConfig.get_supported_backends():
+		if backend.get("id", "") == mode:
+			status = "%s status: %s" % [backend.get("label", mode), backend.get("status", "unknown")]
+			status += "\nSetup: %s" % backend.get("guidance", BackendConfig.get_backend_guidance(mode))
+			break
+	if mode == "api":
+		status += "\nProvider intent: %s. API secrets stay in the environment; Lacapult stores only the env-var name." % Settings.read("backend_api_provider")
+	elif mode == "ollama":
+		status += "\nNo model pull is attempted. C-AOL still launches tools/llm_runner/runner.py through Python."
+	else:
+		status += "\nOpenVINO is Windows-first for Lacapult v0. Runtime/model install is not automated; this is detection plus config only."
 	_backend_status.text = status
 
 
@@ -210,6 +270,11 @@ func _store_backend_field(setting_prefix: String, value: String) -> void:
 	var mode = Settings.read("backend_mode")
 	if mode == "api" or mode == "ollama":
 		Settings.store("backend_%s_%s" % [mode, setting_prefix], value)
+	elif mode == "openvino":
+		if setting_prefix == "endpoint":
+			Settings.store("backend_openvino_model_dir", value)
+		elif setting_prefix == "model":
+			Settings.store("backend_openvino_device", value)
 
 
 func _on_BackendMode_item_selected(index: int) -> void:
@@ -225,11 +290,24 @@ func _on_BackendModel_text_changed(new_text: String) -> void:
 	_store_backend_field("model", new_text)
 
 
+func _on_BackendPython_text_changed(new_text: String) -> void:
+	Settings.store("backend_python_path", new_text)
+
+
+func _on_BackendApiKeyEnv_text_changed(new_text: String) -> void:
+	Settings.store("backend_api_key_env", new_text)
+
+
 func _on_SaveBackendSetup_pressed() -> void:
 	var mode = Settings.read("backend_mode")
 	var endpoint = "" if _backend_endpoint == null else _backend_endpoint.text
 	var model = "" if _backend_model == null else _backend_model.text
-	var result = BackendConfig.write_launcher_backend_config(mode, endpoint, model)
+	var python_path = "" if _backend_python_path == null else _backend_python_path.text
+	var api_provider = Settings.read("backend_api_provider")
+	var api_key_env = "" if _backend_api_key_env == null else _backend_api_key_env.text
+	var openvino_model_dir = endpoint if mode == "openvino" else Settings.read("backend_openvino_model_dir")
+	var openvino_device = model if mode == "openvino" else Settings.read("backend_openvino_device")
+	var result = BackendConfig.write_launcher_backend_config(mode, endpoint, model, python_path, api_provider, api_key_env, openvino_model_dir, openvino_device)
 	_backend_status.text = "Backend setup save result: %s" % result
 
 

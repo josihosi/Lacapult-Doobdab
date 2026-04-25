@@ -224,3 +224,29 @@ This is intentionally not a new metadata or application system. The repeatable p
 `scripts/Catapult.gd` now creates a read-only Game-tab launch preflight label for the active C-AOL install on macOS. The check reuses Lacapult's app-bundle executable discovery, runs `otool -L` against the launch binary, and classifies absolute local dylib paths under `/opt/local`, `/usr/local`, or `/opt/homebrew`. Missing local dylibs block Play/Resume and post an explanatory status; present local dylibs are reported as a portability warning; unavailable `otool` does not pretend to prove launchability.
 
 For the selected C-AOL `v0.2.0` macOS DMG, the preflight distinguishes the layers clearly: Lacapult install/copy succeeds, `Cataclysm.app` exists, and the actual `Contents/Resources/cataclysm-tiles` binary is blocked by missing `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`. This is launcher-side UX/status only. It does not rebuild, bundle, sign, notarize, publish, install MacPorts/Homebrew libraries, contact upstream, or mutate real Application Support state.
+
+## 2026-04-25 backend-good v0-safe hardening
+
+C-AOL backend truth from the reference checkout:
+
+- Runtime backend choices are `openvino`, `api`, and `ollama` via `tools/llm_runner/runner.py`.
+- The game launches `tools/llm_runner/runner.py` through a Python executable resolved from `LLM_INTENT_PYTHON` or fallback defaults. This Python runner requirement applies to API and Ollama too; it is not really OpenVINO-only despite the current in-game option label.
+- API mode uses `any_llm` in the Python runner and currently reaches C-AOL runtime through provider `openai` hardcoded in `src/llm_intent.cpp`; Lacapult can store provider intent, but should not imply arbitrary provider routing is consumed by C-AOL until C-AOL changes that path.
+- Ollama mode uses the local Ollama HTTP API and requires a selected model tag; Lacapult may check command/server/model-list state but must not pull models without clearance.
+- OpenVINO mode requires Python imports such as `openvino`/`openvino_genai` plus a local model directory; Lacapult may detect these but must not install runtimes or download models without clearance. For Lacapult v0, OpenVINO is treated as Windows-first: non-Windows checks are allowed as detect-only/status-only, but the installer must not imply full cross-platform OpenVINO readiness.
+
+Lacapult backend setup now records more than a pretty selector:
+
+- `scripts/SettingsUI.gd` exposes Backend, Endpoint/Model or Model-dir/Device as appropriate, API key env-var name, and the shared Python/venv path.
+- `scripts/BackendConfigManager.gd` writes safe launcher-side metadata and `caol_llm_options_patch.json` with C-AOL option names. API secrets are never stored; only `api_key_env` is recorded.
+- Readiness checks are deliberately bounded: Python import checks for API/AnyLLM and OpenVINO, Ollama command/server/model-list checks, OpenVINO model-dir existence, no remote API calls, no model pulls, no installs.
+- `write_sandboxed_options_config()` is proof-only/sandbox-guarded. It can apply a generated patch to copied `config/options.json` paths under `/tmp`, `.proof-cache`, or a `sandbox` path, but the launcher UI still does not mutate Josef's real C-AOL Application Support config.
+
+Current local proof status from `tools/prove_caol_backend_contract.py`:
+
+- Sandboxed API/Ollama/OpenVINO `options_*.json` files are written under `.proof-cache/caol-backend-contract/` and verified for the expected `LLM_INTENT_*` values.
+- Default Python on this Mac is missing `any_llm`, so API is config-shaped/readiness-detected but not locally live-ready until the intended Python/venv has AnyLLM installed and the chosen env var is set.
+- Default Python on this Mac is missing `openvino`/`openvino_genai`, so OpenVINO is config-shaped/readiness-detected but not locally live-ready until runtime packages and a model dir exist.
+- Ollama command/server is present on this Mac; selected-model readiness depends on the configured model being in `ollama list`.
+
+This is the first honest "backend-good" bar for Lacapult: setup/config/status/apply-proof is good; AnyLLM/API and Ollama/llama-family are aimed at Windows/macOS/Linux where dependencies are present; OpenVINO is Windows-first for v0; secret-bearing live API calls, model pulls, OpenVINO installation, and broad provider support remain later lanes.
