@@ -253,14 +253,14 @@ This is the first honest "backend-good" bar for Lacapult: setup/config/status/ap
 
 ## 2026-04-25 mod install/enable + Summarizer feature plan
 
-`doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` is the active next-lane plan after backend-good hardening. It promotes the read-only packaged-mod bridge into a feature-complete mod/Summarizer implementation family. Slice 1 now implements the computable discovery/status model, while UX, generation/apply, and runtime-consumption proof remain later slices. The durable architecture rule is simple: C-AOL owns runtime truth; Lacapult owns installer help.
+`doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` is the active next-lane plan after backend-good hardening. It promotes the read-only packaged-mod bridge into a feature-complete mod/Summarizer implementation family. Slices 1-4 now cover computable discovery/status, read-only UX/dry-run prompting, sandbox companion-pack apply/rollback, and deterministic C-AOL harness prompt consumption. The durable architecture rule is simple: C-AOL owns runtime truth; Lacapult owns installer help.
 
 C-AOL runtime truth:
 
 - Active world mods live in each world's `mods.json` and are loaded into `world_generator->active_world->active_mod_order`.
 - `src/llm_intent.cpp` builds background-summary roots from core `data/json`, active mod roots, and the world custom-mod root.
 - Runtime summary files must live under `npcs/Backgrounds/Summaries_short` or `npcs/Backgrounds/Summaries_extra` and use existing C-AOL legacy text or `npc_personality_summary`/bundle JSON shapes.
-- C-AOL owns summary parsing/override behavior, cache/runtime fixes, and eventual proof that generated summary roots reach prompt construction.
+- C-AOL owns summary parsing/override behavior, cache/runtime fixes, and live compiled-game proof; deterministic harness proof now shows generated summary roots can reach prompt construction.
 
 Lacapult's next implementation family:
 
@@ -269,11 +269,11 @@ Lacapult's next implementation family:
 - Offer a Summarizer button/pop-up after install/enable when contextual mod content lacks summaries.
 - Gate generation on API/Ollama/OpenVINO backend readiness from `BackendConfigManager.gd` without storing secrets, pulling models, installing OpenVINO, or making implicit remote calls. Future backend lanes may add explicit-approval OpenVINO package/model-dir setup and Ollama model recommendations, but the mod status model only carries compatible status fields.
 - Stage generated packs as reversible C-AOL-native companion mods or world custom mods with manifest, backup, and rollback.
-- Prove C-AOL runtime consumption in a sandbox/harness before claiming the feature is complete.
+- Keep C-AOL runtime consumption evidence honest: Slice 4 proves deterministic harness prompt construction, while live compiled-game launch remains separate from this mod/Summarizer lane.
 
 The preferred generated-pack shape is a companion user mod such as `userdata/mods/lacapult_summary_<source_mod_id>/` containing `modinfo.json`, `npcs/Backgrounds/Summaries_extra/generated_<source_mod_id>.json`, optional `Summaries_short` output, and a Lacapult manifest. Stock packaged mod folders should not be mutated.
 
-The plan is deliberately sliced: discovery/status model first, then visible UX/prompting, then sandboxed C-AOL-native summary-pack generation/apply with manifest/backup/rollback, then C-AOL runtime consumption proof, then fixture coverage for obsolete mods, parse errors, dependency blockers, partial/stale/conflicting summaries, backend-not-ready states, and rollback failures. Slice 1 is now landed through `scripts/CaolModStatusModel.gd`, `ModManager.get_caol_mod_summarizer_status()`, and `tools/caol_mod_status_model.py` / `tools/prove_caol_mod_status_model.py`. This keeps the Summarizer button from becoming button-shaped theater before Lacapult can accurately report whether a mod is active, broken, stale, or unsummarized.
+The plan is deliberately sliced: discovery/status model first, then visible UX/prompting, then sandboxed C-AOL-native summary-pack generation/apply with manifest/backup/rollback, then C-AOL runtime consumption proof, then fixture coverage for obsolete mods, parse errors, dependency blockers, partial/stale/conflicting summaries, backend-not-ready states, and rollback failures. Slices 1-4 are now landed through `scripts/CaolModStatusModel.gd`, `ModManager.get_caol_mod_summarizer_status()`, the Python proof helpers, and C-AOL `npc_harness.py`. This keeps the Summarizer button from becoming button-shaped theater before Lacapult can accurately report whether a mod is active, broken, stale, unsummarized, or actually consumable by C-AOL prompt construction.
 
 ## 2026-04-25 C-AOL mod/Summarizer status model Slice 1
 
@@ -292,3 +292,11 @@ The companion proof tools are `tools/caol_mod_status_model.py`, `tools/prove_cao
 `tools/prove_caol_summary_pack_apply.py` is the first sandboxed C-AOL-native companion summary-pack apply proof. It creates a fixture C-AOL install/userdata/world tree under `.proof-cache/caol-summary-pack-apply/`, chooses a non-obsolete contextual packaged stock fixture mod, stages a companion user mod named `lacapult_summary_<source_mod_id>`, writes a C-AOL `npc_personality_summary_bundle` under `npcs/Backgrounds/Summaries_extra`, writes `lacapult_summary_pack_manifest.json`, applies the companion into sandbox userdata, and updates sandbox `mods.json` so the source mod is active before the companion summary mod.
 
 The proof validates JSON/path shape, manifest generated paths, backup files, status-model visibility, and rollback. Rollback restores the prior `mods.json` bytes exactly and removes the generated pack when it did not exist before apply. This proves the reversible file choreography for Slice 3 only. It does not add launcher UI application, backend generation, real mod enabling, C-AOL runtime prompt consumption, real Application Support mutation, model pulls, API calls, OpenVINO setup, releases, or upstream contact.
+
+## 2026-04-25 C-AOL runtime summary consumption Slice 4
+
+`tools/prove_caol_runtime_summary_consumption.py` is the Slice 4 deterministic consumption proof. It builds a sandbox C-AOL-like world under `.proof-cache/caol-runtime-summary-consumption/` with active `mods.json` order `dda`, a fixture source mod, and `lacapult_summary_<source_mod_id>` after the source. The companion pack uses C-AOL-native `npc_personality_summary_bundle` JSON under `npcs/Backgrounds/Summaries_extra` and a generated-pack manifest.
+
+The proof inspects the current C-AOL checkout at `/Users/josefhorvath/Schanigarten/Cataclysm-AOL` on `dev`, records the relevant `src/llm_intent.cpp` seams (`background_summary_data_roots()`, `active_mod_order`, summary-root loading, and `your_tone` / `your_example_expression` emission), then runs C-AOL `tools/llm_runner/npc_harness.py` with the sandbox-derived active source and companion roots. The harness resolves selector `name:Lacapult Runtime Fixture NPC`, writes `.proof-cache/caol-runtime-summary-consumption/evidence/npc_harness_resolve.json`, dumps the prompt to `npc_harness_prompt.txt`, and proves the generated summary reaches prompt fields as `your_tone` and `your_example_expression`.
+
+This closes Slice 4 at deterministic harness/source level. It still does not launch a compiled C-AOL game world from the Lacapult sandbox, call a backend, use secrets, mutate real Application Support state, or prove broad Slice 5 error handling.

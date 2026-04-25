@@ -1,6 +1,6 @@
 # Lacapult mod install/enable + Summarizer feature plan
 
-Status: **ACTIVE NEXT LANE / SLICE 1 DISCOVERY-STATUS MODEL LANDED / SLICE 2 UX-STATUS SURFACE LANDED / SLICE 3 SANDBOX APPLY-ROLLBACK PROVEN**
+Status: **ACTIVE NEXT LANE / SLICE 1 DISCOVERY-STATUS MODEL LANDED / SLICE 2 UX-STATUS SURFACE LANDED / SLICE 3 SANDBOX APPLY-ROLLBACK PROVEN / SLICE 4 RUNTIME-HARNESS CONSUMPTION PROVEN**
 
 This packet turns the read-only C-AOL mod compatibility report into the next bounded implementation family. It does **not** implement the feature yet. It defines the contract Andi should execute in slices after backend-good hardening.
 
@@ -278,12 +278,14 @@ Goal: generate one tiny C-AOL-native companion summary pack in a sandbox.
 
 ### Slice 4 — C-AOL runtime consumption proof
 
+Status: **landed 2026-04-25 as deterministic C-AOL harness/source proof.**
+
 Goal: prove this is not launcher-only theater.
 
-- In a C-AOL sandbox/harness, load a world with the source mod and summary companion active.
-- Prove `background_summary_data_roots()` includes the companion root or world custom root.
-- Prove the generated selector/topic is loaded and reaches the NPC prompt as `your_tone` / `your_example_expression`, or record the exact C-AOL runtime blocker.
-- Gate: deterministic C-AOL harness/test if available; otherwise a narrow C++/Python/source inspection proof plus a documented blocker.
+- Landed `tools/prove_caol_runtime_summary_consumption.py`, which builds a sandbox world with active order `dda`, a source fixture mod, and a generated companion summary mod.
+- The proof derives active mod roots from sandbox `mods.json`, confirms the generated companion root contributes `npcs/Backgrounds/Summaries_extra`, and runs C-AOL's current `/Users/josefhorvath/Schanigarten/Cataclysm-AOL` checkout on branch `dev` through `tools/llm_runner/npc_harness.py`.
+- The generated `npc_personality_summary_bundle` resolves through selector `name:Lacapult Runtime Fixture NPC` and reaches prompt construction as `your_tone` and `your_example_expression`.
+- Gate: passed via `python3 tools/prove_caol_runtime_summary_consumption.py`; evidence is under `.proof-cache/caol-runtime-summary-consumption/evidence/`. This is deterministic harness proof plus C++ source-seam inspection, not a live compiled game-world launch.
 
 ### Slice 5 — error/rollback/backup proof
 
@@ -319,4 +321,4 @@ This lane is complete only when all of the following are true:
 
 ## Recommended next implementation handoff
 
-Next implement **Slice 4: C-AOL runtime consumption proof**. Slice 3 now proves Lacapult can stage/apply/rollback a C-AOL-native companion summary pack in a sandbox and make the status model see it. The next cut should prove that an active generated summary root reaches C-AOL prompt construction in a sandbox/harness, or record the exact C-AOL-side blocker.
+Next implement **Slice 5: error/rollback/backup proof**. Slice 4 now proves that a sandbox active generated companion summary root can reach C-AOL deterministic prompt construction. The next cut should broaden fixture coverage for obsolete mods, parse errors, missing dependencies, partial summaries, stale summaries, conflicts, backend-not-ready, and rollback failure handling.
