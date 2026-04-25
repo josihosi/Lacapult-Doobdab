@@ -4,7 +4,7 @@ Success-state ledger for Lacapult Doobdab.
 
 ## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-Status: **HEADLESS GODOT INSTALLER PASS PROVEN / AWAITING CLICKED GUI INSTALL PASS OR RELEASE-PREP DECISION**
+Status: **FULL-SCENE INSTALL BUTTON PATH PROVEN / AWAITING CLICKED GUI INSTALL PASS OR RELEASE-PREP DECISION**
 
 Done only when all are true:
 
@@ -41,5 +41,6 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [x] Controlled selected macOS DMG download/mount/launchability-shape proof, without launching or installing the game.
 - [x] Sandboxed Lacapult-style macOS DMG copy/move install-shape proof, without touching the real Application Support install state or launching the game.
 - [x] Headless Godot `ReleaseInstaller.install_release()` pass for the selected cached macOS DMG inside an isolated HOME, without touching the real Application Support install state or launching the game.
-- [ ] Clicked in-launcher macOS DMG extraction/install/launch pass.
+- [x] Full-scene Godot Install-button signal pass for the selected cached macOS DMG inside an isolated HOME, without touching the real Application Support install state or launching the game.
+- [ ] Physical clicked GUI macOS DMG extraction/install/launch pass.
 - [ ] Signed/packaged Lacapult releases for Windows/Linux/macOS.

@@ -134,6 +134,15 @@ Before claiming v0 is done, Andi should record:
 - The isolated install root was under `/tmp/lacapult-godot-install-home.../Library/Application Support/Lacapult Doobdab`, not the real user Application Support tree. Final proof JSON reported `target_exists=true`, `app_exists=true`, `info_exists=true`, `looks_launchable=true`, listing `Cataclysm.app` plus `catapult_install_info.json`, with install info name `Cataclysm - Arsenic and Old Lace v0.2.0`.
 - Godot exited 0. It printed the known no-UI `Status label not found`/cleanup warnings because the smoke intentionally did not instantiate the full `Catapult` scene; those warnings did not prevent the installer path from completing. This still does **not** claim a clicked GUI install or C-AOL game launch smoke.
 
+## Evidence - 2026-04-25 full-scene install button smoke
+
+- Added `tools/godot_scene_install_button_smoke.gd`, a headless Godot 3 script that instantiates `scenes/Catapult.tscn` instead of calling `ReleaseInstaller` directly. It runs with an isolated `HOME` and an already-downloaded C-AOL macOS DMG path in `LACAPULT_CAOL_DMG`.
+- Ran `LACAPULT_CAOL_DMG="$PWD/.proof-cache/caol-dmg/caol_cdda-0-h_2026-03-29-1556_macos.dmg" HOME=$(mktemp -d /tmp/lacapult-scene-install-home.XXXXXX) /opt/homebrew/bin/godot --path . --no-window --script tools/godot_scene_install_button_smoke.gd`.
+- The smoke waited for the real `ReleaseManager` live GitHub fetch in the main scene, verified the first Game-tab release row was `Cataclysm - Arsenic and Old Lace v0.2.0` with selected asset `caol_cdda-0-h_2026-03-29-1556_macos.dmg`, selected build row 0, emitted the real `BtnInstall` pressed signal, and waited for the scene's `ReleaseInstaller` to finish.
+- Final isolated install proof reported `target_exists=true`, `app_exists=true`, `info_exists=true`, and `looks_launchable=true` under `/tmp/lacapult-scene-install-home.../Library/Application Support/Lacapult Doobdab/caol/game0`; the final listing included `Cataclysm.app` and `catapult_install_info.json`, and install info name was `Cataclysm - Arsenic and Old Lace v0.2.0`.
+- This is stronger than the direct headless installer smoke because it exercises the main scene's release-list selection and Install button signal path. It still does **not** claim a physical mouse-clicked GUI install or a C-AOL game launch smoke.
+- Godot exited 0. It printed known macOS/no-window cleanup warnings at process exit; they did not prevent the full-scene install-button path from completing.
+
 ## Known risk spots
 
 - Godot 3 scene node paths may break if the game chooser/channel UI is removed too aggressively.

@@ -6,7 +6,7 @@ Short execution queue only.
 
 Active target: `Lacapult Doobdab v0.2.0 release installer plus first backend setup options`.
 
-Current checkpoint: local proof packet, first Godot GUI smoke, controlled selected-macOS-DMG mount/launchability-shape proof, sandboxed Lacapult-style DMG install-shape proof, Godot 3.6.2 project-load revalidation, and a headless Godot `ReleaseInstaller.install_release()` pass against the selected cached macOS DMG are complete as of 2026-04-25. The next honest step is either a clicked in-launcher install pass for the selected macOS DMG or a Schani/Josef release-prep decision.
+Current checkpoint: local proof packet, first Godot GUI smoke, controlled selected-macOS-DMG mount/launchability-shape proof, sandboxed Lacapult-style DMG install-shape proof, Godot 3.6.2 project-load revalidation, a headless Godot `ReleaseInstaller.install_release()` pass, and a full-scene Godot Install-button signal pass against the selected cached macOS DMG are complete as of 2026-04-25. The next honest step is either a physical clicked GUI install pass for the selected macOS DMG or a Schani/Josef release-prep decision.
 
 Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order.
 
@@ -47,7 +47,7 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - If full GUI launch is possible, smoke launch to the release list; otherwise record the exact missing tool/blocker.
 
 7. Park next slices
-   - Clicked in-launcher install pass for the selected macOS DMG, including optional launch smoke, only when Schani/Josef wants that heavier proof; the headless Godot installer path and sandboxed copy/move shape are already proven.
+   - Physical clicked in-launcher install pass for the selected macOS DMG, including optional launch smoke, only when Schani/Josef wants that heavier proof; the headless Godot installer path, full-scene Install-button signal path, and sandboxed copy/move shape are already proven.
    - OpenVINO full setup.
    - Real model install/model-pull automation.
    - C-AOL-specific mod/soundpack/tileset recommendation packs.

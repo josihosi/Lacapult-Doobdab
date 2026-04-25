@@ -178,3 +178,8 @@ The repeatable proof packet was re-run after the sandbox install proof: live all
 ## 2026-04-25 headless Godot installer smoke
 
 `tools/godot_install_release_smoke.gd` is a narrow Godot-side installer proof for the selected cached C-AOL `v0.2.0` macOS DMG. Run it with an isolated `HOME` and `LACAPULT_CAOL_DMG=/absolute/path/to/caol_cdda-0-h_2026-03-29-1556_macos.dmg`. It copies the DMG into Lacapult's cache, calls `ReleaseInstaller.install_release()`, and verifies the final isolated `caol/game0` contains `Cataclysm.app`, `catapult_install_info.json`, and passes the same launchability guard used by the installer. It is stronger than the Python sandbox mimic because it exercises the real Godot installer code path, but it is still not a clicked GUI install and does not launch C-AOL.
+
+
+## 2026-04-25 full-scene install button smoke
+
+`tools/godot_scene_install_button_smoke.gd` is the current strongest non-interactive install proof. It instantiates `scenes/Catapult.tscn`, lets the normal startup path fetch C-AOL releases, verifies the first listed Game-tab build is the prioritized installable `v0.2.0` macOS DMG, selects that row, emits the real Install button signal, waits for the scene-owned `ReleaseInstaller`, and verifies the isolated final install folder. This proves the main scene release-list/install-button handoff in addition to the lower-level installer code path. It is still not a physical mouse-clicked GUI install and does not launch C-AOL.
