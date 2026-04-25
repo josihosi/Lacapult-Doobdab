@@ -306,6 +306,14 @@ Schani greenlit the next bounded non-release-decision proof after the export-pac
 - Re-ran `python3 tools/prove_caol_release.py --all-platforms`, `python3 tools/prove_caol_backend_contract.py`, `python3 -m py_compile tools/prove_caol_macos_dmg.py tools/prove_caol_game_launch_smoke.py`, `/opt/homebrew/bin/godot --version`, `/opt/homebrew/bin/godot --path . --no-window --quit`, and `git diff --check`. Cheap Lacapult proofs still pass; Godot remains `3.6.2.stable.official.3cd3caab6`.
 - This does not invalidate Lacapult's release selection or install-shape proof. It means the selected upstream C-AOL `v0.2.0` macOS asset is not launchable on this clean Mac without those MacPorts dylibs being present or the app bundle being repackaged with portable/bundled dependencies. No real user Application Support state, API secrets, model downloads, public releases, or upstream contact were used.
 
+## Evidence - 2026-04-25 read-only C-AOL mod bridge UI status
+
+- `scripts/SettingsUI.gd` now adds a read-only `C-AOL packaged mod compatibility` Settings block near the backend controls. It exposes the generated report status without mod enabling or generated summary-pack application.
+- The visible status distinguishes the current bridge counts: 49 packaged mods total; 42 non-obsolete stock packaged mods path-supported; 7 obsolete blockers; 30 `summarizer-compatible-but-needs-generated-pack`; 12 `no-summary-needed`; 0 `summarizer-ready`.
+- The same block uses C-AOL-native summary-root language: future generated packs belong under active mod roots at `npcs/Backgrounds/Summaries_short` or `npcs/Backgrounds/Summaries_extra`, not a Lacapult-only metadata system.
+- The visible report reference points to `.proof-cache/caol-mod-bridge/caol_mod_summarizer_bridge_report.md`, says to regenerate it with `python3 tools/prove_caol_mod_inventory.py`, and points at `doc/caol-mod-compatibility-summary.md` for the committed canon summary.
+- Revalidation for this handoff passed: `python3 tools/prove_caol_mod_inventory.py`, `python3 -m py_compile tools/prove_caol_mod_inventory.py`, static grep for the UI/status tokens in `scripts/SettingsUI.gd`, `/opt/homebrew/bin/godot --path . --no-window --quit`, `git diff --check`, plus a JSON assertion that the regenerated proof still reports 42 stock, 7 obsolete, 30 generated-pack-needed, 12 no-summary-needed, and a markdown report path. Logs are under `.proof-cache/ui-status-20260425T1513/`.
+
 ## Product packaging bar - Lacapult itself
 
 Lacapult is the installer/launcher, so release-prep evidence must distinguish Lacapult's own app distribution from the C-AOL game bundle it installs. A raw Godot project launch or PCK export is not enough for the final product bar: Windows, macOS, and Linux should each get an easy user-facing install/open path, with export-template/signing/notarization blockers recorded honestly when they prevent that proof.

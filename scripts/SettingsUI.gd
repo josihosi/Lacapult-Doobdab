@@ -18,6 +18,7 @@ var _backend_mode_button: OptionButton = null
 var _backend_endpoint: LineEdit = null
 var _backend_model: LineEdit = null
 var _backend_status: Label = null
+var _caol_mod_bridge_status: Label = null
 
 onready var _root = $"/root/Catapult"
 onready var _tabs = $"/root/Catapult/Main/Tabs"
@@ -68,6 +69,7 @@ func _ready() -> void:
 	$ScaleOverride/sbScaleOverride.editable = Settings.read("ui_scale_override_enabled")
 	$ScaleOverride/sbScaleOverride.value = (Settings.read("ui_scale_override") as float) * 100.0
 	_add_backend_setup_controls()
+	_add_caol_mod_bridge_status_controls()
 
 
 func _add_backend_setup_controls() -> void:
@@ -141,6 +143,40 @@ func _add_backend_setup_controls() -> void:
 	move_child(section, 2)
 
 	_refresh_backend_setup_controls()
+
+
+func _add_caol_mod_bridge_status_controls() -> void:
+	if has_node("CaolModBridgeStatus"):
+		return
+
+	var section = VBoxContainer.new()
+	section.name = "CaolModBridgeStatus"
+	section.hint_tooltip = "Read-only C-AOL packaged-mod compatibility and summarizer bridge status."
+	add_child(section)
+
+	var title = Label.new()
+	title.text = "C-AOL packaged mod compatibility"
+	section.add_child(title)
+
+	_caol_mod_bridge_status = Label.new()
+	_caol_mod_bridge_status.autowrap = true
+	_caol_mod_bridge_status.text = "Read-only report available for packaged C-AOL v0.2.0 stock mods: 49 packaged mods total; 42 non-obsolete stock packaged mods are path-supported; 7 obsolete blockers; 30 summarizer-compatible-but-needs-generated-pack; 12 no-summary-needed; 0 summarizer-ready."
+	section.add_child(_caol_mod_bridge_status)
+
+	var summary_roots = Label.new()
+	summary_roots.autowrap = true
+	summary_roots.text = "C-AOL summary roots stay native: future generated packs belong in active mod roots under npcs/Backgrounds/Summaries_short or npcs/Backgrounds/Summaries_extra. Lacapult v0 does not apply generated summary packs or enable mods from this status block."
+	section.add_child(summary_roots)
+
+	var report_reference = Label.new()
+	report_reference.autowrap = true
+	report_reference.text = "Full generated proof report: .proof-cache/caol-mod-bridge/caol_mod_summarizer_bridge_report.md. Regenerate from a source checkout with python3 tools/prove_caol_mod_inventory.py; canon summary: doc/caol-mod-compatibility-summary.md."
+	section.add_child(report_reference)
+
+	# Keep this read-only status surface near the backend controls, before the long
+	# inherited settings list. No buttons here: applying/generated summary packs is
+	# a later explicit flow, not part of the v0 status surface.
+	move_child(section, 3)
 
 
 func _refresh_backend_setup_controls() -> void:

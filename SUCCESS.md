@@ -4,7 +4,7 @@ Success-state ledger for Lacapult Doobdab.
 
 ## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-Status: **CLICKED INSTALL + BACKEND TRIAD + MOD INVENTORY + RELEASE-PREP PACK PROVEN / APP EXPORT BLOCKED ON GODOT TEMPLATES**
+Status: **CLICKED INSTALL + BACKEND TRIAD + MOD UI STATUS + RELEASE-PREP PACK PROVEN / GAME-LAUNCH BLOCKED ON C-AOL DYLIBS / APP EXPORT BLOCKED ON GODOT TEMPLATES**
 
 Done only when all are true:
 
@@ -28,6 +28,7 @@ Done only when all are true:
 - [x] First C-AOL mod compatibility / future NPC-summary investigation note exists.
 - [x] C-AOL mod compatibility investigation records inherited source assumptions and marks first useful compatibility statuses as supported, untested, broken, or unknown.
 - [x] Per-mod packaged C-AOL `v0.2.0` compatibility/summarizer bridge report exists, classifies obsolete blockers vs supported packaged mods, and points future summary packs at C-AOL `Summaries_short` / `Summaries_extra` roots.
+- [x] Settings tab surfaces that report as read-only status with packaged-mod counts, blocker/status distinctions, full report reference/regeneration path, C-AOL `npcs/Backgrounds/Summaries_short` / `Summaries_extra` language, and an explicit no-generated-pack-apply boundary.
 - [x] Validation evidence is recorded in `TESTING.md`.
 - [x] Godot 3.6.2 GUI smoke proves the project launches, the Game tab prioritizes the C-AOL `v0.2.0` macOS DMG, and the Settings tab exposes backend setup controls.
 - [x] Public repo existence is recorded (`https://github.com/josihosi/Lacapult-Doobdab`), and public releases/contact remain blocked without fresh Josef/Schani clearance.
@@ -41,7 +42,7 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [ ] Large model download/model-pull automation.
 - [ ] API-key/backend live smoke test requiring real secrets.
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.
-- [ ] UI surfacing of the packaged-mod compatibility/summarizer report and generated-summary-pack application flow.
+- [ ] Generated-summary-pack application flow; the current Settings surface is read-only and does not apply packs or enable mods.
 - [ ] NPC/LLM runtime consumption of mod compatibility summaries.
 - [x] Controlled selected macOS DMG download/mount/launchability-shape proof, without launching or installing the game.
 - [x] Sandboxed Lacapult-style macOS DMG copy/move install-shape proof, without touching the real Application Support install state or launching the game.

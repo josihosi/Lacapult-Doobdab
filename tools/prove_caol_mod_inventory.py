@@ -363,7 +363,7 @@ def write_markdown_report(path: Path, result: dict[str, Any]) -> None:
             "",
             "## Next application step",
             "",
-            "UI/application integration is not claimed here. The next smallest Lacapult step is to surface this report's status for packaged stock mods and keep any generated summaries in C-AOL-compatible active-mod roots (`npcs/Backgrounds/Summaries_short` / `Summaries_extra`) rather than a launcher-only format.",
+            "Lacapult surfaces this proof as read-only status metadata only. Future generated summary packs must stay in C-AOL-compatible active-mod roots (`npcs/Backgrounds/Summaries_short` / `Summaries_extra`) rather than a launcher-only format, and this proof still does not enable mods or apply generated packs.",
             "",
         ]
     )
@@ -374,9 +374,11 @@ def write_reports(report_dir: Path, result: dict[str, Any]) -> dict[str, str]:
     report_dir.mkdir(parents=True, exist_ok=True)
     json_path = report_dir / "caol_mod_summarizer_bridge_report.json"
     markdown_path = report_dir / "caol_mod_summarizer_bridge_report.md"
+    paths = {"json": str(json_path), "markdown": str(markdown_path)}
+    result["report_paths"] = paths
     json_path.write_text(json.dumps(result, indent=2, sort_keys=True), encoding="utf-8")
     write_markdown_report(markdown_path, result)
-    return {"json": str(json_path), "markdown": str(markdown_path)}
+    return paths
 
 
 def main() -> int:

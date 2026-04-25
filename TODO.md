@@ -6,7 +6,7 @@ Short execution queue only.
 
 Active target: `Lacapult Doobdab v0.2.0 release installer plus first backend setup options`.
 
-Current checkpoint: local proof packet, first Godot GUI smoke, controlled selected-macOS-DMG mount/launchability-shape proof, sandboxed Lacapult-style DMG install-shape proof, Godot 3.6.2 project-load revalidation, a headless Godot `ReleaseInstaller.install_release()` pass, a full-scene Godot Install-button signal pass, a physical clicked GUI install pass against the selected cached macOS DMG, backend triad, first C-AOL mod compatibility inventory, per-mod C-AOL summarizer bridge report, and local Godot export-pack/PCK release-prep proof are complete as of 2026-04-25. The next bounded C-AOL game-launch smoke from an isolated installed app bundle was attempted and is blocked by the selected upstream C-AOL macOS app binary linking unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`. Do not install Godot export templates, sign/notarize, publish, solve full OpenVINO automation, patch upstream packaging, or curate C-AOL mod downloads in this lane without fresh clearance.
+Current checkpoint: local proof packet, first Godot GUI smoke, controlled selected-macOS-DMG mount/launchability-shape proof, sandboxed Lacapult-style DMG install-shape proof, Godot 3.6.2 project-load revalidation, a headless Godot `ReleaseInstaller.install_release()` pass, a full-scene Godot Install-button signal pass, a physical clicked GUI install pass against the selected cached macOS DMG, backend triad, first C-AOL mod compatibility inventory, per-mod C-AOL summarizer bridge report, read-only Settings status surfacing for that report, and local Godot export-pack/PCK release-prep proof are complete as of 2026-04-25. The next bounded C-AOL game-launch smoke from an isolated installed app bundle was attempted and is blocked by the selected upstream C-AOL macOS app binary linking unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`. Do not install Godot export templates, sign/notarize, publish, solve full OpenVINO automation, patch upstream packaging, apply generated summary packs, or curate C-AOL mod downloads in this lane without fresh clearance.
 
 Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order. Lacapult's own cross-platform installability is part of the product bar: Windows/macOS/Linux users should be able to install/open the launcher without developer tooling. Keep that evidence separate from C-AOL game-package launchability.
 
@@ -43,6 +43,7 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - [x] Mark what is supported, untested, broken, or unknown for C-AOL instead of treating inherited support as automatically true.
    - [x] Record the next smallest proof for C-AOL mod compatibility and future NPC/LLM summary metadata.
    - [x] Emit a per-mod packaged C-AOL `v0.2.0` compatibility/summarizer bridge report that reuses C-AOL active-mod summary roots instead of inventing a Lacapult-only format.
+   - [x] Surface the packaged-mod compatibility/summarizer bridge report as read-only Settings status with counts, report reference, native summary-root language, and an explicit no-apply/no-enable boundary.
 
 6. Minimal validation
    - Prove release JSON parsing selects correct platform asset(s) from live C-AOL v0.2.0 releases.
@@ -57,6 +58,6 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - OpenVINO full setup/installer automation beyond selectable v0 status metadata.
    - Real model install/model-pull automation.
    - C-AOL-specific mod/soundpack/tileset recommendation packs.
-   - UI surfacing of the packaged-mod compatibility/summarizer report and any future generated summary-pack install/apply flow.
+   - Generated summary-pack install/apply flow after the read-only report status surface.
    - NPC/LLM runtime integration of mod summaries.
    - Public GitHub push/release publication, only after explicit clearance.

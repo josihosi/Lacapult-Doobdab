@@ -36,7 +36,7 @@ Per-mod bridge result from the selected packaged `v0.2.0` DMG:
 - 12 packaged mods are classified `no-summary-needed` for this bridge because they do not expose obvious NPC/context JSON content.
 - No JSON parse errors or missing dependency blockers were found in the selected packaged mod set.
 
-Next smallest application step: surface this report in Lacapult as read-only compatibility/status information for packaged stock mods. A later apply flow can generate or install C-AOL-compatible summary packs into active mod roots, but this proof does not claim UI integration or runtime NPC consumption.
+Current application step: Lacapult now surfaces this report in Settings as read-only compatibility/status information for packaged stock mods. A later apply flow can generate or install C-AOL-compatible summary packs into active mod roots, but this proof does not claim generated-pack application, mod enabling, or runtime NPC consumption.
 
 ## Report shape vs runtime summary shape
 
@@ -77,4 +77,4 @@ Preferred target path for named/context overrides is `<active_mod>/npcs/Backgrou
 
 ## v0 rule
 
-Do not promise automatic NPC/LLM consumption yet. The useful v0 behavior is to preserve inherited mod/soundpack/tileset support, make C-AOL compatibility status honest, and keep future runtime summary packs compatible with C-AOL's existing loader.
+Do not promise automatic NPC/LLM consumption yet. The useful v0 behavior is to preserve inherited mod/soundpack/tileset support, make C-AOL compatibility status honest in the launcher, and keep future runtime summary packs compatible with C-AOL's existing loader.

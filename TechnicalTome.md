@@ -212,3 +212,9 @@ On this Mac, Godot 3.6.2 can export all three PCK resource packs, proving the pr
 `tools/prove_caol_game_launch_smoke.py` is the current launch proof for the selected C-AOL `v0.2.0` macOS DMG. It proves the same sandboxed install shape as the earlier DMG proof, then starts the installed `Cataclysm.app` launch script under an isolated `HOME` and observes whether the game reaches a running process.
 
 On Josef's Mac mini, the selected `caol_cdda-0-h_2026-03-29-1556_macos.dmg` installs correctly but does not launch. `cataclysm-tiles` aborts via dyld because it links absolute `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib` paths; those libraries are not bundled inside `Cataclysm.app/Contents` and are not present on this Mac. This is an upstream C-AOL macOS package portability blocker, not a Lacapult release-list or installer-copy failure. Lacapult can still eventually surface this as a clearer launch preflight/status message, but fixing the packaged binary or bundling dylibs belongs to the C-AOL release/package lane and needs fresh clearance before upstream publication/contact.
+
+## 2026-04-25 read-only C-AOL mod bridge UI status
+
+`scripts/SettingsUI.gd` now surfaces the packaged C-AOL mod compatibility/summarizer bridge as read-only Settings status near the backend controls. It exposes the current report counts and generated-report reference, explicitly says no generated summary packs are applied and no mods are enabled from this block, and keeps future summary-pack language tied to C-AOL active mod roots: `npcs/Backgrounds/Summaries_short` and `npcs/Backgrounds/Summaries_extra`.
+
+This is intentionally not a new metadata or application system. The repeatable proof report remains generated under ignored `.proof-cache/caol-mod-bridge/` by `python3 tools/prove_caol_mod_inventory.py`; committed canon stays in `doc/caol-mod-compatibility-summary.md`.
