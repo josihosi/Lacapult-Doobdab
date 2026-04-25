@@ -4,24 +4,29 @@ Short execution queue only.
 
 ## Now
 
-Active target: `Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply`.
+Active target: `Backend recommendation/setup lane for Josef Windows pre-release confidence`.
 
-Current checkpoint: the v0.2.0 release installer, clicked install proof, backend triad readiness/config/apply proof, read-only packaged-mod bridge status, local unsigned export proof, macOS launch preflight proof, Slice 1 C-AOL mod/Summarizer discovery/status model proof, Slice 2 UX dry-run status, Slice 3 sandbox summary-pack apply/rollback proof, Slice 4 deterministic C-AOL runtime-harness prompt-consumption proof, and Slice 5 error/rollback matrix proof are complete as of 2026-04-25. The C-AOL game-launch smoke from an isolated installed app bundle remains blocked by the selected upstream C-AOL macOS app binary linking unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`; that stays a C-AOL packaging lane, not this mod/summarizer lane. The active next-lane plan is `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`. Do not sign/notarize, publish, solve full OpenVINO automation, patch upstream packaging, apply generated summary packs to real user data, or curate C-AOL mod downloads in this lane without fresh clearance.
+Current checkpoint: the v0.2.0 release installer, clicked install proof, backend triad readiness/config/apply proof, read-only packaged-mod bridge status, local unsigned export proof, macOS launch preflight proof, Slice 1 C-AOL mod/Summarizer discovery/status model proof, Slice 2 UX dry-run status, Slice 3 sandbox summary-pack apply/rollback proof, Slice 4 deterministic C-AOL runtime-harness prompt-consumption proof, Slice 5 error/rollback matrix proof, and click-level GUI audit are complete as of 2026-04-25. The C-AOL game-launch smoke from an isolated installed app bundle remains blocked by the selected upstream C-AOL macOS app binary linking unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`; that stays a C-AOL packaging lane, not this mod/summarizer lane. The active next-lane plan is backend recommendation/setup: make API the fastest onboarding/debug path, Ollama the mainstream local path, and OpenVINO the Windows-first specialized/detect-only path before exposing real Summarizer generation/apply UI. The mod/Summarizer implementation plan remains `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`, with real generation/apply UI intentionally deferred until backend choice/readiness is less hollow. Do not sign/notarize, publish, solve full OpenVINO automation, patch upstream packaging, apply generated summary packs to real user data, or curate C-AOL mod downloads in this lane without fresh clearance.
 
 Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order. Lacapult's own cross-platform installability is part of the product bar: Windows/macOS/Linux users should be able to install/open the launcher without developer tooling. Keep that evidence separate from C-AOL game-package launchability.
 
-0. Mod install/enable + Summarizer active next lane
+0. Backend recommendation/setup active next lane
+   - [ ] Turn backend setup into a player-facing recommendation path: API = fastest onboarding/debug, Ollama = mainstream local, OpenVINO = Windows-first specialized/detect-only.
+   - [ ] Add/verify Windows-focused wording and smoke coverage for the selected recommendation path before Josef laptop testing.
+   - [ ] Keep real Summarizer generation/apply UI disabled or dry-run/status-only until backend recommendation/readiness is good enough.
+
+1. Mod install/enable + Summarizer implemented slices
    - [x] Implement Slice 1 from `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`: discovery/status model for stock packaged, user-installed, custom-catalog, and world-specific mods, with enabled/disabled state for at least one sandbox world.
    - [x] Implement Slice 2: visible Mods/Settings UX status plus post-install Summarizer prompt and persistent dry-run/status buttons; true post-enable hook remains dependent on a later real enable/apply flow.
    - [x] Implement Slice 3: sandboxed C-AOL-native companion summary-pack generation/apply proof with manifest, backup, and rollback.
    - [x] Implement Slice 4: C-AOL sandbox/harness proof that an active generated summary root is consumed by runtime prompt construction, or record the exact C-AOL-side blocker.
    - [x] Implement Slice 5: fixture coverage for obsolete mods, parse errors, missing dependencies, partial summaries, stale summaries, conflicts, backend-not-ready, and rollback failure handling.
 
-1. Confirm source/import state
+2. Confirm source/import state
    - Verify this repo is local-only and has no inherited `.git` history from Dabdoob.
    - Commit the imported source plus canon docs once attribution files are present.
 
-2. Public identity and attribution cleanup
+3. Public identity and attribution cleanup
    - Preserve `LICENSE` MIT notice for qrrk and Dabdoob.
    - Add/update `ATTRIBUTION.md`.
    - Rewrite README top section for Lacapult Doobdab as a C-AOL-specific launcher/installer.

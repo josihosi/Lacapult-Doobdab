@@ -4,7 +4,7 @@ Success-state ledger for Lacapult Doobdab.
 
 ## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-Status: **CLICKED INSTALL + BACKEND TRIAD V0-SAFE CONFIG/READINESS + SANDBOX OPTIONS APPLY PROVEN + MOD UI STATUS + LOCAL UNSIGNED APP/PACKAGE EXPORTS PROVEN + LAUNCH PREFLIGHT STATUS PROVEN / GAME-LAUNCH BLOCKED ON C-AOL DYLIBS / SIGNING+PUBLIC RELEASE NOT CLAIMED**
+Status: **CLICKED INSTALL + BACKEND TRIAD V0-SAFE CONFIG/READINESS + SANDBOX OPTIONS APPLY PROVEN + MOD UI STATUS + CLICK-LEVEL GUI AUDIT MAYBE-READY FOR JOSEF WINDOWS TEST + LOCAL UNSIGNED APP/PACKAGE EXPORTS PROVEN + LAUNCH PREFLIGHT STATUS PROVEN / GAME-LAUNCH BLOCKED ON C-AOL DYLIBS / PUBLIC RELEASE NOT CLAIMED**
 
 Done only when all are true:
 
@@ -36,6 +36,8 @@ Done only when all are true:
 - [x] Godot 3.6.2 GUI smoke proves the project launches, the Game tab prioritizes the C-AOL `v0.2.0` macOS DMG, and the Settings tab exposes backend setup controls.
 - [x] Public repo existence is recorded (`https://github.com/josihosi/Lacapult-Doobdab`), and public releases/contact remain blocked without fresh Josef/Schani clearance.
 - [x] Lacapult itself has local unsigned app/executable/package evidence for Windows, macOS, and Linux; developer-only Godot project launch or raw PCK export is not the final bar.
+- [x] Click-level GUI audit doc exists at `doc/lacapult-click-level-gui-audit-2026-04-25.md`; verdict is maybe-ready for Josef Windows test, not public release.
+- [x] C-AOL release/changelog link no longer opens an inherited empty changelog path; for C-AOL it opens the selected/fallback GitHub release page.
 
 ## Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply
 
@@ -75,3 +77,11 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [ ] C-AOL game-launch smoke from an isolated installed app bundle reaches a running game process. Current proof is attempted but blocked by unbundled upstream macOS dylib dependencies (`/opt/local/lib/libfreetype.6.dylib`, `/opt/local/lib/libz.1.dylib`) in the selected C-AOL `v0.2.0` DMG.
 - [x] Full local unsigned app exports / package-shaped Lacapult distribution artifacts for Windows/Linux/macOS; no binaries committed.
 - [ ] Signed/notarized/public Lacapult release publication and normal-player install QA.
+
+## Evidence - 2026-04-25 click-level GUI audit
+
+- Added `doc/lacapult-click-level-gui-audit-2026-04-25.md` with persona click maps for fresh Windows, macOS/Linux, backend setup, mod/Summarizer, returning-user, and failure-user paths.
+- Patched the C-AOL changelog/release link so C-AOL opens the selected/fallback GitHub release page instead of the inherited changelog dialog.
+- Patched `project.godot` debug/test window dimensions from 1x1 to 600x700 so GUI QA/debug launches are not hidden in a postage stamp.
+- Audit verdict: coherent enough for a Josef Windows pre-release test, not ready for public release; the next product lane should be backend recommendation/setup before real Summarizer generation/apply UI.
+- Re-ran Godot project load, backend triad smoke, C-AOL mod status/UX smokes, related Python compile, and `git diff --check`; all passed. Combined log: `.proof-cache/click-gui-audit/gates-rerun.log`.

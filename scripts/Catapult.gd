@@ -454,6 +454,14 @@ func _on_Description_meta_clicked(meta) -> void:
 
 func _on_ChangelogLink_meta_clicked(meta) -> void:
 	
+	if Settings.read("game") == "caol":
+		var release_url = "https://github.com/josihosi/Cataclysm-AOL/releases"
+		var releases = _releases.releases.get(_get_release_key(), [])
+		if _lst_builds.selected != -1 and _lst_builds.selected < len(releases):
+			release_url = releases[_lst_builds.selected].get("release_page_url", release_url)
+		Status.post("Opening C-AOL release page: %s" % release_url)
+		OS.shell_open(release_url)
+		return
 	_changelog.open()
 
 
@@ -667,14 +675,20 @@ func apply_game_choice() -> void:
 		_rbtn_stable.pressed = true
 		_rbtn_exper.disabled = true
 		_rbtn_stable.disabled = true
+		_lbl_changelog.bbcode_text = "[right][color=#3b93f7][url]View C-AOL release page[/url][/color][/right]"
+		_lbl_changelog.hint_tooltip = "Open the selected C-AOL GitHub release page."
 		_btn_refresh.disabled = false
 	elif (game == "dda") or (game == "bn"):
+		_lbl_changelog.bbcode_text = tr("lbl_changelog")
+		_lbl_changelog.hint_tooltip = tr("tooltip_changelog")
 		_rbtn_exper.disabled = false
 		_rbtn_stable.disabled = false
 		if channel == "stable":
 			_rbtn_stable.pressed = true
 		_btn_refresh.disabled = false
 	elif game in ["eod", "tish", "tlg"]:
+		_lbl_changelog.bbcode_text = tr("lbl_changelog")
+		_lbl_changelog.hint_tooltip = tr("tooltip_changelog")
 		# These Forks do not have a stable channel
 		_rbtn_exper.pressed = true
 		_rbtn_exper.disabled = true
