@@ -1,239 +1,192 @@
 # Lacapult click-level GUI audit — 2026-04-25
 
-Status: **MAYBE-READY FOR JOSEF WINDOWS TEST / NOT READY FOR PUBLIC RELEASE**
+Scope: pre-release confidence pass for Lacapult Doobdab as a C-AOL launcher. This is not a signing, tagging, release, or publication pass.
 
-This is a product audit, not a release note. It checks whether Lacapult Doobdab currently behaves like a coherent C-AOL launcher rather than a pile of inherited Dabdoob doors with some C-AOL wallpaper stapled on.
+Evidence classes used:
 
-## Evidence classes
+- Source click-map review of `scenes/Catapult.tscn` plus the tab/controller scripts.
+- Isolated live launch with a temporary `HOME` so the pass did not intentionally mutate Josef's real C-AOL Application Support data.
+- Peekaboo screenshots for the first-launch Game tab and the C-AOL release-page handoff.
+- Existing Godot/Python smoke tests listed in `TESTING.md` and rerun for touched areas.
 
-- **Live GUI evidence:** Godot 3.6.2 launched the main Lacapult window under an isolated temporary `HOME`; screenshots were captured with Peekaboo under `~/.openclaw/workspace/runtime/lacapult-click-audit-2026-04-25/`.
-- **Source-level click map:** `scenes/Catapult.tscn` and the visible tab scripts were inspected for every player-facing tab, button family, and inherited dead-end risk.
-- **Existing deterministic proofs:** the audit relies on already-landed install/backend/mod/Summarizer proof scripts for behavior that should not mutate Josef's real Application Support data.
+Live UI automation caveat: Peekaboo coordinate clicks were flaky with the Godot 3 debug window on this Mac/retina setup. The Game tab was visually verified; source-level click mapping plus existing Godot smokes were used for the other tabs. Source inspection is not being presented as full visual QA.
 
-Live GUI automation caveat: Peekaboo could capture full-screen screenshots, but Godot's remote-window enumeration reported odd tiny window bounds in some runs. So this audit treats live screenshots as visual sanity evidence and source/proof inspection as the click-level authority. No real user C-AOL data was intentionally mutated.
+Runtime artifacts kept under:
 
-## Audit verdict
+- `~/.openclaw/workspace/runtime/lacapult-click-audit-2026-04-25/`
+- Key screenshots: `relaunch-screen.png`, `screen-after-patch.png`, `screen-see-after-patch.png`, `game-tab-after-patch.png`
 
-**Verdict:** maybe-ready for Josef Windows test, not ready for public release.
+## Release-readiness verdict
 
-Reasoning:
+`ready-for-Josef-Windows-test`
 
-- The launcher now has a coherent visible first-run story: pick C-AOL, refresh/select `v0.2.0`, install selected release, configure backend metadata, inspect mod/Summarizer status, and use Play/Resume only when launch preflight allows it.
-- The most dangerous hollow UI traps are guarded or honestly labelled:
-  - Lacapult self-update is disabled until Lacapult has public releases.
-  - C-AOL Summarizer controls are dry-run/status-only and say so.
-  - Backend controls save metadata and readiness status, not secrets or silent installs.
-  - OpenVINO is described as Windows-first/detect-only for v0.
-  - Play/Resume has macOS launch preflight and blocks known non-portable C-AOL package dylib failures instead of crashing mysteriously.
-- The largest remaining release blocker is not a click-path bug: the selected C-AOL macOS `v0.2.0` app bundle does not launch on this Mac because it links unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib` paths. That is a C-AOL package portability lane, not a Lacapult menu-flow issue.
-- Windows still needs a real exported Lacapult build smoke and Josef laptop test before public release confidence. Local export proofs are good, but not the same as a normal-user Windows install/open/play pass.
-
-## Small fixes made during this audit
-
-### 1. C-AOL changelog link no longer opens an inherited empty PR dialog
-
-Problem: the inherited `View Changelog` link was meaningful for DDA/BN GitHub PR streams, but C-AOL release users expect release notes. For C-AOL it was a misleading inherited door.
-
-Fix: when `game == "caol"`, the link label becomes **View C-AOL release page** and opens the selected release's GitHub page, falling back to `https://github.com/josihosi/Cataclysm-AOL/releases`.
-
-Files:
-
-- `scripts/Catapult.gd`
-
-### 2. Godot debug/test window is no longer configured as a one-pixel postage stamp
-
-Problem: `project.godot` had `window/size/test_width=1` and `window/size/test_height=1`. That produced flaky visual QA and could make debug launches look broken when the app itself existed.
-
-Fix: set debug/test dimensions to the normal 600x700 launcher size.
-
-Files:
-
-- `project.godot`
+Meaning: the launcher no longer has obvious hollow/dead-end C-AOL controls in the audited paths, and the high-risk v0 limitations are now surfaced as status-only/config-only rather than pretending to do more. This is still not a public release greenlight. Final release confidence still needs Josef's Windows click-through of install -> play -> resume/settings/mods/backups on the packaged build.
 
 ## Persona click map
 
-### Persona 1 — fresh normal Windows user: install C-AOL v0.2.0 and play
+### 1. Fresh Windows user: install C-AOL v0.2.0 and play
 
-Expected path:
+Click path:
 
-1. Open Lacapult Doobdab.
-2. Stay on **Game** tab.
-3. Confirm target is C-AOL.
-4. Click **Refresh** if releases are not loaded.
-5. Select the platform-matching `v0.2.0` Windows asset.
-6. Click **Install Selected**.
-7. Wait for download/extract/install status.
-8. Confirm active install appears.
-9. Click **Play**.
+1. Launch Lacapult.
+2. Confirm game selector is `Cataclysm: Arsenic and Old Lace`.
+3. Read the C-AOL description.
+4. See channel fixed to release/stable for C-AOL; experimental is disabled.
+5. Open available builds.
+6. Select `Cataclysm - Arsenic and Old Lace v0.2.0 ... windows.zip` on Windows.
+7. Click `Install Selected`.
+8. Wait for download/extract/move status in the log.
+9. Confirm `Active install` changes from `None` to the installed release.
+10. Click `Play`.
+11. If a previous world exists, click `Resume Last World`.
+12. Use `GameDir` / `UserDir` folder icons if troubleshooting paths.
 
-What makes sense now:
+Audit read:
 
-- Release metadata and install paths have deterministic proofs.
-- The visible install button has already been click-smoked in an isolated HOME.
-- Local unsigned Windows export/package shape is proven, but not yet Josef-laptop-proven.
+- The selected build item includes installability/asset status and tooltips include release page/asset details.
+- Install refuses releases with no platform asset instead of pretending they can install.
+- With no active install, Play/Resume are disabled.
+- The `Update current active install` checkbox is now visually unchecked when no active install exists, so a fresh user is not invited to update something that does not exist.
 
-Remaining risk:
+Remaining Windows-specific proof needed:
 
-- A real Windows laptop pass is still required. The app may be locally exportable and still fail a normal user's OS/package/permissions reality check, because software distribution enjoys being a goblin.
+- A real Windows packaged-build click-through must confirm the `.zip` asset selection, extraction root, executable launch, `--userdir`, and resume behavior.
 
-### Persona 2 — fresh macOS/Linux user
+### 2. Fresh macOS/Linux user: platform differences and launch preflight
 
-Expected path:
+Click path:
 
-1. Open Lacapult.
-2. Select platform release.
-3. Install.
-4. Press **Play** only if launch preflight is green.
+1. Launch Lacapult.
+2. Select/read C-AOL build list.
+3. On macOS, select the `.dmg` asset if present; on Linux, select the `.tar.gz` asset.
+4. Install.
+5. Observe active-install launch preflight.
+6. Click Play only if preflight allows it.
 
-What makes sense now:
+Audit read:
 
-- macOS DMG install shape is proven in a sandbox.
-- macOS Play/Resume preflight now reports the actual C-AOL package portability blocker instead of letting the binary abort.
-- Linux package export shape is proven locally.
+- `ReleaseInstaller.gd` searches the extracted root differently on Windows vs Linux/macOS and has specific `.app` bundle handling.
+- macOS has C-AOL launch preflight for missing/non-portable local dylibs and blocks launch when known missing dylibs would make the package fail.
+- The preflight text explicitly says Lacapult can report package portability issues, not repair them.
 
-Remaining risk:
+Remaining macOS/Linux caveat:
 
-- macOS C-AOL `v0.2.0` currently fails because the upstream app bundle references non-bundled local dylibs. Lacapult should not pretend to fix that.
-- Linux needs real package/open/run evidence before public release confidence.
+- This remains package-sensitive. If the C-AOL macOS artifact links `/opt/local`, `/usr/local`, or `/opt/homebrew` dylibs, Lacapult surfaces the problem instead of hiding it. That is acceptable launcher behavior, but not proof that the macOS game package is portable.
 
-### Persona 3 — backend setup user: API, Ollama, OpenVINO
+### 3. Backend setup user: API, Ollama, OpenVINO
 
-Expected path:
+Click path:
 
-1. Open **Settings**.
-2. Use **C-AOL NPC backend setup**.
-3. Choose API / Ollama / OpenVINO.
-4. Fill endpoint/model/Python/env-var fields as applicable.
-5. Click **Save backend setup metadata**.
-6. Read backend readiness/status text.
+1. Click `Settings`.
+2. Find `C-AOL NPC backend setup` near the top of Settings.
+3. Choose backend: `Recommended: API backend`, `Local: Ollama backend`, or `Windows-first: OpenVINO backend`.
+4. Fill endpoint/model/Python/env-var fields as relevant.
+5. Read the status/guidance block.
+6. Click `Save backend setup metadata`.
 
-What makes sense now:
+Audit read:
 
-- API path stores provider/model/env-var metadata only; it does not store or print secrets.
-- Ollama path checks command/server/model-list state without pulling models.
-- OpenVINO path is plainly Windows-first/detect-only for v0 and does not install packages or download/convert models.
-- Backend option apply to real C-AOL config is sandbox-proven, but not exposed as a real-user mutation button.
+- Backend UI is config/status, not an installer.
+- The UI now recommends API first for fastest Windows onboarding/debug, Ollama second as the mainstream local path, and OpenVINO third as Windows-first specialized/detect-only.
+- API path stores only provider/model/env-var metadata; secrets stay in environment variables.
+- Ollama path states no model pull is attempted.
+- OpenVINO path states Windows-first v0 and no automated runtime/model install.
+- Backend detection reports missing Python/import/model-dir/API-key-env statuses instead of silently downloading or calling anything.
 
-Remaining risk:
+Dead-end risk checked:
 
-- The next product decision should favor **backend recommendation/setup** before real generation/apply UI. A Summarizer generation button without a good backend recommendation path would be a shiny button wired to user confusion. Ja eh.
-- C-AOL runtime still has hardcoded API provider behavior in source; Lacapult must not overpromise arbitrary API provider routing until C-AOL consumes it.
+- No backend selection claims it will install OpenVINO, pull Ollama models, call an API, or fix missing dependencies. The v0 promise is intentionally narrow.
 
-### Persona 4 — mod-curious user: mods and Summarizer status
+### 4. Mod-curious user: mods, Summarizer status, dry-run
 
-Expected path:
+Click path:
 
-1. Open **Mods**.
-2. Inspect installed/available mods.
-3. Read C-AOL summary badges/status.
-4. Click **Summarizer dry-run**.
-5. Optionally inspect Settings status too.
+1. Install/activate a C-AOL game first; until then, `Mods` is disabled by the base launcher gating.
+2. Click `Mods`.
+3. Select available/installed mods.
+4. Read badges: enabled/disabled, summary-ready/missing/partial, obsolete/dependency/metadata blocked.
+5. Click `Summarizer dry-run`.
+6. Read the status message.
+7. Use install/delete buttons for actual mod file operations only.
 
-What makes sense now:
+Audit read:
 
-- Mods tab and Settings tab both expose C-AOL mod/Summarizer status.
-- Dry-run buttons explicitly say no backend call, no generated pack, no apply, and no userdata mutation.
-- Slice 3-5 proofs cover sandbox apply/rollback, runtime consumption, and error/rollback matrix.
+- The Summarizer surface is explicitly status-only.
+- Dry-run tooltip and status text say no backend call, generated pack, apply, enable, or save mutation happens.
+- Settings has a second read-only C-AOL packaged-mod compatibility block with the same limitation.
+- Generation/apply is not exposed as a real-user-active button. Good; no hollow promise here.
 
-Remaining risk:
+Remaining product limitation:
 
-- Real user generation/apply UI is intentionally not wired yet. This is correct for now; the UI should remain status-only until backend recommendation is less miserable.
+- The inherited mod UI is dense, and compatibility-date fetching may feel technical. This is tolerable for v0, but future UX should separate simple mod install from compatibility diagnostics.
 
-### Persona 5 — returning user with an installed game
+### 5. Returning user with an installed game
 
-Expected path:
+Click path:
 
-1. Open Lacapult.
-2. Existing install appears in **Game Installs**.
-3. Use **Make Active** if needed.
-4. Use folder buttons for game/user dir inspection.
-5. Use **Play** / **Resume** when preflight permits.
-6. Use **Backups** if backup/restore is needed.
-7. Use **Mods**, **Tilesets**, **Soundpacks**, and **Fonts** for inherited asset management.
+1. Launch Lacapult.
+2. Read `Active install`.
+3. Click `Play`.
+4. Click `Resume Last World` if lastworld exists.
+5. Open `GameDir` or `UserDir` for troubleshooting.
+6. Use `Backups` for manual/automatic saves.
+7. Use `Settings` for backend setup and launcher preferences.
+8. Use `Mods`, `Tilesets`, `Soundpacks`, `Fonts` after an install exists.
+9. If multiple installs exist, use the installs list: select -> `Make Active`; double-click opens install folder; `Delete` removes an install.
 
-What makes sense now:
+Audit read:
 
-- Inherited tabs are still present rather than silently deleted.
-- Backups and launch-before-backup setting remain visible.
-- C-AOL-specific launch preflight now prevents at least one known bad launch class from becoming a mysterious crash.
+- Installed-game-only tabs remain disabled until an install exists, preventing most empty dead ends.
+- Multiple-install controls are disabled until a list item is selected.
+- Backups are reachable only when there is enough game/userdata context for them to make sense.
 
-Remaining risk:
+### 6. Failure user: missing deps, blocked launch package, obsolete/broken mod, backend-not-ready
 
-- Inherited DDA/BN/TLG catalog compatibility does not automatically mean C-AOL compatibility. Where C-AOL truth is not proven, UI/status must keep saying untested rather than supported.
+Click path / statuses:
 
-### Persona 6 — failure/confused user
+- Missing platform asset: build list says no asset for this platform and install is disabled.
+- Release has no assets: build list says no release assets yet and install is disabled.
+- Missing install folder/executable: launch preflight reports the specific missing folder/executable.
+- macOS non-portable package: launch preflight names the missing dylibs and blocks launch.
+- API backend not ready: status reports Python/import/provider/model/env-var readiness without reading secrets.
+- Ollama backend not ready: status reports endpoint/model/Python/import readiness; no model pull.
+- OpenVINO not ready: status reports Windows-first/config-only/runtime/model-dir readiness; no install.
+- Obsolete/dependency-blocked mod: mod badges and detail text show blocked status.
 
-Expected failure paths:
+Audit read:
 
-- Backend dependency missing.
-- API env var not set.
-- Ollama missing/server down/model missing.
-- OpenVINO packages/model dir missing.
-- Broken/obsolete mod metadata.
-- Missing/partial/stale/conflicting generated summaries.
-- C-AOL launch package not portable.
+- The important failure paths now either disable the action, show status, or log a specific reason. No high-risk path silently proceeds into a promised install/download/API action that v0 cannot actually deliver.
 
-What makes sense now:
+## Dead ends / hollow promises found
 
-- Existing proofs cover backend-not-ready gates, broken modinfo, content parse errors, missing dependencies, obsolete mods, partial/stale/conflicting summaries, and rollback restore.
-- macOS launch package failure is surfaced as preflight status.
+1. C-AOL changelog link still behaved like inherited Catapult experimental changelog.
+   - Why it was hollow: C-AOL uses GitHub releases, not the inherited experimental changelog dialog.
+   - Fix: for C-AOL, the link is now labeled `View C-AOL release page` and opens the selected C-AOL release page, falling back to the releases index.
 
-Remaining risk:
+2. Fresh-user Game tab could show `Update current active install` as checked even with `Active install: None`.
+   - Why it was hollow: the disabled checked state suggested Lacapult might update an install that does not exist.
+   - Fix: when no install exists, the checkbox is disabled and visually unchecked; when an install exists, the stored setting is restored.
 
-- The UI is still dense. For Josef's own testing this is acceptable; for public release a shorter first-run wizard would be kinder.
+3. `Update Lacapult` was visible but disabled while self-update is intentionally unavailable.
+   - Why it was hollow: the button title suggested an action that cannot exist until public Lacapult releases exist.
+   - Fix: when self-update is disabled, the button text changes to `Lacapult update unavailable` with a direct tooltip.
 
-## Tab/menu audit summary
+## Small fixes made
 
-### Game tab
+- `project.godot`: changed debug test window size from `1x1` to `600x700`, so local debug launches are visually inspectable instead of appearing as a one-pixel/black-window trap.
+- `scripts/Catapult.gd`: C-AOL release link now routes to the selected release page and has C-AOL-specific label/tooltip.
+- `scripts/Catapult.gd`: fresh no-install state no longer displays a checked `Update current active install` checkbox.
+- `scripts/Catapult.gd`: disabled self-update now says unavailable in the button itself.
+- `scripts/BackendConfigManager.gd`, `scripts/SettingsUI.gd`, `tools/godot_backend_triad_smoke.gd`: Settings now exposes the backend recommendation order and the smoke asserts that the order/warnings stay present.
 
-- **Refresh:** meaningful; fetches C-AOL release data.
-- **Stable/Experimental:** C-AOL forces stable and disables channel choice, which is sensible for release-targeted `v0.2.0`.
-- **View C-AOL release page:** meaningful after this audit; opens selected/fallback GitHub release page.
-- **Install Selected:** meaningful; sandbox and clicked GUI proof exist.
-- **Play/Resume:** meaningful only after active install; preflight blocks known bad C-AOL package portability on macOS.
-- **Open/Search Wiki:** disabled for C-AOL; acceptable because no C-AOL wiki path is wired. Better disabled than a fake search.
-- **Update Lacapult:** disabled because no public Lacapult release endpoint exists. Acceptable for pre-release; should be hidden or moved before public release if still disabled.
+## Remaining blockers before public release confidence
 
-### Mods tab
-
-- Installed/available mod lists remain useful.
-- C-AOL status/badges are read-only and honest.
-- Summarizer dry-run is useful as a status explainer, not fake generation.
-- Real install/enable/apply is not feature-complete yet; do not relabel as done.
-
-### Tilesets / Soundpacks / Fonts
-
-- Inherited asset-management surfaces remain intact.
-- No C-AOL-specific dead end found in source audit, but these need normal-user package smoke later because inherited logic may have C-AOL path edge cases.
-
-### Backups
-
-- Backup-before-launch remains visible and useful.
-- Restore/delete flows should be tested with an installed Windows package before public release.
-
-### Settings
-
-- Backend setup panel is visible near the top, before inherited settings sprawl.
-- API/Ollama/OpenVINO labels and status wording are honest enough for v0.
-- C-AOL mod/Summarizer bridge panel says the native summary roots and no-real-apply state.
-
-### About / Debug
-
-- About remains suitable for attribution/support context.
-- Debug tab is developer-facing; acceptable for pre-release but public release may want it hidden behind an advanced toggle.
-
-## Remaining blockers before release confidence
-
-1. **Windows normal-user test:** exported Lacapult package opens on Josef's Windows laptop, fetches C-AOL `v0.2.0`, installs the Windows asset, and reaches Play/Resume without a launcher-side crash.
-2. **Backend recommendation/setup lane:** choose recommended default path in-product. Current recommendation: API for fastest onboarding/debug, Ollama as mainstream local backend, OpenVINO visible as Windows-first/specialized. Do this before real Summarizer generation/apply UI.
-3. **Real user generation/apply UI:** still intentionally absent. Keep dry-run/status-only until backend readiness/recommendation is clear enough.
-4. **C-AOL macOS package portability:** not a Lacapult UI blocker for Windows testing, but a public macOS release blocker.
-5. **Public distribution hygiene:** signing/notarization/GitHub release/tags/upstream contact still require separate clearance.
+- Windows packaged-build click-through: install C-AOL v0.2.0, play, create/enter world, quit, resume, verify userdir isolation.
+- Windows backend setup smoke from the packaged app, especially Python path / env-var / Ollama URL fields.
+- Windows mod tab smoke after an install exists: install/enable ordinary mod, read Summarizer status, press dry-run, confirm no generation/apply mutation.
+- Backups tab smoke with a real save directory.
+- Optional but wise: reduce first-screen text density and lore-heavy wording before broad public users see it.
 
 ## Recommendation
 
-Do **not** public-release yet.
-
-Do a Josef Windows test build next, but label it as a pre-release test packet. The launcher is coherent enough to test on Windows; it is not yet proven enough to hand to strangers with a straight face and a dry biscuit.
-
-Next implementation lane I would pick: **backend recommendation/setup**, not real generation/apply UI. The Summarizer already has enough sandbox proof to be real later, but the user needs guidance on which backend to choose before the app asks them to generate anything.
+Proceed to Josef Windows testing. Do not publish/release yet. If Josef's Windows test confirms install -> play -> resume and the Settings/Mods/Backups flows behave as mapped here, this audit no longer sees a launcher-shaped hollow spot blocking a release candidate.

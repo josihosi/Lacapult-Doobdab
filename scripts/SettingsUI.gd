@@ -15,6 +15,7 @@ var _proxy_options := ["off", "on", "download"]
 var _backend_modes := ["api", "ollama", "openvino"]
 
 var _backend_mode_button: OptionButton = null
+var _backend_recommendation: Label = null
 var _backend_endpoint_label: Label = null
 var _backend_endpoint: LineEdit = null
 var _backend_model_label: Label = null
@@ -89,6 +90,11 @@ func _add_backend_setup_controls() -> void:
 	title.text = "C-AOL NPC backend setup"
 	section.add_child(title)
 
+	_backend_recommendation = Label.new()
+	_backend_recommendation.autowrap = true
+	_backend_recommendation.text = BackendConfig.get_backend_recommendation_summary()
+	section.add_child(_backend_recommendation)
+
 	var mode_row = HBoxContainer.new()
 	mode_row.name = "BackendMode"
 	section.add_child(mode_row)
@@ -99,9 +105,9 @@ func _add_backend_setup_controls() -> void:
 	_backend_mode_button = OptionButton.new()
 	_backend_mode_button.rect_min_size = Vector2(180, 0)
 	_backend_mode_button.size_flags_horizontal = SIZE_SHRINK_END
-	_backend_mode_button.add_item("API backend")
-	_backend_mode_button.add_item("Ollama backend")
-	_backend_mode_button.add_item("OpenVINO backend")
+	_backend_mode_button.add_item("Recommended: API backend")
+	_backend_mode_button.add_item("Local: Ollama backend")
+	_backend_mode_button.add_item("Windows-first: OpenVINO backend")
 	_backend_mode_button.connect("item_selected", self, "_on_BackendMode_item_selected")
 	mode_row.add_child(_backend_mode_button)
 
@@ -278,10 +284,15 @@ func _refresh_backend_setup_controls() -> void:
 	_backend_python_path.text = Settings.read("backend_python_path")
 	_backend_api_key_env.text = Settings.read("backend_api_key_env")
 
+	if _backend_recommendation != null:
+		_backend_recommendation.text = BackendConfig.get_backend_recommendation_summary()
+
 	var status = "Backend status: unknown"
 	for backend in BackendConfig.get_supported_backends():
 		if backend.get("id", "") == mode:
 			status = "%s status: %s" % [backend.get("label", mode), backend.get("status", "unknown")]
+			status += "\nRecommendation #%s: %s" % [backend.get("recommendation_rank", "?"), backend.get("recommendation", "No recommendation text available.")]
+			status += "\nV0 warning: %s" % backend.get("v0_warning", "Metadata/status only; no unsafe setup automation is attempted.")
 			status += "\nSetup: %s" % backend.get("guidance", BackendConfig.get_backend_guidance(mode))
 			break
 	if mode == "api":
@@ -336,7 +347,8 @@ func _on_SaveBackendSetup_pressed() -> void:
 	var openvino_model_dir = endpoint if mode == "openvino" else Settings.read("backend_openvino_model_dir")
 	var openvino_device = model if mode == "openvino" else Settings.read("backend_openvino_device")
 	var result = BackendConfig.write_launcher_backend_config(mode, endpoint, model, python_path, api_provider, api_key_env, openvino_model_dir, openvino_device)
-	_backend_status.text = "Backend setup save result: %s" % result
+	_refresh_backend_setup_controls()
+	_backend_status.text = "Backend setup save result: %s\n%s" % [result, _backend_status.text]
 
 
 func _on_obtnLanguage_item_selected(index: int) -> void:

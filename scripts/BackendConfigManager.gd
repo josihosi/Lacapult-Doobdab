@@ -28,6 +28,10 @@ func get_supported_backends() -> Array:
 		{
 			"id": BACKEND_API,
 			"label": "API backend",
+			"recommendation_rank": 1,
+			"recommendation": "Recommended first for Windows pre-release testing: fastest onboarding/debug path when Python + AnyLLM and an API-key env var are already available.",
+			"setup_role": "fastest_onboarding_debug",
+			"v0_warning": "Lacapult stores provider/model/env-var metadata only; it never stores API keys or makes a live API call from this Settings block.",
 			"status": _detect_api_status(python_path, api_provider, api_model, api_key_env),
 			"guidance": get_backend_guidance(BACKEND_API),
 			"python_path": python_path,
@@ -38,6 +42,10 @@ func get_supported_backends() -> Array:
 		{
 			"id": BACKEND_OLLAMA,
 			"label": "Ollama backend",
+			"recommendation_rank": 2,
+			"recommendation": "Mainstream local path: use when Ollama is installed, the local server is running, and a model is already present.",
+			"setup_role": "mainstream_local",
+			"v0_warning": "Lacapult detects command/server/model-list state only; it does not pull models or run an Ollama installer.",
 			"status": _detect_ollama_status(ollama_endpoint, ollama_model),
 			"guidance": get_backend_guidance(BACKEND_OLLAMA),
 			"endpoint": ollama_endpoint,
@@ -47,6 +55,10 @@ func get_supported_backends() -> Array:
 		{
 			"id": BACKEND_OPENVINO,
 			"label": "OpenVINO backend",
+			"recommendation_rank": 3,
+			"recommendation": "Specialized Windows-first path: selectable for users who already have OpenVINO Python packages and a local model directory.",
+			"setup_role": "windows_first_specialized_detect_only",
+			"v0_warning": "Lacapult v0 reports OpenVINO readiness only; it does not install runtimes, tokenizers, drivers, or download/convert models.",
 			"status": _detect_openvino_status(python_path, openvino_model_dir),
 			"guidance": get_backend_guidance(BACKEND_OPENVINO),
 			"python_path": python_path,
@@ -54,6 +66,10 @@ func get_supported_backends() -> Array:
 			"device": openvino_device
 		},
 	]
+
+
+func get_backend_recommendation_summary() -> String:
+	return "Recommended setup order for Josef's Windows test: 1) API = fastest onboarding/debug, 2) Ollama = mainstream local, 3) OpenVINO = Windows-first specialized/detect-only. Settings saves metadata/status only: no API call, model pull, OpenVINO install, generated summary-pack apply, or real C-AOL config mutation happens here."
 
 func get_backend_guidance(mode: String) -> String:
 	if mode == BACKEND_API:

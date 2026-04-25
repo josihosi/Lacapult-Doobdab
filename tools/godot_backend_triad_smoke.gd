@@ -52,7 +52,8 @@ func _run() -> void:
 		"sandbox_options_apply": sandbox_results,
 		"last_config": last_config,
 		"last_patch": last_patch,
-		"supported_backends": backend.get_supported_backends()
+		"supported_backends": backend.get_supported_backends(),
+		"recommendation_summary": backend.get_backend_recommendation_summary()
 	}
 	print(JSON.print(proof, "  "))
 
@@ -72,9 +73,56 @@ func _run() -> void:
 	if last_patch.get("options", []).empty() or last_patch["options"][0].get("value", "") != "openvino":
 		_fail("OpenVINO backend option missing from preview patch")
 		return
+	if not _assert_backend_recommendations(backend.get_supported_backends(), backend.get_backend_recommendation_summary()):
+		return
+	if not _assert_settings_ui_recommendation_copy():
+		return
 
 	_exit_code = 0
 	_finalize()
+
+
+func _assert_backend_recommendations(supported: Array, summary: String) -> bool:
+	if supported.size() != 3:
+		_fail("expected exactly three supported backend recommendations")
+		return false
+	var expected = ["api", "ollama", "openvino"]
+	for i in range(expected.size()):
+		var item = supported[i]
+		if item.get("id", "") != expected[i]:
+			_fail("backend recommendation order mismatch at %s: %s" % [i, item.get("id", "missing")])
+			return false
+		if item.get("recommendation_rank", 0) != i + 1:
+			_fail("backend recommendation rank mismatch for %s" % expected[i])
+			return false
+		if str(item.get("recommendation", "")).strip_edges() == "" or str(item.get("v0_warning", "")).strip_edges() == "":
+			_fail("backend recommendation/warning missing for %s" % expected[i])
+			return false
+	if summary.find("API = fastest onboarding/debug") < 0:
+		_fail("recommendation summary does not prioritize API")
+		return false
+	if summary.find("Ollama = mainstream local") < 0:
+		_fail("recommendation summary does not describe Ollama")
+		return false
+	if summary.find("OpenVINO = Windows-first specialized/detect-only") < 0:
+		_fail("recommendation summary does not warn about OpenVINO")
+		return false
+	return true
+
+
+func _assert_settings_ui_recommendation_copy() -> bool:
+	var f := File.new()
+	var err := f.open("res://scripts/SettingsUI.gd", File.READ)
+	if err != OK:
+		_fail("could not read SettingsUI.gd for recommendation UI proof")
+		return false
+	var text := f.get_as_text()
+	f.close()
+	for token in ["Recommended: API backend", "Local: Ollama backend", "Windows-first: OpenVINO backend", "Recommendation #", "Summarizer dry-run/status-only"]:
+		if text.find(token) < 0:
+			_fail("Settings UI recommendation/status-only token missing: %s" % token)
+			return false
+	return true
 
 
 func _run_sandbox_options_apply(paths, helpers, backend, install_dir: String) -> Dictionary:

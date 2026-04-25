@@ -4,7 +4,7 @@ Success-state ledger for Lacapult Doobdab.
 
 ## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-Status: **CLICKED INSTALL + BACKEND TRIAD V0-SAFE CONFIG/READINESS + SANDBOX OPTIONS APPLY PROVEN + MOD UI STATUS + CLICK-LEVEL GUI AUDIT MAYBE-READY FOR JOSEF WINDOWS TEST + LOCAL UNSIGNED APP/PACKAGE EXPORTS PROVEN + LAUNCH PREFLIGHT STATUS PROVEN / GAME-LAUNCH BLOCKED ON C-AOL DYLIBS / PUBLIC RELEASE NOT CLAIMED**
+Status: **CLICKED INSTALL + BACKEND TRIAD V0-SAFE CONFIG/READINESS + SANDBOX OPTIONS APPLY PROVEN + MOD UI STATUS + CLICK-LEVEL GUI AUDIT READY FOR JOSEF WINDOWS TEST + LOCAL UNSIGNED APP/PACKAGE EXPORTS PROVEN + LAUNCH PREFLIGHT STATUS PROVEN / GAME-LAUNCH BLOCKED ON C-AOL DYLIBS / PUBLIC RELEASE NOT CLAIMED**
 
 Done only when all are true:
 
@@ -24,6 +24,7 @@ Done only when all are true:
 - [x] Ollama backend appears as a first supported setup/config option with safe command/server/model-list detection and no model pulls.
 - [x] Backend setup has a visible Settings-tab selector/status/save path, including the shared C-AOL Python/venv runner path.
 - [x] API, Ollama, and OpenVINO are visible as backend choices.
+- [x] Backend setup now presents a player-facing recommendation order: API first for fastest Windows onboarding/debug, Ollama for mainstream local setup, OpenVINO as Windows-first specialized/detect-only.
 - [x] OpenVINO selection saves/reports honest v0 Windows-first Python-import/model-dir/device detection/config metadata without pretending runtime install/download/live inference exists.
 - [x] Sandboxed C-AOL `config/options.json` apply proof verifies API, Ollama, and OpenVINO option patches without mutating Josef's real C-AOL Application Support config.
 - [x] Inherited mod/soundpack/tileset support is preserved or any temporary breakage is documented.
@@ -36,8 +37,9 @@ Done only when all are true:
 - [x] Godot 3.6.2 GUI smoke proves the project launches, the Game tab prioritizes the C-AOL `v0.2.0` macOS DMG, and the Settings tab exposes backend setup controls.
 - [x] Public repo existence is recorded (`https://github.com/josihosi/Lacapult-Doobdab`), and public releases/contact remain blocked without fresh Josef/Schani clearance.
 - [x] Lacapult itself has local unsigned app/executable/package evidence for Windows, macOS, and Linux; developer-only Godot project launch or raw PCK export is not the final bar.
-- [x] Click-level GUI audit doc exists at `doc/lacapult-click-level-gui-audit-2026-04-25.md`; verdict is maybe-ready for Josef Windows test, not public release.
+- [x] Click-level GUI audit doc exists at `doc/lacapult-click-level-gui-audit-2026-04-25.md`; verdict is ready for Josef Windows test, not public release.
 - [x] C-AOL release/changelog link no longer opens an inherited empty changelog path; for C-AOL it opens the selected/fallback GitHub release page.
+- [x] Fresh no-install state does not display a checked `Update current active install` checkbox, and unavailable Lacapult self-update is labeled as unavailable instead of implying a working update action.
 
 ## Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply
 
@@ -83,5 +85,7 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - Added `doc/lacapult-click-level-gui-audit-2026-04-25.md` with persona click maps for fresh Windows, macOS/Linux, backend setup, mod/Summarizer, returning-user, and failure-user paths.
 - Patched the C-AOL changelog/release link so C-AOL opens the selected/fallback GitHub release page instead of the inherited changelog dialog.
 - Patched `project.godot` debug/test window dimensions from 1x1 to 600x700 so GUI QA/debug launches are not hidden in a postage stamp.
-- Audit verdict: coherent enough for a Josef Windows pre-release test, not ready for public release; the next product lane should be backend recommendation/setup before real Summarizer generation/apply UI.
+- Patched fresh no-install/update-current and unavailable self-update labels so the Game tab no longer offers impossible-looking update actions.
+- Added Settings-tab backend recommendation copy and smoke coverage: API fastest onboarding/debug, Ollama mainstream local, OpenVINO Windows-first specialized/detect-only.
+- Audit verdict: ready for a Josef Windows pre-release test, not ready for public release; real Summarizer generation/apply UI remains deferred behind backend readiness.
 - Re-ran Godot project load, backend triad smoke, C-AOL mod status/UX smokes, related Python compile, and `git diff --check`; all passed. Combined log: `.proof-cache/click-gui-audit/gates-rerun.log`.

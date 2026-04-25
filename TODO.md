@@ -11,9 +11,9 @@ Current checkpoint: the v0.2.0 release installer, clicked install proof, backend
 Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order. Lacapult's own cross-platform installability is part of the product bar: Windows/macOS/Linux users should be able to install/open the launcher without developer tooling. Keep that evidence separate from C-AOL game-package launchability.
 
 0. Backend recommendation/setup active next lane
-   - [ ] Turn backend setup into a player-facing recommendation path: API = fastest onboarding/debug, Ollama = mainstream local, OpenVINO = Windows-first specialized/detect-only.
-   - [ ] Add/verify Windows-focused wording and smoke coverage for the selected recommendation path before Josef laptop testing.
-   - [ ] Keep real Summarizer generation/apply UI disabled or dry-run/status-only until backend recommendation/readiness is good enough.
+   - [x] Turn backend setup into a player-facing recommendation path: API = fastest onboarding/debug, Ollama = mainstream local, OpenVINO = Windows-first specialized/detect-only.
+   - [x] Add/verify Windows-focused wording and smoke coverage for the selected recommendation path before Josef laptop testing.
+   - [x] Keep real Summarizer generation/apply UI disabled or dry-run/status-only until backend recommendation/readiness is good enough.
 
 1. Mod install/enable + Summarizer implemented slices
    - [x] Implement Slice 1 from `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`: discovery/status model for stock packaged, user-installed, custom-catalog, and world-specific mods, with enabled/disabled state for at least one sandbox world.

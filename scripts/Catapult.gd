@@ -1090,6 +1090,7 @@ func _refresh_currently_installed() -> void:
 
 	if game in _installs:
 		_lbl_build.text = active_name
+		_cb_update.pressed = Settings.read("update_current_when_installing")
 		var launch_preflight = _refresh_launch_preflight_status()
 		var launch_blocked = launch_preflight.get("blocks_launch", false)
 		_btn_play.disabled = launch_blocked
@@ -1113,6 +1114,7 @@ func _refresh_currently_installed() -> void:
 		_clear_launch_preflight_status()
 		_btn_install.disabled = not has_download_url
 		_cb_update.disabled = true
+		_cb_update.pressed = false
 		_btn_play.disabled = true
 		_btn_resume.disabled = true
 		_btn_game_dir.visible = false
@@ -1283,8 +1285,12 @@ func _on_BtnCheck_pressed() -> void:
 	var current_version = Settings.get_hardcoded_version()
 	if VERSION_CHECK_URL == "":
 		Status.post(tr("Lacapult self-update is disabled until public Lacapult releases exist. Current version: v%s") % current_version)
+		_btn_update.text = "Lacapult update unavailable"
+		_btn_update.hint_tooltip = "Self-update is disabled until public Lacapult releases exist."
 		_btn_update.disabled = true
 		return
+	_btn_update.text = "Update Lacapult"
+	_btn_update.hint_tooltip = "Check the public Lacapult release page for a launcher update."
 	Status.post(tr("Checking for Lacapult updates... Current version: v%s") % current_version)
 	
 	# Disable the update button while checking
