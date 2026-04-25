@@ -6,7 +6,7 @@ Short execution queue only.
 
 Active target: `Lacapult Doobdab v0.2.0 release installer plus first backend setup options`.
 
-Current checkpoint: local proof packet, first Godot GUI smoke, controlled selected-macOS-DMG mount/launchability-shape proof, sandboxed Lacapult-style DMG install-shape proof, Godot 3.6.2 project-load revalidation, a headless Godot `ReleaseInstaller.install_release()` pass, a full-scene Godot Install-button signal pass, and a physical clicked GUI install pass against the selected cached macOS DMG are complete as of 2026-04-25. The backend triad and first C-AOL mod compatibility inventory are now proven. The next honest step is a Schani/Josef release-prep decision or an optional C-AOL game-launch smoke, not pretending full OpenVINO automation or curated C-AOL mod downloads exist.
+Current checkpoint: local proof packet, first Godot GUI smoke, controlled selected-macOS-DMG mount/launchability-shape proof, sandboxed Lacapult-style DMG install-shape proof, Godot 3.6.2 project-load revalidation, a headless Godot `ReleaseInstaller.install_release()` pass, a full-scene Godot Install-button signal pass, and a physical clicked GUI install pass against the selected cached macOS DMG are complete as of 2026-04-25. The backend triad, first C-AOL mod compatibility inventory, and local Godot export-pack/PCK release-prep proof are now proven. The next honest step is either installing Godot 3.6.2 export templates and doing unsigned local app exports, making a signing/notarization decision, or running the optional C-AOL game-launch smoke; do not pretend full OpenVINO automation or curated C-AOL mod downloads exist.
 
 Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order.
 
@@ -51,6 +51,7 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - If full GUI launch is possible, smoke launch to the release list; otherwise record the exact missing tool/blocker.
 
 7. Park next slices
+   - [x] Local Godot export-pack/PCK release-prep proof for macOS/Linux/Windows using temporary safe presets; full app exports are blocked until Godot 3.6.2 export templates are installed.
    - C-AOL game-launch smoke from the clicked install, only when Schani/Josef wants that heavier proof; the physical clicked install, headless Godot installer path, full-scene Install-button signal path, and sandboxed copy/move shape are already proven.
    - OpenVINO full setup/installer automation beyond selectable v0 status metadata.
    - Real model install/model-pull automation.

@@ -28,6 +28,10 @@ This repository is early development. It is public for transparency and collabor
 
 No Lacapult Doobdab packaged release exists yet. For development, open the Godot project locally and run `scenes/Catapult.tscn` if a compatible Godot binary is available.
 
+## Release-prep validation
+
+Run `python3 tools/prove_lacapult_export_packaging.py` for the current local packaging proof. It exports Godot PCK packs for macOS, Linux, and Windows into ignored `.proof-cache/` output and reports whether full app exports are blocked by missing Godot export templates.
+
 ## Credits
 
 Lacapult Doobdab stands on existing open-source Cataclysm launcher work:
