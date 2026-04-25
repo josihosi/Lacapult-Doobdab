@@ -192,8 +192,13 @@ func _add_caol_mod_bridge_status_controls() -> void:
 
 	_caol_mod_bridge_status = Label.new()
 	_caol_mod_bridge_status.autowrap = true
-	_caol_mod_bridge_status.text = "Read-only report available for packaged C-AOL v0.2.0 stock mods: 49 packaged mods total; 42 non-obsolete stock packaged mods are path-supported; 7 obsolete blockers; 30 summarizer-compatible-but-needs-generated-pack; 12 no-summary-needed; 0 summarizer-ready."
 	section.add_child(_caol_mod_bridge_status)
+
+	var dry_run_button = Button.new()
+	dry_run_button.text = "Summarizer dry-run status"
+	dry_run_button.hint_tooltip = "Status-only prompt: no backend call, no generated pack, no apply, no mod enable."
+	dry_run_button.connect("pressed", self, "_on_CaolSummarizerDryRun_pressed")
+	section.add_child(dry_run_button)
 
 	var summary_roots = Label.new()
 	summary_roots.autowrap = true
@@ -206,9 +211,31 @@ func _add_caol_mod_bridge_status_controls() -> void:
 	section.add_child(report_reference)
 
 	# Keep this read-only status surface near the backend controls, before the long
-	# inherited settings list. No buttons here: applying/generated summary packs is
-	# a later explicit flow, not part of the v0 status surface.
+	# inherited settings list. The button is dry-run/status-only; applying/generated
+	# summary packs is a later explicit flow.
 	move_child(section, 3)
+	_refresh_caol_mod_bridge_status()
+
+
+func _refresh_caol_mod_bridge_status() -> void:
+	if _caol_mod_bridge_status == null:
+		return
+	var mods = get_node_or_null("/root/Mods")
+	if mods == null or not mods.has_method("get_caol_mod_summarizer_overview"):
+		_caol_mod_bridge_status.text = "Read-only C-AOL mod/Summarizer status unavailable: Mods autoload is not ready."
+		return
+	var overview = mods.get_caol_mod_summarizer_overview()
+	_caol_mod_bridge_status.text = overview.get("status_text", "Read-only C-AOL mod/Summarizer status unavailable.")
+
+
+func _on_CaolSummarizerDryRun_pressed() -> void:
+	var mods = get_node_or_null("/root/Mods")
+	if mods == null or not mods.has_method("get_caol_summarizer_dry_run"):
+		_caol_mod_bridge_status.text = "Summarizer dry-run unavailable: Mods autoload is not ready."
+		return
+	var dry_run = mods.get_caol_summarizer_dry_run()
+	_caol_mod_bridge_status.text = dry_run.get("message", "Summarizer dry-run unavailable.")
+	Status.post("C-AOL Summarizer dry-run/status-only check complete; no backend call, pack apply, or save mutation was attempted.")
 
 
 func _refresh_backend_setup_controls() -> void:
@@ -264,6 +291,7 @@ func _refresh_backend_setup_controls() -> void:
 	else:
 		status += "\nOpenVINO is Windows-first for Lacapult v0. Runtime/model install is not automated; this is detection plus config only."
 	_backend_status.text = status
+	_refresh_caol_mod_bridge_status()
 
 
 func _store_backend_field(setting_prefix: String, value: String) -> void:

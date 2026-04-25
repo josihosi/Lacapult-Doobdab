@@ -26,7 +26,7 @@ func build_status(stock_mods_dir: String, user_mods_dir: String, custom_catalog_
 	var world = _read_world_mods(save_dir, world_name)
 	var world_custom_dir = ""
 	if world.get("world_path", "") != "":
-		world_custom_dir = String(world["world_path"]).plus_file("mods")
+		world_custom_dir = str(world["world_path"]).plus_file("mods")
 
 	var records := []
 	records += _scan_mod_root(stock_mods_dir, "stock")
@@ -92,6 +92,116 @@ func build_status(stock_mods_dir: String, user_mods_dir: String, custom_catalog_
 		},
 		"counts": _count_badges(records),
 		"mods": records,
+	}
+
+
+func build_ux_overview(status: Dictionary) -> Dictionary:
+	# Slice 2 read-only view model for Mods/Settings. This summarizes the status
+	# shape into concise UI text and dry-run action state; it never calls a backend,
+	# generates summaries, applies packs, enables mods, or edits saves.
+	var mods = status.get("mods", [])
+	var counts = status.get("counts", {})
+	var world = status.get("world", {})
+	var enabled_contextual := 0
+	var enabled_summary_ready := 0
+	var enabled_summary_missing := 0
+	var enabled_summary_partial := 0
+	var enabled_summary_unknown := 0
+	var enabled_summary_not_needed := 0
+	var enabled_summary_blocked := 0
+	var candidates := []
+	for record in mods:
+		if not _record_is_enabled_source_mod(record):
+			continue
+		var summary_status = record.get("summary_status", "summary-unknown")
+		var contextual = _record_has_contextual_content(record)
+		if contextual:
+			enabled_contextual += 1
+		if summary_status == "summary-ready":
+			enabled_summary_ready += 1
+		elif summary_status == "summary-missing":
+			enabled_summary_missing += 1
+		elif summary_status == "summary-partial":
+			enabled_summary_partial += 1
+		elif summary_status == "summary-unknown":
+			enabled_summary_unknown += 1
+		elif summary_status == "summary-not-needed":
+			enabled_summary_not_needed += 1
+
+		if contextual and _record_is_blocked(record):
+			enabled_summary_blocked += 1
+		elif contextual and summary_status in ["summary-missing", "summary-partial", "summary-unknown"]:
+			candidates.append(record)
+
+	var all_enabled_state = "unknown"
+	if world.get("mods_json_present", false) == true:
+		if enabled_summary_blocked > 0:
+			all_enabled_state = "blocked"
+		elif candidates.size() > 0:
+			all_enabled_state = "needs-summaries"
+		else:
+			all_enabled_state = "all-clear"
+
+	return {
+		"read_only": true,
+		"all_enabled_extra_context_state": all_enabled_state,
+		"world_name": world.get("world_name", null),
+		"world_errors": world.get("errors", []),
+		"total_mod_records": mods.size(),
+		"installed_or_packaged_count": counts.get("stock-packaged", 0) + counts.get("user-installed", 0) + counts.get("world-specific-custom", 0),
+		"custom_catalog_count": counts.get("custom-catalog", 0),
+		"enabled_count": counts.get("enabled-in-world", 0),
+		"disabled_count": counts.get("disabled", 0),
+		"obsolete_blocked_count": counts.get("obsolete-blocked", 0),
+		"metadata_broken_count": counts.get("metadata-broken", 0),
+		"dependency_blocked_count": counts.get("dependency-blocked", 0),
+		"summary_ready_count": counts.get("summary-ready", 0),
+		"summary_missing_count": counts.get("summary-missing", 0),
+		"summary_partial_count": counts.get("summary-partial", 0),
+		"summary_unknown_count": counts.get("summary-unknown", 0),
+		"summary_not_needed_count": counts.get("summary-not-needed", 0),
+		"enabled_contextual_count": enabled_contextual,
+		"enabled_summary_ready_count": enabled_summary_ready,
+		"enabled_summary_missing_count": enabled_summary_missing,
+		"enabled_summary_partial_count": enabled_summary_partial,
+		"enabled_summary_unknown_count": enabled_summary_unknown,
+		"enabled_summary_not_needed_count": enabled_summary_not_needed,
+		"enabled_summary_blocked_count": enabled_summary_blocked,
+		"summarizer_candidate_count": candidates.size(),
+		"summarizer_candidates": _candidate_briefs(candidates),
+		"status_text": _overview_status_text(counts, all_enabled_state, candidates.size(), world),
+	}
+
+
+func build_dry_run_summarizer_prompt(status: Dictionary, backend_mode := "", backend_status := "") -> Dictionary:
+	var overview = build_ux_overview(status)
+	var lines := []
+	lines.append("Dry-run only: no backend call, no generated pack, no mod enable, no save/userdata mutation.")
+	lines.append("Enabled extra NPC/content summary state: %s." % overview.get("all_enabled_extra_context_state", "unknown"))
+	if backend_mode != "" or backend_status != "":
+		lines.append("Selected backend gate: %s -> %s." % [backend_mode if backend_mode != "" else "unknown", backend_status if backend_status != "" else "unknown"])
+	lines.append("Backend generation would require the selected API/Ollama/OpenVINO readiness checks to pass; Slice 2 does not generate or apply anything.")
+	var candidates = overview.get("summarizer_candidates", [])
+	if candidates.empty():
+		lines.append("No enabled contextual mod currently needs a dry-run summary action, or world status is unknown/blocked.")
+	else:
+		lines.append("Would summarize these enabled contextual mods as C-AOL-native companion packs later:")
+		for candidate in candidates.slice(0, 7):
+			lines.append("- %s (%s): %s" % [candidate.get("name", candidate.get("id", "unknown")), candidate.get("id", "unknown"), candidate.get("summary_status", "summary-unknown")])
+		if candidates.size() > 8:
+			lines.append("- ...and %s more." % (candidates.size() - 8))
+	return {
+		"read_only": true,
+		"action": "summarizer_dry_run_status_only",
+		"candidate_count": candidates.size(),
+		"backend_mode": backend_mode,
+		"backend_status": backend_status,
+		"would_mutate": false,
+		"would_call_backend": false,
+		"would_generate_pack": false,
+		"would_enable_mods": false,
+		"message": "\n".join(lines),
+		"overview": overview,
 	}
 
 
@@ -264,6 +374,57 @@ func _summarize_record(record: Dictionary, generated_by_source: Dictionary) -> S
 		if flags.get(key, false):
 			return "summary-missing"
 	return "summary-not-needed"
+
+
+func _record_is_enabled_source_mod(record: Dictionary) -> bool:
+	if record.get("enabled_status", "") != "enabled-in-world":
+		return false
+	if record.get("source_type", "") == "custom-catalog":
+		return false
+	if record.get("generated_summary_pack", {}).get("present", false):
+		return false
+	return true
+
+
+func _record_has_contextual_content(record: Dictionary) -> bool:
+	var flags = record.get("json_content", {}).get("content_flags", {})
+	for key in ["npc", "faction", "monster", "item", "location"]:
+		if flags.get(key, false):
+			return true
+	return false
+
+
+func _record_is_blocked(record: Dictionary) -> bool:
+	return record.get("metadata_status", "") == "metadata-broken" or record.get("dependency_status", "") == "dependency-blocked" or record.get("obsolete_status", "") == "obsolete-blocked"
+
+
+func _candidate_briefs(records: Array) -> Array:
+	var briefs := []
+	for record in records:
+		briefs.append({
+			"id": record.get("id", ""),
+			"name": record.get("name", record.get("id", "")),
+			"source_type": record.get("source_type", ""),
+			"enabled_status": record.get("enabled_status", ""),
+			"summary_status": record.get("summary_status", "summary-unknown"),
+			"dependency_status": record.get("dependency_status", ""),
+		})
+	return briefs
+
+
+func _overview_status_text(counts: Dictionary, all_enabled_state: String, candidate_count: int, world: Dictionary) -> String:
+	var world_name = str(world.get("world_name", "none"))
+	var world_note = "world=%s" % world_name
+	if world.get("mods_json_present", false) != true:
+		world_note = "world=unknown/no mods.json"
+	var lines := []
+	lines.append("Read-only C-AOL mod/Summarizer status (%s)." % world_note)
+	lines.append("Enabled/disabled: %s enabled, %s disabled." % [counts.get("enabled-in-world", 0), counts.get("disabled", 0)])
+	lines.append("Summary coverage: %s ready, %s missing, %s partial, %s unknown, %s not needed." % [counts.get("summary-ready", 0), counts.get("summary-missing", 0), counts.get("summary-partial", 0), counts.get("summary-unknown", 0), counts.get("summary-not-needed", 0)])
+	lines.append("Blockers: %s obsolete, %s metadata broken, %s dependency-blocked." % [counts.get("obsolete-blocked", 0), counts.get("metadata-broken", 0), counts.get("dependency-blocked", 0)])
+	lines.append("All enabled extra NPC/content summarized: %s; dry-run Summarizer candidates: %s." % [all_enabled_state, candidate_count])
+	lines.append("Status-only surface: no backend call, no summary generation, no pack apply, no mod enable/save mutation.")
+	return "\n".join(lines)
 
 
 func _content_flags(type_counts: Dictionary) -> Dictionary:

@@ -17,6 +17,10 @@ onready var _dlg_del_multiple = $DeleteMultipleDialog
 
 var _installed_mods_view := []
 var _available_mods_view := []
+var _caol_status_by_id := {}
+var _caol_summarizer_overview := {}
+var _caol_status_label: Label = null
+var _caol_dry_run_button: Button = null
 
 var _mods_to_delete := []
 var _mods_to_install := []
@@ -37,6 +41,28 @@ func _ready() -> void:
 	
 	# Connect to the mod compatibility signal
 	_mods.connect("mod_compatibility_checked", self, "_on_mod_compatibility_checked")
+	_add_caol_summarizer_status_controls()
+
+
+func _add_caol_summarizer_status_controls() -> void:
+	if has_node("CaolSummarizerStatus"):
+		return
+	var section = HBoxContainer.new()
+	section.name = "CaolSummarizerStatus"
+	section.hint_tooltip = "Read-only C-AOL mod/Summarizer status and dry-run prompt. No backend call or userdata mutation."
+	add_child(section)
+	_caol_status_label = Label.new()
+	_caol_status_label.autowrap = true
+	_caol_status_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	section.add_child(_caol_status_label)
+	_caol_dry_run_button = Button.new()
+	_caol_dry_run_button.text = "Summarizer dry-run"
+	_caol_dry_run_button.hint_tooltip = "Show what would be summarized later. Status-only: no backend call, no generated pack, no apply."
+	_caol_dry_run_button.connect("pressed", self, "_on_CaolSummarizerDryRun_pressed")
+	section.add_child(_caol_dry_run_button)
+	# Keep the status prompt next to the mod action buttons, above the verbose info box.
+	move_child(section, 2)
+	_refresh_caol_summarizer_status()
 
 
 func _populate_list_with_mods(mods_array: Array, list: ItemList) -> void:
@@ -49,8 +75,83 @@ func _populate_list_with_mods(mods_array: Array, list: ItemList) -> void:
 			list.set_item_tooltip(list.get_item_count() - 1, tooltip)
 
 
+func _refresh_caol_summarizer_status() -> void:
+	_caol_status_by_id.clear()
+	_caol_summarizer_overview.clear()
+	if Settings.read("game") != "caol":
+		if _caol_status_label != null:
+			_caol_status_label.text = "C-AOL Summarizer status is only available for the C-AOL game target."
+		if _caol_dry_run_button != null:
+			_caol_dry_run_button.disabled = true
+		return
+	var status = _mods.get_caol_mod_summarizer_status()
+	_caol_summarizer_overview = CaolModStatus.build_ux_overview(status)
+	for record in status.get("mods", []):
+		var id = record.get("id", "")
+		if id == "":
+			continue
+		if not _caol_status_by_id.has(id) or record.get("enabled_status", "") == "enabled-in-world":
+			_caol_status_by_id[id] = record
+	if _caol_status_label != null:
+		_caol_status_label.text = _caol_summarizer_overview.get("status_text", "Read-only C-AOL mod/Summarizer status unavailable.")
+	if _caol_dry_run_button != null:
+		_caol_dry_run_button.disabled = false
+
+
+func _caol_summary_badge_for_mod(id: String) -> String:
+	if not _caol_status_by_id.has(id):
+		return ""
+	var record = _caol_status_by_id[id]
+	var badges := []
+	if record.get("enabled_status", "") == "enabled-in-world":
+		badges.append("enabled")
+	else:
+		badges.append("disabled")
+	var summary_status = record.get("summary_status", "summary-unknown")
+	if summary_status == "summary-ready":
+		badges.append("summary-ready")
+	elif summary_status == "summary-missing":
+		badges.append("summary-missing")
+	elif summary_status == "summary-partial":
+		badges.append("summary-partial")
+	elif summary_status == "summary-unknown":
+		badges.append("summary-unknown")
+	if record.get("obsolete_status", "") == "obsolete-blocked":
+		badges.append("obsolete")
+	if record.get("metadata_status", "") == "metadata-broken":
+		badges.append("metadata-broken")
+	if record.get("dependency_status", "") == "dependency-blocked":
+		badges.append("dependency-blocked")
+	return " [%s]" % ", ".join(badges)
+
+
+func _append_caol_status_to_mod_info(text: String, id: String) -> String:
+	if not _caol_status_by_id.has(id):
+		return text
+	var record = _caol_status_by_id[id]
+	var result = text
+	result += "\n\n[b][u]C-AOL Summarizer status:[/u][/b] %s / %s / %s" % [record.get("enabled_status", "unknown"), record.get("dependency_status", "unknown"), record.get("summary_status", "summary-unknown")]
+	result += "\nRead-only in Slice 2. Use the Summarizer dry-run button to see what would be summarized later; no backend call, generated pack, apply, enable, or save mutation happens here."
+	return result
+
+
+func _on_CaolSummarizerDryRun_pressed() -> void:
+	var dry_run = _mods.get_caol_summarizer_dry_run()
+	if _caol_status_label != null:
+		_caol_status_label.text = dry_run.get("message", "Summarizer dry-run unavailable.")
+	Status.post("C-AOL Summarizer dry-run/status-only check complete; no backend call, pack apply, or save mutation was attempted.")
+
+
+func _post_install_summarizer_prompt_if_needed() -> void:
+	_refresh_caol_summarizer_status()
+	var count = _caol_summarizer_overview.get("summarizer_candidate_count", 0)
+	if count > 0:
+		Status.post("C-AOL Summarizer prompt: %s enabled contextual mod(s) lack complete summaries. Use Summarizer dry-run for status only; generation/apply is a later slice." % count, Enums.MSG_WARN)
+
+
 func reload_installed() -> void:
 	
+	_refresh_caol_summarizer_status()
 	var hidden_mods = 0
 	var show_stock = Settings.read("show_stock_mods")
 	var show_obsolete = Settings.read("show_obsolete_mods")
@@ -79,7 +180,7 @@ func reload_installed() -> void:
 		if show:
 			_installed_mods_view.append({
 				"id": id,
-				"name": mod["modinfo"]["name"],
+				"name": mod["modinfo"]["name"] + _caol_summary_badge_for_mod(id),
 				"location": mod["location"]
 			})
 			if (show_obsolete) and (status == 3):
@@ -454,7 +555,7 @@ func _on_InstalledList_multi_selected(index: int, selected: bool) -> void:
 		active_idx = selection.max()
 	
 	var active_id = _installed_mods_view[active_idx]["id"]
-	_lbl_mod_info.bbcode_text = _make_mod_info_string(_mods.installed[active_id])
+	_lbl_mod_info.bbcode_text = _append_caol_status_to_mod_info(_make_mod_info_string(_mods.installed[active_id]), active_id)
 	_lbl_mod_info.scroll_to_line(0)
 	
 	var only_stock_selected = true
@@ -606,6 +707,7 @@ func _do_mod_installation() -> void:
 	
 	reload_installed()
 	reload_available()
+	_post_install_summarizer_prompt_if_needed()
 
 
 func _on_ModReinstallDialog_response_yes() -> void:
@@ -626,7 +728,7 @@ func _refresh_selected_mod_description() -> void:
 	if len(installed_selection) > 0:
 		var index = installed_selection[0]
 		var id = _installed_mods_view[index]["id"]
-		_lbl_mod_info.bbcode_text = _make_mod_info_string(_mods.installed[id])
+		_lbl_mod_info.bbcode_text = _append_caol_status_to_mod_info(_make_mod_info_string(_mods.installed[id]), id)
 		_lbl_mod_info.scroll_to_line(0)
 		return
 	

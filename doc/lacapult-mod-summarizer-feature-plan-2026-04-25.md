@@ -1,6 +1,6 @@
 # Lacapult mod install/enable + Summarizer feature plan
 
-Status: **ACTIVE NEXT LANE / SLICE 1 DISCOVERY-STATUS MODEL LANDED**
+Status: **ACTIVE NEXT LANE / SLICE 1 DISCOVERY-STATUS MODEL LANDED / SLICE 2 UX-STATUS SURFACE LANDED**
 
 This packet turns the read-only C-AOL mod compatibility report into the next bounded implementation family. It does **not** implement the feature yet. It defines the contract Andi should execute in slices after backend-good hardening.
 
@@ -61,7 +61,7 @@ Lacapult should not invent a second summary schema. Its job is the boring useful
   - user mods: `Library/Application Support/Lacapult Doobdab/caol/userdata/mods` on macOS, equivalent launcher data paths elsewhere
   - custom repo: `.../caol/mod_repo`
   - world/save data: `.../caol/userdata/save`
-- `scripts/SettingsUI.gd` currently surfaces the packaged-mod compatibility/summarizer report as read-only status only.
+- `scripts/SettingsUI.gd` and `scripts/ModsUI.gd` now surface the live read-only C-AOL mod/Summarizer overview, including enabled/disabled counts, summary coverage, blockers, “all enabled extra context” state, and a Summarizer dry-run/status button.
 - `tools/prove_caol_mod_inventory.py` proves the current packaged C-AOL `v0.2.0` macOS DMG has 42 non-obsolete packaged stock mods, 7 obsolete blockers, 30 contextual mods needing generated packs, 12 no-summary-needed mods, and 0 packaged summary-ready mods.
 - `scripts/BackendConfigManager.gd` now gives the backend-good readiness/config/status foundation that the Summarizer button should reuse.
 
@@ -218,7 +218,7 @@ The Summarizer button should be enabled only when a selected backend is plausibl
 ### Ollama backend
 
 - Detect command presence, local server/list response, and configured model presence.
-- Later backend recommendation UX may suggest among locally available models or a cleared model list, but provenance/renamed public names and hardware-fit recommendations are a separate backend lane.
+- Later backend recommendation UX may suggest among locally available models or a cleared model list, but provenance/renamed public names and hardware-fit recommendations are a separate backend lane. That lane must stay cross-platform for Linux/macOS/Windows, prioritize Windows UX/evidence, and not become Mac-only because current proofs run on Josef's Mac.
 - Do not pull models automatically.
 - If Ollama is installed but the server is down, show “start Ollama” guidance rather than a fake failure.
 - If the model is missing, offer guidance; model pull automation is a separate explicit decision.
@@ -253,12 +253,14 @@ Goal: make mod/summarizer status computable without applying anything.
 
 ### Slice 2 — UX/status surface
 
+Status: **landed 2026-04-25 as read-only Mods/Settings status plus dry-run Summarizer prompt.**
+
 Goal: show the useful truth in the launcher.
 
-- Add badges/status text in the Mods tab or a near-term Settings bridge panel.
-- Add a post-install/post-enable Summarizer prompt, wired initially to dry-run/status only.
-- Add the “all enabled extra NPC/content summarized” state.
-- Gate: Godot project-load plus a small scene/headless smoke proving the status controls exist and do not crash.
+- Landed C-AOL summary badges/status text in `scripts/ModsUI.gd` and the near-term Settings bridge panel.
+- Landed a post-install Summarizer prompt path and persistent dry-run/status buttons; a true post-enable hook remains pending until Lacapult owns a C-AOL world `mods.json` enable/apply flow.
+- Landed the “all enabled extra NPC/content summarized” state via `CaolModStatus.build_ux_overview()`.
+- Gate: passed via Godot project-load plus headless status/UX smoke proving the dry-run view state is read-only and does not crash.
 
 ### Slice 3 — sandboxed summary-pack generation/apply proof
 
@@ -295,7 +297,7 @@ This lane is complete only when all of the following are true:
 - Mod discovery distinguishes stock packaged, user-installed, custom-catalog, and world-specific mods for C-AOL.
 - Enabled vs disabled status is world-aware for at least one sandbox world.
 - Obsolete, broken metadata, parse errors, missing roots, missing dependencies, partial summaries, stale summaries, and conflicts produce visible statuses.
-- After install/enable of a contextual mod, the UI offers a Summarizer prompt/button rather than burying the next action.
+- After install of a contextual mod, and from persistent Mods/Settings status surfaces, the UI offers a Summarizer prompt/button rather than burying the next action. A true post-enable hook remains a later enable/apply-flow requirement.
 - The “all enabled extra NPC/content summarized” state is visible and honest.
 - Backend readiness gates generation for API, Ollama, and OpenVINO using the backend-good checks; no API secrets are stored and no model pulls/downloads happen without explicit clearance.
 - A generated pack is C-AOL-native under `npcs/Backgrounds/Summaries_short` / `Summaries_extra`; no launcher-only schema is treated as runtime-ready.
@@ -314,4 +316,4 @@ This lane is complete only when all of the following are true:
 
 ## Recommended next implementation handoff
 
-Next implement **Slice 2: UX/status surface**. Slice 1 is now present and proven; the next cut should render the truth instead of re-solving discovery. If Lacapult cannot accurately say which mods are active, broken, stale, or unsummarized in a sandbox, then a shiny Summarizer button is just a button-shaped lie.
+Next implement **Slice 3: sandboxed summary-pack generation/apply proof**. Slice 1 can compute status, and Slice 2 can render that truth plus dry-run prompts. The next cut should generate or fixture one tiny C-AOL-native companion summary pack under `npcs/Backgrounds/Summaries_extra`, apply it only inside a sandboxed C-AOL userdata/world tree with backup and rollback, and prove no real Application Support data is touched.

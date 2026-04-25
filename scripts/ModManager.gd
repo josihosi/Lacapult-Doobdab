@@ -1559,5 +1559,27 @@ func get_caol_mod_summarizer_status(world_name := "") -> Dictionary:
 	return CaolModStatus.build_current_status(world_name)
 
 
+func get_caol_mod_summarizer_overview(world_name := "") -> Dictionary:
+	# Slice 2 view model for Mods/Settings: concise counts, all-enabled state,
+	# and dry-run candidate list. Still read-only/status-only.
+	return CaolModStatus.build_ux_overview(get_caol_mod_summarizer_status(world_name))
+
+
+func get_caol_summarizer_dry_run(world_name := "") -> Dictionary:
+	# Dry-run prompt/action state. This intentionally does not call a backend,
+	# generate files, enable mods, apply packs, or mutate saves/userdata.
+	var mode = Settings.read("backend_mode")
+	var backend_status = _current_backend_status(mode)
+	return CaolModStatus.build_dry_run_summarizer_prompt(get_caol_mod_summarizer_status(world_name), mode, backend_status)
+
+
+func _current_backend_status(mode: String) -> String:
+	if get_node_or_null("/root/BackendConfig") == null:
+		return "backend_config_unavailable"
+	for backend in BackendConfig.get_supported_backends():
+		if backend.get("id", "") == mode:
+			return backend.get("status", "unknown")
+	return "unknown_backend"
+
 
 

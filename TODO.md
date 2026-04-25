@@ -12,7 +12,7 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
 
 0. Mod install/enable + Summarizer active next lane
    - [x] Implement Slice 1 from `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`: discovery/status model for stock packaged, user-installed, custom-catalog, and world-specific mods, with enabled/disabled state for at least one sandbox world.
-   - [ ] Implement Slice 2: visible Mods/Settings UX status plus post-install/post-enable Summarizer prompt/button, initially safe as dry-run/status only.
+   - [x] Implement Slice 2: visible Mods/Settings UX status plus post-install Summarizer prompt and persistent dry-run/status buttons; true post-enable hook remains dependent on a later real enable/apply flow.
    - [ ] Implement Slice 3: sandboxed C-AOL-native companion summary-pack generation/apply proof with manifest, backup, and rollback.
    - [ ] Implement Slice 4: C-AOL sandbox/harness proof that an active generated summary root is consumed by runtime prompt construction, or record the exact C-AOL-side blocker.
    - [ ] Implement Slice 5: fixture coverage for obsolete mods, parse errors, missing dependencies, partial summaries, stale summaries, conflicts, backend-not-ready, and rollback failure handling.
@@ -70,6 +70,6 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - OpenVINO guided setup/installer automation beyond v0-safe detection/config/status metadata. Future direction may offer an explicit-approval fixed package list such as `openvino`, `openvino-genai`, and `openvino-tokenizers` plus model-dir setup, but no installs/downloads are implemented in the current slice.
    - Real model install/model-pull automation and Ollama recommendation UX. Future direction should account for local model inventory/recommendations, but Slice 1 only preserves status-model compatibility and does not recommend or pull models.
    - C-AOL-specific mod/soundpack/tileset recommendation packs.
-   - [active above] Feature-complete mod install/enable plus Summarizer UX after the read-only report status surface: post-mod-install Summarizer button/pop-up, extra NPC/content summary status, generation/apply status, and sandbox-proven C-AOL-native `Summaries_short` / `Summaries_extra` application.
+   - [active above] Feature-complete mod install/enable plus Summarizer UX after the read-only report/status-only dry-run surface: generation/apply status, sandbox-proven C-AOL-native `Summaries_short` / `Summaries_extra` application, backup, and rollback remain next.
    - [active above] NPC/LLM runtime integration proof that active mod summaries are consumed by C-AOL, with schema/runtime behavior kept on the C-AOL side and Lacapult acting as UX/status/apply helper.
    - Public GitHub push/release publication, only after explicit clearance.

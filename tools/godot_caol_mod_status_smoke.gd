@@ -19,6 +19,14 @@ func _init() -> void:
 		"Sandbox World"
 	)
 	var ok = _assert_status(result)
+	var overview = status_model.build_ux_overview(result)
+	var prompt = status_model.build_dry_run_summarizer_prompt(result, "ollama", "fixture-ready")
+	if overview.get("all_enabled_extra_context_state", "") != "needs-summaries":
+		printerr("unexpected overview all-enabled state: %s" % overview.get("all_enabled_extra_context_state", ""))
+		ok = false
+	if prompt.get("would_mutate", true) or prompt.get("would_call_backend", true) or prompt.get("would_generate_pack", true):
+		printerr("dry-run prompt is not read-only")
+		ok = false
 	if output_path != "":
 		var f = File.new()
 		var err = f.open(output_path, File.WRITE)
@@ -29,7 +37,7 @@ func _init() -> void:
 			printerr("failed to write status output: %s" % err)
 			ok = false
 	print("godot caol mod status smoke: mods=%s enabled=%s summary_ready=%s summary_missing=%s" % [result.get("mods", []).size(), result.get("counts", {}).get("enabled-in-world", 0), result.get("counts", {}).get("summary-ready", 0), result.get("counts", {}).get("summary-missing", 0)])
-	quit(0 if ok else 1)
+	quit(0 if ok == true else 1)
 
 
 func _assert_status(result: Dictionary) -> bool:

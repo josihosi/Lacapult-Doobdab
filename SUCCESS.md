@@ -39,20 +39,21 @@ Done only when all are true:
 
 ## Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply
 
-Status: **SLICE 1 DISCOVERY/STATUS MODEL PROVEN / UX, GENERATION, APPLY, RUNTIME CONSUMPTION NOT IMPLEMENTED**
+Status: **SLICE 1 DISCOVERY/STATUS MODEL PROVEN + SLICE 2 UX/DRY-RUN STATUS SURFACE PROVEN / GENERATION, APPLY, RUNTIME CONSUMPTION NOT IMPLEMENTED**
 
 Done only when all are true:
 
 - [x] Mod discovery distinguishes stock packaged, user-installed, custom-catalog, and world-specific mods for C-AOL in the Slice 1 read-only status model/proof.
 - [x] Enabled vs disabled status is world-aware for at least one sandbox world in the Slice 1 fixture proof.
 - [ ] Obsolete mods, broken metadata, parse errors, missing roots, missing dependencies, partial summaries, stale summaries, conflicts, and disabled mods produce visible statuses.
-- [ ] After install/enable of a contextual mod, Lacapult offers a Summarizer prompt/button rather than burying the next action.
-- [ ] The launcher shows whether all enabled extra NPC/content is summarized, blocked, stale, or unknown.
-- [ ] API, Ollama, and OpenVINO generation readiness is gated through the backend-good checks; no API secrets are stored and no model pulls/downloads happen without explicit clearance.
+- [x] After mod install, and from persistent Mods/Settings status surfaces, Lacapult offers a Summarizer prompt/button rather than burying the next action, currently dry-run/status-only.
+- [ ] A true post-enable hook is still pending because the current inherited launcher does not yet apply C-AOL world `mods.json` enable changes.
+- [x] The launcher shows whether all enabled extra NPC/content is summarized, blocked, needs summaries, or unknown.
+- [ ] API, Ollama, and OpenVINO generation readiness is gated through the backend-good checks for real generation/apply; current Slice 2 dry-run only reports selected backend status and performs no API calls/model pulls/downloads.
 - [ ] Generated packs are C-AOL-native under `npcs/Backgrounds/Summaries_short` / `Summaries_extra`, not launcher-only metadata.
 - [ ] Applying a generated pack and changing a world mod list is sandbox-proven with backup and rollback.
 - [ ] C-AOL runtime consumption is proven in a sandbox/harness, or a concrete C-AOL-side blocker is recorded.
-- [x] Slice 1 proof scripts do not mutate Josef's real Application Support config, saves, worlds, or mods; later apply/generation proofs must keep the same boundary.
+- [x] Slice 1 and Slice 2 proof scripts do not mutate Josef's real Application Support config, saves, worlds, or mods; later apply/generation proofs must keep the same boundary.
 
 ## Parked next slices
 
@@ -62,7 +63,7 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [ ] Large model download/model-pull automation or Ollama model recommendation UX. Local model inventory can inform a future backend recommendation lane, but nothing in Slice 1 pulls or recommends models yet.
 - [ ] API-key/backend live smoke test requiring real secrets.
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.
-- [active above] Feature-complete mod install/enable plus Summarizer UX; after mod install/enable, Lacapult should offer a Summarizer button/pop-up, show whether extra NPC/content summaries exist, handle generation/apply status, and write C-AOL-native `Summaries_short` / `Summaries_extra` data through a sandbox-proven flow. The current Settings surface is read-only and does not apply packs or enable mods.
+- [active above] Feature-complete mod install/enable plus Summarizer UX; the current Mods/Settings surfaces show read-only status and dry-run Summarizer prompts, but generation/apply status and C-AOL-native `Summaries_short` / `Summaries_extra` pack writes still need sandbox proof. The current surface does not apply packs or enable mods.
 - [active above] NPC/LLM runtime consumption of mod compatibility summaries.
 - [x] Controlled selected macOS DMG download/mount/launchability-shape proof, without launching or installing the game.
 - [x] Sandboxed Lacapult-style macOS DMG copy/move install-shape proof, without touching the real Application Support install state or launching the game.
