@@ -27,15 +27,15 @@ This repository is early development. It is public for transparency and collabor
 
 ## Installation
 
-No Lacapult Doobdab packaged release exists yet. For development, open the Godot project locally and run `scenes/Catapult.tscn` if a compatible Godot 3 binary is available.
+No Lacapult Doobdab public packaged release exists yet. For development, open the Godot project locally and run `scenes/Catapult.tscn` if a compatible Godot 3 binary is available.
 
-Do not treat the raw Godot project or generated `.pck` files as user-facing installers. The current product bar still requires easy Windows/macOS/Linux app packages before a normal-player release.
+Do not treat the raw Godot project or generated `.pck` files as user-facing installers. The current local proof can produce unsigned macOS/Linux/Windows app/package artifacts, but signed/notarized/public releases and normal-player install QA are still separate release work.
 
 ## Release-prep validation
 
-Run `python3 tools/prove_lacapult_export_packaging.py` for the current local packaging proof. It exports Godot PCK packs for macOS, Linux, and Windows into ignored `.proof-cache/` output and reports whether full app exports are blocked by missing Godot export templates.
+Run `python3 tools/prove_lacapult_export_packaging.py` for the current local packaging proof. It exports Godot PCK packs plus real unsigned macOS/Linux/Windows app/executable artifacts into ignored `.proof-cache/` output, creates unsigned archive/package shapes, records sizes/hashes/shape checks in a manifest, and restores temporary export presets.
 
-As of the current local proof, Godot 3.6.2 can assemble the cross-platform PCK packs, but full app exports are blocked until the matching Godot 3.6.2 export templates are installed (`osx.zip`, `linux_x11_64_release`, and `windows_64_release.exe`). Signing, notarization, GitHub release publication, upstream contact, OpenVINO runtime setup, model pulls, and API-secret smoke tests are separate decisions and are not performed by this proof.
+As of the current local proof, Godot 3.6.2 plus installed export templates can assemble the cross-platform PCK packs and local unsigned app/package artifacts. Signing, notarization, GitHub release publication, upstream contact, OpenVINO runtime setup, model pulls, and API-secret smoke tests are separate decisions and are not performed by this proof.
 
 ## Credits
 

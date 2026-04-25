@@ -325,12 +325,28 @@ Schani greenlit the next bounded non-release-decision proof after the export-pac
 
 ## Product packaging bar - Lacapult itself
 
-Lacapult is the installer/launcher, so release-prep evidence must distinguish Lacapult's own app distribution from the C-AOL game bundle it installs. A raw Godot project launch or PCK export is not enough for the final product bar: Windows, macOS, and Linux should each get an easy user-facing install/open path, with export-template/signing/notarization blockers recorded honestly when they prevent that proof.
+Lacapult is the installer/launcher, so release-prep evidence must distinguish Lacapult's own app distribution from the C-AOL game bundle it installs. A raw Godot project launch or PCK export is not enough for the final product bar: Windows, macOS, and Linux should each get an easy user-facing install/open path. The current local proof now covers unsigned app/package artifacts, while signing/notarization, public release publication, and normal-player install QA remain separate release decisions.
 
 ## Evidence - 2026-04-25 README installability/status alignment
 
 - Updated `README.md` so the public-facing development target matches current canon: the backend setup selector is API/Ollama/OpenVINO, with OpenVINO selectable as honest v0 placeholder/status metadata rather than full runtime automation.
 - Clarified that no packaged Lacapult release exists yet, raw Godot project launch and generated `.pck` files are not user-facing installers, and the remaining product bar is easy Windows/macOS/Linux app packages.
-- Re-ran `python3 tools/prove_lacapult_export_packaging.py`; Godot 3.6.2 exported all three platform PCK packs, each 25,538,144 bytes with SHA-256 `e25b1b802ab8c41cc499466540e772a5f6dff437f0a983cd0e96c1fbf54a0ad6`. Full app exports remained honestly skipped because the checked template roots do not contain `osx.zip`, `linux_x11_64_release`, or `windows_64_release.exe`.
+- Re-ran `python3 tools/prove_lacapult_export_packaging.py`; at that earlier point before local template installation, Godot 3.6.2 exported all three platform PCK packs, each 25,538,144 bytes with SHA-256 `e25b1b802ab8c41cc499466540e772a5f6dff437f0a983cd0e96c1fbf54a0ad6`, while full app exports were honestly skipped because the checked template roots did not contain `osx.zip`, `linux_x11_64_release`, or `windows_64_release.exe`.
 - Re-ran `python3 tools/prove_caol_release.py --all-platforms`, `python3 tools/prove_caol_backend_contract.py`, `/opt/homebrew/bin/godot --path . --no-window --quit`, and `git diff --check`; all passed. Godot printed the known macOS/no-window cleanup warnings but exited 0.
 - Static README proof: `rg -n 'API/Ollama/OpenVINO|OpenVINO backend|generated \`.pck\`|osx.zip|linux_x11_64_release|windows_64_release.exe|separate decisions' README.md` shows the corrected public status text.
+
+
+## Evidence - 2026-04-25 local unsigned app/package export proof
+
+- Extended `tools/prove_lacapult_export_packaging.py` beyond PCK-only proof. It still writes temporary safe Godot 3 export presets and restores any prior/absent `export_presets.cfg`, but now also attempts real app/executable exports when templates are present, records app/package shape checks, and creates unsigned archive/package outputs under ignored `.proof-cache/lacapult-export/`.
+- Ran `python3 tools/prove_lacapult_export_packaging.py`; Godot was `/opt/homebrew/bin/godot` reporting `3.6.2.stable.official.3cd3caab6`. Template probe found `osx.zip`, `linux_x11_64_release`, and `windows_64_release.exe` under `~/Library/Application Support/Godot/templates/3.6.2.stable`; no app exports were skipped.
+- PCK pack exports still succeeded for macOS/Linux/Windows: each `.pck` was 25,538,144 bytes with SHA-256 `e25b1b802ab8c41cc499466540e772a5f6dff437f0a983cd0e96c1fbf54a0ad6`.
+- Real unsigned app/executable exports succeeded:
+  - macOS: `.proof-cache/lacapult-export/app/Lacapult Doobdab.app`, 84,030,208 bytes across 17 files, tree SHA-256 `106f491ce7e6d01ad0fc3656d67601a322d71f50dc365e5891aacd623d5997f8`; shape check found `Info.plist`, bundled `Lacapult Doobdab.pck`, executable `Contents/MacOS/Lacapult Doobdab`, bundle id `at.schanigarten.lacapult-doobdab`, and explicitly `signed_or_notarized=false`.
+  - Linux: `.proof-cache/lacapult-export/app/Lacapult-Doobdab.x86_64`, 60,186,832 bytes, SHA-256 `c02dc05abd08ba5a62cc40dc9c33174e2051229ac8eab00215b606573b12b06f`; shape check found the executable bit and embedded-PCK export setting.
+  - Windows: `.proof-cache/lacapult-export/app/Lacapult-Doobdab.exe`, 59,629,680 bytes, SHA-256 `bd657e3dff3ef0a61eaf39b9b3e010ab8227f67791ae4fbdf943573cf5eb9b69`; shape check found `.exe` suffix and `MZ` header.
+- Unsigned package/archive shapes succeeded:
+  - macOS zip: `.proof-cache/lacapult-export/packages/Lacapult-Doobdab-macos-unsigned.zip`, 84,033,582 bytes, SHA-256 `da8ece82ff6bb361927251708f89ee42bfc996f47f4196539be4a4763fed24d6`, contains expected `.app` root.
+  - Linux tar.gz: `.proof-cache/lacapult-export/packages/Lacapult-Doobdab-linux-unsigned.tar.gz`, 32,912,128 bytes, SHA-256 `e2e60bfac9e678dcc01a26e2403b36730c8392120c1e3159ebc090dc3658dd53`, contains executable member `Lacapult-Doobdab.x86_64`.
+  - Windows zip: `.proof-cache/lacapult-export/packages/Lacapult-Doobdab-windows-unsigned.zip`, 59,629,818 bytes, SHA-256 `bf152f127cda7aec3c297942750f0193223b721c4376d7f9952ea53246ac8d86`, contains expected `.exe` root.
+- Manifest/logs: `.proof-cache/lacapult-export/manifest.json` and `.proof-cache/lacapult-export/logs/`. `export_presets.cfg` was absent before the proof and absent afterward; binary artifacts remain ignored and uncommitted. This proves local unsigned app/package exportability only. It does not claim signing, notarization, public release publication, platform security-prompt behavior, upstream contact, OpenVINO runtime setup, model pulls, API secrets, or C-AOL game package launchability.
