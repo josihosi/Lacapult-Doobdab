@@ -53,7 +53,7 @@ Done only when all are true:
 - [x] A sandbox fixture generated pack is C-AOL-native under `npcs/Backgrounds/Summaries_extra`, not launcher-only metadata.
 - [x] Applying a generated companion summary pack and changing a world `mods.json` list is sandbox-proven with backup and rollback.
 - [ ] C-AOL runtime consumption is proven in a sandbox/harness, or a concrete C-AOL-side blocker is recorded.
-- [x] Slice 1 and Slice 2 proof scripts do not mutate Josef's real Application Support config, saves, worlds, or mods; later apply/generation proofs must keep the same boundary.
+- [x] Slice 1, Slice 2, and Slice 3 proof scripts do not mutate Josef's real Application Support config, saves, worlds, or mods; future real apply/generation UI must keep the same boundary until explicitly approved.
 
 ## Parked next slices
 
@@ -64,7 +64,7 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [ ] API-key/backend live smoke test requiring real secrets.
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.
 - [active above] Feature-complete mod install/enable plus Summarizer UX; the current Mods/Settings surfaces show read-only status and dry-run Summarizer prompts, and sandbox C-AOL-native `Summaries_extra` companion-pack apply/rollback is proven. The current surface still does not call a backend, apply packs, enable mods, or prove C-AOL runtime consumption.
-- [active above] NPC/LLM runtime consumption of mod compatibility summaries.
+- [active above] NPC/LLM runtime consumption of mod compatibility summaries is the next bounded proof.
 - [x] Controlled selected macOS DMG download/mount/launchability-shape proof, without launching or installing the game.
 - [x] Sandboxed Lacapult-style macOS DMG copy/move install-shape proof, without touching the real Application Support install state or launching the game.
 - [x] Headless Godot `ReleaseInstaller.install_release()` pass for the selected cached macOS DMG inside an isolated HOME, without touching the real Application Support install state or launching the game.
