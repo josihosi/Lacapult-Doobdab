@@ -126,6 +126,14 @@ Before claiming v0 is done, Andi should record:
 - Re-ran safe Ollama detection: `command -v ollama` returned `/opt/homebrew/bin/ollama`; `ollama list` succeeded against the local server. No model pull, install, remote API call, or API secret was used.
 - Re-ran `git diff --check`; it passed.
 
+## Evidence - 2026-04-25 headless Godot installer smoke
+
+- Added `tools/godot_install_release_smoke.gd`, a headless Godot 3 script intended to run with an isolated `HOME` and an already-downloaded C-AOL macOS DMG path in `LACAPULT_CAOL_DMG`.
+- Ran `LACAPULT_CAOL_DMG="$PWD/.proof-cache/caol-dmg/caol_cdda-0-h_2026-03-29-1556_macos.dmg" HOME=$(mktemp -d /tmp/lacapult-godot-install-home.XXXXXX) /opt/homebrew/bin/godot --path . --no-window --script tools/godot_install_release_smoke.gd`.
+- The smoke invoked the actual Godot `ReleaseInstaller.install_release()` path with the selected cached `v0.2.0` DMG, so `FS.extract()`, `hdiutil` mount/copy/detach, `_find_game_root_directory()`, `catapult_install_info.json` creation, final move into `caol/game0`, chmod pass, and `_looks_like_game_directory()` launchability guard were exercised by Lacapult's GDScript rather than the Python mimic.
+- The isolated install root was under `/tmp/lacapult-godot-install-home.../Library/Application Support/Lacapult Doobdab`, not the real user Application Support tree. Final proof JSON reported `target_exists=true`, `app_exists=true`, `info_exists=true`, `looks_launchable=true`, listing `Cataclysm.app` plus `catapult_install_info.json`, with install info name `Cataclysm - Arsenic and Old Lace v0.2.0`.
+- Godot exited 0. It printed the known no-UI `Status label not found`/cleanup warnings because the smoke intentionally did not instantiate the full `Catapult` scene; those warnings did not prevent the installer path from completing. This still does **not** claim a clicked GUI install or C-AOL game launch smoke.
+
 ## Known risk spots
 
 - Godot 3 scene node paths may break if the game chooser/channel UI is removed too aggressively.

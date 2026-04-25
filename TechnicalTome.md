@@ -174,3 +174,7 @@ The selected asset `caol_cdda-0-h_2026-03-29-1556_macos.dmg` exposes `Cataclysm.
 ## 2026-04-25 cron project-load/install-shape revalidation
 
 The repeatable proof packet was re-run after the sandbox install proof: live all-platform release metadata, backend option contract, macOS DMG sandbox install shape, safe Ollama detection, and `git diff --check` all still pass. Godot 3.6.2 is available at `/opt/homebrew/bin/godot`; `godot --path . --no-window --quit` exits 0, giving a cheap project-load smoke in addition to the earlier GUI screenshots. The run still does not claim a clicked in-launcher install into the real Lacapult app-data folder or a C-AOL launch smoke.
+
+## 2026-04-25 headless Godot installer smoke
+
+`tools/godot_install_release_smoke.gd` is a narrow Godot-side installer proof for the selected cached C-AOL `v0.2.0` macOS DMG. Run it with an isolated `HOME` and `LACAPULT_CAOL_DMG=/absolute/path/to/caol_cdda-0-h_2026-03-29-1556_macos.dmg`. It copies the DMG into Lacapult's cache, calls `ReleaseInstaller.install_release()`, and verifies the final isolated `caol/game0` contains `Cataclysm.app`, `catapult_install_info.json`, and passes the same launchability guard used by the installer. It is stronger than the Python sandbox mimic because it exercises the real Godot installer code path, but it is still not a clicked GUI install and does not launch C-AOL.
