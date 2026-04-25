@@ -152,6 +152,16 @@ Before claiming v0 is done, Andi should record:
 - Re-ran the cheap proof packet after the clicked pass: `python3 tools/prove_caol_release.py --all-platforms`, `python3 tools/prove_caol_backend_contract.py`, `python3 -m py_compile tools/prove_caol_macos_dmg.py`, `/opt/homebrew/bin/godot --version`, `/opt/homebrew/bin/godot --path . --no-window --quit`, safe `ollama list`, and `git diff --check`. Godot printed the known macOS/no-window cleanup warnings but exited successfully; `git diff --check` passed after trimming a trailing blank line in this documentation update.
 - This closes the previously parked clicked GUI install proof. It still does **not** claim a C-AOL game-launch smoke, GitHub release publication, upstream contact, model pulls, heavyweight installs, or API-secret use.
 
+
+## Evidence - 2026-04-25 cron release-prep revalidation
+
+- Re-ran `python3 tools/prove_caol_release.py --all-platforms`; live `josihosi/Cataclysm-AOL` `v0.2.0` still has 12 assets, Linux/macOS/Windows each matched 4 installable platform assets, and the prioritized UI order still starts with installable `v0.2.0` metadata.
+- Re-ran `python3 tools/prove_caol_backend_contract.py`; local C-AOL `src/options.cpp` still contains the required `LLM_INTENT_*` option names, Lacapult still references them without forbidden secret-bearing fields, and the options patch remains preview-only.
+- Re-ran `python3 -m py_compile tools/prove_caol_macos_dmg.py`; the DMG proof helper still compiles.
+- Re-ran Godot availability/project-load proof: `/opt/homebrew/bin/godot --version` reports `3.6.2.stable.official.3cd3caab6`, and `/opt/homebrew/bin/godot --path . --no-window --quit` exits 0. Godot printed the known macOS/no-window cleanup warnings at exit, but the project-load smoke succeeded.
+- Re-ran safe Ollama detection: `ollama list` succeeded against the local server. No model pull, install, remote API call, or API secret was used.
+- Re-ran `git diff --check`; it passed. `git status --short --branch` showed `main...origin/main` before this documentation-only evidence update.
+
 ## Known risk spots
 
 - Godot 3 scene node paths may break if the game chooser/channel UI is removed too aggressively.
