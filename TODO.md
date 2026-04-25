@@ -6,7 +6,7 @@ Short execution queue only.
 
 Active target: `Lacapult Doobdab v0.2.0 release installer plus first backend setup options`.
 
-Current checkpoint: local proof packet, first Godot GUI smoke, controlled selected-macOS-DMG mount/launchability-shape proof, and sandboxed Lacapult-style DMG install-shape proof are complete as of 2026-04-25. The next honest step is either a full in-launcher install pass for the selected macOS DMG or a Schani/Josef release-prep decision.
+Current checkpoint: local proof packet, first Godot GUI smoke, controlled selected-macOS-DMG mount/launchability-shape proof, sandboxed Lacapult-style DMG install-shape proof, and a fresh Godot 3.6.2 project-load revalidation are complete as of 2026-04-25. The next honest step is either a full in-launcher install pass for the selected macOS DMG or a Schani/Josef release-prep decision.
 
 Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order.
 

@@ -117,6 +117,15 @@ Before claiming v0 is done, Andi should record:
   - API backend status/help text: `API mode saves endpoint/model metadata only; Lacapult v0 never stores API keys.`
 - No API secrets, model pulls, heavy release downloads, GitHub releases, or upstream contact were used. The real macOS DMG extraction/app-bundle install pass remains the next heavier proof.
 
+## Evidence - 2026-04-25 cron project-load/install-shape revalidation
+
+- Re-ran `python3 tools/prove_caol_release.py --all-platforms`; live `josihosi/Cataclysm-AOL` `v0.2.0` still has 12 assets, Linux/macOS/Windows each matched 4 installable platform assets, and the prioritized UI order still starts with installable `v0.2.0` metadata.
+- Re-ran `python3 tools/prove_caol_backend_contract.py`; local C-AOL `src/options.cpp` still contains the required `LLM_INTENT_*` option names, Lacapult still references them without forbidden secret-bearing field tokens, and the patch remains preview-only.
+- Re-ran `python3 -m py_compile tools/prove_caol_macos_dmg.py` and `python3 tools/prove_caol_macos_dmg.py --install-sandbox`; the cached selected macOS DMG still mounts read-only, exposes launchable `Cataclysm.app`, and produces a sandbox final install folder containing `Cataclysm.app` plus `catapult_install_info.json` with `looks_launchable_after_move=true`.
+- Re-ran Godot availability/project-load proof: `/opt/homebrew/bin/godot --version` reports `3.6.2.stable.official.3cd3caab6`, and `godot --path . --no-window --quit` exits 0. Godot printed known macOS/headless cleanup warnings at exit, but this was still a successful project-load smoke; it did not click through an in-launcher install.
+- Re-ran safe Ollama detection: `command -v ollama` returned `/opt/homebrew/bin/ollama`; `ollama list` succeeded against the local server. No model pull, install, remote API call, or API secret was used.
+- Re-ran `git diff --check`; it passed.
+
 ## Known risk spots
 
 - Godot 3 scene node paths may break if the game chooser/channel UI is removed too aggressively.
