@@ -4,7 +4,7 @@
 
 It is derived from [Hihahahalol's Dabdoob / Catapult_Dabdoob](https://github.com/Hihahahalol/Catapult_Dabdoob), which is based on [qrrk's Catapult launcher](https://github.com/qrrk/Catapult). The inherited launcher code remains MIT licensed; see `LICENSE` and `ATTRIBUTION.md`.
 
-> Current development target: fetch and install existing C-AOL `v0.2.0` GitHub release assets, then add first safe backend setup paths for API and Ollama. OpenVINO is parked as a specialized future path.
+> Current development target: fetch and install existing C-AOL `v0.2.0` GitHub release assets, expose the first backend setup selector for API/Ollama/OpenVINO, and keep packaging/installability blockers honest before any public release.
 
 ## What v0 is meant to do
 
@@ -17,8 +17,9 @@ It is derived from [Hihahahalol's Dabdoob / Catapult_Dabdoob](https://github.com
 - Reuse Dabdoob's install/update path while preserving saves, config, mods, soundpacks, and tilesets where possible.
 - Provide safe first-pass backend setup metadata for:
   - API backend, without storing or logging secrets.
-  - Ollama backend, with local detection/config guidance.
-- Preserve inherited mod/soundpack/tileset support while C-AOL-specific compatibility work is investigated.
+  - Ollama backend, with local command/server detection and config guidance.
+  - OpenVINO backend, selectable in v0 with honest placeholder/status metadata only; full runtime setup is not automated yet.
+- Preserve inherited mod/soundpack/tileset support while C-AOL-specific compatibility work is investigated and clearly marked as supported, untested, broken, or unknown for C-AOL.
 
 ## Development status
 
@@ -26,11 +27,15 @@ This repository is early development. It is public for transparency and collabor
 
 ## Installation
 
-No Lacapult Doobdab packaged release exists yet. For development, open the Godot project locally and run `scenes/Catapult.tscn` if a compatible Godot binary is available.
+No Lacapult Doobdab packaged release exists yet. For development, open the Godot project locally and run `scenes/Catapult.tscn` if a compatible Godot 3 binary is available.
+
+Do not treat the raw Godot project or generated `.pck` files as user-facing installers. The current product bar still requires easy Windows/macOS/Linux app packages before a normal-player release.
 
 ## Release-prep validation
 
 Run `python3 tools/prove_lacapult_export_packaging.py` for the current local packaging proof. It exports Godot PCK packs for macOS, Linux, and Windows into ignored `.proof-cache/` output and reports whether full app exports are blocked by missing Godot export templates.
+
+As of the current local proof, Godot 3.6.2 can assemble the cross-platform PCK packs, but full app exports are blocked until the matching Godot 3.6.2 export templates are installed (`osx.zip`, `linux_x11_64_release`, and `windows_64_release.exe`). Signing, notarization, GitHub release publication, upstream contact, OpenVINO runtime setup, model pulls, and API-secret smoke tests are separate decisions and are not performed by this proof.
 
 ## Credits
 

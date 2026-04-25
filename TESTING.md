@@ -326,3 +326,11 @@ Schani greenlit the next bounded non-release-decision proof after the export-pac
 ## Product packaging bar - Lacapult itself
 
 Lacapult is the installer/launcher, so release-prep evidence must distinguish Lacapult's own app distribution from the C-AOL game bundle it installs. A raw Godot project launch or PCK export is not enough for the final product bar: Windows, macOS, and Linux should each get an easy user-facing install/open path, with export-template/signing/notarization blockers recorded honestly when they prevent that proof.
+
+## Evidence - 2026-04-25 README installability/status alignment
+
+- Updated `README.md` so the public-facing development target matches current canon: the backend setup selector is API/Ollama/OpenVINO, with OpenVINO selectable as honest v0 placeholder/status metadata rather than full runtime automation.
+- Clarified that no packaged Lacapult release exists yet, raw Godot project launch and generated `.pck` files are not user-facing installers, and the remaining product bar is easy Windows/macOS/Linux app packages.
+- Re-ran `python3 tools/prove_lacapult_export_packaging.py`; Godot 3.6.2 exported all three platform PCK packs, each 25,538,144 bytes with SHA-256 `e25b1b802ab8c41cc499466540e772a5f6dff437f0a983cd0e96c1fbf54a0ad6`. Full app exports remained honestly skipped because the checked template roots do not contain `osx.zip`, `linux_x11_64_release`, or `windows_64_release.exe`.
+- Re-ran `python3 tools/prove_caol_release.py --all-platforms`, `python3 tools/prove_caol_backend_contract.py`, `/opt/homebrew/bin/godot --path . --no-window --quit`, and `git diff --check`; all passed. Godot printed the known macOS/no-window cleanup warnings but exited 0.
+- Static README proof: `rg -n 'API/Ollama/OpenVINO|OpenVINO backend|generated \`.pck\`|osx.zip|linux_x11_64_release|windows_64_release.exe|separate decisions' README.md` shows the corrected public status text.
