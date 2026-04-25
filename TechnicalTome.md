@@ -186,3 +186,9 @@ The repeatable proof packet was re-run after the sandbox install proof: live all
 ## 2026-04-25 physical clicked GUI install pass
 
 A visible Godot GUI pass was run under isolated `HOME=/tmp/lacapult-click-home.XIDrDG` with the selected C-AOL `v0.2.0` macOS DMG pre-populated in that HOME's Lacapult cache. Peekaboo captured the Game tab and then performed an actual mouse click on `Install Selected`. The clicked path installed into the isolated Lacapult app-data tree, producing `caol/game0/Cataclysm.app` plus `catapult_install_info.json` with install info name `Cataclysm - Arsenic and Old Lace v0.2.0`. This proves the physical clicked GUI install path without mutating the real user install state, launching C-AOL, publishing releases, pulling models, or using API secrets.
+
+
+## 2026-04-25 backend triad and mod compatibility correction
+
+- v0 backend setup is a three-choice selector: API, Ollama, and OpenVINO. API/Ollama have the first real config/status paths; OpenVINO is selectable and writes honest placeholder/status metadata, but full runtime setup remains later.
+- C-AOL mod support cannot be declared done just because inherited Dabdoob systems survived. For `game = "caol"`, custom downloadable mod catalogs currently fall through to `Paths.mod_repo`; stock mods come from the active C-AOL install tree, including macOS app-bundle data paths. That proof now exists as `tools/prove_caol_mod_inventory.py`: the selected cached C-AOL v0.2.0 macOS DMG exposes 42 non-obsolete packaged stock mod IDs plus 7 obsolete IDs through `Cataclysm.app/Contents/Resources/data/mods`; inherited DDA/BN/TLG downloadable catalogs remain untested for C-AOL unless a C-AOL source is added.

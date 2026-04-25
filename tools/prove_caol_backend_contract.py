@@ -27,6 +27,15 @@ FORBIDDEN_SECRET_FIELDS = {
     "authorization",
     "bearer_token",
 }
+REQUIRED_BACKEND_TOKENS = {
+    "BACKEND_API",
+    "BACKEND_OLLAMA",
+    "BACKEND_OPENVINO",
+    "API backend",
+    "Ollama backend",
+    "OpenVINO backend",
+    "openvino_selectable_setup_not_automated",
+}
 
 
 def read(path: Path) -> str:
@@ -57,6 +66,9 @@ def main() -> int:
     forbidden_hits = sorted(
         token for token in FORBIDDEN_SECRET_FIELDS if token in backend_text.lower()
     )
+    missing_backend_tokens = sorted(
+        token for token in REQUIRED_BACKEND_TOKENS if token not in backend_text
+    )
 
     print("C-AOL backend option contract proof")
     print(f"  C-AOL root: {args.caol_root}")
@@ -77,6 +89,11 @@ def main() -> int:
         print(f"  Forbidden secret-bearing field tokens found: {', '.join(forbidden_hits)}")
         return 1
     print("  No forbidden secret-bearing field tokens found in backend manager")
+
+    if missing_backend_tokens:
+        print(f"  Missing backend selector/status tokens: {', '.join(missing_backend_tokens)}")
+        return 1
+    print("  Backend manager exposes API, Ollama, and OpenVINO v0 selector/status tokens")
 
     if "preview_only_not_applied" not in backend_text:
         print("  Missing preview-only apply status guard")

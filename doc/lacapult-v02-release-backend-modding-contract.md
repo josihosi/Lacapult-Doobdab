@@ -27,7 +27,7 @@ classification: active, with backend and modding sub-slices sequenced behind the
 
 ### LLM backend setup options
 
-First backend pair:
+The visible backend selector has three choices, with v0 honesty about capability:
 1. **API backend**
    - UI/config path for choosing API mode.
    - Safe config-writing/checking path for C-AOL.
@@ -36,9 +36,10 @@ First backend pair:
    - UI/config path for choosing Ollama mode.
    - Detect whether `ollama` exists and whether the local server responds.
    - Offer setup guidance and config-writing first; only automate install if the safe platform-specific path is clear.
-
-Parked backend:
-- **OpenVINO** remains the specialized third path. Add only a placeholder/detection note in v0 unless it is cheaper than expected.
+3. **OpenVINO backend**
+   - Selectable third option in the UI.
+   - v0 should save/report an honest placeholder, detection, or status artifact if feasible.
+   - Full OpenVINO setup/installer automation remains later.
 
 ### Modding support
 
@@ -51,7 +52,7 @@ Parked backend:
 
 - Public repo exists at `https://github.com/josihosi/Lacapult-Doobdab`, but do not push, publish releases, or contact upstream without fresh explicit clearance.
 - Do not attempt all three backend installers before v0.2.0 release installation works.
-- Do not fully solve OpenVINO in this slice.
+- Do not fully solve OpenVINO in this slice; make it selectable and honest, not fake-complete.
 - Do not promise automatic Ollama installation unless the path is safe and verified.
 - Do not rewrite all inherited mod infrastructure before proving the release installer.
 - Do not make NPC summary generation part of the installer v0; only define the compatibility-summary direction.
@@ -63,10 +64,10 @@ Done when:
 - `v0.2.0` C-AOL release assets are fetched and correctly filtered by platform.
 - At least one v0.2.0 asset produces valid installer metadata.
 - The launcher is C-AOL-specific in visible identity and defaults.
-- API and Ollama appear as the first supported backend setup options in canon and, when implemented, in UI/config flow.
-- OpenVINO is visibly parked or stubbed as specialized/future work.
+- API, Ollama, and OpenVINO appear as the visible backend choices in canon and UI.
+- API/Ollama have safe config/status paths; OpenVINO has an honest selectable placeholder/detection/status path without pretending full setup exists.
 - Inherited modding support is not accidentally broken by C-AOL-only changes.
-- A first mod-compatibility/NPC-summary investigation note exists, without pretending it is implemented.
+- The mod-compatibility/NPC-summary investigation records inherited sources, C-AOL assumptions, and next proof needs without pretending runtime NPC integration exists.
 
 ## Testing impact
 
@@ -84,6 +85,6 @@ Needed:
 Sequence the work:
 1. Get v0.2.0 release listing/filter/install metadata working.
 2. Rebrand and C-AOL-only defaults enough that the launcher surface is honest.
-3. Add API + Ollama backend setup plan/stub/config path.
-4. Inspect inherited mod support and write the first compatibility-summary note.
-5. Park OpenVINO and deeper mod/NPC integration as next slices unless explicitly reopened.
+3. Add API + Ollama backend setup plan/stub/config path, and keep OpenVINO visible as the third selectable v0-honest option.
+4. Inspect inherited mod support deeply enough to mark C-AOL compatibility assumptions and next proof needs.
+5. Park full OpenVINO automation and deeper mod/NPC runtime integration as next slices unless explicitly reopened.

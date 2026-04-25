@@ -4,7 +4,7 @@ Success-state ledger for Lacapult Doobdab.
 
 ## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-Status: **PHYSICAL CLICKED GUI INSTALL PASS PROVEN / AWAITING RELEASE-PREP DECISION**
+Status: **CLICKED INSTALL + BACKEND TRIAD + MOD INVENTORY PROVEN / AWAITING RELEASE-PREP DECISION**
 
 Done only when all are true:
 
@@ -22,9 +22,11 @@ Done only when all are true:
 - [x] API backend appears as a first supported setup/config option without leaking secrets.
 - [x] Ollama backend appears as a first supported setup/config option with safe local detection or a recorded blocker.
 - [x] Backend setup has a visible Settings-tab selector/status/save path.
-- [x] OpenVINO is explicitly parked or stubbed as a specialized later backend.
+- [x] API, Ollama, and OpenVINO are visible as backend choices.
+- [x] OpenVINO selection saves/reports an honest v0 placeholder/detection/status artifact without pretending full setup exists.
 - [x] Inherited mod/soundpack/tileset support is preserved or any temporary breakage is documented.
 - [x] First C-AOL mod compatibility / future NPC-summary investigation note exists.
+- [x] C-AOL mod compatibility investigation records inherited source assumptions and marks first useful compatibility statuses as supported, untested, broken, or unknown.
 - [x] Validation evidence is recorded in `TESTING.md`.
 - [x] Godot 3.6.2 GUI smoke proves the project launches, the Game tab prioritizes the C-AOL `v0.2.0` macOS DMG, and the Settings tab exposes backend setup controls.
 - [x] Public repo existence is recorded (`https://github.com/josihosi/Lacapult-Doobdab`), and public releases/contact remain blocked without fresh Josef/Schani clearance.
@@ -33,7 +35,7 @@ Done only when all are true:
 
 These are not part of v0 unless Josef/Schani explicitly reopens them:
 
-- [ ] OpenVINO full setup path.
+- [ ] OpenVINO full setup path beyond selectable v0 status metadata.
 - [ ] Large model download/model-pull automation.
 - [ ] API-key/backend live smoke test requiring real secrets.
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.

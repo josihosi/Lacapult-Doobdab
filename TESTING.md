@@ -39,11 +39,11 @@ Before claiming v0 is done, Andi should record:
 3. Backend setup proof
    - API option/config path exists and avoids secret leakage.
    - Ollama option/config path exists and local detection is run if available.
-   - OpenVINO is parked/stubbed rather than silently missing.
+   - API, Ollama, and OpenVINO selector/status paths exist; OpenVINO is selectable with honest v0 placeholder/detection/status metadata, not full automation.
 
 4. Modding investigation proof
    - inherited mod/soundpack/tileset entry points are identified.
-   - first C-AOL compatibility-summary / future NPC-summary note is written.
+   - C-AOL stock/user/custom-catalog compatibility assumptions are classified as supported, untested, broken, or unknown; future NPC-summary metadata remains investigation-only.
 
 5. Godot/static proof
    - `godot --version` / `godot3 --version` / `godot4 --version` check.
@@ -113,7 +113,7 @@ Before claiming v0 is done, Andi should record:
   - window title `Lacapult Doobdab — Cataclysm: Arsenic and Old Lace`
   - Game target `Cataclysm: Arsenic and Old Lace`
   - first build row `Cataclysm - Arsenic and Old Lace v0.2.0 — caol_cdda-0-h_2026-03-29-1556_macos.dmg ...`
-  - backend dropdown options `API backend`, `Ollama backend`, and `OpenVINO (parked)`
+  - backend dropdown options for API, Ollama, and the third OpenVINO path; later evidence below tightens the label/status to `OpenVINO backend` with v0-honest placeholder metadata
   - API backend status/help text: `API mode saves endpoint/model metadata only; Lacapult v0 never stores API keys.`
 - No API secrets, model pulls, heavy release downloads, GitHub releases, or upstream contact were used. The real macOS DMG extraction/app-bundle install pass remains the next heavier proof.
 
@@ -180,7 +180,7 @@ Before claiming v0 is done, Andi should record:
   - `command -v ollama` -> `/opt/homebrew/bin/ollama`
   - `curl -fsS --max-time 2 http://127.0.0.1:11434/api/tags` -> running
   - API backend remains config-shape only; no secrets were used, stored, or logged.
-  - OpenVINO remains parked as `parked_specialized_future` in `scripts/BackendConfigManager.gd`.
+  - OpenVINO was present as a specialized placeholder in this earlier slice; later evidence below upgrades it to selectable v0 status metadata.
 - Godot availability check:
   - `godot --version`, `godot3 --version`, and `godot4 --version` were not found on this machine, so no GUI/project-load smoke was claimed.
 - Static identity/release proof:
@@ -201,8 +201,8 @@ Before claiming v0 is done, Andi should record:
 ## Evidence - 2026-04-25 backend settings surface
 
 - Added `BackendConfig` as a Godot autoload and wired the Settings tab to create a small C-AOL NPC backend setup section at runtime.
-- Static UI proof: `grep -R "BackendConfig=\|BackendSetup\|Save backend setup metadata\|C-AOL NPC backend setup\|OpenVINO is parked\|API mode saves" -n project.godot scripts/SettingsUI.gd scripts/BackendConfigManager.gd`
-  - Shows the autoload, runtime-created backend setup section, save button, API no-secret warning, Ollama status readout, and parked OpenVINO copy.
+- Static UI proof: `grep -R "BackendConfig=\|BackendSetup\|Save backend setup metadata\|C-AOL NPC backend setup\|OpenVINO\|API mode saves" -n project.godot scripts/SettingsUI.gd scripts/BackendConfigManager.gd`
+  - Shows the autoload, runtime-created backend setup section, save button, API no-secret warning, Ollama status readout, and the OpenVINO placeholder/status copy later tightened by the backend triad proof.
 - Re-ran `python3 tools/prove_caol_release.py`; it still selects `caol_cdda-0-h_2026-03-29-1556_macos.dmg` for Darwin `v0.2.0` and produces installer metadata without downloading it.
 - Re-ran Ollama cheap detection: `command -v ollama` is `/opt/homebrew/bin/ollama`; local server probe returned JSON with 8 models. No model pull or secret-bearing API smoke was attempted.
 - Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are still unavailable on this Mac, so no GUI/project-load smoke was claimed.
@@ -262,3 +262,17 @@ Before claiming v0 is done, Andi should record:
 - Re-ran `python3 tools/prove_caol_backend_contract.py`; C-AOL option names still match local `src/options.cpp`, no secret-bearing fields are introduced, and the patch remains preview-only.
 - Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are still unavailable on this Mac, so no GUI/project-load smoke was claimed.
 - `git diff --check` passed.
+
+## Evidence - 2026-04-25 backend triad + mod compatibility re-scope
+
+- Josef clarified that v0 should not collapse backend setup to only API/Ollama: API, Ollama, and OpenVINO should all be visible choices, with v0 honesty about what each path can configure.
+- `scripts/BackendConfigManager.gd` now treats OpenVINO as a selectable backend that writes launcher-side placeholder/status metadata and a preview-only C-AOL backend patch, without installing runtimes, pulling models, or pretending full OpenVINO setup exists.
+- `scripts/SettingsUI.gd` labels the third option `OpenVINO backend` rather than a dead parked row.
+- Added `tools/godot_backend_triad_smoke.gd`; it runs under an isolated `HOME`, creates a fake active C-AOL install record so `Paths.config` resolves, writes API/Ollama/OpenVINO backend metadata, and verifies the final OpenVINO config/preview patch has `LLM_INTENT_BACKEND=openvino` with `preview_only_not_applied`.
+- Ran `python3 tools/prove_caol_backend_contract.py`; it asserts API/Ollama/OpenVINO selector/status tokens in addition to the C-AOL `LLM_INTENT_*` option contract and secret-safety guard.
+- Ran `HOME=$(mktemp -d /tmp/lacapult-backend-triad-home.XXXXXX) /opt/homebrew/bin/godot --path . --no-window --script tools/godot_backend_triad_smoke.gd`; API, Ollama, and OpenVINO all returned `ok`, with OpenVINO status `openvino_selectable_setup_not_automated`.
+- `doc/caol-mod-compatibility-summary.md` now records the inherited mod/source inventory: stock mods come from the active C-AOL install tree, user mods keep the inherited userdata shape, custom downloadable catalogs exist for TLG/BN/DDA but not C-AOL, and each class must be marked as supported, untested, broken, or unknown instead of waved through.
+- Added and ran `tools/prove_caol_mod_inventory.py`; it mounted the selected cached `caol_cdda-0-h_2026-03-29-1556_macos.dmg` read-only, inspected `Cataclysm.app/Contents/Resources/data/mods`, and detached cleanly.
+- The mod inventory proof found 42 non-obsolete stock C-AOL mod IDs and 7 obsolete IDs in the packaged app bundle; sample supported stock IDs include `dda`, `magiclysm`, `mindovermatter`, `no_hope`, `aftershock`, `DinoMod`, and `MMA`.
+- The same proof confirmed packaged sound/gfx paths exist and that Lacapult's source paths preserve app-bundle stock mods, per-game userdata user mods, and fallback `mod_repo` parsing for `caol`.
+- Classification now recorded in `doc/caol-mod-compatibility-summary.md`: stock packaged C-AOL mods are supported by path shape/presence; user-installed mods are mechanically supported but content-unknown; inherited DDA/BN/TLG custom download catalogs are untested for C-AOL; future NPC/LLM mod summaries remain metadata direction only.

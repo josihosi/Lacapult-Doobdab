@@ -19,11 +19,11 @@ This repo is a standalone C-AOL-specific launcher/installer derived from Dabdoob
 
 ### Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-**Status:** PHYSICAL CLICKED GUI INSTALL PASS PROVEN / AWAITING RELEASE-PREP DECISION
+**Status:** CLICKED INSTALL + BACKEND TRIAD + MOD INVENTORY PROVEN / AWAITING RELEASE-PREP DECISION
 
 Build from the local standalone repo at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdab`, then turn the first product slice into a C-AOL-specific launcher that can fetch and install the existing `v0.2.0` C-AOL releases from `josihosi/Cataclysm-AOL`. The local proof packet is complete as of 2026-04-25, a Godot 3.6.2 GUI smoke proves the project launches, surfaces the prioritized C-AOL `v0.2.0` macOS DMG first, and exposes the Settings-tab backend setup controls. Controlled DMG proofs now confirm the selected macOS asset exposes a launchable `.app` shape and that a sandboxed Lacapult-style copy/move install leaves `Cataclysm.app` plus `catapult_install_info.json` in the final install folder without touching the real Application Support install state or launching the game.
 
-The active scope now includes first-pass LLM backend setup options for **API** and **Ollama** after the v0.2.0 release install path is proven. **OpenVINO** stays parked as the specialized third backend unless it is cheap to stub/detect. Modding support stays inherited for now, with a bounded compatibility/NPC-summary investigation behind the installer proof. A headless Godot installer smoke exercises the real `ReleaseInstaller.install_release()` path against the selected cached macOS DMG inside an isolated HOME. A stronger full-scene Godot smoke instantiates the main Catapult scene, waits for the live C-AOL release fetch, selects the prioritized `v0.2.0` build row, emits the real Install button signal, and verifies the isolated install. A physical GUI pass now launched the visible Godot window under an isolated HOME, used a real mouse click on `Install Selected`, and verified the final sandbox install folder contains `Cataclysm.app` plus `catapult_install_info.json`. It still is not a C-AOL game-launch smoke.
+The active scope now includes a visible three-option backend setup selector for **API**, **Ollama**, and **OpenVINO** after the v0.2.0 release install path is proven. API and Ollama get the first real config/status paths; OpenVINO must still be selectable and honest in v0, with a safe placeholder/detection/status path rather than full installer automation. Modding support is not merely a parked courtesy note: inherited mod/soundpack/tileset support must be investigated against C-AOL enough to tell what is preserved, what is untested, and what metadata shape can later feed NPC/LLM summaries. A headless Godot installer smoke exercises the real `ReleaseInstaller.install_release()` path against the selected cached macOS DMG inside an isolated HOME. A stronger full-scene Godot smoke instantiates the main Catapult scene, waits for the live C-AOL release fetch, selects the prioritized `v0.2.0` build row, emits the real Install button signal, and verifies the isolated install. A physical GUI pass now launched the visible Godot window under an isolated HOME, used a real mouse click on `Install Selected`, and verified the final sandbox install folder contains `Cataclysm.app` plus `catapult_install_info.json`. It still is not a C-AOL game-launch smoke.
 
 Product north star: `doc/lacapult-one-shot-installer-vision.md`. It is greenlit as direction, but execution still follows proof order: v0.2.0 release metadata/install path first, backend skeleton second, mod compatibility investigation third.
 
@@ -37,7 +37,7 @@ The player-facing v0 story:
 3. Refresh available C-AOL releases.
 4. Pick a platform-appropriate `v0.2.0` asset from GitHub releases.
 5. Install/update the game while preserving user data.
-6. Choose a first backend setup path, initially API or Ollama.
+6. Choose a backend setup path from API, Ollama, or OpenVINO, with v0 honesty about what each path can actually configure.
 7. Launch the installed game.
 
 ### Required source lineage
@@ -83,15 +83,15 @@ Preserve MIT license notice and attribution. Do not make the repo look like an u
 - Add first LLM backend setup options after the v0.2.0 install path is structurally proven:
   - API backend: selectable mode plus config-writing/checking path; smoke/status check only if it does not require secrets
   - Ollama backend: selectable mode plus local `ollama`/server detection and C-AOL config path; do not pull huge models or automate risky installs without clearance
-  - OpenVINO: parked/specialized third path; add only placeholder or detection if cheap
+  - OpenVINO backend: selectable third mode with an honest v0 placeholder/detection/status path; full OpenVINO install/setup automation remains later
 
 ### Out of scope for v0
 
 - Pushing to the public GitHub repo, publishing releases, or contacting upstream without fresh explicit clearance from Josef/Schani. The public repo exists at `https://github.com/josihosi/Lacapult-Doobdab`, but public writes remain clearance-gated.
 - Full all-three-backend installation automation.
-- OpenVINO implementation beyond a placeholder/detection stub.
+- OpenVINO implementation beyond selectable placeholder/detection/status metadata.
 - Pulling or installing large local models without explicit clearance.
-- Modpack curation beyond preserving inherited mod/soundpack/tileset behavior and starting a bounded compatibility-summary investigation.
+- Modpack curation beyond investigating inherited mod/soundpack/tileset behavior, marking C-AOL compatibility honestly, and starting a bounded compatibility-summary shape.
 - Supporting DDA/TLG/BN/EOD/TISH as first-class visible targets.
 - New artwork/icon polish unless needed to remove misleading Dabdoob branding.
 - Cross-platform signed release builds of Lacapult itself.
@@ -146,15 +146,16 @@ Preferred bounded approach:
 ### 6. LLM backend setup behavior
 
 - Add C-AOL backend setup as a visible concept only after the release install path is not vapor.
-- First supported options are API and Ollama.
+- The player-facing selector should expose three options: API, Ollama, and OpenVINO.
 - API setup should focus on mode/config fields and safe validation without exposing secrets.
 - Ollama setup should detect local availability/server status and write/check C-AOL config; installation/model-pull automation is later unless explicitly cleared.
-- OpenVINO remains a parked specialized path.
+- OpenVINO setup should be selectable and honest in v0: placeholder/detection/status metadata is enough, but it should not disappear as if only two backends exist.
 
 ### 7. Modding compatibility investigation
 
 - Keep inherited Dabdoob mod/soundpack/tileset support unless it blocks C-AOL-first UX.
-- Identify where inherited mod metadata and compatibility rules live.
+- Identify where inherited mod metadata, download sources, compatibility rules, and UI entry points live.
+- Check how those inherited assumptions map onto an installed C-AOL `v0.2.0` tree and mark the result honestly as supported, untested, broken, or unknown.
 - Start a C-AOL compatibility-summary note for mods.
 - Treat NPC/LLM mod summaries as future-facing metadata: useful later for telling NPC/context systems what factions, items, monsters, locations, or tone an installed mod adds.
 
@@ -189,6 +190,6 @@ The v0 target is done when:
 - C-AOL `v0.2.0` releases are fetched from `josihosi/Cataclysm-AOL`
 - platform asset matching works for current `v0.2.0` assets
 - install/update/launch paths are at least plausibly wired and tested to the smallest honest extent available on this Mac
-- API and Ollama backend setup options are represented in canon and, when implemented, in UI/config flow
-- OpenVINO is explicitly parked or stubbed as specialized/future work
-- inherited modding support is preserved and the first compatibility/NPC-summary investigation note exists
+- API, Ollama, and OpenVINO backend setup options are represented in canon and in the UI selector, with v0-honest capability/status for each
+- OpenVINO is selectable but not falsely implemented beyond placeholder/detection/status metadata
+- inherited modding support is preserved and the C-AOL compatibility/NPC-summary investigation records entry points, assumptions, and next proof needs

@@ -95,7 +95,7 @@ func _add_backend_setup_controls() -> void:
 	_backend_mode_button.size_flags_horizontal = SIZE_SHRINK_END
 	_backend_mode_button.add_item("API backend")
 	_backend_mode_button.add_item("Ollama backend")
-	_backend_mode_button.add_item("OpenVINO (parked)")
+	_backend_mode_button.add_item("OpenVINO backend")
 	_backend_mode_button.connect("item_selected", self, "_on_BackendMode_item_selected")
 	mode_row.add_child(_backend_mode_button)
 
@@ -160,7 +160,7 @@ func _refresh_backend_setup_controls() -> void:
 	_backend_endpoint.editable = mode != "openvino"
 	_backend_model.editable = mode != "openvino"
 
-	var status = "OpenVINO is parked/specialized for a later slice."
+	var status = "OpenVINO is selectable in v0; Lacapult records the choice but does not install runtimes or pull models yet."
 	if mode == "api":
 		status = "API mode saves endpoint/model metadata only; Lacapult v0 never stores API keys."
 	elif mode == "ollama":

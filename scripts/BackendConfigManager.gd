@@ -26,15 +26,13 @@ func get_supported_backends() -> Array:
 		{
 			"id": BACKEND_OPENVINO,
 			"label": "OpenVINO backend",
-			"status": "parked_specialized_future"
+			"status": _detect_openvino_status()
 		},
 	]
 
 func write_launcher_backend_config(mode: String, endpoint: String = "", model: String = "") -> String:
 	if not mode in [BACKEND_API, BACKEND_OLLAMA, BACKEND_OPENVINO]:
 		return "unsupported_backend"
-	if mode == BACKEND_OPENVINO:
-		return "openvino_parked"
 
 	var d = Directory.new()
 	if not d.dir_exists(Paths.config):
@@ -42,13 +40,19 @@ func write_launcher_backend_config(mode: String, endpoint: String = "", model: S
 		if err != OK:
 			return "config_dir_error_%s" % err
 
+	var status = "configured_without_secret"
+	if mode == BACKEND_OLLAMA:
+		status = _detect_ollama_status()
+	elif mode == BACKEND_OPENVINO:
+		status = _detect_openvino_status()
+
 	var safe_config = {
 		"backend": mode,
-		"status": "configured_without_secret" if mode == BACKEND_API else _detect_ollama_status(),
-		"endpoint": endpoint,
-		"model": model,
+		"status": status,
+		"endpoint": "" if mode == BACKEND_OPENVINO else endpoint,
+		"model": "" if mode == BACKEND_OPENVINO else model,
 		"last_check": OS.get_datetime(),
-		"notes": "Launcher-side C-AOL backend setup metadata. API secrets are intentionally not stored here.",
+		"notes": _backend_notes(mode),
 		"caol_options_patch": _build_caol_options_patch(mode, endpoint, model)
 	}
 	var options_patch = safe_config["caol_options_patch"]
@@ -100,6 +104,21 @@ func _build_caol_options_patch(mode: String, endpoint: String, model: String) ->
 			})
 
 	return patch
+
+func _backend_notes(mode: String) -> String:
+	if mode == BACKEND_OPENVINO:
+		return "OpenVINO is selectable in Lacapult v0, but full setup automation is not implemented yet. This file records the user's intent without installing runtimes or pulling models."
+	return "Launcher-side C-AOL backend setup metadata. API secrets are intentionally not stored here."
+
+
+func _detect_openvino_status() -> String:
+	var output = []
+	var command_lookup = "where" if OS.get_name() == "Windows" else "which"
+	var exit_code = OS.execute(command_lookup, ["openvino"], true, output, true)
+	if exit_code == 0:
+		return "openvino_command_present_setup_not_automated"
+	return "openvino_selectable_setup_not_automated"
+
 
 func _detect_ollama_status() -> String:
 	var output = []
