@@ -25,20 +25,21 @@ Build from the local standalone repo at `/Users/josefhorvath/Schanigarten/Lacapu
 
 The active scope now includes a visible three-option backend setup selector for **API**, **Ollama**, and **OpenVINO** after the v0.2.0 release install path is proven. API and Ollama get the first real config/status paths; OpenVINO must still be selectable and honest in v0, with a safe placeholder/detection/status path rather than full installer automation. Modding support is not merely a parked courtesy note: inherited mod/soundpack/tileset support must be investigated against C-AOL enough to tell what is preserved, what is untested, and what metadata shape can later feed NPC/LLM summaries. A headless Godot installer smoke exercises the real `ReleaseInstaller.install_release()` path against the selected cached macOS DMG inside an isolated HOME. A stronger full-scene Godot smoke instantiates the main Catapult scene, waits for the live C-AOL release fetch, selects the prioritized `v0.2.0` build row, emits the real Install button signal, and verifies the isolated install. A physical GUI pass now launched the visible Godot window under an isolated HOME, used a real mouse click on `Install Selected`, and verified the final sandbox install folder contains `Cataclysm.app` plus `catapult_install_info.json`. A release-prep export proof now generates temporary safe Godot presets, exports macOS/Linux/Windows PCK packs into ignored `.proof-cache/`, and restores `export_presets.cfg`; full app exports are blocked locally because Godot 3.6.2 export templates are missing (`osx.zip`, `linux_x11_64_release`, `windows_64_release.exe`), with signing/notarization still unclaimed. A C-AOL game-launch smoke from an isolated installed app bundle was attempted and now gives the next hard blocker: the selected `v0.2.0` macOS DMG installs into the sandboxed Lacapult app shape, but `Cataclysm.app/Contents/Resources/cataclysm-tiles` aborts on this Mac because it links absolute `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib` paths that are not bundled in the app and are not present locally. Template installation, signing/notarization, public release packaging, and any upstream packaging fix remain separate decisions.
 
-Product north star: `doc/lacapult-one-shot-installer-vision.md`. It is greenlit as direction, but execution still follows proof order: v0.2.0 release metadata/install path first, backend skeleton second, mod compatibility investigation third.
+Product north star: `doc/lacapult-one-shot-installer-vision.md`. It is greenlit as direction, but execution still follows proof order: v0.2.0 release metadata/install path first, backend skeleton second, mod compatibility investigation third. Lacapult is itself an installer/launcher product, so its own distribution must be easy for normal users to install on Windows, macOS, and Linux; do not let C-AOL package launchability work obscure the separate Lacapult app packaging/installability bar.
 
 ### Product intent
 
 Lacapult Doobdab should install and launch C-AOL releases with the minimum friction possible.
 
 The player-facing v0 story:
-1. Download/open Lacapult Doobdab.
-2. See C-AOL as the only real game target.
-3. Refresh available C-AOL releases.
-4. Pick a platform-appropriate `v0.2.0` asset from GitHub releases.
-5. Install/update the game while preserving user data.
-6. Choose a backend setup path from API, Ollama, or OpenVINO, with v0 honesty about what each path can actually configure.
-7. Launch the installed game.
+1. Download/install Lacapult Doobdab easily on Windows, macOS, or Linux.
+2. Open Lacapult without developer tooling.
+3. See C-AOL as the only real game target.
+4. Refresh available C-AOL releases.
+5. Pick a platform-appropriate `v0.2.0` asset from GitHub releases.
+6. Install/update the game while preserving user data.
+7. Choose a backend setup path from API, Ollama, or OpenVINO, with v0 honesty about what each path can actually configure.
+8. Launch the installed game.
 
 ### Required source lineage
 

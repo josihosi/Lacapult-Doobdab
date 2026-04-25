@@ -8,7 +8,7 @@ Active target: `Lacapult Doobdab v0.2.0 release installer plus first backend set
 
 Current checkpoint: local proof packet, first Godot GUI smoke, controlled selected-macOS-DMG mount/launchability-shape proof, sandboxed Lacapult-style DMG install-shape proof, Godot 3.6.2 project-load revalidation, a headless Godot `ReleaseInstaller.install_release()` pass, a full-scene Godot Install-button signal pass, a physical clicked GUI install pass against the selected cached macOS DMG, backend triad, first C-AOL mod compatibility inventory, and local Godot export-pack/PCK release-prep proof are complete as of 2026-04-25. The next bounded C-AOL game-launch smoke from an isolated installed app bundle was attempted and is blocked by the selected upstream C-AOL macOS app binary linking unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`. Do not install Godot export templates, sign/notarize, publish, solve full OpenVINO automation, patch upstream packaging, or curate C-AOL mod downloads in this lane without fresh clearance.
 
-Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order.
+Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order. Lacapult's own cross-platform installability is part of the product bar: Windows/macOS/Linux users should be able to install/open the launcher without developer tooling. Keep that evidence separate from C-AOL game-package launchability.
 
 1. Confirm source/import state
    - Verify this repo is local-only and has no inherited `.git` history from Dabdoob.
@@ -51,7 +51,7 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - If full GUI launch is possible, smoke launch to the release list; otherwise record the exact missing tool/blocker.
 
 7. Park next slices
-   - [x] Local Godot export-pack/PCK release-prep proof for macOS/Linux/Windows using temporary safe presets; full app exports are blocked until Godot 3.6.2 export templates are installed.
+   - [x] Local Godot export-pack/PCK release-prep proof for macOS/Linux/Windows using temporary safe presets; full app exports / user-installable Lacapult packages are blocked until Godot 3.6.2 export templates are installed.
    - [x] C-AOL game-launch smoke from an isolated installed app bundle attempted; sandbox install still succeeds, but actual game startup aborts before running because the selected macOS binary depends on unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`.
    - OpenVINO full setup/installer automation beyond selectable v0 status metadata.
    - Real model install/model-pull automation.

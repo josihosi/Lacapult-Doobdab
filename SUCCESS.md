@@ -30,6 +30,7 @@ Done only when all are true:
 - [x] Validation evidence is recorded in `TESTING.md`.
 - [x] Godot 3.6.2 GUI smoke proves the project launches, the Game tab prioritizes the C-AOL `v0.2.0` macOS DMG, and the Settings tab exposes backend setup controls.
 - [x] Public repo existence is recorded (`https://github.com/josihosi/Lacapult-Doobdab`), and public releases/contact remain blocked without fresh Josef/Schani clearance.
+- [ ] Lacapult itself has easy user-facing install/package evidence for Windows, macOS, and Linux; developer-only Godot project launch or raw PCK export is not enough.
 
 ## Parked next slices
 
@@ -47,4 +48,4 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [x] Physical clicked GUI macOS DMG extraction/install pass, without launching the game.
 - [x] Local Godot export-pack/PCK release-prep proof for macOS/Linux/Windows into ignored `.proof-cache/`, with `export_presets.cfg` restored afterward.
 - [ ] C-AOL game-launch smoke from an isolated installed app bundle reaches a running game process. Current proof is attempted but blocked by unbundled upstream macOS dylib dependencies (`/opt/local/lib/libfreetype.6.dylib`, `/opt/local/lib/libz.1.dylib`) in the selected C-AOL `v0.2.0` DMG.
-- [ ] Full app exports / signed packaged Lacapult releases for Windows/Linux/macOS; currently blocked locally on missing Godot 3.6.2 export templates and later signing/notarization choices.
+- [ ] Full app exports / installer-shaped Lacapult app distribution for Windows/Linux/macOS; currently blocked locally on missing Godot 3.6.2 export templates and later signing/notarization choices.
