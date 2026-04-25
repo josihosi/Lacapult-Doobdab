@@ -193,6 +193,14 @@ A visible Godot GUI pass was run under isolated `HOME=/tmp/lacapult-click-home.X
 - v0 backend setup is a three-choice selector: API, Ollama, and OpenVINO. API/Ollama have the first real config/status paths; OpenVINO is selectable and writes honest placeholder/status metadata, but full runtime setup remains later.
 - C-AOL mod support cannot be declared done just because inherited Dabdoob systems survived. For `game = "caol"`, custom downloadable mod catalogs currently fall through to `Paths.mod_repo`; stock mods come from the active C-AOL install tree, including macOS app-bundle data paths. That proof now exists as `tools/prove_caol_mod_inventory.py`: the selected cached C-AOL v0.2.0 macOS DMG exposes 42 non-obsolete packaged stock mod IDs plus 7 obsolete IDs through `Cataclysm.app/Contents/Resources/data/mods`; inherited DDA/BN/TLG downloadable catalogs remain untested for C-AOL unless a C-AOL source is added.
 
+## 2026-04-25 C-AOL mod/summarizer bridge proof
+
+`tools/prove_caol_mod_inventory.py` now emits a structured per-mod compatibility/summarizer bridge report into `.proof-cache/caol-mod-bridge/` while preserving the older high-level inventory fields. The report inspects every packaged stock mod in the selected C-AOL `v0.2.0` macOS DMG and records id/name, obsolete flag, dependencies, packaged-path presence, summary roots, JSON content flags, and a status classification.
+
+Current result: 42 non-obsolete packaged stock mods are path-supported; 7 packaged mods are blocker-obsolete; no packaged mod currently ships `npcs/Backgrounds/Summaries_short` or `npcs/Backgrounds/Summaries_extra`; 30 mods contain NPC/faction/monster/item/location-ish content and are classified `summarizer-compatible-but-needs-generated-pack`; 12 are `no-summary-needed` for this bridge. There were no JSON parse errors and no missing dependency blockers in the selected packaged mod set.
+
+The bridge contract is intentionally C-AOL-native: C-AOL runtime summary loading already merges core data, active mod roots, and world custom mods, then reads `npcs/Backgrounds/Summaries_short` and `npcs/Backgrounds/Summaries_extra` as JSON or legacy text. Lacapult should therefore generate/install future summary packs into those active mod roots instead of storing a launcher-only summary metadata format. UI surfacing/apply flow is not claimed by this proof.
+
 ## 2026-04-25 release-prep export packaging proof
 
 `tools/prove_lacapult_export_packaging.py` is the current local release-prep export proof. It generates temporary Godot 3 export presets for macOS, Linux, and Windows, runs `--export-pack` into `.proof-cache/lacapult-export/`, writes `.proof-cache/lacapult-export/manifest.json`, and restores `export_presets.cfg` afterward so local signing/export settings are not accidentally committed.

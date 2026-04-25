@@ -162,6 +162,15 @@ Before claiming v0 is done, Andi should record:
 - Re-ran safe Ollama detection: `ollama list` succeeded against the local server. No model pull, install, remote API call, or API secret was used.
 - Re-ran `git diff --check`; it passed. `git status --short --branch` showed `main...origin/main` before this documentation-only evidence update.
 
+## Evidence - 2026-04-25 C-AOL mod/summarizer bridge report
+
+- Extended `tools/prove_caol_mod_inventory.py` from a high-level mod inventory into a structured per-mod compatibility/summarizer bridge proof. It still mounts the selected cached C-AOL `v0.2.0` macOS DMG read-only/no-browse, but now emits JSON and Markdown reports under `.proof-cache/caol-mod-bridge/`.
+- Ran `python3 tools/prove_caol_mod_inventory.py`; it found 42 non-obsolete packaged stock mods and 7 obsolete packaged mods in `Cataclysm.app/Contents/Resources/data/mods`. Status counts were `blocker-obsolete: 7`, `summarizer-compatible-but-needs-generated-pack: 30`, and `no-summary-needed: 12`. No packaged mod currently has `npcs/Backgrounds/Summaries_short` or `npcs/Backgrounds/Summaries_extra`, so no mod is `summarizer-ready` yet.
+- The report records per-mod id/name, obsolete flag, dependencies, packaged-path presence, summary-root presence, JSON content flags, parse errors, missing dependencies, and status/reason classification. No JSON parse errors or missing dependency blockers were found in the selected packaged mod set.
+- Verified the C-AOL bridge contract by static source inspection: `src/llm_intent.cpp` merges core data, active mod roots, and world custom-mod roots in `background_summary_data_roots()`, then loads active-root `npcs/Backgrounds/Summaries_short` and `npcs/Backgrounds/Summaries_extra`. `TechnicalTome.md` documents the JSON schema and override rules.
+- Validation command set for this slice: `python3 -m py_compile tools/prove_caol_mod_inventory.py`, `python3 tools/prove_caol_mod_inventory.py`, `python3 tools/prove_caol_release.py --all-platforms`, static `rg` for C-AOL summary roots/runtime loading, and `git diff --check`; all passed.
+- This is proof/report only. It does not claim UI surfacing, generated summary-pack installation, world mutation, enabling mods in real saves, model pulls, API secrets, upstream contact, or public release work.
+
 ## Known risk spots
 
 - Godot 3 scene node paths may break if the game chooser/channel UI is removed too aggressively.

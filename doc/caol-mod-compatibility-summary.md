@@ -19,38 +19,62 @@ Inherited mod lists were assembled for DDA/BN/TLG/EOD/TISH assumptions. C-AOL `v
 
 ## Current inherited-source inventory - 2026-04-25
 
-`tools/prove_caol_mod_inventory.py` inspected the selected cached C-AOL `v0.2.0` macOS DMG read-only and compared it with Lacapult's inherited source paths. Current classification:
+`tools/prove_caol_mod_inventory.py` inspected the selected cached C-AOL `v0.2.0` macOS DMG read-only and compared it with Lacapult's inherited source paths. It now also writes a per-mod compatibility/summarizer bridge report under `.proof-cache/caol-mod-bridge/caol_mod_summarizer_bridge_report.{json,md}`. Current classification:
 
 - **Stock packaged C-AOL mods: supported by path shape and present in v0.2.0.** The selected DMG exposes `Cataclysm.app/Contents/Resources/data/mods`; Lacapult's `Paths.mods_stock` already resolves macOS `.app` bundle data paths, and the proof found 42 non-obsolete stock mod IDs plus 7 obsolete IDs. Sample IDs include `dda`, `magiclysm`, `mindovermatter`, `no_hope`, `aftershock`, `DinoMod`, and `MMA`.
 - **User-installed mods: mechanically supported, content compatibility unknown.** `Paths.mods_user` still points at the per-game userdata `mods` folder under the C-AOL app-support tree. The file/path mechanism survives, but Lacapult has not proven arbitrary user mod content against C-AOL.
 - **Soundpacks/tilesets: packaged paths present.** The selected C-AOL app bundle has `data/sound` and `gfx`, and Lacapult's inherited path helpers still resolve app-bundle sound/gfx locations.
 - **Custom downloadable mod catalogs: not C-AOL-proven.** `ModManager.refresh_available()` has explicit custom-download catalogs for `tlg`, `bn`, and `dda`, disables mods for `tish`/`eod`, and falls back to parsing `Paths.mod_repo` for any other game key. Since C-AOL uses `game = "caol"`, it currently has no explicit curated C-AOL download catalog. Treat inherited DDA/BN/TLG catalog entries as **untested for C-AOL**, not supported.
-- **NPC/LLM mod summaries: metadata direction only.** The useful future shape is to summarize installed/selected mod metadata for NPC context later; v0 does not integrate that runtime path.
+- **NPC/LLM mod summaries: C-AOL-native bridge, proof only.** C-AOL already merges core data, active mod roots, and world custom mods for background summaries, then reads `npcs/Backgrounds/Summaries_short` and `npcs/Backgrounds/Summaries_extra` in JSON or legacy text format. The report therefore points future generated packs at those roots instead of inventing a Lacapult-only metadata format.
 
-Next smallest proof: run the inventory helper through Andi after any install-path changes and, if a C-AOL `mod_repo` source is added later, classify each downloadable entry as supported/untested/broken/unknown against the selected C-AOL release.
+Per-mod bridge result from the selected packaged `v0.2.0` DMG:
 
-## Proposed summary shape
+- 42 non-obsolete packaged stock mods are path-supported.
+- 7 packaged mods are blocker-obsolete: `Graphical_Overmap`, `Rummaging`, `blazeindustries`, `desertpack`, `military_professions`, `ruralbiome`, and `test_data`.
+- 0 packaged mods currently contain `Summaries_short` or `Summaries_extra`, so none are `summarizer-ready` yet.
+- 30 packaged mods contain obvious NPC/faction/monster/item/location-ish JSON content and are classified `summarizer-compatible-but-needs-generated-pack`.
+- 12 packaged mods are classified `no-summary-needed` for this bridge because they do not expose obvious NPC/context JSON content.
+- No JSON parse errors or missing dependency blockers were found in the selected packaged mod set.
+
+Next smallest application step: surface this report in Lacapult as read-only compatibility/status information for packaged stock mods. A later apply flow can generate or install C-AOL-compatible summary packs into active mod roots, but this proof does not claim UI integration or runtime NPC consumption.
+
+## Report shape vs runtime summary shape
+
+The Lacapult proof report may keep launcher-side inspection fields such as:
 
 ```yaml
 id: <mod id>
 name: <display name>
-source: <repo/url/local>
-compatibility:
-  caol_v0_2_0: supported | untested | broken | unknown
-  notes: <short reason>
-adds:
-  factions: []
-  monsters: []
-  items: []
-  professions: []
-  locations: []
-  mechanics: []
-npc_context_summary: >
-  One or two paragraphs explaining what NPC/LLM context should know if this mod is installed.
-risks:
-  - <balance/lore/conflict issue>
+compatibility_status: stock-packaged-path-supported | user-installed-unknown | blocker-*
+summarizer_bridge_status: summarizer-ready | summarizer-compatible-but-needs-generated-pack | no-summary-needed
+adds_flags:
+  npc: true|false
+  faction: true|false
+  monster: true|false
+  item: true|false
+  location: true|false
 ```
+
+That is only report/status metadata. Any runtime NPC personality pack should use C-AOL's existing summary schema inside an active mod root, for example:
+
+```json
+{
+  "type": "npc_personality_summary_bundle",
+  "version": 1,
+  "entries": [
+    {
+      "type": "npc_personality_summary",
+      "selector": "name:<NPC name>",
+      "your_background": "five-ish grounded descriptors",
+      "your_expression": "one in-voice example line",
+      "source_tag": "lacapult-generated:<mod id>"
+    }
+  ]
+}
+```
+
+Preferred target path for named/context overrides is `<active_mod>/npcs/Backgrounds/Summaries_extra/*.json`; background-topic summaries may use `<active_mod>/npcs/Backgrounds/Summaries_short/*.json` or legacy text if needed.
 
 ## v0 rule
 
-Do not promise automatic NPC/LLM consumption yet. The useful v0 behavior is to preserve inherited mod/soundpack/tileset support, make C-AOL compatibility status honest, and keep metadata ready for a future NPC context layer.
+Do not promise automatic NPC/LLM consumption yet. The useful v0 behavior is to preserve inherited mod/soundpack/tileset support, make C-AOL compatibility status honest, and keep future runtime summary packs compatible with C-AOL's existing loader.
