@@ -11,6 +11,7 @@ Use the smallest evidence that honestly matches the change.
 - UI node-path changes: Godot parse/load or GUI smoke if Godot is available; otherwise record missing Godot binary as blocker and prove paths by inspection.
 - Installer/download changes: avoid huge downloads unless needed; first prove metadata shape and asset selection, especially for C-AOL `v0.2.0`.
 - Backend setup changes: prove config shape and safe local detection; do not require real API secrets or large model downloads for v0 evidence.
+- Mod Summarizer/apply changes: prove status/discovery first, then sandbox generated packs and rollback; never mutate Josef's real Application Support saves/config/mods for proof work.
 - Public pushes/release publication/upstream contact: external actions, require explicit clearance.
 
 ## Current evidence
@@ -170,6 +171,14 @@ Before claiming v0 is done, Andi should record:
 - Verified the C-AOL bridge contract by static source inspection: `src/llm_intent.cpp` merges core data, active mod roots, and world custom-mod roots in `background_summary_data_roots()`, then loads active-root `npcs/Backgrounds/Summaries_short` and `npcs/Backgrounds/Summaries_extra`. `TechnicalTome.md` documents the JSON schema and override rules.
 - Validation command set for this slice: `python3 -m py_compile tools/prove_caol_mod_inventory.py`, `python3 tools/prove_caol_mod_inventory.py`, `python3 tools/prove_caol_release.py --all-platforms`, static `rg` for C-AOL summary roots/runtime loading, and `git diff --check`; all passed.
 - This is proof/report only. It does not claim UI surfacing, generated summary-pack installation, world mutation, enabling mods in real saves, model pulls, API secrets, upstream contact, or public release work.
+
+## Evidence - 2026-04-25 mod Summarizer feature-complete plan
+
+- Added `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` as the active next-lane planning packet after backend-good hardening.
+- The plan keeps C-AOL responsible for active mod roots, `npcs/Backgrounds/Summaries_short`, `npcs/Backgrounds/Summaries_extra`, runtime loading/consumption, and schema/runtime fixes.
+- The plan keeps Lacapult responsible for mod install/enable UX, summary coverage/status, Summarizer pop-up/button, backend-readiness-gated generation orchestration, sandbox staging, generated-pack apply help, backup, and rollback.
+- Required implementation slices are: discovery/status model, UX/status surface, sandboxed summary-pack generation/apply proof, C-AOL runtime consumption proof, and error/rollback/backup proof.
+- Evidence for this planning-only lane is docs inspection plus `git diff --check`; no Python/GDScript code was touched, no model/API/OpenVINO calls were made, and no real user C-AOL Application Support paths were mutated.
 
 ## Known risk spots
 
@@ -361,3 +370,14 @@ Lacapult is the installer/launcher, so release-prep evidence must distinguish La
 - Ran `CAOL_OPTIONS_JSON=/Users/josefhorvath/Schanigarten/Cataclysm-AOL/config/options.json HOME=$(mktemp -d /tmp/lacapult-backend-home.XXXXXX) /opt/homebrew/bin/godot --path . --no-window --script tools/godot_backend_triad_smoke.gd`; it passed. The smoke wrote API/Ollama/OpenVINO launcher-side metadata and applied each generated patch to sandbox C-AOL `options_*.json` copies under the isolated HOME.
 - Ran `/opt/homebrew/bin/godot --path . --no-window --quit`; it exited 0 with the known macOS/headless cleanup warnings.
 - This evidence makes backend setup/config/status/apply-proof good for v0. It still does not claim live API calls with secrets, model pulls/downloads, OpenVINO runtime setup, arbitrary AnyLLM provider consumption by C-AOL runtime, or mutation of Josef's real installed-game config. Backend hardening remains the active implementation lane; feature-complete mod install/enable plus Summarizer apply UX is documented as the next planned lane, not implemented by this proof.
+
+## Pending evidence - mod install/enable + Summarizer feature plan
+
+- Added `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` as the active planning packet for feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply.
+- The plan requires implementation evidence in slices, not one giant hand-wave:
+  - Slice 1: sandboxed discovery/status proof for stock packaged, user-installed, custom-catalog, and world-specific mods, including enabled/disabled state for at least one sandbox world.
+  - Slice 2: Godot UI/status smoke for mod summary badges and post-install/post-enable Summarizer prompt/button, initially dry-run/status only.
+  - Slice 3: sandboxed generated companion summary-pack apply proof with C-AOL-native `Summaries_short` / `Summaries_extra`, manifest, backup, and rollback.
+  - Slice 4: C-AOL runtime/harness proof that an active generated summary root reaches prompt construction, or exact blocker documentation.
+  - Slice 5: fixture coverage for obsolete mods, parse errors, missing dependencies, partial summaries, stale summaries, conflicts, backend-not-ready, and rollback failure handling.
+- No implementation evidence exists yet for these slices; the current read-only bridge remains the last completed modding proof. Future proof scripts must not mutate Josef's real Application Support config, saves, worlds, or mods.

@@ -250,3 +250,11 @@ Current local proof status from `tools/prove_caol_backend_contract.py`:
 - Ollama command/server is present on this Mac; selected-model readiness depends on the configured model being in `ollama list`.
 
 This is the first honest "backend-good" bar for Lacapult: setup/config/status/apply-proof is good; AnyLLM/API and Ollama/llama-family are aimed at Windows/macOS/Linux where dependencies are present; OpenVINO is Windows-first for v0; secret-bearing live API calls, model pulls, OpenVINO installation, and broad provider support remain later lanes.
+
+## 2026-04-25 mod install/enable + Summarizer feature plan
+
+`doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` is the active next-lane planning packet after backend-good hardening. It promotes the read-only packaged-mod bridge into a feature-complete mod/Summarizer implementation family, but does not implement it yet.
+
+The responsibility split is explicit: C-AOL owns runtime truth (`mods.json` active order, active mod roots, world custom mods, `npcs/Backgrounds/Summaries_short`, `npcs/Backgrounds/Summaries_extra`, summary parsing/override behavior, and eventual prompt consumption proof). Lacapult owns installer/helper behavior: discovering stock/user/catalog/world mods, showing enabled/disabled and summary coverage status, prompting after mod install/enable, gating generation on backend readiness, staging generated packs, applying/rolling back C-AOL-native companion summary mods or world custom packs, and explaining weird mod errors without mutating real user data in proofs.
+
+The plan is deliberately sliced: discovery/status model first, then visible UX/prompting, then sandboxed C-AOL-native summary-pack generation/apply with manifest/backup/rollback, then C-AOL runtime consumption proof, then fixture coverage for obsolete mods, parse errors, dependency blockers, partial/stale/conflicting summaries, backend-not-ready states, and rollback failures. This keeps the Summarizer button from becoming button-shaped theater before Lacapult can accurately report whether a mod is active, broken, stale, or unsummarized.

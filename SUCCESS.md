@@ -37,6 +37,23 @@ Done only when all are true:
 - [x] Public repo existence is recorded (`https://github.com/josihosi/Lacapult-Doobdab`), and public releases/contact remain blocked without fresh Josef/Schani clearance.
 - [x] Lacapult itself has local unsigned app/executable/package evidence for Windows, macOS, and Linux; developer-only Godot project launch or raw PCK export is not the final bar.
 
+## Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply
+
+Status: **ACTIVE NEXT LANE / PLANNED, NOT IMPLEMENTED**
+
+Done only when all are true:
+
+- [ ] Mod discovery distinguishes stock packaged, user-installed, custom-catalog, and world-specific mods for C-AOL.
+- [ ] Enabled vs disabled status is world-aware for at least one sandbox world.
+- [ ] Obsolete mods, broken metadata, parse errors, missing roots, missing dependencies, partial summaries, stale summaries, conflicts, and disabled mods produce visible statuses.
+- [ ] After install/enable of a contextual mod, Lacapult offers a Summarizer prompt/button rather than burying the next action.
+- [ ] The launcher shows whether all enabled extra NPC/content is summarized, blocked, stale, or unknown.
+- [ ] API, Ollama, and OpenVINO generation readiness is gated through the backend-good checks; no API secrets are stored and no model pulls/downloads happen without explicit clearance.
+- [ ] Generated packs are C-AOL-native under `npcs/Backgrounds/Summaries_short` / `Summaries_extra`, not launcher-only metadata.
+- [ ] Applying a generated pack and changing a world mod list is sandbox-proven with backup and rollback.
+- [ ] C-AOL runtime consumption is proven in a sandbox/harness, or a concrete C-AOL-side blocker is recorded.
+- [ ] Proof scripts do not mutate Josef's real Application Support config, saves, worlds, or mods.
+
 ## Parked next slices
 
 These are not part of v0 unless Josef/Schani explicitly reopens them:
@@ -45,8 +62,8 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [ ] Large model download/model-pull automation.
 - [ ] API-key/backend live smoke test requiring real secrets.
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.
-- [ ] Feature-complete mod install/enable plus Summarizer UX; after mod install/enable, Lacapult should offer a Summarizer button/pop-up, show whether extra NPC/content summaries exist, handle generation/apply status, and write C-AOL-native `Summaries_short` / `Summaries_extra` data through a sandbox-proven flow. The current Settings surface is read-only and does not apply packs or enable mods.
-- [ ] NPC/LLM runtime consumption of mod compatibility summaries.
+- [active above] Feature-complete mod install/enable plus Summarizer UX; after mod install/enable, Lacapult should offer a Summarizer button/pop-up, show whether extra NPC/content summaries exist, handle generation/apply status, and write C-AOL-native `Summaries_short` / `Summaries_extra` data through a sandbox-proven flow. The current Settings surface is read-only and does not apply packs or enable mods.
+- [active above] NPC/LLM runtime consumption of mod compatibility summaries.
 - [x] Controlled selected macOS DMG download/mount/launchability-shape proof, without launching or installing the game.
 - [x] Sandboxed Lacapult-style macOS DMG copy/move install-shape proof, without touching the real Application Support install state or launching the game.
 - [x] Headless Godot `ReleaseInstaller.install_release()` pass for the selected cached macOS DMG inside an isolated HOME, without touching the real Application Support install state or launching the game.

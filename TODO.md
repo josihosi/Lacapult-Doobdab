@@ -4,11 +4,18 @@ Short execution queue only.
 
 ## Now
 
-Active target: `Lacapult Doobdab v0.2.0 release installer plus first backend setup options`.
+Active target: `Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply`.
 
-Current checkpoint: local proof packet, first Godot GUI smoke, controlled selected-macOS-DMG mount/launchability-shape proof, sandboxed Lacapult-style DMG install-shape proof, Godot 3.6.2 project-load revalidation, a headless Godot `ReleaseInstaller.install_release()` pass, a full-scene Godot Install-button signal pass, a physical clicked GUI install pass against the selected cached macOS DMG, backend triad with v0-safe readiness/config plus sandbox C-AOL options apply proof, first C-AOL mod compatibility inventory, per-mod C-AOL summarizer bridge report, read-only Settings status surfacing for that report, local Godot export-pack plus unsigned app/executable/package release-prep proof, and read-only C-AOL macOS launch preflight/status are complete as of 2026-04-25. The C-AOL game-launch smoke from an isolated installed app bundle remains blocked by the selected upstream C-AOL macOS app binary linking unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`. Do not sign/notarize, publish, solve full OpenVINO automation, patch upstream packaging, apply generated summary packs, or curate C-AOL mod downloads in this lane without fresh clearance.
+Current checkpoint: the v0.2.0 release installer, clicked install proof, backend triad readiness/config/apply proof, read-only packaged-mod bridge status, local unsigned export proof, and macOS launch preflight proof are complete as of 2026-04-25. The C-AOL game-launch smoke from an isolated installed app bundle remains blocked by the selected upstream C-AOL macOS app binary linking unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`; that stays a C-AOL packaging lane, not this mod/summarizer lane. The active next-lane plan is `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`. Do not sign/notarize, publish, solve full OpenVINO automation, patch upstream packaging, apply generated summary packs to real user data, or curate C-AOL mod downloads in this lane without fresh clearance.
 
 Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order. Lacapult's own cross-platform installability is part of the product bar: Windows/macOS/Linux users should be able to install/open the launcher without developer tooling. Keep that evidence separate from C-AOL game-package launchability.
+
+0. Mod install/enable + Summarizer active next lane
+   - [ ] Implement Slice 1 from `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`: discovery/status model for stock packaged, user-installed, custom-catalog, and world-specific mods, with enabled/disabled state for at least one sandbox world.
+   - [ ] Implement Slice 2: visible Mods/Settings UX status plus post-install/post-enable Summarizer prompt/button, initially safe as dry-run/status only.
+   - [ ] Implement Slice 3: sandboxed C-AOL-native companion summary-pack generation/apply proof with manifest, backup, and rollback.
+   - [ ] Implement Slice 4: C-AOL sandbox/harness proof that an active generated summary root is consumed by runtime prompt construction, or record the exact C-AOL-side blocker.
+   - [ ] Implement Slice 5: fixture coverage for obsolete mods, parse errors, missing dependencies, partial summaries, stale summaries, conflicts, backend-not-ready, and rollback failure handling.
 
 1. Confirm source/import state
    - Verify this repo is local-only and has no inherited `.git` history from Dabdoob.
@@ -63,6 +70,6 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - OpenVINO full setup/installer automation beyond v0-safe detection/config/status metadata.
    - Real model install/model-pull automation.
    - C-AOL-specific mod/soundpack/tileset recommendation packs.
-   - Feature-complete mod install/enable plus Summarizer UX after the read-only report status surface: post-mod-install Summarizer button/pop-up, extra NPC/content summary status, generation/apply status, and sandbox-proven C-AOL-native `Summaries_short` / `Summaries_extra` application.
-   - NPC/LLM runtime integration proof that active mod summaries are consumed by C-AOL, with schema/runtime behavior kept on the C-AOL side and Lacapult acting as UX/status/apply helper.
+   - [active above] Feature-complete mod install/enable plus Summarizer UX after the read-only report status surface: post-mod-install Summarizer button/pop-up, extra NPC/content summary status, generation/apply status, and sandbox-proven C-AOL-native `Summaries_short` / `Summaries_extra` application.
+   - [active above] NPC/LLM runtime integration proof that active mod summaries are consumed by C-AOL, with schema/runtime behavior kept on the C-AOL side and Lacapult acting as UX/status/apply helper.
    - Public GitHub push/release publication, only after explicit clearance.
