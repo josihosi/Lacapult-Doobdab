@@ -54,6 +54,14 @@ Before claiming v0 is done, Andi should record:
    - show the release object handed to installer has `name`, `url`, `filename`, `published_at`, `has_any_assets`.
    - do not download a huge release archive unless Schani/Josef explicitly wants that proof.
 
+## Evidence - 2026-04-25 cron revalidation
+
+- Re-ran `python3 tools/prove_caol_release.py --all-platforms`; live `josihosi/Cataclysm-AOL` `v0.2.0` data still has 12 assets, and Linux, macOS, and Windows each matched 4 platform assets with installer metadata containing `name`, `url`, `filename`, `asset_size`, `release_page_url`, `published_at`, and `has_any_assets` without downloading archives.
+- Re-ran `python3 tools/prove_caol_backend_contract.py`; local C-AOL `src/options.cpp` still contains the required `LLM_INTENT_*` option names, Lacapult still references all required names, no forbidden secret-bearing field tokens were found, and the patch remains preview-only.
+- Re-ran safe Ollama detection: `command -v ollama` returned `/opt/homebrew/bin/ollama`; `ollama list` succeeded against the local server. No model pull, install, remote API call, or API secret was used.
+- Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are still unavailable on this Mac, so no GUI/project-load smoke was claimed.
+- `git diff --check` passed.
+
 ## Evidence - 2026-04-25 Ollama backend status tightening
 
 - Tightened `scripts/BackendConfigManager.gd` so the UI/config path can distinguish an installed Ollama command with a responding local server from an installed command whose server is unreachable.
