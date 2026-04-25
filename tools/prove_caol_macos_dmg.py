@@ -8,7 +8,9 @@ then detaches it. It does not launch the game, mutate an installed C-AOL config,
 use API secrets, pull models, publish releases, or contact upstream maintainers.
 
 Default mode is metadata-only. Pass --download to perform the controlled DMG
-mount/inspect proof.
+mount/inspect proof. Pass --install-sandbox to additionally copy the mounted
+DMG contents through a sandboxed version of Lacapult's macOS install-root shape
+without touching the user's real Lacapult Application Support directory.
 """
 
 from __future__ import annotations
@@ -29,6 +31,7 @@ RELEASES_URL = "https://api.github.com/repos/josihosi/Cataclysm-AOL/releases"
 MACOS_FILTERS = ["_macos.dmg", "_macos.tar.gz", "_macos.zip"]
 PREFERRED_TAG = "v0.2.0"
 DEFAULT_CACHE_DIR = Path(".proof-cache/caol-dmg")
+INFO_FILENAME = "catapult_install_info.json"
 LACAPULT_CAOL_EXECUTABLE_NAMES = ["cataclysm-tiles", "cataclysm-tiles.exe", "Cataclysm-AOL"]
 
 
@@ -144,9 +147,138 @@ def inspect_mount(mount_point: str) -> dict[str, Any]:
     }
 
 
+
+def copy_mount_like_lacapult(mount_point: str, tmp_dir: Path) -> Path:
+    """Copy a DMG mount into tmp_dir the way Lacapult's FS.copy_dir does.
+
+    The Godot helper copies the mount root as a child directory, skips the
+    Applications symlink, and ignores dotfiles. Keeping that shape matters
+    because ReleaseInstaller then chooses the directory containing a top-level
+    .app as the install root on macOS.
+    """
+
+    source = Path(mount_point)
+    extracted_root = tmp_dir / source.name
+    extracted_root.mkdir(parents=True, exist_ok=True)
+    for child in source.iterdir():
+        if child.name.startswith(".") or child.name == "Applications":
+            continue
+        dest = extracted_root / child.name
+        if child.is_symlink():
+            continue
+        if child.is_dir():
+            shutil.copytree(child, dest, symlinks=False, dirs_exist_ok=True)
+        elif child.is_file():
+            shutil.copy2(child, dest)
+    return extracted_root
+
+
+def app_bundle_has_executable(app_path: Path) -> bool:
+    for search_dir in [app_path / "Contents" / "MacOS", app_path / "Contents" / "Resources"]:
+        if not search_dir.is_dir():
+            continue
+        files = sorted(child for child in search_dir.iterdir() if child.is_file())
+        for child in files:
+            if child.name in LACAPULT_CAOL_EXECUTABLE_NAMES or len(files) == 1:
+                return True
+    return False
+
+
+def looks_like_game_directory(dir_path: Path) -> bool:
+    for exe_name in LACAPULT_CAOL_EXECUTABLE_NAMES:
+        if (dir_path / exe_name).is_file():
+            return True
+    for child in dir_path.iterdir():
+        if child.is_dir() and child.name.endswith(".app") and app_bundle_has_executable(child):
+            return True
+    game_dirs = ["data", "gfx", "lang", "lua", "tools"]
+    return sum(1 for name in game_dirs if (dir_path / name).is_dir()) >= 2
+
+
+def find_game_root_like_lacapult(tmp_dir: Path) -> Path:
+    candidates = [
+        child
+        for child in tmp_dir.iterdir()
+        if child.is_dir() and not child.name.startswith(".") and not child.name.startswith("__MACOSX")
+    ]
+    if not candidates:
+        raise RuntimeError("sandbox extraction produced no candidate directories")
+
+    for candidate in candidates:
+        if candidate.name.endswith(".app"):
+            return tmp_dir
+
+    for candidate in candidates:
+        if looks_like_game_directory(candidate):
+            return candidate
+
+    if len(candidates) == 1:
+        return candidates[0]
+    return candidates[0]
+
+
+def chmod_app_bundle_executables(install_dir: Path) -> list[str]:
+    chmodded: list[str] = []
+    for app in install_dir.iterdir():
+        if not app.is_dir() or not app.name.endswith(".app"):
+            continue
+        for search_dir in [app / "Contents" / "MacOS", app / "Contents" / "Resources"]:
+            if not search_dir.is_dir():
+                continue
+            for child in search_dir.iterdir():
+                if child.is_file():
+                    child.chmod(child.stat().st_mode | 0o111)
+                    chmodded.append(str(child.relative_to(install_dir)))
+    return chmodded
+
+
+def sandbox_install_from_mount(mount_point: str, release_name: str) -> dict[str, Any]:
+    with tempfile.TemporaryDirectory(prefix="lacapult-caol-install-proof-") as sandbox:
+        sandbox_root = Path(sandbox)
+        tmp_dir = sandbox_root / "Library" / "Application Support" / "Lacapult Doobdab" / "caol" / "tmp"
+        install_dir = sandbox_root / "Library" / "Application Support" / "Lacapult Doobdab" / "caol" / "game0"
+        tmp_dir.mkdir(parents=True, exist_ok=True)
+        install_dir.parent.mkdir(parents=True, exist_ok=True)
+
+        copied_root = copy_mount_like_lacapult(mount_point, tmp_dir)
+        selected_root = find_game_root_like_lacapult(tmp_dir)
+        (selected_root / INFO_FILENAME).write_text(json.dumps({"name": release_name}, indent=4), encoding="utf-8")
+
+        install_dir.mkdir(parents=True, exist_ok=True)
+        moved_entries: list[str] = []
+        for child in selected_root.iterdir():
+            if child.name == "Applications" or child.name.startswith("."):
+                continue
+            target = install_dir / child.name
+            shutil.move(str(child), str(target))
+            moved_entries.append(child.name)
+
+        chmodded = chmod_app_bundle_executables(install_dir)
+        final_listing = sorted(child.name for child in install_dir.iterdir())
+        launchable = looks_like_game_directory(install_dir)
+        info_file = install_dir / INFO_FILENAME
+
+        return {
+            "sandbox_root_removed_after_proof": True,
+            "copied_mount_root_name": copied_root.name,
+            "selected_install_root_relative": str(selected_root.relative_to(sandbox_root)),
+            "final_install_dir_relative": str(install_dir.relative_to(sandbox_root)),
+            "moved_entries": sorted(moved_entries),
+            "final_listing": final_listing,
+            "info_file_present": info_file.is_file(),
+            "info_file": json.loads(info_file.read_text(encoding="utf-8")) if info_file.is_file() else None,
+            "chmodded_app_executables": chmodded,
+            "looks_launchable_after_move": launchable,
+        }
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--download", action="store_true", help="download, mount, inspect, and detach the selected DMG")
+    parser.add_argument(
+        "--install-sandbox",
+        action="store_true",
+        help="also copy/move the mounted DMG through a sandboxed Lacapult install-root proof",
+    )
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR, help="proof download cache directory")
     args = parser.parse_args()
 
@@ -173,6 +305,9 @@ def main() -> int:
         "mounted": False,
     }
 
+    if args.install_sandbox:
+        args.download = True
+
     if not args.download:
         print(json.dumps(proof, indent=2))
         return 0
@@ -191,6 +326,8 @@ def main() -> int:
         mount_point = mount_dmg(dmg_path)
         proof["mounted"] = True
         proof["mount_inspection"] = inspect_mount(mount_point)
+        if args.install_sandbox:
+            proof["sandbox_install"] = sandbox_install_from_mount(mount_point, release.get("name") or PREFERRED_TAG)
     finally:
         if mount_point:
             detach_dmg(mount_point)
@@ -199,6 +336,12 @@ def main() -> int:
     print(json.dumps(proof, indent=2))
     if not proof.get("mount_inspection", {}).get("looks_launchable"):
         print("Mounted DMG did not expose a launchable .app shape", file=sys.stderr)
+        return 1
+    if args.install_sandbox and not proof.get("sandbox_install", {}).get("looks_launchable_after_move"):
+        print("Sandbox install did not preserve a launchable final install shape", file=sys.stderr)
+        return 1
+    if args.install_sandbox and not proof.get("sandbox_install", {}).get("info_file_present"):
+        print("Sandbox install did not create the install info file", file=sys.stderr)
         return 1
     return 0
 

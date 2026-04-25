@@ -65,6 +65,18 @@ Before claiming v0 is done, Andi should record:
 - `godot --version` returned `3.6.2.stable.official.3cd3caab6`; this run did not need a new GUI screenshot because the changed seam was the external DMG shape proof.
 - Re-ran `git diff --check`; it passed.
 
+
+## Evidence - 2026-04-25 sandboxed macOS DMG install-shape proof
+
+- Extended `tools/prove_caol_macos_dmg.py` with `--install-sandbox`. The new mode still fetches live release metadata and uses the selected C-AOL `v0.2.0` macOS DMG, then mounts it read-only/no-browse and copies/moves its contents through a temporary Lacapult-style `Library/Application Support/Lacapult Doobdab/caol/{tmp,game0}` tree. The sandbox is removed after the proof.
+- Ran `python3 tools/prove_caol_macos_dmg.py --install-sandbox`; it reused/downloaded `caol_cdda-0-h_2026-03-29-1556_macos.dmg` (271,265,739 bytes), mounted `/Volumes/Cataclysm DDA`, copied the mount root while skipping `Applications`, selected the app-containing extracted root, created `catapult_install_info.json`, moved contents into sandbox `caol/game0`, and detached successfully.
+- Final sandbox install listing was `Cataclysm.app` plus `catapult_install_info.json`; the info file contained `Cataclysm - Arsenic and Old Lace v0.2.0`; `looks_launchable_after_move` was true via Lacapult's app-bundle guard.
+- This is stronger than metadata/mount inspection because it proves the final install-folder shape after a Lacapult-style copy/move. It still does **not** claim a clicked GUI install, mutation of the real Lacapult Application Support install state, or a C-AOL launch smoke.
+- Ran `python3 -m py_compile tools/prove_caol_macos_dmg.py`; it passed.
+- Re-ran `python3 tools/prove_caol_release.py --all-platforms` and `python3 tools/prove_caol_backend_contract.py`; release metadata and backend option contract still pass.
+- Re-ran `godot --version`; Godot is available as `/opt/homebrew/bin/godot` and reports `3.6.2.stable.official.3cd3caab6`.
+- Re-ran `git diff --check`; it passed.
+
 ## Evidence - 2026-04-25 cron revalidation
 
 - Re-ran `python3 tools/prove_caol_release.py --all-platforms`; live `josihosi/Cataclysm-AOL` `v0.2.0` data still has 12 assets, and Linux, macOS, and Windows each matched 4 platform assets with installer metadata containing `name`, `url`, `filename`, `asset_size`, `release_page_url`, `published_at`, and `has_any_assets` without downloading archives.

@@ -4,7 +4,7 @@ Success-state ledger for Lacapult Doobdab.
 
 ## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-Status: **CONTROLLED DMG SHAPE PROVEN / AWAITING GUI INSTALL PASS OR RELEASE-PREP DECISION**
+Status: **SANDBOX INSTALL SHAPE PROVEN / AWAITING GUI INSTALL PASS OR RELEASE-PREP DECISION**
 
 Done only when all are true:
 
@@ -39,5 +39,6 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.
 - [ ] NPC/LLM runtime consumption of mod compatibility summaries.
 - [x] Controlled selected macOS DMG download/mount/launchability-shape proof, without launching or installing the game.
+- [x] Sandboxed Lacapult-style macOS DMG copy/move install-shape proof, without touching the real Application Support install state or launching the game.
 - [ ] Full in-launcher macOS DMG extraction/install/launch pass.
 - [ ] Signed/packaged Lacapult releases for Windows/Linux/macOS.
