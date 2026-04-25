@@ -54,6 +54,15 @@ Before claiming v0 is done, Andi should record:
    - show the release object handed to installer has `name`, `url`, `filename`, `published_at`, `has_any_assets`.
    - do not download a huge release archive unless Schani/Josef explicitly wants that proof.
 
+## Evidence - 2026-04-25 Ollama backend status tightening
+
+- Tightened `scripts/BackendConfigManager.gd` so the UI/config path can distinguish an installed Ollama command with a responding local server from an installed command whose server is unreachable.
+- Static proof: `grep -n "where\|OS.execute(\"ollama\"\|ollama_command_present_server_running\|ollama_command_present_server_unreachable" scripts/BackendConfigManager.gd` shows the platform-aware command lookup and cheap server probe statuses.
+- Re-ran safe local Ollama proof: `command -v ollama` returned `/opt/homebrew/bin/ollama`; `ollama list` returned the local model table, proving the current Mac would report `ollama_command_present_server_running`. No model pull, install, remote API call, or secret-bearing smoke test was attempted.
+- Re-ran `python3 tools/prove_caol_release.py --all-platforms`; v0.2.0 still produced installable metadata for Linux, macOS, and Windows without downloading archives.
+- Re-ran Godot availability check: `godot`, `godot3`, and `godot4` are still unavailable on this Mac, so no GUI/project-load smoke was claimed.
+- `git diff --check` passed.
+
 ## Known risk spots
 
 - Godot 3 scene node paths may break if the game chooser/channel UI is removed too aggressively.

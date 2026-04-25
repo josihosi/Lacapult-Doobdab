@@ -54,7 +54,13 @@ func write_launcher_backend_config(mode: String, endpoint: String = "", model: S
 
 func _detect_ollama_status() -> String:
 	var output = []
-	var exit_code = OS.execute("which", ["ollama"], true, output, true)
+	var command_lookup = "where" if OS.get_name() == "Windows" else "which"
+	var exit_code = OS.execute(command_lookup, ["ollama"], true, output, true)
 	if exit_code != 0:
 		return "ollama_command_missing"
-	return "ollama_command_present_server_not_checked_in_godot"
+
+	output.clear()
+	exit_code = OS.execute("ollama", ["list"], true, output, true)
+	if exit_code == 0:
+		return "ollama_command_present_server_running"
+	return "ollama_command_present_server_unreachable"

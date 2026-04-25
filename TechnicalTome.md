@@ -125,3 +125,9 @@ The detailed one-shot installer direction lives in `doc/lacapult-one-shot-instal
 - `scripts/ReleaseInstaller.gd` now re-checks the moved target directory before posting install/update success, so an extracted archive must still look like a launchable game directory after the final move.
 - macOS DMG/app-bundle extraction keeps top-level `.app` bundles inside the install directory instead of installing the bundle itself as the root. This matches the launcher lookup path, which searches for `.app` bundles inside `Paths.game_dir`.
 - The install-root probe and Unix chmod pass now include the C-AOL-specific `Cataclysm-AOL` executable name alongside inherited `cataclysm-tiles` names.
+
+## 2026-04-25 Ollama backend status tightening
+
+- `scripts/BackendConfigManager.gd` now uses a platform-aware `which`/`where` command lookup for Ollama instead of assuming a Unix shell helper on every platform.
+- When the Ollama command exists, the Godot-side detector runs `ollama list` as the cheap server/status probe. It reports `ollama_command_present_server_running` on success or `ollama_command_present_server_unreachable` when the command exists but the local server is not responding.
+- The probe does not pull models, install anything, call remote APIs, or log/store API secrets.
