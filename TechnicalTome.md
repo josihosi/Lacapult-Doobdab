@@ -82,13 +82,13 @@ This is not v0 unless only a harmless stub is added.
 
 ## Backend setup direction
 
-First supported setup options for the active v0 target are API and Ollama.
+Supported v0 setup choices are API, Ollama, and OpenVINO, with different honesty levels.
 
 API path should focus on choosing API mode, writing/checking C-AOL config, and validating config shape without exposing secrets. Live API smoke tests that need real keys are later unless Josef explicitly provides/clears that path.
 
-Ollama path should detect whether the `ollama` command exists and whether the local server responds. It may write/check C-AOL config for Ollama. It must not pull large models or run heavyweight installs without explicit clearance.
+Ollama path should detect whether the `ollama` command exists and whether the local server responds. It may write/check C-AOL config for Ollama. It must not pull large models or run heavyweight installs without explicit clearance. Local model recommendation UX is a later backend lane, not part of the mod-status slice. Keep user-facing recommended model identity separate from local installed tags/aliases; for example, Josef's local `nemotron-9b-full:latest` tag points through `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest`, so provenance and installed alias are not the same field.
 
-OpenVINO is the specialized third backend and remains parked after API/Ollama unless a cheap placeholder or detector can be added safely.
+OpenVINO is the specialized third backend. V0 keeps it to detection/config/status, but future Lacapult may offer a guided install path with explicit user approval, a fixed package list, and model-dir setup. No OpenVINO installs/downloads happen in the current mod/Summarizer Slice 1 work.
 
 ## Mod compatibility / NPC summary direction
 
@@ -253,7 +253,7 @@ This is the first honest "backend-good" bar for Lacapult: setup/config/status/ap
 
 ## 2026-04-25 mod install/enable + Summarizer feature plan
 
-`doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` is the active next-lane plan after backend-good hardening. It promotes the read-only packaged-mod bridge into a feature-complete mod/Summarizer implementation family, but does not implement it yet. The durable architecture rule is simple: C-AOL owns runtime truth; Lacapult owns installer help.
+`doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` is the active next-lane plan after backend-good hardening. It promotes the read-only packaged-mod bridge into a feature-complete mod/Summarizer implementation family. Slice 1 now implements the computable discovery/status model, while UX, generation/apply, and runtime-consumption proof remain later slices. The durable architecture rule is simple: C-AOL owns runtime truth; Lacapult owns installer help.
 
 C-AOL runtime truth:
 
@@ -267,10 +267,16 @@ Lacapult's next implementation family:
 - Discover stock packaged, user-installed, custom-catalog, and world-specific mods.
 - Report world-aware enabled/disabled state plus obsolete, broken metadata, dependency, partial, stale, conflict, and summary coverage states.
 - Offer a Summarizer button/pop-up after install/enable when contextual mod content lacks summaries.
-- Gate generation on API/Ollama/OpenVINO backend readiness from `BackendConfigManager.gd` without storing secrets, pulling models, installing OpenVINO, or making implicit remote calls.
+- Gate generation on API/Ollama/OpenVINO backend readiness from `BackendConfigManager.gd` without storing secrets, pulling models, installing OpenVINO, or making implicit remote calls. Future backend lanes may add explicit-approval OpenVINO package/model-dir setup and Ollama model recommendations, but the mod status model only carries compatible status fields.
 - Stage generated packs as reversible C-AOL-native companion mods or world custom mods with manifest, backup, and rollback.
 - Prove C-AOL runtime consumption in a sandbox/harness before claiming the feature is complete.
 
 The preferred generated-pack shape is a companion user mod such as `userdata/mods/lacapult_summary_<source_mod_id>/` containing `modinfo.json`, `npcs/Backgrounds/Summaries_extra/generated_<source_mod_id>.json`, optional `Summaries_short` output, and a Lacapult manifest. Stock packaged mod folders should not be mutated.
 
-The plan is deliberately sliced: discovery/status model first, then visible UX/prompting, then sandboxed C-AOL-native summary-pack generation/apply with manifest/backup/rollback, then C-AOL runtime consumption proof, then fixture coverage for obsolete mods, parse errors, dependency blockers, partial/stale/conflicting summaries, backend-not-ready states, and rollback failures. This keeps the Summarizer button from becoming button-shaped theater before Lacapult can accurately report whether a mod is active, broken, stale, or unsummarized.
+The plan is deliberately sliced: discovery/status model first, then visible UX/prompting, then sandboxed C-AOL-native summary-pack generation/apply with manifest/backup/rollback, then C-AOL runtime consumption proof, then fixture coverage for obsolete mods, parse errors, dependency blockers, partial/stale/conflicting summaries, backend-not-ready states, and rollback failures. Slice 1 is now landed through `scripts/CaolModStatusModel.gd`, `ModManager.get_caol_mod_summarizer_status()`, and `tools/caol_mod_status_model.py` / `tools/prove_caol_mod_status_model.py`. This keeps the Summarizer button from becoming button-shaped theater before Lacapult can accurately report whether a mod is active, broken, stale, or unsummarized.
+
+## 2026-04-25 C-AOL mod/Summarizer status model Slice 1
+
+`scripts/CaolModStatusModel.gd` is the first runtime-facing status model for the mod/Summarizer lane. It is read-only and exposed through `ModManager.get_caol_mod_summarizer_status(world_name := "")` for `game = "caol"`. The model scans stock packaged mods, user-installed mods, custom-catalog entries, and a selected world's custom `mods/` folder; reads `mods.json` for enabled vs disabled state; records dependency, obsolete, metadata-parse, summary-root, generated-summary-pack manifest, and source-fingerprint status; and returns a single `caol_mod_summarizer_status` dictionary that later Mods/Settings UX can render.
+
+The companion proof tools are `tools/caol_mod_status_model.py`, `tools/prove_caol_mod_status_model.py`, and `tools/godot_caol_mod_status_smoke.gd`. The Python proof creates a sandbox fixture under ignored `.proof-cache/`, covers stock/user/catalog/world-custom sources plus enabled/disabled, obsolete, broken metadata, dependency-blocked, summary-ready/missing/partial/not-needed/unknown, and generated-pack-present states, and emits `.proof-cache/caol-mod-status/status.json`. The Godot smoke runs the same fixture through the autoloaded `CaolModStatus` implementation and writes `.proof-cache/caol-mod-status/godot-status.json`. This is Slice 1 only: it does not install or enable mods, apply generated packs, mutate real user data, call any backend, or prove C-AOL runtime consumption.

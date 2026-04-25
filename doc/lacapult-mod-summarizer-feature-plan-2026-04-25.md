@@ -1,6 +1,6 @@
 # Lacapult mod install/enable + Summarizer feature plan
 
-Status: **ACTIVE NEXT LANE / CANON PLANNING PACKET**
+Status: **ACTIVE NEXT LANE / SLICE 1 DISCOVERY-STATUS MODEL LANDED**
 
 This packet turns the read-only C-AOL mod compatibility report into the next bounded implementation family. It does **not** implement the feature yet. It defines the contract Andi should execute in slices after backend-good hardening.
 
@@ -47,7 +47,7 @@ Lacapult should not invent a second summary schema. Its job is the boring useful
 - Gate generation on backend readiness from the backend-good checks:
   - API/AnyLLM Python import readiness, provider/model/env-var metadata, no secret storage
   - Ollama command/server/model-list readiness, no model pulls without clearance
-  - OpenVINO Python import/model-dir/device readiness, Windows-first/detect-only unless the user supplies the runtime/model
+  - OpenVINO Python import/model-dir/device readiness now; future guided install may offer an explicit-approval fixed package list such as `openvino`, `openvino-genai`, and `openvino-tokenizers` plus model-dir setup, but no install/download belongs in the discovery/status slice
 - Stage generated summary packs in a sandbox first.
 - Apply generated packs as C-AOL-native mod roots or world custom-mod roots, with backups and rollback.
 - Explain failures in player language without pretending Lacapult can fix broken upstream packages or malformed third-party mods.
@@ -218,6 +218,7 @@ The Summarizer button should be enabled only when a selected backend is plausibl
 ### Ollama backend
 
 - Detect command presence, local server/list response, and configured model presence.
+- Later backend recommendation UX may suggest among locally available models or a cleared model list, but provenance/renamed public names and hardware-fit recommendations are a separate backend lane.
 - Do not pull models automatically.
 - If Ollama is installed but the server is down, show “start Ollama” guidance rather than a fake failure.
 - If the model is missing, offer guidance; model pull automation is a separate explicit decision.
@@ -226,7 +227,8 @@ The Summarizer button should be enabled only when a selected backend is plausibl
 
 - Treat as Windows-first for v0.
 - Check Python imports (`openvino`, `openvino_genai`) and local model-dir presence.
-- Do not install runtimes or download/convert models.
+- Later Lacapult may offer guided setup with explicit user approval, a fixed package list, and model-dir setup, but that is outside Slice 1.
+- Do not install runtimes or download/convert models in this lane.
 - On non-Windows, detect-only/status-only wording must stay honest.
 
 ### Offline/error states
@@ -239,13 +241,15 @@ The Summarizer button should be enabled only when a selected backend is plausibl
 
 ### Slice 1 — discovery/status model
 
+Status: **landed 2026-04-25 as read-only Godot/Python status model plus sandbox proof.**
+
 Goal: make mod/summarizer status computable without applying anything.
 
-- Add a Godot-side or helper-backed status model for packaged, user, custom-catalog, and world custom mods.
-- Reuse `tools/prove_caol_mod_inventory.py` classifications where useful, but move the runtime-facing state into Lacapult code deliberately.
-- Add source fingerprints and generated-pack manifest detection.
-- Make status world-aware enough to answer “enabled in this world?” for a sandbox world.
-- Gate: static inspection plus a sandbox fixture/proof that emits status JSON for stock/user/world mods without mutating real Application Support.
+- Landed a Godot-side status model for packaged, user, custom-catalog, and world custom mods in `scripts/CaolModStatusModel.gd`, exposed through `ModManager.get_caol_mod_summarizer_status()`.
+- Landed helper/proof code in `tools/caol_mod_status_model.py` and `tools/prove_caol_mod_status_model.py` rather than leaving the runtime-facing state as a Markdown-only report.
+- Landed source fingerprints and generated-pack manifest/root detection.
+- Landed world-aware enabled/disabled state for a sandbox world via `mods.json`.
+- Gate: passed via static/project-load inspection plus a sandbox fixture/proof that emits status JSON for stock/user/world/custom-catalog mods without mutating real Application Support.
 
 ### Slice 2 — UX/status surface
 
@@ -310,4 +314,4 @@ This lane is complete only when all of the following are true:
 
 ## Recommended next implementation handoff
 
-Start with **Slice 1: discovery/status model**. It is the least glamorous and therefore the right first cut. If Lacapult cannot accurately say which mods are active, broken, stale, or unsummarized in a sandbox, then a shiny Summarizer button is just a button-shaped lie.
+Next implement **Slice 2: UX/status surface**. Slice 1 is now present and proven; the next cut should render the truth instead of re-solving discovery. If Lacapult cannot accurately say which mods are active, broken, stale, or unsummarized in a sandbox, then a shiny Summarizer button is just a button-shaped lie.

@@ -30,7 +30,7 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. It is greenlit 
 
 ### Active next implementation family
 
-The next planned lane after backend-good hardening is now **feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply**, defined in `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`. The lane promotes the existing read-only packaged-mod bridge into a bounded implementation plan: discover stock/user/catalog/world mods, report enabled/disabled and summary coverage status, offer a post-install/post-enable Summarizer prompt, gate generation on API/Ollama/OpenVINO backend readiness, stage C-AOL-native `npcs/Backgrounds/Summaries_short` / `Summaries_extra` packs, and prove sandboxed apply/rollback plus C-AOL runtime consumption. C-AOL owns runtime schema/loading/consumption; Lacapult owns installer UX, status, generation orchestration, apply/rollback help, and backend readiness checks. No proof script or UI slice may mutate Josef's real Application Support config, saves, worlds, or mods.
+The next planned lane after backend-good hardening is now **feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply**, defined in `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`. Slice 1 is now implemented as a read-only C-AOL mod/Summarizer discovery/status model with sandbox proof; the next bounded target is Slice 2 UX/status surface. The lane promotes the existing read-only packaged-mod bridge into a bounded implementation plan: discover stock/user/catalog/world mods, report enabled/disabled and summary coverage status, offer a post-install/post-enable Summarizer prompt, gate generation on API/Ollama/OpenVINO backend readiness, stage C-AOL-native `npcs/Backgrounds/Summaries_short` / `Summaries_extra` packs, and prove sandboxed apply/rollback plus C-AOL runtime consumption. C-AOL owns runtime schema/loading/consumption; Lacapult owns installer UX, status, generation orchestration, apply/rollback help, and backend readiness checks. No proof script or UI slice may mutate Josef's real Application Support config, saves, worlds, or mods.
 
 ### Product intent
 
@@ -95,8 +95,8 @@ Preserve MIT license notice and attribution. Do not make the repo look like an u
 
 - Pushing to the public GitHub repo, publishing releases, or contacting upstream without fresh explicit clearance from Josef/Schani. The public repo exists at `https://github.com/josihosi/Lacapult-Doobdab`, but public writes remain clearance-gated.
 - Full all-three-backend installation automation, model downloads, or secret-bearing live API calls.
-- OpenVINO implementation beyond v0-safe detection/config/status metadata; runtime install/model download/live inference remain later.
-- Pulling or installing large local models without explicit clearance.
+- OpenVINO implementation beyond v0-safe detection/config/status metadata; runtime install/model download/live inference remain later. Future direction may grow into a guided, explicit-approval setup path with a fixed package list and model-dir setup, but that is not implemented in this mod-status slice.
+- Pulling or installing large local models without explicit clearance. Ollama model recommendation UX is a later backend lane; Slice 1 does not recommend, rename, verify provenance for, or pull models.
 - Modpack curation beyond investigating inherited mod/soundpack/tileset behavior, marking C-AOL compatibility honestly, and starting a bounded compatibility-summary shape; feature-complete mod install/enable plus summarizer apply UX is the next planned lane.
 - Supporting DDA/TLG/BN/EOD/TISH as first-class visible targets.
 - New artwork/icon polish unless needed to remove misleading Dabdoob branding.

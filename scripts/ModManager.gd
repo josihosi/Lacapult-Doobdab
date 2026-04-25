@@ -1550,5 +1550,14 @@ func _store_mod_download_date(mod_id: String) -> void:
 	Status.post("Stored download date for mod %s: %s" % [actual_mod_id, date_string], Enums.MSG_DEBUG)
 
 
+func get_caol_mod_summarizer_status(world_name := "") -> Dictionary:
+	# Slice 1 read-only bridge for C-AOL mod/Summarizer status. Later UX slices
+	# can render this shape without the Mods tab having to know the filesystem
+	# details for stock/user/catalog/world-custom roots.
+	if Settings.read("game") != "caol":
+		return {"model": "caol_mod_summarizer_status", "version": 1, "read_only": true, "mods": [], "counts": {}, "world": {"errors": ["C-AOL status model only runs for game=caol"]}}
+	return CaolModStatus.build_current_status(world_name)
+
+
 
 

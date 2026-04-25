@@ -85,10 +85,10 @@ Modding is not solved yet. The current Lacapult state is intentionally read-only
 
 The active next-lane planning packet is now `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`. It promotes the sketch above into a feature-complete execution family:
 
-1. Discovery/status model for stock packaged, user-installed, custom-catalog, and world-specific mods.
+1. [landed] Discovery/status model for stock packaged, user-installed, custom-catalog, and world-specific mods, including world-aware enabled/disabled state in a sandbox proof.
 2. UX/status surface with Summarizer pop-up/button and “all enabled extra NPC/content summarized” status.
 3. Sandboxed generated summary-pack apply proof using C-AOL-native roots.
 4. C-AOL runtime consumption proof in a sandbox/harness if feasible, or an explicit C-AOL-side blocker.
 5. Error/backup/rollback proof for obsolete mods, broken metadata, dependency chains, partial/stale/conflicting summaries, backend-not-ready, and apply failure cases.
 
-This belongs mostly on the Lacapult side for user-facing apply/enable UX, pop-up/status handling, backend readiness, and sandbox proofs, but schema and runtime consumption remain on the C-AOL side through `Summaries_short` / `Summaries_extra`. Do not fake it with launcher-only metadata; if NPCs cannot consume it in-game, the modding bridge is just a little museum label, na bravo.
+This belongs mostly on the Lacapult side for user-facing apply/enable UX, pop-up/status handling, backend readiness, and sandbox proofs, but schema and runtime consumption remain on the C-AOL side through `Summaries_short` / `Summaries_extra`. Do not fake it with launcher-only metadata; if NPCs cannot consume it in-game, the modding bridge is just a little museum label, na bravo. Slice 1 now gives Lacapult a computable read-only status model; Slice 2 should make that status visible in the launcher without applying generated packs yet.
