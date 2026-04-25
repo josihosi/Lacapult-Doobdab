@@ -22,7 +22,7 @@ func build_current_status(world_name := "") -> Dictionary:
 	return build_status(paths.mods_stock, paths.mods_user, paths.mod_repo, paths.savegames, world_name)
 
 
-func build_status(stock_mods_dir: String, user_mods_dir: String, custom_catalog_dir: String, save_dir: String, world_name := "") -> Dictionary:
+func build_status(stock_mods_dir: String, user_mods_dir: String, custom_catalog_dir: String, save_dir: String, world_name := "", backend_gate := {}) -> Dictionary:
 	var world = _read_world_mods(save_dir, world_name)
 	var world_custom_dir = ""
 	if world.get("world_path", "") != "":
@@ -72,9 +72,15 @@ func build_status(stock_mods_dir: String, user_mods_dir: String, custom_catalog_
 				generated_by_source[source_id] = []
 			generated_by_source[source_id].append(record)
 
+	var gate_ready = _backend_gate_ready(backend_gate)
 	for record in records:
 		record["summary_status"] = _summarize_record(record, generated_by_source)
 		record["status_badges"] = [record["source_status"], record["enabled_status"], record["obsolete_status"], record["metadata_status"], record["dependency_status"], record["summary_status"]]
+		if record.get("json_content", {}).get("json_parse_error_count", 0) > 0:
+			record["status_badges"].append("content-parse-error")
+		if gate_ready == false and _record_has_contextual_content(record) and ["summary-missing", "summary-partial", "summary-stale", "summary-conflict", "summary-unknown"].has(record["summary_status"]):
+			record["status_badges"].append("backend-not-ready")
+			record["status_badges"].append("summary-blocked")
 		if record.get("generated_summary_pack", {}).get("present", false):
 			record["status_badges"].append("generated-summary-pack-present")
 
@@ -89,6 +95,11 @@ func build_status(stock_mods_dir: String, user_mods_dir: String, custom_catalog_
 			"custom_catalog": custom_catalog_dir,
 			"save_dir": save_dir,
 			"world_custom_mods": world_custom_dir,
+		},
+		"backend_gate": {
+			"mode": backend_gate.get("mode", null) if typeof(backend_gate) == TYPE_DICTIONARY else null,
+			"status": backend_gate.get("status", null) if typeof(backend_gate) == TYPE_DICTIONARY else null,
+			"generation_ready": gate_ready,
 		},
 		"counts": _count_badges(records),
 		"mods": records,
@@ -123,6 +134,8 @@ func build_ux_overview(status: Dictionary) -> Dictionary:
 			enabled_summary_missing += 1
 		elif summary_status == "summary-partial":
 			enabled_summary_partial += 1
+		elif summary_status == "summary-stale" or summary_status == "summary-conflict":
+			enabled_summary_partial += 1
 		elif summary_status == "summary-unknown":
 			enabled_summary_unknown += 1
 		elif summary_status == "summary-not-needed":
@@ -130,7 +143,7 @@ func build_ux_overview(status: Dictionary) -> Dictionary:
 
 		if contextual and _record_is_blocked(record):
 			enabled_summary_blocked += 1
-		elif contextual and summary_status in ["summary-missing", "summary-partial", "summary-unknown"]:
+		elif contextual and summary_status in ["summary-missing", "summary-partial", "summary-stale", "summary-conflict", "summary-unknown"]:
 			candidates.append(record)
 
 	var all_enabled_state = "unknown"
@@ -158,6 +171,9 @@ func build_ux_overview(status: Dictionary) -> Dictionary:
 		"summary_ready_count": counts.get("summary-ready", 0),
 		"summary_missing_count": counts.get("summary-missing", 0),
 		"summary_partial_count": counts.get("summary-partial", 0),
+		"summary_stale_count": counts.get("summary-stale", 0),
+		"summary_conflict_count": counts.get("summary-conflict", 0),
+		"summary_blocked_count": counts.get("summary-blocked", 0),
 		"summary_unknown_count": counts.get("summary-unknown", 0),
 		"summary_not_needed_count": counts.get("summary-not-needed", 0),
 		"enabled_contextual_count": enabled_contextual,
@@ -346,7 +362,34 @@ func _scan_json_content(mod_dir: String) -> Dictionary:
 				var manifest = record.duplicate(true)
 				manifest["path"] = _relative_path(path, mod_dir)
 				manifests.append(manifest)
-	return {"json_file_count": _count_json_files(files), "json_files_parsed": parsed_files, "json_parse_error_count": parse_errors.size(), "json_parse_errors_sample": parse_errors.slice(0, 11), "type_counts_sample": type_counts, "content_flags": _content_flags(type_counts), "generated_manifests": manifests}
+	return {"json_file_count": _count_json_files(files), "json_files_parsed": parsed_files, "json_parse_error_count": parse_errors.size(), "json_parse_errors_sample": parse_errors.slice(0, 11), "type_counts_sample": type_counts, "content_flags": _content_flags(type_counts), "generated_manifests": manifests, "summary_claims": _summary_claims_from_files(mod_dir, files)}
+
+
+func _summary_claims_from_files(mod_dir: String, files: Array) -> Array:
+	var claims := []
+	for path in files:
+		if not String(path).ends_with(".json"):
+			continue
+		if not (_relative_path(path, mod_dir).find(SUMMARY_SHORT_REL) == 0 or _relative_path(path, mod_dir).find(SUMMARY_EXTRA_REL) == 0):
+			continue
+		var loaded = _load_json(path)
+		if loaded.has("error"):
+			continue
+		var records = loaded["data"].get("entries", []) if typeof(loaded["data"]) == TYPE_DICTIONARY and typeof(loaded["data"].get("entries", [])) == TYPE_ARRAY else (loaded["data"] if typeof(loaded["data"]) == TYPE_ARRAY else [loaded["data"]])
+		for record in records:
+			if typeof(record) != TYPE_DICTIONARY:
+				continue
+			var selectors = _normalized_claim_values(record.get("selectors", []))
+			if selectors.empty():
+				selectors = _normalized_claim_values(record.get("selector", ""))
+			if selectors.empty():
+				selectors = _normalized_claim_values(record.get("id", ""))
+			var topics = _normalized_claim_values(record.get("topics", []))
+			if topics.empty():
+				topics = _normalized_claim_values(record.get("topic", ""))
+			if not selectors.empty() or not topics.empty():
+				claims.append({"path": _relative_path(path, mod_dir), "selectors": selectors, "topics": topics, "source_tag": record.get("source_tag", "")})
+	return claims
 
 
 func _summarize_record(record: Dictionary, generated_by_source: Dictionary) -> String:
@@ -360,9 +403,20 @@ func _summarize_record(record: Dictionary, generated_by_source: Dictionary) -> S
 	var has_root = summaries.get("summaries_short_exists", false) or summaries.get("summaries_extra_exists", false)
 	var has_summary_files = summaries.get("summary_file_count", 0) > 0
 	var generated_packs = generated_by_source.get(record.get("id", ""), [])
+	var active_generated_packs := []
 	for pack in generated_packs:
-		if pack.get("enabled_status", "") == "enabled-in-world" and pack.get("summary_roots", {}).get("summary_file_count", 0) > 0:
-			return "summary-ready"
+		if pack.get("enabled_status", "") == "enabled-in-world":
+			active_generated_packs.append(pack)
+	if active_generated_packs.size() > 0:
+		if _generated_packs_conflict(active_generated_packs):
+			return "summary-conflict"
+		for pack in active_generated_packs:
+			if _generated_pack_is_stale(record, pack):
+				return "summary-stale"
+		for pack in active_generated_packs:
+			if pack.get("summary_roots", {}).get("summary_file_count", 0) > 0:
+				return "summary-ready"
+		return "summary-partial"
 	if generated_packs.size() > 0:
 		return "summary-partial"
 	if has_summary_files:
@@ -374,6 +428,57 @@ func _summarize_record(record: Dictionary, generated_by_source: Dictionary) -> S
 		if flags.get(key, false):
 			return "summary-missing"
 	return "summary-not-needed"
+
+
+func _generated_packs_conflict(packs: Array) -> bool:
+	var seen := []
+	for pack in packs:
+		for key in _summary_claim_keys(pack):
+			if seen.has(key):
+				return true
+			seen.append(key)
+	return false
+
+
+func _summary_claim_keys(record: Dictionary) -> Array:
+	var keys := []
+	for claim in record.get("json_content", {}).get("summary_claims", []):
+		var selectors = claim.get("selectors", [""])
+		var topics = claim.get("topics", [""])
+		if selectors.empty():
+			selectors = [""]
+		if topics.empty():
+			topics = [""]
+		for selector in selectors:
+			for topic in topics:
+				keys.append("%s||%s" % [str(selector), str(topic)])
+	return keys
+
+
+func _generated_pack_is_stale(source_record: Dictionary, pack_record: Dictionary) -> bool:
+	var manifest = pack_record.get("generated_summary_pack", {}).get("manifest", {})
+	var fingerprint = str(manifest.get("source_fingerprint", ""))
+	if fingerprint == "":
+		return false
+	if not fingerprint.begins_with("tree-size-list:"):
+		# Python proof manifests may use a different fingerprint scheme; avoid false
+		# stale badges in the Godot mirror unless the scheme is comparable here.
+		return false
+	return fingerprint != str(source_record.get("source_fingerprint", ""))
+
+
+func _backend_gate_ready(backend_gate) :
+	if typeof(backend_gate) != TYPE_DICTIONARY or backend_gate.empty():
+		return null
+	var mode = str(backend_gate.get("mode", ""))
+	var status = str(backend_gate.get("status", ""))
+	if mode == "api":
+		return status.find("any_llm_import_ok") >= 0 and status.find("model_configured") >= 0 and status.find("api_key_env_present_secret_not_read") >= 0
+	if mode == "ollama":
+		return status.find("server_running_model_present") >= 0
+	if mode == "openvino":
+		return status.find("imports_ok") >= 0 and status.find("model_dir_present") >= 0
+	return false
 
 
 func _record_is_enabled_source_mod(record: Dictionary) -> bool:
@@ -420,8 +525,8 @@ func _overview_status_text(counts: Dictionary, all_enabled_state: String, candid
 	var lines := []
 	lines.append("Read-only C-AOL mod/Summarizer status (%s)." % world_note)
 	lines.append("Enabled/disabled: %s enabled, %s disabled." % [counts.get("enabled-in-world", 0), counts.get("disabled", 0)])
-	lines.append("Summary coverage: %s ready, %s missing, %s partial, %s unknown, %s not needed." % [counts.get("summary-ready", 0), counts.get("summary-missing", 0), counts.get("summary-partial", 0), counts.get("summary-unknown", 0), counts.get("summary-not-needed", 0)])
-	lines.append("Blockers: %s obsolete, %s metadata broken, %s dependency-blocked." % [counts.get("obsolete-blocked", 0), counts.get("metadata-broken", 0), counts.get("dependency-blocked", 0)])
+	lines.append("Summary coverage: %s ready, %s missing, %s partial, %s stale, %s conflicts, %s unknown, %s not needed." % [counts.get("summary-ready", 0), counts.get("summary-missing", 0), counts.get("summary-partial", 0), counts.get("summary-stale", 0), counts.get("summary-conflict", 0), counts.get("summary-unknown", 0), counts.get("summary-not-needed", 0)])
+	lines.append("Blockers: %s obsolete, %s metadata broken, %s dependency-blocked, %s backend-not-ready." % [counts.get("obsolete-blocked", 0), counts.get("metadata-broken", 0), counts.get("dependency-blocked", 0), counts.get("backend-not-ready", 0)])
 	lines.append("All enabled extra NPC/content summarized: %s; dry-run Summarizer candidates: %s." % [all_enabled_state, candidate_count])
 	lines.append("Status-only surface: no backend call, no summary generation, no pack apply, no mod enable/save mutation.")
 	return "\n".join(lines)
@@ -463,6 +568,17 @@ func _normalized_dependencies(value) -> Array:
 		return result
 	for dep in value:
 		result.append(str(dep))
+	return result
+
+
+func _normalized_claim_values(value) -> Array:
+	var result := []
+	if typeof(value) == TYPE_ARRAY:
+		for item in value:
+			if str(item) != "":
+				result.append(str(item))
+	elif str(value) != "":
+		result.append(str(value))
 	return result
 
 

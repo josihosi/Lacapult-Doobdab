@@ -39,13 +39,13 @@ Done only when all are true:
 
 ## Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply
 
-Status: **SLICE 1 DISCOVERY/STATUS MODEL PROVEN + SLICE 2 UX/DRY-RUN STATUS SURFACE PROVEN + SLICE 3 SANDBOX SUMMARY-PACK APPLY/ROLLBACK PROVEN + SLICE 4 RUNTIME-HARNESS CONSUMPTION PROVEN / REAL GENERATION UI + BROAD ERROR MATRIX NOT IMPLEMENTED**
+Status: **SLICE 1 DISCOVERY/STATUS MODEL PROVEN + SLICE 2 UX/DRY-RUN STATUS SURFACE PROVEN + SLICE 3 SANDBOX SUMMARY-PACK APPLY/ROLLBACK PROVEN + SLICE 4 RUNTIME-HARNESS CONSUMPTION PROVEN + SLICE 5 ERROR/ROLLBACK MATRIX PROVEN / REAL GENERATION UI NOT IMPLEMENTED**
 
 Done only when all are true:
 
 - [x] Mod discovery distinguishes stock packaged, user-installed, custom-catalog, and world-specific mods for C-AOL in the Slice 1 read-only status model/proof.
 - [x] Enabled vs disabled status is world-aware for at least one sandbox world in the Slice 1 fixture proof.
-- [ ] Obsolete mods, broken metadata, parse errors, missing roots, missing dependencies, partial summaries, stale summaries, conflicts, and disabled mods produce visible statuses.
+- [x] Obsolete mods, broken metadata, content parse errors, missing roots, missing dependencies, partial summaries, stale summaries, conflicts, backend-not-ready gates, and disabled mods produce visible statuses in the sandbox status/error matrix.
 - [x] After mod install, and from persistent Mods/Settings status surfaces, Lacapult offers a Summarizer prompt/button rather than burying the next action, currently dry-run/status-only.
 - [ ] A true post-enable hook is still pending because the current inherited launcher does not yet apply C-AOL world `mods.json` enable changes.
 - [x] The launcher shows whether all enabled extra NPC/content is summarized, blocked, needs summaries, or unknown.
@@ -53,7 +53,7 @@ Done only when all are true:
 - [x] A sandbox fixture generated pack is C-AOL-native under `npcs/Backgrounds/Summaries_extra`, not launcher-only metadata.
 - [x] Applying a generated companion summary pack and changing a world `mods.json` list is sandbox-proven with backup and rollback.
 - [x] C-AOL runtime consumption is proven in a sandbox/harness, or a concrete C-AOL-side blocker is recorded.
-- [x] Slice 1, Slice 2, Slice 3, and Slice 4 proof scripts do not mutate Josef's real Application Support config, saves, worlds, or mods; future real apply/generation UI must keep the same boundary until explicitly approved.
+- [x] Slice 1, Slice 2, Slice 3, Slice 4, and Slice 5 proof scripts do not mutate Josef's real Application Support config, saves, worlds, or mods; future real apply/generation UI must keep the same boundary until explicitly approved.
 
 ## Parked next slices
 
@@ -64,7 +64,7 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [ ] API-key/backend live smoke test requiring real secrets.
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.
 - [active above] Feature-complete mod install/enable plus Summarizer UX; the current Mods/Settings surfaces show read-only status and dry-run Summarizer prompts, sandbox C-AOL-native `Summaries_extra` companion-pack apply/rollback is proven, and deterministic C-AOL harness prompt consumption is proven. The current surface still does not call a backend, apply packs, or enable mods from the UI.
-- [active above] Slice 5 fixture/error coverage for obsolete mods, parse errors, missing dependencies, partial/stale summaries, conflicts, backend-not-ready, and rollback failure handling is the next bounded proof.
+- [x] Slice 5 fixture/error coverage for obsolete mods, parse errors, missing dependencies, partial/stale summaries, conflicts, backend-not-ready, and rollback-restores-replacement handling is landed as a sandbox-only proof.
 - [x] Controlled selected macOS DMG download/mount/launchability-shape proof, without launching or installing the game.
 - [x] Sandboxed Lacapult-style macOS DMG copy/move install-shape proof, without touching the real Application Support install state or launching the game.
 - [x] Headless Godot `ReleaseInstaller.install_release()` pass for the selected cached macOS DMG inside an isolated HOME, without touching the real Application Support install state or launching the game.

@@ -1,6 +1,6 @@
 # Lacapult mod install/enable + Summarizer feature plan
 
-Status: **ACTIVE NEXT LANE / SLICE 1 DISCOVERY-STATUS MODEL LANDED / SLICE 2 UX-STATUS SURFACE LANDED / SLICE 3 SANDBOX APPLY-ROLLBACK PROVEN / SLICE 4 RUNTIME-HARNESS CONSUMPTION PROVEN**
+Status: **ACTIVE NEXT LANE / SLICES 1-5 PROVEN THROUGH ERROR-ROLLBACK MATRIX / REAL GENERATION UI NOT IMPLEMENTED**
 
 This packet turns the read-only C-AOL mod compatibility report into the next bounded implementation family. It does **not** implement the feature yet. It defines the contract Andi should execute in slices after backend-good hardening.
 
@@ -289,11 +289,14 @@ Goal: prove this is not launcher-only theater.
 
 ### Slice 5 — error/rollback/backup proof
 
+Status: **landed 2026-04-25 as sandbox-only error matrix plus replacement rollback proof.**
+
 Goal: make the installer safe enough to trust.
 
-- Add proof fixtures for parse error, missing dependency, stale manifest, partial summary, obsolete mod, and backend-not-ready.
-- Add rollback proof for replacing an existing generated pack and editing a sandbox `mods.json`.
-- Gate: one script/run that creates, applies, detects, and rolls back all fixture cases under `.proof-cache/` or `/tmp` only.
+- Landed `tools/prove_caol_summary_error_matrix.py`, which builds weird C-AOL-like fixtures under ignored `.proof-cache/caol-summary-error-matrix/`.
+- Landed status-model visibility for broken metadata, content JSON parse errors, missing dependencies, obsolete mods, missing summary roots, partial summary roots, stale generated-pack manifests, conflicting generated packs, and backend-not-ready generation gates.
+- Landed rollback proof for replacing a preexisting generated companion pack while editing sandbox `mods.json`, then restoring the exact prior `mods.json` bytes and preexisting pack directory.
+- Gate: passed via `python3 tools/prove_caol_summary_error_matrix.py`; evidence is under `.proof-cache/caol-summary-error-matrix/evidence/`.
 
 ## Success state
 

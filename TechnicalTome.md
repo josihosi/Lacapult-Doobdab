@@ -300,3 +300,9 @@ The proof validates JSON/path shape, manifest generated paths, backup files, sta
 The proof inspects the current C-AOL checkout at `/Users/josefhorvath/Schanigarten/Cataclysm-AOL` on `dev`, records the relevant `src/llm_intent.cpp` seams (`background_summary_data_roots()`, `active_mod_order`, summary-root loading, and `your_tone` / `your_example_expression` emission), then runs C-AOL `tools/llm_runner/npc_harness.py` with the sandbox-derived active source and companion roots. The harness resolves selector `name:Lacapult Runtime Fixture NPC`, writes `.proof-cache/caol-runtime-summary-consumption/evidence/npc_harness_resolve.json`, dumps the prompt to `npc_harness_prompt.txt`, and proves the generated summary reaches prompt fields as `your_tone` and `your_example_expression`.
 
 This closes Slice 4 at deterministic harness/source level. It still does not launch a compiled C-AOL game world from the Lacapult sandbox, call a backend, use secrets, mutate real Application Support state, or prove broad Slice 5 error handling.
+
+## 2026-04-25 C-AOL Summarizer Slice 5 error/rollback matrix
+
+`tools/prove_caol_summary_error_matrix.py` is the Slice 5 safety proof. It builds a sandbox-only C-AOL-like tree under `.proof-cache/caol-summary-error-matrix/`, never touching real Application Support or an installed C-AOL package, and proves visible status handling for broken `modinfo.json`, content JSON parse errors, missing dependencies, obsolete mods, missing/partial summary roots, stale generated-pack fingerprints, conflicting generated packs, and backend-not-ready generation gates.
+
+The same proof replaces a preexisting generated companion summary pack and edits sandbox `mods.json`, then rolls back to the exact prior `mods.json` bytes and restores the preexisting pack directory. This closes the broad error/rollback proof slice; real user apply UI, live backend calls, model pulls, OpenVINO installs, and release/signing work remain separate lanes.

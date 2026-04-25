@@ -6,7 +6,7 @@ Short execution queue only.
 
 Active target: `Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply`.
 
-Current checkpoint: the v0.2.0 release installer, clicked install proof, backend triad readiness/config/apply proof, read-only packaged-mod bridge status, local unsigned export proof, macOS launch preflight proof, Slice 1 C-AOL mod/Summarizer discovery/status model proof, Slice 2 UX dry-run status, Slice 3 sandbox summary-pack apply/rollback proof, and Slice 4 deterministic C-AOL runtime-harness prompt-consumption proof are complete as of 2026-04-25. The C-AOL game-launch smoke from an isolated installed app bundle remains blocked by the selected upstream C-AOL macOS app binary linking unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`; that stays a C-AOL packaging lane, not this mod/summarizer lane. The active next-lane plan is `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`. Do not sign/notarize, publish, solve full OpenVINO automation, patch upstream packaging, apply generated summary packs to real user data, or curate C-AOL mod downloads in this lane without fresh clearance.
+Current checkpoint: the v0.2.0 release installer, clicked install proof, backend triad readiness/config/apply proof, read-only packaged-mod bridge status, local unsigned export proof, macOS launch preflight proof, Slice 1 C-AOL mod/Summarizer discovery/status model proof, Slice 2 UX dry-run status, Slice 3 sandbox summary-pack apply/rollback proof, Slice 4 deterministic C-AOL runtime-harness prompt-consumption proof, and Slice 5 error/rollback matrix proof are complete as of 2026-04-25. The C-AOL game-launch smoke from an isolated installed app bundle remains blocked by the selected upstream C-AOL macOS app binary linking unbundled `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`; that stays a C-AOL packaging lane, not this mod/summarizer lane. The active next-lane plan is `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`. Do not sign/notarize, publish, solve full OpenVINO automation, patch upstream packaging, apply generated summary packs to real user data, or curate C-AOL mod downloads in this lane without fresh clearance.
 
 Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for detail, but do not skip the proof order. Lacapult's own cross-platform installability is part of the product bar: Windows/macOS/Linux users should be able to install/open the launcher without developer tooling. Keep that evidence separate from C-AOL game-package launchability.
 
@@ -15,7 +15,7 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - [x] Implement Slice 2: visible Mods/Settings UX status plus post-install Summarizer prompt and persistent dry-run/status buttons; true post-enable hook remains dependent on a later real enable/apply flow.
    - [x] Implement Slice 3: sandboxed C-AOL-native companion summary-pack generation/apply proof with manifest, backup, and rollback.
    - [x] Implement Slice 4: C-AOL sandbox/harness proof that an active generated summary root is consumed by runtime prompt construction, or record the exact C-AOL-side blocker.
-   - [ ] Implement Slice 5: fixture coverage for obsolete mods, parse errors, missing dependencies, partial summaries, stale summaries, conflicts, backend-not-ready, and rollback failure handling.
+   - [x] Implement Slice 5: fixture coverage for obsolete mods, parse errors, missing dependencies, partial summaries, stale summaries, conflicts, backend-not-ready, and rollback failure handling.
 
 1. Confirm source/import state
    - Verify this repo is local-only and has no inherited `.git` history from Dabdoob.
@@ -71,5 +71,5 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - Real model install/model-pull automation and Ollama recommendation UX. Future direction should account for local model inventory/recommendations, but Slice 1 only preserves status-model compatibility and does not recommend or pull models.
    - C-AOL-specific mod/soundpack/tileset recommendation packs.
    - [active above] Feature-complete mod install/enable plus Summarizer UX after the read-only report/status-only dry-run surface: sandbox-proven C-AOL-native `Summaries_extra` companion-pack application, backup, rollback, and status-model visibility are now proven; real user apply UI and broader error handling remain later.
-   - [active above] NPC/LLM runtime integration proof that active mod summaries are consumed by C-AOL is the next bounded slice, with schema/runtime behavior kept on the C-AOL side and Lacapult acting as UX/status/apply helper.
+   - [x] NPC/LLM runtime integration proof that active mod summaries are consumed by C-AOL is landed, with schema/runtime behavior kept on the C-AOL side and Lacapult acting as UX/status/apply helper.
    - Public GitHub push/release publication, only after explicit clearance.

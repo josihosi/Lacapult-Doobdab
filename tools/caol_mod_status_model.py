@@ -19,6 +19,7 @@ SUMMARY_SHORT_REL = Path("npcs") / "Backgrounds" / "Summaries_short"
 SUMMARY_EXTRA_REL = Path("npcs") / "Backgrounds" / "Summaries_extra"
 SUMMARY_ROOTS = (SUMMARY_SHORT_REL, SUMMARY_EXTRA_REL)
 GENERATED_MANIFEST_TYPES = {"lacapult_summary_pack_manifest"}
+SUMMARY_RECORD_TYPES = {"npc_personality_summary", "npc_personality_summary_bundle"}
 
 NPC_TYPES = {
     "npc",
@@ -109,6 +110,14 @@ def normalized_dependencies(value: Any) -> list[str]:
     return sorted(str(dep) for dep in value if isinstance(dep, (str, int, float)))
 
 
+def normalized_claim_values(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return sorted(str(item) for item in value if isinstance(item, (str, int, float)) and str(item))
+    if isinstance(value, (str, int, float)) and str(value):
+        return [str(value)]
+    return []
+
+
 def relative_path(path: Path, base: Path) -> str:
     try:
         return path.relative_to(base).as_posix()
@@ -183,6 +192,7 @@ def scan_json_content(mod_dir: Path) -> dict[str, Any]:
     type_counts: Counter[str] = Counter()
     parse_errors: list[str] = []
     manifest_records: list[dict[str, Any]] = []
+    summary_claims: list[dict[str, Any]] = []
     json_files = sorted(mod_dir.rglob("*.json")) if mod_dir.exists() else []
     parsed_files = 0
     for path in json_files:
@@ -198,6 +208,22 @@ def scan_json_content(mod_dir: Path) -> dict[str, Any]:
                 type_counts[record_type] += 1
             if record_type in GENERATED_MANIFEST_TYPES:
                 manifest_records.append({"path": relative_path(path, mod_dir), **record})
+            rel_path = relative_path(path, mod_dir)
+            in_summary_root = rel_path.startswith(SUMMARY_SHORT_REL.as_posix()) or rel_path.startswith(SUMMARY_EXTRA_REL.as_posix())
+            selectors = normalized_claim_values(record.get("selectors")) or normalized_claim_values(record.get("selector"))
+            topics = normalized_claim_values(record.get("topics")) or normalized_claim_values(record.get("topic"))
+            if record_type in SUMMARY_RECORD_TYPES and not selectors:
+                selectors = normalized_claim_values(record.get("id"))
+            if in_summary_root and (record_type in SUMMARY_RECORD_TYPES or selectors or topics):
+                if selectors or topics:
+                    summary_claims.append(
+                        {
+                            "path": relative_path(path, mod_dir),
+                            "selectors": selectors,
+                            "topics": topics,
+                            "source_tag": record.get("source_tag"),
+                        }
+                    )
     flags: dict[str, bool] = {}
     for group_name, record_types in CONTEXTUAL_TYPE_GROUPS.items():
         flags[group_name] = any(type_counts.get(record_type, 0) > 0 for record_type in record_types)
@@ -210,6 +236,7 @@ def scan_json_content(mod_dir: Path) -> dict[str, Any]:
         "type_counts_sample": dict(type_counts.most_common(24)),
         "content_flags": flags,
         "generated_manifests": manifest_records,
+        "summary_claims": summary_claims[:48],
     }
 
 
@@ -312,6 +339,54 @@ def read_world_mods(save_dir: Path | None, world_name: str | None = None) -> dic
     }
 
 
+def summary_claim_keys(record: dict[str, Any]) -> set[tuple[str, str]]:
+    keys: set[tuple[str, str]] = set()
+    for claim in record.get("json_content", {}).get("summary_claims", []):
+        selectors = claim.get("selectors") or [""]
+        topics = claim.get("topics") or [""]
+        for selector in selectors:
+            for topic in topics:
+                keys.add((str(selector), str(topic)))
+    return keys
+
+
+def generated_packs_conflict(packs: list[dict[str, Any]]) -> bool:
+    seen: set[tuple[str, str]] = set()
+    for pack in packs:
+        keys = summary_claim_keys(pack)
+        if keys & seen:
+            return True
+        seen |= keys
+    return False
+
+
+def generated_pack_is_stale(source_record: dict[str, Any], pack_record: dict[str, Any]) -> bool:
+    manifest = pack_record.get("generated_summary_pack", {}).get("manifest") or {}
+    manifest_fingerprint = str(manifest.get("source_fingerprint") or "")
+    if not manifest_fingerprint:
+        return False
+    return manifest_fingerprint != str(source_record.get("source_fingerprint") or "")
+
+
+def record_has_context(record: dict[str, Any]) -> bool:
+    flags = record.get("json_content", {}).get("content_flags", {})
+    return any(flags.get(name, False) for name in ("npc", "faction", "monster", "item", "location"))
+
+
+def backend_gate_ready(backend_gate: dict[str, Any] | None) -> bool | None:
+    if not backend_gate:
+        return None
+    mode = str(backend_gate.get("mode") or "")
+    status = str(backend_gate.get("status") or "")
+    if mode == "api":
+        return "any_llm_import_ok" in status and "model_configured" in status and "api_key_env_present_secret_not_read" in status
+    if mode == "ollama":
+        return "server_running_model_present" in status
+    if mode == "openvino":
+        return "imports_ok" in status and "model_dir_present" in status
+    return False
+
+
 def summarize_record(record: dict[str, Any], generated_by_source: dict[str, list[dict[str, Any]]]) -> str:
     if record["metadata_status"] == "metadata-broken":
         return "summary-unknown"
@@ -325,6 +400,10 @@ def summarize_record(record: dict[str, Any], generated_by_source: dict[str, list
     generated_packs = generated_by_source.get(record["id"], [])
     active_generated_packs = [pack for pack in generated_packs if pack.get("enabled_status") == "enabled-in-world"]
     if active_generated_packs:
+        if generated_packs_conflict(active_generated_packs):
+            return "summary-conflict"
+        if any(generated_pack_is_stale(record, pack) for pack in active_generated_packs):
+            return "summary-stale"
         if any(pack["summary_roots"]["summary_file_count"] > 0 for pack in active_generated_packs):
             return "summary-ready"
         return "summary-partial"
@@ -332,9 +411,7 @@ def summarize_record(record: dict[str, Any], generated_by_source: dict[str, list
         return "summary-ready"
     if has_root:
         return "summary-partial"
-    flags = record["json_content"]["content_flags"]
-    contextual = any(flags.get(name, False) for name in ("npc", "faction", "monster", "item", "location"))
-    return "summary-missing" if contextual else "summary-not-needed"
+    return "summary-missing" if record_has_context(record) else "summary-not-needed"
 
 
 def build_status_model(
@@ -344,6 +421,7 @@ def build_status_model(
     custom_catalog: Path | None,
     save_dir: Path | None,
     world_name: str | None = None,
+    backend_gate: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     world = read_world_mods(save_dir, world_name)
     world_custom_root = Path(world["world_path"]) / "mods" if world.get("world_path") else None
@@ -378,6 +456,7 @@ def build_status_model(
         if source_id:
             generated_by_source.setdefault(str(source_id), []).append(record)
 
+    gate_ready = backend_gate_ready(backend_gate)
     for record in records:
         record["summary_status"] = summarize_record(record, generated_by_source)
         record["status_badges"] = [
@@ -388,6 +467,11 @@ def build_status_model(
             record["dependency_status"],
             record["summary_status"],
         ]
+        if record.get("json_content", {}).get("json_parse_error_count", 0) > 0:
+            record["status_badges"].append("content-parse-error")
+        if gate_ready is False and record_has_context(record) and record["summary_status"] in {"summary-missing", "summary-partial", "summary-stale", "summary-conflict", "summary-unknown"}:
+            record["status_badges"].append("backend-not-ready")
+            record["status_badges"].append("summary-blocked")
         if record["generated_summary_pack"]["present"]:
             record["status_badges"].append("generated-summary-pack-present")
 
@@ -402,6 +486,11 @@ def build_status_model(
             "custom_catalog": custom_catalog.as_posix() if custom_catalog else None,
             "save_dir": save_dir.as_posix() if save_dir else None,
             "world_custom_mods": world_custom_root.as_posix() if world_custom_root else None,
+        },
+        "backend_gate": {
+            "mode": backend_gate.get("mode") if backend_gate else None,
+            "status": backend_gate.get("status") if backend_gate else None,
+            "generation_ready": gate_ready,
         },
         "counts": dict(Counter(badge for record in records for badge in record["status_badges"])),
         "mods": sorted(records, key=lambda item: (item["id"].lower(), item["source_type"], item["dir"])),

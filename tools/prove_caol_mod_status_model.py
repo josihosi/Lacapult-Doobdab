@@ -16,7 +16,7 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-from caol_mod_status_model import build_status_model
+from caol_mod_status_model import build_status_model, tree_fingerprint
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_FIXTURE = ROOT / ".proof-cache" / "caol-mod-status-fixture"
@@ -120,7 +120,7 @@ def build_fixture(root: Path) -> dict[str, Path]:
                 "version": 1,
                 "source_mod_id": "fixture_context_stock",
                 "source_mod_name": "Fixture Context Stock",
-                "source_fingerprint": "fixture-only",
+                "source_fingerprint": tree_fingerprint(stock / "fixture_context_stock"),
                 "backend": "fixture",
                 "model": "fixture",
                 "target_schema": "c-aol npc_personality_summary_bundle v1",
