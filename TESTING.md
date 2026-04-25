@@ -172,14 +172,6 @@ Before claiming v0 is done, Andi should record:
 - Validation command set for this slice: `python3 -m py_compile tools/prove_caol_mod_inventory.py`, `python3 tools/prove_caol_mod_inventory.py`, `python3 tools/prove_caol_release.py --all-platforms`, static `rg` for C-AOL summary roots/runtime loading, and `git diff --check`; all passed.
 - This is proof/report only. It does not claim UI surfacing, generated summary-pack installation, world mutation, enabling mods in real saves, model pulls, API secrets, upstream contact, or public release work.
 
-## Evidence - 2026-04-25 mod Summarizer feature-complete plan
-
-- Added `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` as the active next-lane planning packet after backend-good hardening.
-- The plan keeps C-AOL responsible for active mod roots, `npcs/Backgrounds/Summaries_short`, `npcs/Backgrounds/Summaries_extra`, runtime loading/consumption, and schema/runtime fixes.
-- The plan keeps Lacapult responsible for mod install/enable UX, summary coverage/status, Summarizer pop-up/button, backend-readiness-gated generation orchestration, sandbox staging, generated-pack apply help, backup, and rollback.
-- Required implementation slices are: discovery/status model, UX/status surface, sandboxed summary-pack generation/apply proof, C-AOL runtime consumption proof, and error/rollback/backup proof.
-- Evidence for this planning-only lane is docs inspection plus `git diff --check`; no Python/GDScript code was touched, no model/API/OpenVINO calls were made, and no real user C-AOL Application Support paths were mutated.
-
 ## Known risk spots
 
 - Godot 3 scene node paths may break if the game chooser/channel UI is removed too aggressively.
