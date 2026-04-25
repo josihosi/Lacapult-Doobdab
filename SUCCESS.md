@@ -39,7 +39,7 @@ Done only when all are true:
 
 ## Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply
 
-Status: **SLICE 1 DISCOVERY/STATUS MODEL PROVEN + SLICE 2 UX/DRY-RUN STATUS SURFACE PROVEN / GENERATION, APPLY, RUNTIME CONSUMPTION NOT IMPLEMENTED**
+Status: **SLICE 1 DISCOVERY/STATUS MODEL PROVEN + SLICE 2 UX/DRY-RUN STATUS SURFACE PROVEN + SLICE 3 SANDBOX SUMMARY-PACK APPLY/ROLLBACK PROVEN / REAL GENERATION UI + RUNTIME CONSUMPTION NOT IMPLEMENTED**
 
 Done only when all are true:
 
@@ -50,8 +50,8 @@ Done only when all are true:
 - [ ] A true post-enable hook is still pending because the current inherited launcher does not yet apply C-AOL world `mods.json` enable changes.
 - [x] The launcher shows whether all enabled extra NPC/content is summarized, blocked, needs summaries, or unknown.
 - [ ] API, Ollama, and OpenVINO generation readiness is gated through the backend-good checks for real generation/apply; current Slice 2 dry-run only reports selected backend status and performs no API calls/model pulls/downloads.
-- [ ] Generated packs are C-AOL-native under `npcs/Backgrounds/Summaries_short` / `Summaries_extra`, not launcher-only metadata.
-- [ ] Applying a generated pack and changing a world mod list is sandbox-proven with backup and rollback.
+- [x] A sandbox fixture generated pack is C-AOL-native under `npcs/Backgrounds/Summaries_extra`, not launcher-only metadata.
+- [x] Applying a generated companion summary pack and changing a world `mods.json` list is sandbox-proven with backup and rollback.
 - [ ] C-AOL runtime consumption is proven in a sandbox/harness, or a concrete C-AOL-side blocker is recorded.
 - [x] Slice 1 and Slice 2 proof scripts do not mutate Josef's real Application Support config, saves, worlds, or mods; later apply/generation proofs must keep the same boundary.
 
@@ -63,7 +63,7 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [ ] Large model download/model-pull automation or Ollama model recommendation UX. Local model inventory can inform a future backend recommendation lane, but nothing in Slice 1 pulls or recommends models yet.
 - [ ] API-key/backend live smoke test requiring real secrets.
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.
-- [active above] Feature-complete mod install/enable plus Summarizer UX; the current Mods/Settings surfaces show read-only status and dry-run Summarizer prompts, but generation/apply status and C-AOL-native `Summaries_short` / `Summaries_extra` pack writes still need sandbox proof. The current surface does not apply packs or enable mods.
+- [active above] Feature-complete mod install/enable plus Summarizer UX; the current Mods/Settings surfaces show read-only status and dry-run Summarizer prompts, and sandbox C-AOL-native `Summaries_extra` companion-pack apply/rollback is proven. The current surface still does not call a backend, apply packs, enable mods, or prove C-AOL runtime consumption.
 - [active above] NPC/LLM runtime consumption of mod compatibility summaries.
 - [x] Controlled selected macOS DMG download/mount/launchability-shape proof, without launching or installing the game.
 - [x] Sandboxed Lacapult-style macOS DMG copy/move install-shape proof, without touching the real Application Support install state or launching the game.

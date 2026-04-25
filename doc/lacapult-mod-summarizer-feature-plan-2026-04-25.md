@@ -1,6 +1,6 @@
 # Lacapult mod install/enable + Summarizer feature plan
 
-Status: **ACTIVE NEXT LANE / SLICE 1 DISCOVERY-STATUS MODEL LANDED / SLICE 2 UX-STATUS SURFACE LANDED**
+Status: **ACTIVE NEXT LANE / SLICE 1 DISCOVERY-STATUS MODEL LANDED / SLICE 2 UX-STATUS SURFACE LANDED / SLICE 3 SANDBOX APPLY-ROLLBACK PROVEN**
 
 This packet turns the read-only C-AOL mod compatibility report into the next bounded implementation family. It does **not** implement the feature yet. It defines the contract Andi should execute in slices after backend-good hardening.
 
@@ -264,14 +264,17 @@ Goal: show the useful truth in the launcher.
 
 ### Slice 3 — sandboxed summary-pack generation/apply proof
 
+Status: **landed 2026-04-25 as sandbox-only C-AOL-native companion summary-pack apply plus rollback proof.**
+
 Goal: generate one tiny C-AOL-native companion summary pack in a sandbox.
 
-- Choose one non-obsolete contextual packaged mod from the current report.
-- Generate or fixture a minimal `npc_personality_summary_bundle` under `Summaries_extra`.
-- Write a companion `modinfo.json` and manifest.
-- Apply it only inside a sandboxed C-AOL userdata/world tree.
-- Update sandbox `mods.json` so source mod and summary companion are active, with the summary companion after the source.
-- Gate: proof script validates paths, JSON parse, manifest, backup files, and rollback restore.
+- Landed `tools/prove_caol_summary_pack_apply.py`, which creates a C-AOL-like sandbox under ignored `.proof-cache/caol-summary-pack-apply/` and chooses one non-obsolete contextual packaged stock mod from the status model.
+- Landed a generated companion user mod shape with `modinfo.json`, `lacapult_summary_pack_manifest.json`, and a minimal `npc_personality_summary_bundle` under `npcs/Backgrounds/Summaries_extra`.
+- Landed manifest fields for source mod id/name/fingerprint, deterministic proof timestamp, generated paths, backup paths, prior/new world mod order, apply target paths, and rollback plan.
+- Landed sandbox `mods.json` apply proof that activates the source mod and companion summary mod with the companion after the source.
+- Landed backup/rollback proof that restores the prior `mods.json` bytes/order exactly and removes the generated pack when it did not exist before apply.
+- Landed status-model visibility proof: after apply the source mod is `summary-ready` and the companion generated-pack manifest is visible; after rollback the source returns to `summary-missing` and the companion disappears.
+- Gate: passed via `python3 tools/prove_caol_summary_pack_apply.py`; evidence is under `.proof-cache/caol-summary-pack-apply/evidence/`.
 
 ### Slice 4 — C-AOL runtime consumption proof
 
@@ -316,4 +319,4 @@ This lane is complete only when all of the following are true:
 
 ## Recommended next implementation handoff
 
-Next implement **Slice 3: sandboxed summary-pack generation/apply proof**. Slice 1 can compute status, and Slice 2 can render that truth plus dry-run prompts. The next cut should generate or fixture one tiny C-AOL-native companion summary pack under `npcs/Backgrounds/Summaries_extra`, apply it only inside a sandboxed C-AOL userdata/world tree with backup and rollback, and prove no real Application Support data is touched.
+Next implement **Slice 4: C-AOL runtime consumption proof**. Slice 3 now proves Lacapult can stage/apply/rollback a C-AOL-native companion summary pack in a sandbox and make the status model see it. The next cut should prove that an active generated summary root reaches C-AOL prompt construction in a sandbox/harness, or record the exact C-AOL-side blocker.

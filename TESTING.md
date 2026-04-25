@@ -172,6 +172,14 @@ Before claiming v0 is done, Andi should record:
 - Validation command set for this slice: `python3 -m py_compile tools/prove_caol_mod_inventory.py`, `python3 tools/prove_caol_mod_inventory.py`, `python3 tools/prove_caol_release.py --all-platforms`, static `rg` for C-AOL summary roots/runtime loading, and `git diff --check`; all passed.
 - This is proof/report only. It does not claim UI surfacing, generated summary-pack installation, world mutation, enabling mods in real saves, model pulls, API secrets, upstream contact, or public release work.
 
+## Evidence - 2026-04-25 C-AOL summary-pack apply/rollback Slice 3
+
+- Added `tools/prove_caol_summary_pack_apply.py`, a sandbox-only Slice 3 proof for C-AOL-native companion summary-pack generation/apply/rollback. It builds a fixture C-AOL userdata/world tree under `.proof-cache/caol-summary-pack-apply/`; it does not touch Josef's real Application Support config, saves, mods, or installed game.
+- Ran `python3 -m py_compile tools/prove_caol_summary_pack_apply.py tools/caol_mod_status_model.py`; it passed.
+- Ran `python3 tools/prove_caol_summary_pack_apply.py`; it chose fixture stock mod `fixture_apply_context_stock`, staged companion user mod `lacapult_summary_fixture_apply_context_stock`, wrote `npcs/Backgrounds/Summaries_extra/generated_fixture_apply_context_stock.json` as an `npc_personality_summary_bundle`, wrote `lacapult_summary_pack_manifest.json`, backed up sandbox `mods.json`, applied the companion pack, changed sandbox mod order from `["dda"]` to `["dda", "fixture_apply_context_stock", "lacapult_summary_fixture_apply_context_stock"]`, proved the status model saw the source as `summary-ready` and companion manifest as generated-pack-present, then rolled back to the exact prior `mods.json` bytes and removed the generated pack. Evidence: `.proof-cache/caol-summary-pack-apply/evidence/evidence.json`.
+- Re-ran no-regression proof: `python3 tools/prove_caol_release.py --all-platforms`, `python3 tools/prove_caol_backend_contract.py`, `python3 tools/prove_caol_mod_status_model.py`, `godot_caol_mod_status_smoke.gd`, `godot_caol_mod_ux_status_smoke.gd`, `/opt/homebrew/bin/godot --path . --no-window --quit`, and `git diff --check`; all passed. Godot printed the known fixture JSON parse errors and macOS/no-window cleanup warnings, but exited 0.
+- This is still fixture/proof-only. It does not call a backend, use API secrets, pull models, install OpenVINO, mutate real user data, enable real mods, prove C-AOL runtime prompt consumption, publish releases, or contact upstream.
+
 ## Known risk spots
 
 - Godot 3 scene node paths may break if the game chooser/channel UI is removed too aggressively.
