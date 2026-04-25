@@ -143,6 +143,15 @@ Before claiming v0 is done, Andi should record:
 - This is stronger than the direct headless installer smoke because it exercises the main scene's release-list selection and Install button signal path. It still does **not** claim a physical mouse-clicked GUI install or a C-AOL game launch smoke.
 - Godot exited 0. It printed known macOS/no-window cleanup warnings at process exit; they did not prevent the full-scene install-button path from completing.
 
+## Evidence - 2026-04-25 physical clicked GUI install pass
+
+- Launched `/opt/homebrew/bin/godot --path .` as a visible GUI with isolated `HOME=/tmp/lacapult-click-home.XIDrDG`, after pre-populating that HOME's Lacapult cache with the selected C-AOL `v0.2.0` macOS DMG (`caol_cdda-0-h_2026-03-29-1556_macos.dmg`). This avoided touching the real `~/Library/Application Support/Lacapult Doobdab` state and avoided a fresh heavy download.
+- Captured the visible launcher window with Peekaboo under `~/.openclaw/workspace/runtime/lacapult-click-smoke/initial.png`; the window title was `Lacapult Doobdab — Cataclysm: Arsenic and Old Lace`, the first build row was the prioritized `Cataclysm - Arsenic and Old Lace v0.2.0` macOS DMG, and `Install Selected` was visible/enabled.
+- Used Peekaboo to send an actual mouse click at the visible `Install Selected` button location rather than emitting a Godot signal.
+- Verified the isolated clicked install completed at `/tmp/lacapult-click-home.XIDrDG/Library/Application Support/Lacapult Doobdab/caol/game0` with `Cataclysm.app` and `catapult_install_info.json`; the install info recorded `Cataclysm - Arsenic and Old Lace v0.2.0`.
+- Re-ran the cheap proof packet after the clicked pass: `python3 tools/prove_caol_release.py --all-platforms`, `python3 tools/prove_caol_backend_contract.py`, `python3 -m py_compile tools/prove_caol_macos_dmg.py`, `/opt/homebrew/bin/godot --version`, `/opt/homebrew/bin/godot --path . --no-window --quit`, safe `ollama list`, and `git diff --check`. Godot printed the known macOS/no-window cleanup warnings but exited successfully; `git diff --check` passed after trimming a trailing blank line in this documentation update.
+- This closes the previously parked clicked GUI install proof. It still does **not** claim a C-AOL game-launch smoke, GitHub release publication, upstream contact, model pulls, heavyweight installs, or API-secret use.
+
 ## Known risk spots
 
 - Godot 3 scene node paths may break if the game chooser/channel UI is removed too aggressively.
