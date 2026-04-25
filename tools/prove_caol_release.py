@@ -60,6 +60,25 @@ def select_asset(release: dict[str, Any], system: str) -> dict[str, Any]:
     }
 
 
+def order_for_ui(releases: list[dict[str, Any]], system: str, preferred_tag: str = "v0.2.0") -> list[dict[str, Any]]:
+    shaped = []
+    for release in releases:
+        asset_result = select_asset(release, system)
+        shaped.append(
+            {
+                "tag_name": release.get("tag_name", ""),
+                "name": release.get("name") or release.get("tag_name", ""),
+                "installable": asset_result["installable"],
+                "filename": asset_result["installer_shape"]["filename"],
+            }
+        )
+    return (
+        [item for item in shaped if item["tag_name"] == preferred_tag or preferred_tag in item["name"]]
+        + [item for item in shaped if item["installable"] and item["tag_name"] != preferred_tag and preferred_tag not in item["name"]]
+        + [item for item in shaped if not item["installable"] and item["tag_name"] != preferred_tag and preferred_tag not in item["name"]]
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -85,16 +104,21 @@ def main() -> int:
         return 1
 
     platform_results = [select_asset(v020, system) for system in systems]
+    ui_order = order_for_ui(releases, systems[0])
     proof = {
         "release": v020.get("tag_name"),
         "release_name": v020.get("name"),
         "published_at": v020.get("published_at", ""),
         "asset_count": len(v020.get("assets", [])),
+        "ui_first_release_after_priority": ui_order[0] if ui_order else None,
         "platform_results": platform_results,
     }
     print(json.dumps(proof, indent=2))
 
     if not all(result["installable"] for result in platform_results):
+        return 1
+    if not ui_order or ui_order[0]["tag_name"] != "v0.2.0" or not ui_order[0]["installable"]:
+        print("v0.2.0 is not first/installable in prioritized UI order", file=sys.stderr)
         return 1
     return 0
 

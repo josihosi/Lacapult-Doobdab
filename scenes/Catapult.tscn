@@ -346,9 +346,9 @@ size_flags_horizontal = 4
 margin_left = 0.0
 margin_right = 106.0
 margin_bottom = 32.0
-hint_tooltip = "Update the current installation of Dabdoob to the latest version"
+hint_tooltip = "Lacapult self-update is disabled until public Lacapult releases exist"
 size_flags_horizontal = 4
-text = "Update Dabdoob"
+text = "Update Lacapult"
 icon = ExtResource( 3 )
 
 [node name="GameInstalls" type="VBoxContainer" parent="Main/Tabs/Game"]

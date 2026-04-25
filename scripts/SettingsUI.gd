@@ -136,6 +136,10 @@ func _add_backend_setup_controls() -> void:
 	save_button.connect("pressed", self, "_on_SaveBackendSetup_pressed")
 	section.add_child(save_button)
 
+	# Keep the v0 backend controls above the long inherited settings list so the
+	# endpoint/model/status/save path is visible in a normal launcher window.
+	move_child(section, 2)
+
 	_refresh_backend_setup_controls()
 
 

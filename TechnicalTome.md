@@ -149,4 +149,14 @@ Remaining non-credit player-facing text now says Lacapult Doobdab rather than Da
 
 ## 2026-04-25 local proof packet closure
 
-Release metadata, installer-shape proof, backend API/Ollama preview config, OpenVINO parked status, mod compatibility note, and identity cleanup are all locally proven. The remaining validation gap is not a code claim: this Mac has no `godot`, `godot3`, or `godot4` binary, so GUI/project-load smoke must happen elsewhere or after Godot is installed.
+Release metadata, installer-shape proof, backend API/Ollama preview config, OpenVINO parked status, mod compatibility note, and identity cleanup are all locally proven.
+
+## 2026-04-25 Godot GUI first-run smoke
+
+Godot 3.6.2 is available as `godot` on this Mac. A GUI smoke launched the project and proved the first visible Game tab and Settings backend surface. The smoke also shaped three small fixes:
+
+- C-AOL release rows now prefer `v0.2.0` first, then other installable rows, then blocked/no-platform-asset rows. This prevents old inherited/non-installable release names from being the first visible build even though the current C-AOL proof target is ready.
+- The Settings-tab backend setup section is moved near the top of the inherited settings list so Backend, Endpoint, Model, status/help text, and Save are visible without relying on a clipped bottom area.
+- The disabled self-update button now says `Update Lacapult` instead of inherited `Update Dabdoob`.
+
+The next heavier proof is an actual controlled macOS DMG download/extraction/install pass for the selected `v0.2.0` asset. Do not treat the GUI smoke as proof that DMG extraction or `.app` launchability succeeded; it only proved the selected release metadata and visible setup surface.

@@ -91,15 +91,18 @@ const _ASSET_FILTERS = {
 	"caol-release-linux": {
 		"field": "name",
 		"substring": "_linux.tar.gz",
+		"preferred_tag": "v0.2.0",
 	},
 	"caol-release-win": {
 		"field": "name",
 		"substring": "_windows.zip",
+		"preferred_tag": "v0.2.0",
 	},
 	"caol-release-mac": {
 		"field": "name",
 		"substring": "_macos.dmg",
 		"fallback_substrings": ["_macos.tar.gz", "_macos.zip"],
+		"preferred_tag": "v0.2.0",
 	},
 }
 
@@ -443,6 +446,7 @@ func _parse_builds(data: PoolByteArray, write_to: Array, filter: Dictionary) -> 
 	for rec in json:
 		var build = {}
 		build["name"] = rec["name"]
+		build["tag_name"] = rec.get("tag_name", "")
 		if Settings.read("shorten_release_names"):
 			build["name"] = build["name"].split(" ")[-1]
 		build["url"] = ""
@@ -469,10 +473,33 @@ func _parse_builds(data: PoolByteArray, write_to: Array, filter: Dictionary) -> 
 		# Include all releases, even those without matching assets
 		tmp_arr.append(build)
 
+	if "preferred_tag" in filter:
+		tmp_arr = _prioritize_release_builds(tmp_arr, filter["preferred_tag"])
+
 	if len(tmp_arr) > 0:
 		write_to.clear()
 		write_to.append_array(tmp_arr)
 		Status.post(tr("msg_got_n_releases") % len(tmp_arr))
+
+
+func _prioritize_release_builds(builds: Array, preferred_tag: String) -> Array:
+	var preferred = []
+	var installable = []
+	var blocked = []
+
+	for build in builds:
+		if build.get("tag_name", "") == preferred_tag or preferred_tag in build.get("name", ""):
+			preferred.append(build)
+		elif build.get("url", "") != "":
+			installable.append(build)
+		else:
+			blocked.append(build)
+
+	var ordered = []
+	ordered.append_array(preferred)
+	ordered.append_array(installable)
+	ordered.append_array(blocked)
+	return ordered
 
 
 func fetch(release_key: String) -> void:

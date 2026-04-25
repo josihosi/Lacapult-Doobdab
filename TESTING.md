@@ -79,6 +79,21 @@ Before claiming v0 is done, Andi should record:
 - Re-ran `git diff --check`; it passed.
 - Canon now records that the public repo exists at `https://github.com/josihosi/Lacapult-Doobdab`, while public pushes/releases/contact remain blocked on fresh Schani/Josef clearance.
 
+## Evidence - 2026-04-25 Godot GUI first-run smoke
+
+- Ran Godot 3.6.2 GUI from `/Users/josefhorvath/Schanigarten/Lacapult-Doobdab` and captured the launched window with Peekaboo screenshots under `~/.openclaw/workspace/runtime/lacapult-gui-smoke/`.
+- Initial GUI smoke surfaced two user-visible issues before handoff: the build selector opened on an older non-installable inherited `Cataclysm-DDA experimental build...` release row, and the backend setup section was appended below the visible Settings area.
+- Fixed `scripts/ReleaseManager.gd` so C-AOL release filters prefer `v0.2.0` and then show other installable releases before blocked/no-asset rows; `tools/prove_caol_release.py --all-platforms` now also asserts the prioritized UI order starts with installable `v0.2.0`.
+- Fixed `scripts/SettingsUI.gd` so `C-AOL NPC backend setup` appears near the top of Settings with visible Backend, Endpoint, Model, status/help text, and `Save backend setup metadata` controls.
+- Fixed the inherited disabled self-update button text in `scenes/Catapult.tscn` from `Update Dabdoob` to `Update Lacapult`.
+- Final GUI screenshots proved:
+  - window title `Lacapult Doobdab — Cataclysm: Arsenic and Old Lace`
+  - Game target `Cataclysm: Arsenic and Old Lace`
+  - first build row `Cataclysm - Arsenic and Old Lace v0.2.0 — caol_cdda-0-h_2026-03-29-1556_macos.dmg ...`
+  - backend dropdown options `API backend`, `Ollama backend`, and `OpenVINO (parked)`
+  - API backend status/help text: `API mode saves endpoint/model metadata only; Lacapult v0 never stores API keys.`
+- No API secrets, model pulls, heavy release downloads, GitHub releases, or upstream contact were used. The real macOS DMG extraction/app-bundle install pass remains the next heavier proof.
+
 ## Known risk spots
 
 - Godot 3 scene node paths may break if the game chooser/channel UI is removed too aggressively.

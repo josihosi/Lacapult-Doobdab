@@ -4,7 +4,7 @@ Success-state ledger for Lacapult Doobdab.
 
 ## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-Status: **LOCAL PROOF COMPLETE / AWAITING GODOT GUI VALIDATION OR PUBLIC-ACTION CLEARANCE**
+Status: **GUI SMOKE COMPLETE / AWAITING REAL INSTALL PASS OR RELEASE-PREP DECISION**
 
 Done only when all are true:
 
@@ -26,7 +26,8 @@ Done only when all are true:
 - [x] Inherited mod/soundpack/tileset support is preserved or any temporary breakage is documented.
 - [x] First C-AOL mod compatibility / future NPC-summary investigation note exists.
 - [x] Validation evidence is recorded in `TESTING.md`.
-- [x] Public repo existence is recorded (`https://github.com/josihosi/Lacapult-Doobdab`), and public pushes/releases/contact remain blocked without fresh Josef/Schani clearance.
+- [x] Godot 3.6.2 GUI smoke proves the project launches, the Game tab prioritizes the C-AOL `v0.2.0` macOS DMG, and the Settings tab exposes backend setup controls.
+- [x] Public repo existence is recorded (`https://github.com/josihosi/Lacapult-Doobdab`), and public releases/contact remain blocked without fresh Josef/Schani clearance.
 
 ## Parked next slices
 
@@ -37,5 +38,5 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [ ] API-key/backend live smoke test requiring real secrets.
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.
 - [ ] NPC/LLM runtime consumption of mod compatibility summaries.
-- [ ] Godot GUI/project-load smoke on a machine with Godot installed.
+- [ ] Real controlled macOS DMG install/extraction/launchability pass.
 - [ ] Signed/packaged Lacapult releases for Windows/Linux/macOS.
