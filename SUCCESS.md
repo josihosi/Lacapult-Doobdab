@@ -74,7 +74,7 @@ Done only when all are true:
 
 ## Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply
 
-Status: **SLICES 1-5 PROVEN / SLICE 6 PREVIEW+WRITER+BACKEND-GENERATION+TARGET-CHOOSER SEAMS LANDED / RETESTABLE-STATE PACKAGE-SHAPE PROVEN / API+OPENVINO LIVE GENERATION STILL GATED**
+Status: **SLICES 1-5 PROVEN / SLICE 6 PREVIEW+WRITER+BACKEND-GENERATION+TARGET-CHOOSER SEAMS LANDED / RETESTABLE-STATE PACKAGE-SHAPE PROVEN / POST-MOD UI RETEST PRERELEASE PUBLISHED / API+OPENVINO LIVE GENERATION STILL GATED**
 
 Done only when all are true:
 
@@ -87,10 +87,22 @@ Done only when all are true:
 - [x] API, Ollama, and OpenVINO generation readiness is gated through the backend-good checks for real generation/apply; no API calls, model pulls/downloads, package installs, or user-data writes happen without explicit confirmation. Slice 6 preview and confirmed writer both carry the backend-good gate and block apply when the selected backend is not generation-ready.
 - [x] A sandbox fixture generated pack is C-AOL-native under `npcs/Backgrounds/Summaries_extra`, not launcher-only metadata.
 - [x] Optional live-local Ollama proof uses already-local `mistral:latest` from `ollama list`, calls only the local Ollama HTTP endpoint, and applies/stages the generated entry through the same isolated companion-pack seam without model pulls, package installs, API secrets, remote APIs, or real user-data mutation.
-- [x] A retestable-state proof re-runs the Slice 6 status/UI/apply/backend gates plus local unsigned package export/package-shape proof from current `main`, confirming the Windows package still includes the required `utils/7za.exe` sidecar without publishing a release.
+- [x] A retestable-state proof re-runs the Slice 6 status/UI/apply/backend gates plus local unsigned package export/package-shape proof from current `main`, confirming the Windows package still includes the required `utils/7za.exe` sidecar.
+- [x] The post-mod UI Windows retest GitHub prerelease is published at https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-post-mod-ui-retest-2026-04-26 after Josef's explicit greenlight, with source commit, asset sizes, SHA-256 hashes, proof commands, and caveats recorded in `TESTING.md`.
 - [x] Applying a generated companion summary pack and changing a world `mods.json` list is sandbox-proven with backup and rollback.
 - [x] C-AOL runtime consumption is proven in a sandbox/harness, or a concrete C-AOL-side blocker is recorded.
 - [x] Slice 1, Slice 2, Slice 3, Slice 4, and Slice 5 proof scripts do not mutate Josef's real Application Support config, saves, worlds, or mods; Slice 6 automated proofs must keep the same sandbox boundary.
+
+## Evidence - 2026-04-26 post-mod UI Windows retest prerelease
+
+- Published GitHub prerelease `lacapult-post-mod-ui-retest-2026-04-26`: https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-post-mod-ui-retest-2026-04-26
+- Source commit: `8c9d8f3d5e3bc9757fffd69b7eeecd8cb8bcbdba` (`Record post-mod UI retestable proof`).
+- Uploaded assets:
+  - `Lacapult-Doobdab-windows-unsigned.zip` — 66,479,179 bytes — SHA-256 `694823044d89f091257ce6dedbf3cd92d0ba3b13ba0014ee3264146dae29dc42` — includes `utils/7za.exe`.
+  - `Lacapult-Doobdab-macos-unsigned.zip` — 90,291,422 bytes — SHA-256 `2f87f87c034327190b8284784427175e2fd77d4799e651a100b779a1ccfba3bd`.
+  - `Lacapult-Doobdab-linux-unsigned.tar.gz` — 37,474,689 bytes — SHA-256 `6242d67d5e554f142c0c6814b26b035b9791f2eb4226996df0654e2202d98103`.
+  - `SHA256SUMS.txt` — 311 bytes — SHA-256 `b0b20af7695a4acab4a49fcf9eab52c013f8e9b98ff792ed73d92d7fcb839e5e`.
+- Remote release inspection verified prerelease state, URL, asset names, sizes, and digests. Remaining caveat: this is unsigned/not notarized/not SmartScreen-trusted and still needs Josef's Windows laptop retest before public-final confidence.
 
 ## Parked next slices
 
@@ -101,7 +113,7 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [ ] API-key/backend live smoke test requiring real secrets.
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.
 - [x] Feature-complete mod install/enable plus Summarizer UX Slice 6 proof set; the current Mods/Settings surfaces show read-only status, dry-run prompts, selectable target world/mod controls, apply preview, a confirmed writer seam, fixture/live-local-Ollama backend generation, and generated companion-pack apply with backups in sandbox proof. The current API/OpenVINO surface still does not call live backends or automate model/package setup.
-- [ ] Lacapult post-mod UI Windows retest release packet: the current UI/mod-installer/Summarizer lane is now honestly retestable with local package-shape evidence, but the fresh GitHub test/prerelease publication remains parked until Schani/Josef explicitly greenlights that external release step. Canonical contract: `doc/lacapult-post-mod-ui-windows-retest-release-packet-2026-04-26.md`.
+- [x] Lacapult post-mod UI Windows retest release packet: Josef explicitly greenlit the external release step, and the fresh GitHub test/prerelease is published at https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-post-mod-ui-retest-2026-04-26. Canonical contract: `doc/lacapult-post-mod-ui-windows-retest-release-packet-2026-04-26.md`. Josef's real Windows laptop click-through/playtest remains external.
 - [x] Slice 5 fixture/error coverage for obsolete mods, parse errors, missing dependencies, partial/stale summaries, conflicts, backend-not-ready, and rollback-restores-replacement handling is landed as a sandbox-only proof.
 - [x] Controlled selected macOS DMG download/mount/launchability-shape proof, without launching or installing the game.
 - [x] Sandboxed Lacapult-style macOS DMG copy/move install-shape proof, without touching the real Application Support install state or launching the game.
