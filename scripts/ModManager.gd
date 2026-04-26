@@ -1568,6 +1568,31 @@ func get_caol_mod_summarizer_overview(world_name := "") -> Dictionary:
 	return CaolModStatus.build_ux_overview(get_caol_mod_summarizer_status(world_name))
 
 
+func get_caol_summarizer_world_names() -> Array:
+	# UI helper for Slice 6: list worlds that have a readable mods.json so the
+	# player can choose the target world before preview/apply. Read-only.
+	var worlds := []
+	var paths = get_node_or_null("/root/Paths")
+	if paths == null:
+		return worlds
+	var save_dir = str(paths.savegames)
+	var d = Directory.new()
+	if save_dir == "" or not d.dir_exists(save_dir):
+		return worlds
+	if d.open(save_dir) != OK:
+		return worlds
+	d.list_dir_begin(true, true)
+	var name = d.get_next()
+	while name != "":
+		var world_path = save_dir.plus_file(name)
+		if d.dir_exists(world_path) and d.file_exists(world_path.plus_file("mods.json")):
+			worlds.append(name)
+		name = d.get_next()
+	d.list_dir_end()
+	worlds.sort()
+	return worlds
+
+
 func get_caol_summarizer_apply_preview(world_name := "", selected_mod_id := "", confirmation_received := false) -> Dictionary:
 	# Slice 6 preview/action plan. This builds a player-facing plan but does not
 	# call a backend, generate files, apply packs, enable mods, or mutate saves.

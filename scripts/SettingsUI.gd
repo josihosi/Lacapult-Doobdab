@@ -13,6 +13,10 @@ var _themes := [
 
 var _proxy_options := ["off", "on", "download"]
 var _caol_mod_bridge_status: Label = null
+var _caol_summarizer_world_select: OptionButton = null
+var _caol_summarizer_world_names := []
+var _caol_summarizer_mod_select: OptionButton = null
+var _caol_summarizer_selected_mod_ids := []
 
 onready var _root = $"/root/Catapult"
 onready var _tabs = $"/root/Catapult/Main/Tabs"
@@ -82,6 +86,23 @@ func _add_caol_mod_bridge_status_controls() -> void:
 	_caol_mod_bridge_status.autowrap = true
 	section.add_child(_caol_mod_bridge_status)
 
+	var world_label = Label.new()
+	world_label.text = "Summarizer target world"
+	section.add_child(world_label)
+
+	_caol_summarizer_world_select = OptionButton.new()
+	_caol_summarizer_world_select.hint_tooltip = "Choose the C-AOL world whose mods.json should be previewed before any generated summary companion pack is applied."
+	_caol_summarizer_world_select.connect("item_selected", self, "_on_CaolSummarizerWorld_selected")
+	section.add_child(_caol_summarizer_world_select)
+
+	var chooser_label = Label.new()
+	chooser_label.text = "Summarizer target mod"
+	section.add_child(chooser_label)
+
+	_caol_summarizer_mod_select = OptionButton.new()
+	_caol_summarizer_mod_select.hint_tooltip = "Choose one enabled contextual mod from the current world before previewing or confirming a generated C-AOL summary companion pack."
+	section.add_child(_caol_summarizer_mod_select)
+
 	var dry_run_button = Button.new()
 	dry_run_button.text = "Summarizer dry-run status"
 	dry_run_button.hint_tooltip = "Status-only prompt: no backend call, no generated pack, no apply, no mod enable."
@@ -123,9 +144,83 @@ func _refresh_caol_mod_bridge_status() -> void:
 	var mods = get_node_or_null("/root/Mods")
 	if mods == null or not mods.has_method("get_caol_mod_summarizer_overview"):
 		_caol_mod_bridge_status.text = "Read-only C-AOL mod/Summarizer status unavailable: Mods autoload is not ready."
+		_populate_caol_summarizer_target_selector({})
 		return
-	var overview = mods.get_caol_mod_summarizer_overview()
+	if mods.has_method("get_caol_summarizer_world_names"):
+		_populate_caol_summarizer_world_selector(mods.get_caol_summarizer_world_names())
+	var overview = mods.get_caol_mod_summarizer_overview(_selected_caol_summarizer_world_name())
 	_caol_mod_bridge_status.text = overview.get("status_text", "Read-only C-AOL mod/Summarizer status unavailable.")
+	_populate_caol_summarizer_target_selector(overview)
+
+
+func _populate_caol_summarizer_world_selector(worlds: Array) -> void:
+	if _caol_summarizer_world_select == null:
+		return
+	var previous = _selected_caol_summarizer_world_name()
+	_caol_summarizer_world_names.clear()
+	_caol_summarizer_world_select.clear()
+	if worlds.empty():
+		_caol_summarizer_world_select.add_item("No readable world mods.json found", 0)
+		_caol_summarizer_world_select.disabled = true
+		return
+	_caol_summarizer_world_select.disabled = false
+	var selected_index = 0
+	for world in worlds:
+		var world_name = str(world)
+		_caol_summarizer_world_names.append(world_name)
+		_caol_summarizer_world_select.add_item(world_name, _caol_summarizer_world_names.size() - 1)
+		if world_name == previous:
+			selected_index = _caol_summarizer_world_names.size() - 1
+	_caol_summarizer_world_select.select(selected_index)
+
+
+func _selected_caol_summarizer_world_name() -> String:
+	if _caol_summarizer_world_select == null or _caol_summarizer_world_select.disabled:
+		return ""
+	var index = _caol_summarizer_world_select.get_selected_id()
+	if index < 0 or index >= _caol_summarizer_world_names.size():
+		index = _caol_summarizer_world_select.selected
+	if index < 0 or index >= _caol_summarizer_world_names.size():
+		return ""
+	return str(_caol_summarizer_world_names[index])
+
+
+func _populate_caol_summarizer_target_selector(overview: Dictionary) -> void:
+	if _caol_summarizer_mod_select == null:
+		return
+	var previous_id = _selected_caol_summarizer_mod_id()
+	_caol_summarizer_selected_mod_ids.clear()
+	_caol_summarizer_mod_select.clear()
+	var candidates = overview.get("summarizer_candidates", [])
+	if typeof(candidates) != TYPE_ARRAY or candidates.empty():
+		_caol_summarizer_mod_select.add_item("No eligible enabled contextual mod needs summaries", 0)
+		_caol_summarizer_mod_select.disabled = true
+		return
+	_caol_summarizer_mod_select.disabled = false
+	var selected_index = 0
+	for candidate in candidates:
+		var mod_id = str(candidate.get("id", ""))
+		var label = "%s (%s) - %s" % [candidate.get("name", mod_id), mod_id, candidate.get("summary_status", "summary-unknown")]
+		_caol_summarizer_selected_mod_ids.append(mod_id)
+		_caol_summarizer_mod_select.add_item(label, _caol_summarizer_selected_mod_ids.size() - 1)
+		if mod_id == previous_id:
+			selected_index = _caol_summarizer_selected_mod_ids.size() - 1
+	_caol_summarizer_mod_select.select(selected_index)
+
+
+func _selected_caol_summarizer_mod_id() -> String:
+	if _caol_summarizer_mod_select == null or _caol_summarizer_mod_select.disabled:
+		return ""
+	var index = _caol_summarizer_mod_select.get_selected_id()
+	if index < 0 or index >= _caol_summarizer_selected_mod_ids.size():
+		index = _caol_summarizer_mod_select.selected
+	if index < 0 or index >= _caol_summarizer_selected_mod_ids.size():
+		return ""
+	return str(_caol_summarizer_selected_mod_ids[index])
+
+
+func _on_CaolSummarizerWorld_selected(_index: int) -> void:
+	_refresh_caol_mod_bridge_status()
 
 
 func _on_CaolSummarizerDryRun_pressed() -> void:
@@ -133,7 +228,7 @@ func _on_CaolSummarizerDryRun_pressed() -> void:
 	if mods == null or not mods.has_method("get_caol_summarizer_dry_run"):
 		_caol_mod_bridge_status.text = "Summarizer dry-run unavailable: Mods autoload is not ready."
 		return
-	var dry_run = mods.get_caol_summarizer_dry_run()
+	var dry_run = mods.get_caol_summarizer_dry_run(_selected_caol_summarizer_world_name())
 	_caol_mod_bridge_status.text = dry_run.get("message", "Summarizer dry-run unavailable.")
 	Status.post("C-AOL Summarizer dry-run/status-only check complete; no backend call, pack apply, or save mutation was attempted.")
 
@@ -143,9 +238,11 @@ func _on_CaolSummarizerApplyPreview_pressed() -> void:
 	if mods == null or not mods.has_method("get_caol_summarizer_apply_preview"):
 		_caol_mod_bridge_status.text = "Summarizer apply preview unavailable: Mods autoload is not ready."
 		return
-	var preview = mods.get_caol_summarizer_apply_preview()
+	var selected_world = _selected_caol_summarizer_world_name()
+	var selected_mod_id = _selected_caol_summarizer_mod_id()
+	var preview = mods.get_caol_summarizer_apply_preview(selected_world, selected_mod_id)
 	_caol_mod_bridge_status.text = preview.get("message", "Summarizer apply preview unavailable.")
-	Status.post("C-AOL Summarizer apply preview built; explicit confirmation is still required before any backend call, generated pack, or save mutation.")
+	Status.post("C-AOL Summarizer apply preview built for %s; explicit confirmation is still required before any backend call, generated pack, or save mutation." % (selected_mod_id if selected_mod_id != "" else "the current eligible mod"))
 
 
 func _on_CaolSummarizerApplyConfirmed_pressed() -> void:
@@ -153,7 +250,9 @@ func _on_CaolSummarizerApplyConfirmed_pressed() -> void:
 	if mods == null or not mods.has_method("generate_and_apply_caol_summarizer_pack"):
 		_caol_mod_bridge_status.text = "Summarizer apply unavailable: Mods autoload is not ready."
 		return
-	var result = mods.generate_and_apply_caol_summarizer_pack("", "", true, true)
+	var selected_world = _selected_caol_summarizer_world_name()
+	var selected_mod_id = _selected_caol_summarizer_mod_id()
+	var result = mods.generate_and_apply_caol_summarizer_pack(selected_world, selected_mod_id, true, true)
 	_caol_mod_bridge_status.text = result.get("message", "Summarizer apply unavailable.")
 	if result.get("applied", false):
 		Status.post("C-AOL Summarizer backend generation/apply completed with backup/rollback visibility.")

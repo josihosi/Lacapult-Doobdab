@@ -19,6 +19,16 @@ Use the smallest evidence that honestly matches the change.
 Slice 6 is active. Use `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` as the contract: promote the existing read-only/dry-run Summarizer surfaces into a user-confirmed generation/apply path for eligible contextual C-AOL mods/worlds. Proofs must remain sandboxed/non-mutating: no package installs, model pulls/downloads, API calls/secrets, or real Application Support/game-state writes without explicit confirmation and a safe path.
 
 
+## Evidence - 2026-04-26 Summarizer Slice 6 UI target selection/error polish v0
+
+- Added Settings-tab `Summarizer target world` and `Summarizer target mod` selectors. Worlds are read from local save folders with a readable `mods.json`; eligible mod choices are populated from the selected world's contextual candidates.
+- The preview and confirmed generation/apply buttons now pass the selected world and mod id into the existing Slice 6 preview/backend/write gates instead of silently taking the first candidate from the first readable world.
+- Added disabled/no-candidate UI states so blocked status is visible before a user tries to confirm generation/apply.
+- Added `tools/prove_caol_summarizer_ui_polish.py`, a non-mutating static proof that the Settings surface exposes the selectors, preview/confirm paths use the selected world/mod id, and existing confirmation/backend-call gates remain in place.
+- Validation passed: `python3 -m py_compile tools/caol_mod_status_model.py tools/prove_caol_mod_status_model.py tools/prove_caol_summary_pack_apply.py tools/prove_caol_summary_error_matrix.py tools/prove_caol_summarizer_ui_polish.py`, `python3 tools/prove_caol_mod_status_model.py`, `python3 tools/prove_caol_summarizer_ui_polish.py`, fixture-root `tools/godot_caol_mod_ux_status_smoke.gd`, fixture-backend isolated-HOME `tools/godot_caol_summarizer_apply_smoke.gd`, `python3 tools/prove_caol_backend_contract.py`, `/opt/homebrew/bin/godot --path . --no-window --quit`, and `git diff --check`. Evidence log: `.proof-cache/slice6-ui-polish-gates.log`; UX JSON: `.proof-cache/slice6-ui-polish-ux.json`; apply JSON: `.proof-cache/slice6-ui-polish-apply.json`. Godot emitted known fixture parse/headless macOS cleanup warnings but exited 0.
+- Remaining honest gap: this polished the chooser/error surface and re-proved sandbox generation/apply; no real local Ollama generation smoke was claimed, and API/OpenVINO live generation remains gated.
+
+
 ## Evidence - 2026-04-26 Summarizer Slice 6 backend-generation seam v0
 
 - Added `ModManager.generate_and_apply_caol_summarizer_pack()`, a stricter Slice 6 path that requires the existing preview/backend/world/confirmation gates plus a separate explicit backend-call allowance before generation. It then reuses the confirmed writer seam, backup, manifest, native `Summaries_extra`, and world `mods.json` apply machinery.

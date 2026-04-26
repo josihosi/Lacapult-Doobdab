@@ -1,6 +1,6 @@
 # Lacapult mod install/enable + Summarizer feature plan
 
-Status: **ACTIVE / SLICES 1-5 PROVEN THROUGH ERROR-ROLLBACK MATRIX / SLICE 6 PREVIEW+WRITER+BACKEND-GENERATION SEAMS LANDED**
+Status: **ACTIVE / SLICES 1-5 PROVEN THROUGH ERROR-ROLLBACK MATRIX / SLICE 6 PREVIEW+WRITER+BACKEND-GENERATION+TARGET-CHOOSER SEAMS LANDED**
 
 This packet turns the read-only C-AOL mod compatibility report into the next bounded implementation family. It does **not** implement the feature yet. It defines the contract Andi should execute in slices after backend-good hardening.
 
