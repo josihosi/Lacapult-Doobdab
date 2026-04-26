@@ -99,6 +99,7 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [ ] API-key/backend live smoke test requiring real secrets.
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.
 - [active above] Feature-complete mod install/enable plus Summarizer UX; the current Mods/Settings surfaces show read-only status, dry-run prompts, apply preview, and a confirmed writer seam that applies a generated companion pack with backups in sandbox proof. The current surface still does not call a live backend or automate model/package setup.
+- [ ] Lacapult post-mod UI Windows retest release packet: after the current UI/mod-installer/Summarizer lane is honestly retestable, publish a fresh Lacapult GitHub test/prerelease with downloadable Windows artifacts for Josef. Canonical contract: `doc/lacapult-post-mod-ui-windows-retest-release-packet-2026-04-26.md`.
 - [x] Slice 5 fixture/error coverage for obsolete mods, parse errors, missing dependencies, partial/stale summaries, conflicts, backend-not-ready, and rollback-restores-replacement handling is landed as a sandbox-only proof.
 - [x] Controlled selected macOS DMG download/mount/launchability-shape proof, without launching or installing the game.
 - [x] Sandboxed Lacapult-style macOS DMG copy/move install-shape proof, without touching the real Application Support install state or launching the game.
