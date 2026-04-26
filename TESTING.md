@@ -14,6 +14,10 @@ Use the smallest evidence that honestly matches the change.
 - Mod Summarizer/apply changes: prove status/discovery first, then sandbox generated packs and rollback; never mutate Josef's real Application Support saves/config/mods for proof work.
 - Public pushes/release publication/upstream contact: external actions, require explicit clearance.
 
+## Active proof target - 2026-04-26 Lacapult launcher test/prerelease
+
+Josef explicitly cleared a Lacapult launcher test/prerelease so he can download the Windows package on his laptop and test the launcher/game path. This is not a C-AOL game release, not C-AOL `v0.3.0`, and not signing/notarization. The release proof must regenerate fresh packages from current `main`, attach at least the Windows package to a Lacapult-specific GitHub test/prerelease, record hashes/sizes/URL, and verify the remote release/assets with `gh release view`. Use `doc/lacapult-launcher-test-release-packet-2026-04-26.md` as the execution contract.
+
 ## Current evidence
 
 Initial source audit from Schani:

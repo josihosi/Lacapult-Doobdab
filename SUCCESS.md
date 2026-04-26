@@ -4,7 +4,7 @@ Success-state ledger for Lacapult Doobdab.
 
 ## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-Status: **CLICKED INSTALL + BACKEND TRIAD V0-SAFE CONFIG/READINESS + SANDBOX OPTIONS APPLY PROVEN + MOD UI STATUS + BACKEND RECOMMENDATION UX PROVEN + CLICK-LEVEL GUI AUDIT READY-FOR-JOSEF-WINDOWS-TEST + LOCAL UNSIGNED APP/PACKAGE EXPORTS PROVEN + macOS C-AOL v0.2.0 LAUNCH REPAIR PROVEN / PUBLIC RELEASE NOT CLAIMED**
+Status: **LACAPULT LAUNCHER TEST RELEASE ACTIVE / C-AOL v0.2.0 INSTALL+LAUNCH REPAIR PROVEN / C-AOL v0.3 PARKED / FINAL SIGNED PUBLIC RELEASE NOT CLAIMED**
 
 Done only when all are true:
 
@@ -41,6 +41,10 @@ Done only when all are true:
 - [x] Isolated macOS launch smoke with repair proves the selected C-AOL `v0.2.0` app no longer aborts on `/opt/local` dylib paths after Lacapult repair; the repaired app stays running past the smoke observation window, with no package-manager paths left in the checked load graph.
 - [x] C-AOL release/changelog link no longer opens an inherited empty changelog path; for C-AOL it opens the selected/fallback GitHub release page.
 - [x] Fresh no-install state does not display a checked `Update current active install` checkbox, and unavailable Lacapult self-update is labeled as unavailable instead of implying a working update action.
+- [ ] Fresh Lacapult launcher packages are regenerated from current `main` after the macOS launch repair/canon commits.
+- [ ] A Lacapult-specific GitHub test/prerelease exists with at least a Windows downloadable package for Josef.
+- [ ] Release notes, tag, and asset names clearly distinguish Lacapult launcher test build from C-AOL game releases and C-AOL `v0.3.0`.
+- [ ] SHA-256 hashes, asset sizes, and remote release URL are recorded in `TESTING.md`.
 
 ## Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply
 
