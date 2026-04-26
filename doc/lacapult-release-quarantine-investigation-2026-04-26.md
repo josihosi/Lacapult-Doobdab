@@ -63,15 +63,26 @@ Most likely from current evidence:
 3. **Inherited-name leakage:** Catapult/Dabdoob internal names and some visible lineage strings remain; even when licensed/credited correctly, they can blur identity in a downloadable Windows artifact.
 4. **Not yet proven from current evidence:** the latest Windows zip is not currently proven to contain a full C-AOL game payload or to have been built from the Cataclysm-AOL repo by mistake.
 
+## Mac-side identity surface pass - 2026-04-26
+
+A bounded non-mutating pass inspected the surfaces available from macOS and added the smallest obvious launcher-facing correction before any republish:
+
+- Local Windows package shape is still Lacapult-shaped: `Lacapult-Doobdab.exe`, `utils/7-ZIP_LICENSE`, and `utils/7za.exe`.
+- The quarantined release body already says this is a **Lacapult launcher** prerelease and not a new C-AOL game release.
+- The first Game-tab surface was too easy to read as just “C-AOL” because it jumped straight into the C-AOL target/release controls. It now starts with `Lacapult Doobdab launcher` and explicit copy saying the download is the launcher, not a C-AOL game archive, and that it fetches/installs existing C-AOL releases.
+- The visible About-tab GitHub link still pointed at upstream Dabdoob/Catapult as if it were the product repo. It now points to `https://github.com/josihosi/Lacapult-Doobdab/`; upstream credit remains in attribution/credit copy.
+- Proof: `python3 tools/prove_lacapult_identity_surface.py`; evidence JSON: `.proof-cache/lacapult-identity-surface/latest.json`.
+
+This reduces obvious user-facing identity leakage, but it is not a Windows runtime reproduction. Real Windows first-launch click-through remains required before confidence/republish.
+
 ## Open investigation steps
 
-- Reproduce Josef's exact Windows-facing symptom if possible: package extraction shape, first-launch window, first visible tab, release page/download copy, and any “wrong app” impression.
-- Inspect the actual GitHub release body/copy for whether it over-emphasizes C-AOL or suggests a C-AOL game download instead of a Lacapult launcher download.
-- Decide whether future Lacapult public/test releases need a distinct identity pass before publication:
-  - launcher-first opening screen/copy;
-  - clearer “this app installs C-AOL” framing;
+- Run a real Windows first-launch click-through: package extraction shape, first-launch window, first visible tab, release row wording, and any “wrong app” impression.
+- Decide whether the next identity/product correction packet should also include:
+  - a stronger launcher-first welcome/start page;
+  - release-row copy that treats C-AOL as the target game, not the artifact identity;
   - fewer inherited Catapult internal names in visible places;
-  - release notes that treat C-AOL as target game, not the artifact identity;
+  - release notes/download-page framing that stays Lacapult-first;
   - maybe rename user-facing windows/buttons before the next retest.
 - Keep all Lacapult release assets draft/private until the investigation is closed and Josef/Schani explicitly re-greenlight publication.
 

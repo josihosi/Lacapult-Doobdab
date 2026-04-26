@@ -14,9 +14,17 @@ Use the smallest evidence that honestly matches the change.
 - Mod Summarizer/apply changes: prove status/discovery first, then sandbox generated packs and rollback; never mutate Josef's real Application Support saves/config/mods for proof work.
 - Public pushes/release publication/upstream contact: external actions, require explicit clearance.
 
-## Active proof target - 2026-04-26 real C-AOL mod/Summarizer generation/apply UI v0
+## Active proof target - 2026-04-26 Lacapult release quarantine / identity investigation
 
-Slice 6 is active. Use `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` as the contract: promote the existing read-only/dry-run Summarizer surfaces into a user-confirmed generation/apply path for eligible contextual C-AOL mods/worlds. Proofs must remain sandboxed/non-mutating: no package installs, model pulls/downloads, API calls/secrets, or real Application Support/game-state writes without explicit confirmation and a safe path.
+The real C-AOL mod/Summarizer generation/apply UI v0 lane is implemented and sandbox-proofed. Current validation focus is the quarantined Lacapult release identity/product failure: inspect package, release-copy, first visible launcher surfaces, and obvious user-facing inherited-name leakage before any republish. Proofs must remain non-mutating: no public release publication, no package/model installs or pulls, no API secrets/calls, and no real Application Support/game-state writes without explicit confirmation and a safe path.
+
+## Evidence - 2026-04-26 Lacapult identity surface correction/proof
+
+- Added a first Game-tab identity banner in `scenes/Catapult.tscn`: `Lacapult Doobdab launcher` plus copy saying the download is the launcher, not a C-AOL game archive, and that it fetches/installs existing C-AOL releases and manages backend/mod/Summarizer helpers.
+- Repointed the visible About-tab GitHub link from the upstream Dabdoob/Catapult repository to `https://github.com/josihosi/Lacapult-Doobdab/`; upstream credit remains preserved in attribution/credit copy.
+- Added `tools/prove_lacapult_identity_surface.py`, a non-mutating proof that checks the project identity, first Game-tab launcher framing, About link target, local Windows package shape, and quarantined draft release copy.
+- Validation passed: `python3 -m py_compile tools/prove_lacapult_identity_surface.py`, `python3 tools/prove_lacapult_identity_surface.py`, `/opt/homebrew/bin/godot --path . --no-window --quit`, and `git diff --check`; evidence JSON: `.proof-cache/lacapult-identity-surface/latest.json`. Godot emitted known macOS/headless cleanup/icon/sound warnings but exited 0.
+- Result: local evidence still says the Windows package is Lacapult-shaped (`Lacapult-Doobdab.exe` plus 7-Zip sidecars), and the first in-app surface now has launcher-not-game framing. Remaining gap: a real Windows first-launch click-through is still needed before any republish/confidence claim.
 
 ## Evidence - 2026-04-26 Summarizer Slice 6 retestable-state/package-shape proof
 

@@ -101,6 +101,7 @@ Done only when all are true:
 - Unauthenticated `HEAD` on the latest Windows asset URL returns `404`, so the old release asset is not publicly downloadable.
 - Initial local artifact inspection of `.proof-cache/lacapult-export/packages/Lacapult-Doobdab-windows-unsigned.zip` shows a Lacapult package shape (`Lacapult-Doobdab.exe`, `utils/7-ZIP_LICENSE`, `utils/7za.exe`) and local hash `694823044d89f091257ce6dedbf3cd92d0ba3b13ba0014ee3264146dae29dc42`, matching the latest remote digest.
 - Initial string/source inspection confirms the exported executable is very C-AOL-heavy by product design (`Cataclysm: Arsenic and Old Lace`, `C-AOL LLM backend setup`, C-AOL release/install/repair/Summarizer paths) and still carries inherited Catapult/Dabdoob internal naming, so the user-facing identity failure remains real even if the archive is not literally a C-AOL game payload.
+- First identity-surface correction/proof landed: the Game tab now opens with `Lacapult Doobdab launcher` and explicit launcher-not-C-AOL-game-archive copy; the visible About GitHub link now points to `https://github.com/josihosi/Lacapult-Doobdab/`; `python3 tools/prove_lacapult_identity_surface.py` confirms project identity, local Windows package shape, quarantined release copy, and these visible surfaces. Remaining gap: real Windows first-launch click-through before any republish/confidence claim.
 - Canonical incident note: `doc/lacapult-release-quarantine-investigation-2026-04-26.md`.
 
 ## Evidence - 2026-04-26 post-mod UI Windows retest prerelease (quarantined)

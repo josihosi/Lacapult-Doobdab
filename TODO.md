@@ -33,7 +33,8 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - [x] Verify public removal: authenticated release list shows all three as Draft, unauthenticated GitHub releases API returns zero public releases, and the latest old Windows asset URL returns `404`.
    - [x] Inspect the latest local Windows artifact shape: `Lacapult-Doobdab.exe` plus `utils/7-ZIP_LICENSE` / `utils/7za.exe`, with hash matching the remote digest.
    - [x] Record initial finding that the archive is not literally a full C-AOL game package, but the exported app is heavily C-AOL-facing by design and still carries inherited Catapult/Dabdoob naming.
-   - [ ] Reproduce/inspect the exact Windows-facing symptom if possible: first launch, first visible tab, release-copy wording, and why the download reads as CAOL instead of Lacapult to Josef.
+   - [x] Reproduce/inspect the Windows-facing identity surfaces possible from macOS: package extraction shape, quarantined release-copy wording, first visible Game-tab framing, and obvious visible inherited-name leakage. Result: package is Lacapult-shaped, release copy already says launcher/not-C-AOL-release, but the first Game tab needed explicit launcher-not-game framing and the visible About GitHub link still pointed at upstream Dabdoob/Catapult.
+   - [ ] Run a real Windows first-launch click-through before any renewed confidence claim: extracted package, first window, first visible tab, release row wording, and install/download impression.
    - [ ] Decide the next identity/product correction packet before any republish.
 
 0. Backend recommendation/setup lane — closed for Windows test
