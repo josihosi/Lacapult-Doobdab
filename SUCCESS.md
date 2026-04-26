@@ -5,19 +5,28 @@ Success-state ledger for Lacapult Doobdab.
 
 ## Lacapult LLM backend setup installer packet v0
 
-Status: **ACTIVE / GREENLIT FOR ANDI**
+Status: **IMPLEMENTED / SAFE STATIC+GODOT PROOF PASSED / READY FOR SCHANI REVIEW**
 
 Done only when all are true:
 
-- [ ] Backend setup has its own visible tab/page titled exactly `C-AOL LLM backend setup`.
-- [ ] Player-facing backend copy is neutral and no longer mentions Josef, Windows test positioning, or raw internal/debug status wording where a normal installer sentence belongs.
-- [ ] API/AnyLLM, Ollama, and OpenVINO each expose a guided setup/install pathway with explicit confirmation before external changes.
-- [ ] Ollama setup offers `mistral-v0.3` and `nemotron-9b` choices, with hardware-based recommendation and manual override.
-- [ ] Installer-path tests prove package/model install actions are gated, mocked, or sandboxed and do not mutate Josef's real machine.
-- [ ] Inherited About/thank-you personal support message is preserved, while backend/setup installer copy is cleaned so no Josef/test-run wording leaks into normal setup surfaces.
-- [ ] A GUI reasoning roleplay from a Reddit C:DDA aficionado installing C-AOL has been run, and its findings are reflected in UI/copy/proof expectations.
+- [x] Backend setup has its own visible tab/page titled exactly `C-AOL LLM backend setup`.
+- [x] Player-facing backend copy is neutral and no longer mentions Josef, Windows test positioning, or raw internal/debug status wording where a normal installer sentence belongs.
+- [x] API/AnyLLM, Ollama, and OpenVINO each expose a guided setup/install pathway with explicit confirmation before external changes.
+- [x] Ollama setup offers `mistral-v0.3` and `nemotron-9b` choices, with hardware-based recommendation and manual override.
+- [x] Installer-path tests prove package/model install actions are gated, mocked, or sandboxed and do not mutate Josef's real machine.
+- [x] Inherited About/thank-you personal support message is preserved, while backend/setup installer copy is cleaned so no Josef/test-run wording leaks into normal setup surfaces.
+- [x] A GUI reasoning roleplay from a Reddit C:DDA aficionado installing C-AOL has been run, and its findings are reflected in UI/copy/proof expectations.
 
 Canonical contract: `doc/lacapult-llm-backend-setup-installer-packet-v0-2026-04-26.md`.
+
+## Evidence - 2026-04-26 LLM backend setup installer packet v0
+
+- Backend setup is a standalone tab/page named exactly `C-AOL LLM backend setup` in `scenes/Catapult.tscn`, wired through `scripts/BackendSetupUI.gd`, with the old Settings-tab backend construction removed.
+- Player-facing backend/setup copy is neutral for anonymous C-AOL players; proof scans backend setup surfaces for `Josef`, `Windows test`, `pre-release testing`, and `Windows-first` leakage.
+- API/AnyLLM, Ollama, and OpenVINO each expose guided setup paths with `ConfirmExternalBackendAction`; confirmation records intent only and explicitly performs no package install, model pull, API call, or real machine mutation.
+- Ollama setup offers `mistral-v0.3` and `nemotron-9b`; fixture hardware recommendations steer low/unknown hardware toward `mistral-v0.3`, allow/recommend `nemotron-9b` on stronger memory, and leave the final choice to the player.
+- Required outsider roleplay artifact exists at `doc/lacapult-gui-reasoning-reddit-cdda-install-run-2026-04-26.md`; it treats unexplained Josef/test-run wording as internal scaffolding leakage unless kept in credits/history.
+- Validation passed: `python3 tools/prove_backend_setup_installer_packet.py`, `python3 tools/prove_caol_backend_contract.py`, `/opt/homebrew/bin/godot --path . --no-window --script tools/godot_backend_triad_smoke.gd`, `/opt/homebrew/bin/godot --path . --no-window --quit`, and `git diff --check`. Godot emitted known macOS/no-window cleanup warnings but exited 0.
 
 ## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 

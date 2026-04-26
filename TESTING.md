@@ -14,9 +14,17 @@ Use the smallest evidence that honestly matches the change.
 - Mod Summarizer/apply changes: prove status/discovery first, then sandbox generated packs and rollback; never mutate Josef's real Application Support saves/config/mods for proof work.
 - Public pushes/release publication/upstream contact: external actions, require explicit clearance.
 
-## Active proof target - 2026-04-26 Lacapult launcher test/prerelease
+## Active proof target - 2026-04-26 LLM backend setup installer packet v0
 
-Josef explicitly cleared a Lacapult launcher test/prerelease so he can download the Windows package on his laptop and test the launcher/game path. This is not a C-AOL game release, not C-AOL `v0.3.0`, and not signing/notarization. The proof regenerated fresh packages from current `main`, attached Windows/macOS/Linux unsigned packages to a Lacapult-specific GitHub prerelease, recorded hashes/sizes/URL, and verified the remote release/assets with `gh release view`. Use `doc/lacapult-launcher-test-release-packet-2026-04-26.md` as the execution contract and release ledger.
+The active backend setup installer packet is now implemented and proofed safely. Use `doc/lacapult-llm-backend-setup-installer-packet-v0-2026-04-26.md` as the contract and `doc/lacapult-gui-reasoning-reddit-cdda-install-run-2026-04-26.md` as the outsider GUI reasoning artifact. Proofs must remain non-mutating: no package installs, no model pulls/downloads, no API calls/secrets, and no real Application Support/game-state mutation without explicit confirmation and a safe path.
+
+## Evidence - 2026-04-26 LLM backend setup installer packet v0
+
+- `python3 tools/prove_backend_setup_installer_packet.py` passed. It proves the standalone `C-AOL LLM backend setup` tab exists, the old Settings backend panel is no longer constructed, player-facing backend setup surfaces avoid Josef/test-run/Windows-first leakage, confirmation-gated actions are present, the inherited thank-you/lineage copy remains, and Ollama fixture recommendations cover low/unknown vs stronger hardware while leaving choice manual.
+- `python3 tools/prove_caol_backend_contract.py` passed. It still verifies C-AOL `LLM_INTENT_*` option names, API/Ollama/OpenVINO config/readiness shape, sandboxed options patches, no secret-bearing fields, no API calls, no model pulls, no OpenVINO installs, and no real user config mutation.
+- `/opt/homebrew/bin/godot --path . --no-window --script tools/godot_backend_triad_smoke.gd` passed, including backend tab token checks for `API / AnyLLM`, `Ollama local`, `OpenVINO specialized`, `mistral-v0.3`, `nemotron-9b`, and confirmation/no-download wording.
+- `/opt/homebrew/bin/godot --path . --no-window --quit` passed as the project-load gate. It printed known macOS/headless cleanup warnings and a real-user sound-dir warning, but exited 0 and performed no installer/backend mutation.
+- `git diff --check` passed.
 
 ## Evidence - 2026-04-26 Lacapult launcher test/prerelease
 
