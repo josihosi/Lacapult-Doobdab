@@ -55,6 +55,8 @@ var _launch_preflight_status: Label = null
 
 const VERSION_CHECK_URL = "" # Lacapult public self-update is disabled until a Lacapult release repo exists.
 const CAOL_NONPORTABLE_DYLIB_PREFIXES = ["/opt/local/", "/usr/local/", "/opt/homebrew/"]
+const CAOL_REPAIR_FREETYPE_SOURCE = "res://resources/caol_macos_repair/libfreetype.6.dylib"
+const CAOL_REPAIR_LIBPNG_SOURCE = "res://resources/caol_macos_repair/libpng16.16.dylib"
 var _latest_version = ""
 var _is_update_available = false
 var _release_page_url = ""
@@ -915,12 +917,22 @@ func _start_game(world := "") -> void:
 			var d = Directory.new()
 			var caol_preflight = _get_caol_macos_launch_preflight(Paths.game_dir)
 			if caol_preflight.get("blocks_launch", false):
-				var preflight_message = _format_launch_preflight_status(caol_preflight)
-				Status.post(preflight_message, Enums.MSG_ERROR)
-				if _launch_preflight_status != null:
-					_launch_preflight_status.text = preflight_message
-					_launch_preflight_status.visible = true
-				return
+				if _is_caol_macos_preflight_repairable(caol_preflight):
+					var repair = _repair_caol_macos_launch_dependencies(caol_preflight)
+					Status.post(_format_launch_preflight_status(repair), repair.get("message_type", Enums.MSG_WARN))
+					caol_preflight = _get_caol_macos_launch_preflight(Paths.game_dir)
+					if not caol_preflight.get("blocks_launch", false):
+						Status.post(_format_launch_preflight_status(caol_preflight))
+					else:
+						caol_preflight["repair_status"] = repair.get("status", "repair_failed")
+						caol_preflight["repair_error"] = repair.get("error", "C-AOL macOS repair did not clear the launch blocker.")
+				if caol_preflight.get("blocks_launch", false):
+					var preflight_message = _format_launch_preflight_status(caol_preflight)
+					Status.post(preflight_message, Enums.MSG_ERROR)
+					if _launch_preflight_status != null:
+						_launch_preflight_status.text = preflight_message
+						_launch_preflight_status.visible = true
+					return
 			
 			if d.file_exists(launcher_path):
 				# Use cataclysm-launcher if available (like Linux)
@@ -1093,6 +1105,8 @@ func _refresh_currently_installed() -> void:
 		_cb_update.pressed = Settings.read("update_current_when_installing")
 		var launch_preflight = _refresh_launch_preflight_status()
 		var launch_blocked = launch_preflight.get("blocks_launch", false)
+		if launch_blocked and _is_caol_macos_preflight_repairable(launch_preflight):
+			launch_blocked = false
 		_btn_play.disabled = launch_blocked
 		_btn_resume.disabled = launch_blocked or not (Directory.new().file_exists(Paths.config.plus_file("lastworld.json")))
 		_btn_game_dir.visible = true
@@ -1163,6 +1177,7 @@ func _get_caol_macos_launch_preflight(game_dir: String) -> Dictionary:
 		"executable": "",
 		"missing_nonportable_dylibs": [],
 		"present_nonportable_dylibs": [],
+		"repairable_by_lacapult": false,
 		"otool_exit_code": 0
 	}
 
@@ -1202,10 +1217,131 @@ func _get_caol_macos_launch_preflight(game_dir: String) -> Dictionary:
 	if result["missing_nonportable_dylibs"].size() > 0:
 		result["status"] = "blocked_missing_nonportable_dylibs"
 		result["blocks_launch"] = true
+		result["repairable_by_lacapult"] = _is_caol_macos_preflight_repairable(result)
 	elif result["present_nonportable_dylibs"].size() > 0:
 		result["status"] = "nonportable_dylibs_present_locally"
 
 	return result
+
+
+func _is_caol_macos_preflight_repairable(preflight: Dictionary) -> bool:
+	if OS.get_name() != "OSX" or Settings.read("game") != "caol":
+		return false
+	if preflight.get("status", "") != "blocked_missing_nonportable_dylibs":
+		return false
+	if not preflight.get("app_bundle_present", false):
+		return false
+	var missing = preflight.get("missing_nonportable_dylibs", [])
+	if missing.size() == 0:
+		return false
+	var has_freetype = false
+	var has_zlib = false
+	for dep in missing:
+		match str(dep).get_file():
+			"libfreetype.6.dylib":
+				has_freetype = true
+			"libz.1.dylib":
+				has_zlib = true
+			_:
+				return false
+	if not has_freetype and not has_zlib:
+		return false
+	var f = File.new()
+	return f.file_exists(CAOL_REPAIR_FREETYPE_SOURCE) and f.file_exists(CAOL_REPAIR_LIBPNG_SOURCE)
+
+
+func _repair_caol_macos_launch_dependencies(preflight: Dictionary) -> Dictionary:
+	var result = {
+		"status": "repair_failed",
+		"blocks_launch": true,
+		"message_type": Enums.MSG_ERROR,
+		"error": "",
+		"copied": [],
+		"commands": []
+	}
+	if not _is_caol_macos_preflight_repairable(preflight):
+		result["error"] = "The C-AOL macOS package has a launch blocker Lacapult does not know how to repair safely."
+		return result
+
+	for repair_tool in ["otool", "install_name_tool", "codesign"]:
+		if OS.execute("/usr/bin/which", [repair_tool], true) != 0:
+			result["error"] = "Required macOS repair tool is missing: %s" % repair_tool
+			return result
+
+	var executable = str(preflight.get("executable", ""))
+	var resources_dir = executable.get_base_dir()
+	var app_bundle = resources_dir.get_base_dir().get_base_dir()
+	var freetype_target = resources_dir.plus_file("libfreetype.6.dylib")
+	var libpng_target = resources_dir.plus_file("libpng16.16.dylib")
+
+	var copy_result = _copy_binary_file(CAOL_REPAIR_LIBPNG_SOURCE, libpng_target)
+	if copy_result != OK:
+		result["error"] = "Could not copy bundled libpng repair dylib into the app bundle."
+		return result
+	result["copied"].append(libpng_target)
+	copy_result = _copy_binary_file(CAOL_REPAIR_FREETYPE_SOURCE, freetype_target)
+	if copy_result != OK:
+		result["error"] = "Could not copy bundled freetype repair dylib into the app bundle."
+		return result
+	result["copied"].append(freetype_target)
+
+	OS.execute("chmod", ["0644", freetype_target], true)
+	OS.execute("chmod", ["0644", libpng_target], true)
+
+	var commands = [
+		["install_name_tool", ["-change", "/opt/local/lib/libfreetype.6.dylib", "@executable_path/libfreetype.6.dylib", executable]],
+		["install_name_tool", ["-change", "/opt/local/lib/libz.1.dylib", "/usr/lib/libz.1.dylib", executable]],
+		["install_name_tool", ["-id", "@executable_path/libpng16.16.dylib", libpng_target]],
+		["install_name_tool", ["-id", "@executable_path/libfreetype.6.dylib", freetype_target]],
+		["install_name_tool", ["-change", "@@HOMEBREW_PREFIX@@/opt/libpng/lib/libpng16.16.dylib", "@executable_path/libpng16.16.dylib", freetype_target]],
+		["install_name_tool", ["-change", "/opt/homebrew/opt/libpng/lib/libpng16.16.dylib", "@executable_path/libpng16.16.dylib", freetype_target]],
+		["install_name_tool", ["-change", "/usr/local/opt/libpng/lib/libpng16.16.dylib", "@executable_path/libpng16.16.dylib", freetype_target]],
+		["codesign", ["--force", "--sign", "-", libpng_target]],
+		["codesign", ["--force", "--sign", "-", freetype_target]],
+		["codesign", ["--force", "--sign", "-", executable]],
+		["codesign", ["--force", "--deep", "--sign", "-", app_bundle]]
+	]
+
+	for command in commands:
+		var output = []
+		var exit_code = OS.execute(command[0], command[1], true, output, true)
+		result["commands"].append({"command": command[0], "args": command[1], "exit_code": exit_code, "output": _join_text(output)})
+		# install_name_tool returns non-zero when a fallback load command is already absent;
+		# that is harmless for fallback paths but not for codesign.
+		if exit_code != 0 and command[0] != "install_name_tool":
+			result["error"] = "C-AOL macOS repair command failed: %s" % command[0]
+			return result
+
+	var after = _get_caol_macos_launch_preflight(preflight.get("install_dir", Paths.game_dir))
+	if after.get("blocks_launch", false):
+		result["error"] = "C-AOL macOS repair ran, but the app bundle still has missing non-portable dylibs: %s" % _join_text(after.get("missing_nonportable_dylibs", []))
+		return result
+
+	result["status"] = "repaired"
+	result["blocks_launch"] = false
+	result["message_type"] = Enums.MSG_WARN
+	return result
+
+
+func _copy_binary_file(source_path: String, target_path: String) -> int:
+	var src = File.new()
+	var err = src.open(source_path, File.READ)
+	if err != OK:
+		return err
+	var dst = File.new()
+	err = dst.open(target_path, File.WRITE)
+	if err != OK:
+		src.close()
+		return err
+	var remaining = src.get_len()
+	while remaining > 0:
+		var chunk_size = int(min(65536, remaining))
+		var chunk = src.get_buffer(chunk_size)
+		dst.store_buffer(chunk)
+		remaining -= chunk.size()
+	src.close()
+	dst.close()
+	return OK
 
 
 func _extract_nonportable_dylibs_from_otool(otool_output: String) -> Array:
@@ -1236,7 +1372,13 @@ func _format_launch_preflight_status(preflight: Dictionary) -> String:
 		"preflight_unavailable":
 			return "Launch preflight: active C-AOL install exists, but otool could not inspect the launch binary. Lacapult will still try to launch it."
 		"blocked_missing_nonportable_dylibs":
-			return "Launch preflight: Lacapult install/copy succeeded and %s is present, but %s needs missing local dylibs: %s. This is a C-AOL macOS package portability issue; Lacapult can report it, not repair it." % [_preflight_app_label(preflight), preflight.get("executable", "game executable").get_file(), _join_text(preflight.get("missing_nonportable_dylibs", []))]
+			if preflight.get("repair_status", "") != "":
+				return "Launch preflight: C-AOL macOS repair failed: %s" % preflight.get("repair_error", "unknown repair error")
+			if preflight.get("repairable_by_lacapult", false):
+				return "Launch preflight: %s needs bundled macOS dylibs instead of missing local paths: %s. Lacapult will repair this app bundle before launch." % [_preflight_app_label(preflight), _join_text(preflight.get("missing_nonportable_dylibs", []))]
+			return "Launch preflight: Lacapult install/copy succeeded and %s is present, but %s needs missing local dylibs: %s. This is a C-AOL macOS package portability issue." % [_preflight_app_label(preflight), preflight.get("executable", "game executable").get_file(), _join_text(preflight.get("missing_nonportable_dylibs", []))]
+		"repaired":
+			return "Launch preflight: repaired C-AOL macOS app bundle dependencies by copying bundled dylibs and rewriting load paths relative to the app."
 		"nonportable_dylibs_present_locally":
 			return "Launch preflight: C-AOL app bundle is present. The launch binary links local machine dylibs (%s); they exist here, but the package is not portable to clean Macs." % _join_text(preflight.get("present_nonportable_dylibs", []))
 		"ok":
