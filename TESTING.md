@@ -24,12 +24,27 @@ Slice 6 is active. Use `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` 
 - Evidence logs/artifacts: `.proof-cache/post-mod-ui-retest-readiness/gates.log`, `.proof-cache/post-mod-ui-retest-readiness/gates-rerun.log`, `.proof-cache/post-mod-ui-retest-readiness/fixture-apply.json`, `.proof-cache/post-mod-ui-retest-readiness/package-summary.json`, plus the refreshed ignored export package outputs under `.proof-cache/lacapult-export/`.
 - The fixture Summarizer apply smoke used isolated HOME `/tmp/lacapult-summarizer-apply-home.*`, explicit fixture backend generation, and already-local model metadata only; it confirmed preview blocking, separate backend-call confirmation, native `Summaries_extra` companion pack write, `mods.json` order, and backup/rollback visibility.
 - `tools/prove_lacapult_export_packaging.py` regenerated unsigned macOS/Linux/Windows packages from current `main` without publishing them. The Windows package was `66,479,179` bytes, SHA-256 `694823044d89f091257ce6dedbf3cd92d0ba3b13ba0014ee3264146dae29dc42`, and the package-shape proof confirmed the required `utils/7za.exe` sidecar. Linux and macOS unsigned packages were also regenerated locally; this remains local package-shape evidence, not a GitHub release.
-- Result: the real C-AOL mod/Summarizer generation/apply UI v0 lane is at an honest retestable state for a future Windows retest package. Josef explicitly greenlit the external publication step, and the post-mod UI GitHub test/prerelease below is now published for Windows retest.
+- Result: the real C-AOL mod/Summarizer generation/apply UI v0 lane reached an honest retestable package shape. Josef explicitly greenlit the external publication step, but the resulting post-mod UI GitHub test/prerelease is now Draft/quarantined after Josef's CAOL/Lacapult identity complaint.
 
-## Evidence - 2026-04-26 Summarizer Slice 6 post-mod UI GitHub prerelease
+## Evidence - 2026-04-26 Lacapult prerelease quarantine / identity investigation
+
+- Quarantined the 2026-04-26 Lacapult prerelease family by converting these releases to Draft: `lacapult-post-mod-ui-retest-2026-04-26`, `lacapult-test-2026-04-26-2`, and `lacapult-test-2026-04-26`.
+- Verification commands:
+  - `gh release list --repo josihosi/Lacapult-Doobdab --limit 20 --json name,tagName,isDraft,isPrerelease,createdAt,publishedAt` -> all three 2026-04-26 releases reported `isDraft: true`.
+  - Unauthenticated `https://api.github.com/repos/josihosi/Lacapult-Doobdab/releases?per_page=10` -> `count 0`.
+  - Unauthenticated `HEAD` on `https://github.com/josihosi/Lacapult-Doobdab/releases/download/untagged-8d96354ede808cb6b1da/Lacapult-Doobdab-windows-unsigned.zip` -> `404`.
+- Artifact inspection:
+  - `.proof-cache/lacapult-export/packages/Lacapult-Doobdab-windows-unsigned.zip` contains only `Lacapult-Doobdab.exe`, `utils/7-ZIP_LICENSE`, and `utils/7za.exe`.
+  - Local zip SHA-256 is `694823044d89f091257ce6dedbf3cd92d0ba3b13ba0014ee3264146dae29dc42`, matching the latest remote asset digest.
+  - Local executable SHA-256 is `562379719413ad88d2a8d93ddc72ed296b8e227b8db9df73c7f89d8113ec19d6`.
+  - `project.godot` identifies the app as `Lacapult Doobdab` and describes it as `A C-AOL release installer and backend setup helper derived from Dabdoob/Catapult`.
+  - `strings` inspection confirms heavy embedded C-AOL product strings and inherited Catapult/Dabdoob paths/names; classify the initial failure as release/product identity and public-confidence failure unless later Windows reproduction proves a literal wrong-payload build.
+- Canonical incident note: `doc/lacapult-release-quarantine-investigation-2026-04-26.md`.
+
+## Evidence - 2026-04-26 Summarizer Slice 6 post-mod UI GitHub prerelease (quarantined)
 
 - Josef explicitly greenlit the queued external release step with `yes release pls`; this is a Lacapult launcher retest/prerelease, not a C-AOL game release, not C-AOL `v0.3.0`, and not signed/notarized/final public confidence.
-- Published GitHub prerelease `lacapult-post-mod-ui-retest-2026-04-26`: https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-post-mod-ui-retest-2026-04-26
+- Published GitHub prerelease `lacapult-post-mod-ui-retest-2026-04-26`, then quarantined it as Draft after Josef's CAOL/Lacapult identity complaint.
 - Source commit: `8c9d8f3d5e3bc9757fffd69b7eeecd8cb8bcbdba` (`Record post-mod UI retestable proof`).
 - Uploaded fresh unsigned launcher package assets regenerated from current `main`:
   - `Lacapult-Doobdab-windows-unsigned.zip` — 66,479,179 bytes — SHA-256 `694823044d89f091257ce6dedbf3cd92d0ba3b13ba0014ee3264146dae29dc42` — includes `utils/7za.exe` sidecar.
@@ -37,8 +52,8 @@ Slice 6 is active. Use `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` 
   - `Lacapult-Doobdab-linux-unsigned.tar.gz` — 37,474,689 bytes — SHA-256 `6242d67d5e554f142c0c6814b26b035b9791f2eb4226996df0654e2202d98103` — includes `utils/7za` sidecar.
   - `SHA256SUMS.txt` — 311 bytes — SHA-256 `b0b20af7695a4acab4a49fcf9eab52c013f8e9b98ff792ed73d92d7fcb839e5e`.
 - Publication gates/proof commands passed: `python3 -m py_compile tools/caol_mod_status_model.py tools/prove_caol_mod_status_model.py tools/prove_caol_summary_pack_apply.py tools/prove_caol_summary_error_matrix.py tools/prove_caol_summarizer_ui_polish.py tools/prove_caol_summarizer_live_ollama_smoke.py tools/prove_lacapult_export_packaging.py`; `python3 tools/prove_caol_mod_status_model.py`; `python3 tools/prove_caol_summarizer_ui_polish.py`; isolated-HOME fixture backend `/opt/homebrew/bin/godot --path . --no-window --script tools/godot_caol_summarizer_apply_smoke.gd`; `python3 tools/prove_caol_backend_contract.py`; `python3 tools/prove_lacapult_export_packaging.py`; `/opt/homebrew/bin/godot --path . --no-window --quit`; `git diff --check`; manifest verification that the Windows package carries `utils/7za.exe`.
-- Remote release inspection passed with `gh release view lacapult-post-mod-ui-retest-2026-04-26 --repo josihosi/Lacapult-Doobdab --json tagName,name,isPrerelease,url,assets`; it verified `isPrerelease=true`, the release URL above, and the asset names/sizes/digests recorded here.
-- Remaining caveats: unsigned packages, no Apple notarization, no Windows code signing or SmartScreen reputation, no public-final confidence, no C-AOL game release, no API secrets/model pulls/package installs in proof, and Josef still needs the real Windows laptop download/extract/run/install/play/resume/mod-Summarizer UI click-through.
+- Remote release inspection passed while the release was public with `gh release view lacapult-post-mod-ui-retest-2026-04-26 --repo josihosi/Lacapult-Doobdab --json tagName,name,isPrerelease,url,assets`; it verified `isPrerelease=true`, the release URL above, and the asset names/sizes/digests recorded here. Later quarantine evidence above supersedes the public-release state.
+- Remaining caveats: unsigned packages, no Apple notarization, no Windows code signing or SmartScreen reputation, no public-final confidence, no C-AOL game release, no API secrets/model pulls/package installs in proof, and no republish until the release identity/product investigation is closed and explicitly re-greenlit.
 
 ## Evidence - 2026-04-26 Summarizer Slice 6 live-local Ollama smoke v0
 
@@ -96,7 +111,7 @@ Slice 6 is active. Use `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` 
 ## Evidence - 2026-04-26 Lacapult launcher test/prerelease
 
 - Removed stale `.proof-cache/lacapult-export` output before packaging, then regenerated fresh unsigned Lacapult launcher packages from `main` at source commit `c7ccd26` (`Greenlight Lacapult launcher test release`).
-- Created GitHub prerelease `lacapult-test-2026-04-26`: https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-test-2026-04-26
+- Created GitHub prerelease `lacapult-test-2026-04-26`; it is now Draft/quarantined with the rest of the 2026-04-26 release family.
 - Release title: `Lacapult Doobdab test build 2026-04-26`; `gh release view lacapult-test-2026-04-26 --repo josihosi/Lacapult-Doobdab --json tagName,name,isPrerelease,assets,url` verified `isPrerelease=true` and the uploaded assets below.
 - Uploaded assets:
   - `Lacapult-Doobdab-windows-unsigned.zip` — 59,704,154 bytes — SHA-256 `357e906bb20a3e3ae558774e1bd25a716ebb1952e4a3c93ac515d91cb7d3ef71`
@@ -110,7 +125,7 @@ Slice 6 is active. Use `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` 
   - `/opt/homebrew/bin/godot --path . --no-window --quit`
   - `git diff --check`
 - Release notes and tag are Lacapult-specific and state that this is an unsigned Lacapult launcher test build, not a C-AOL game release and not C-AOL `v0.3.0`.
-- Remaining caveats: unsigned Windows/macOS/Linux launcher packages; no Apple notarization; no Windows code signing or SmartScreen reputation; not final public confidence; Josef's real Windows laptop download/extract/run/install/launch click-through still remains his test step.
+- Remaining caveats: unsigned Windows/macOS/Linux launcher packages; no Apple notarization; no Windows code signing or SmartScreen reputation; not final public confidence; this release is now quarantined and should not be used as a current download target.
 
 ## Current evidence
 

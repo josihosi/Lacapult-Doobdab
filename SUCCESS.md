@@ -88,21 +88,32 @@ Done only when all are true:
 - [x] A sandbox fixture generated pack is C-AOL-native under `npcs/Backgrounds/Summaries_extra`, not launcher-only metadata.
 - [x] Optional live-local Ollama proof uses already-local `mistral:latest` from `ollama list`, calls only the local Ollama HTTP endpoint, and applies/stages the generated entry through the same isolated companion-pack seam without model pulls, package installs, API secrets, remote APIs, or real user-data mutation.
 - [x] A retestable-state proof re-runs the Slice 6 status/UI/apply/backend gates plus local unsigned package export/package-shape proof from current `main`, confirming the Windows package still includes the required `utils/7za.exe` sidecar.
-- [x] The post-mod UI Windows retest GitHub prerelease is published at https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-post-mod-ui-retest-2026-04-26 after Josef's explicit greenlight, with source commit, asset sizes, SHA-256 hashes, proof commands, and caveats recorded in `TESTING.md`.
+- [x] The post-mod UI Windows retest GitHub prerelease was published after Josef's explicit greenlight, then quarantined as Draft after Josef's CAOL/Lacapult identity complaint; source commit, asset sizes, SHA-256 hashes, proof commands, caveats, and quarantine evidence are recorded in `TESTING.md`.
 - [x] Applying a generated companion summary pack and changing a world `mods.json` list is sandbox-proven with backup and rollback.
 - [x] C-AOL runtime consumption is proven in a sandbox/harness, or a concrete C-AOL-side blocker is recorded.
 - [x] Slice 1, Slice 2, Slice 3, Slice 4, and Slice 5 proof scripts do not mutate Josef's real Application Support config, saves, worlds, or mods; Slice 6 automated proofs must keep the same sandbox boundary.
 
-## Evidence - 2026-04-26 post-mod UI Windows retest prerelease
+## Evidence - 2026-04-26 Lacapult prerelease quarantine / identity investigation
 
-- Published GitHub prerelease `lacapult-post-mod-ui-retest-2026-04-26`: https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-post-mod-ui-retest-2026-04-26
+- Josef reported the 2026-04-26 Lacapult / “Leckerpult” release as faulty and CAOL-looking, and asked for it to be taken off the website.
+- The 2026-04-26 prerelease family is now Draft/quarantined: `lacapult-post-mod-ui-retest-2026-04-26`, `lacapult-test-2026-04-26-2`, and `lacapult-test-2026-04-26`.
+- Unauthenticated GitHub releases API inspection returns zero public releases for `josihosi/Lacapult-Doobdab` after quarantine.
+- Unauthenticated `HEAD` on the latest Windows asset URL returns `404`, so the old release asset is not publicly downloadable.
+- Initial local artifact inspection of `.proof-cache/lacapult-export/packages/Lacapult-Doobdab-windows-unsigned.zip` shows a Lacapult package shape (`Lacapult-Doobdab.exe`, `utils/7-ZIP_LICENSE`, `utils/7za.exe`) and local hash `694823044d89f091257ce6dedbf3cd92d0ba3b13ba0014ee3264146dae29dc42`, matching the latest remote digest.
+- Initial string/source inspection confirms the exported executable is very C-AOL-heavy by product design (`Cataclysm: Arsenic and Old Lace`, `C-AOL LLM backend setup`, C-AOL release/install/repair/Summarizer paths) and still carries inherited Catapult/Dabdoob internal naming, so the user-facing identity failure remains real even if the archive is not literally a C-AOL game payload.
+- Canonical incident note: `doc/lacapult-release-quarantine-investigation-2026-04-26.md`.
+
+## Evidence - 2026-04-26 post-mod UI Windows retest prerelease (quarantined)
+
+- GitHub prerelease `lacapult-post-mod-ui-retest-2026-04-26` was published for Josef's Windows retest, then quarantined as Draft after Josef's CAOL/Lacapult identity complaint.
 - Source commit: `8c9d8f3d5e3bc9757fffd69b7eeecd8cb8bcbdba` (`Record post-mod UI retestable proof`).
-- Uploaded assets:
+- Uploaded assets while published:
   - `Lacapult-Doobdab-windows-unsigned.zip` — 66,479,179 bytes — SHA-256 `694823044d89f091257ce6dedbf3cd92d0ba3b13ba0014ee3264146dae29dc42` — includes `utils/7za.exe`.
   - `Lacapult-Doobdab-macos-unsigned.zip` — 90,291,422 bytes — SHA-256 `2f87f87c034327190b8284784427175e2fd77d4799e651a100b779a1ccfba3bd`.
   - `Lacapult-Doobdab-linux-unsigned.tar.gz` — 37,474,689 bytes — SHA-256 `6242d67d5e554f142c0c6814b26b035b9791f2eb4226996df0654e2202d98103`.
   - `SHA256SUMS.txt` — 311 bytes — SHA-256 `b0b20af7695a4acab4a49fcf9eab52c013f8e9b98ff792ed73d92d7fcb839e5e`.
-- Remote release inspection verified prerelease state, URL, asset names, sizes, and digests. Remaining caveat: this is unsigned/not notarized/not SmartScreen-trusted and still needs Josef's Windows laptop retest before public-final confidence.
+- Publication gates/proof commands passed and are recorded in `TESTING.md`, but this is no longer a public retest release.
+- Remaining caveat: unsigned/not notarized/not SmartScreen-trusted, not public-final confidence, and now blocked on the release identity/product investigation before any republish.
 
 ## Parked next slices
 
@@ -113,7 +124,7 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [ ] API-key/backend live smoke test requiring real secrets.
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.
 - [x] Feature-complete mod install/enable plus Summarizer UX Slice 6 proof set; the current Mods/Settings surfaces show read-only status, dry-run prompts, selectable target world/mod controls, apply preview, a confirmed writer seam, fixture/live-local-Ollama backend generation, and generated companion-pack apply with backups in sandbox proof. The current API/OpenVINO surface still does not call live backends or automate model/package setup.
-- [x] Lacapult post-mod UI Windows retest release packet: Josef explicitly greenlit the external release step, and the fresh GitHub test/prerelease is published at https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-post-mod-ui-retest-2026-04-26. Canonical contract: `doc/lacapult-post-mod-ui-windows-retest-release-packet-2026-04-26.md`. Josef's real Windows laptop click-through/playtest remains external.
+- [x] Lacapult post-mod UI Windows retest release packet: Josef explicitly greenlit the external release step, the GitHub test/prerelease was published, and the whole 2026-04-26 prerelease family is now Draft/quarantined after Josef's CAOL/Lacapult identity complaint. Canonical release contract: `doc/lacapult-post-mod-ui-windows-retest-release-packet-2026-04-26.md`; incident note: `doc/lacapult-release-quarantine-investigation-2026-04-26.md`.
 - [x] Slice 5 fixture/error coverage for obsolete mods, parse errors, missing dependencies, partial/stale summaries, conflicts, backend-not-ready, and rollback-restores-replacement handling is landed as a sandbox-only proof.
 - [x] Controlled selected macOS DMG download/mount/launchability-shape proof, without launching or installing the game.
 - [x] Sandboxed Lacapult-style macOS DMG copy/move install-shape proof, without touching the real Application Support install state or launching the game.
@@ -126,17 +137,16 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [x] Full local unsigned app exports / package-shaped Lacapult distribution artifacts for Windows/Linux/macOS; no binaries committed.
 - [ ] Signed/notarized/public Lacapult release publication and normal-player install QA.
 
-## Evidence - 2026-04-26 Lacapult launcher test/prerelease
+## Evidence - 2026-04-26 Lacapult launcher test/prerelease (quarantined)
 
-- Published original prerelease `lacapult-test-2026-04-26`: https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-test-2026-04-26
-- Published hotfix prerelease `lacapult-test-2026-04-26-2`: https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-test-2026-04-26-2
-- Uploaded fresh unsigned launcher package assets from the 2026-04-26 package proof:
+- Original prerelease `lacapult-test-2026-04-26` and hotfix prerelease `lacapult-test-2026-04-26-2` were published for Josef testing, then quarantined as Draft with the rest of the 2026-04-26 release family after Josef's CAOL/Lacapult identity complaint.
+- Uploaded fresh unsigned launcher package assets from the 2026-04-26 package proof while published:
   - `Lacapult-Doobdab-windows-unsigned.zip` — 66,426,171 bytes — SHA-256 `22617e7b195cc0e26f82354b6634f41feffb54d50bc749eb895aed83085eda21` — includes `utils/7za.exe` sidecar
   - `Lacapult-Doobdab-macos-unsigned.zip` — 90,238,414 bytes — SHA-256 `53b3aade2655c7a4b2290060664a62ff79a2b8f37be35ed2eb4cd01132f9881b`
   - `Lacapult-Doobdab-linux-unsigned.tar.gz` — 37,458,834 bytes — SHA-256 `d2b76a829218a976dd5f320f7fb94f29089db1c8fdaf5882c0ee13c6e7ee26f7` — includes `utils/7za` sidecar
   - `SHA256SUMS.txt` — 311 bytes — SHA-256 `853d8273a3ecc67896721d98deba6cf99f9ec8f1975aeb15ba7c028b1e227b77`
 - Re-ran package/release/backend/project-load gates and `git diff --check`; all passed.
-- Caveat remains intentionally open: this is unsigned/not notarized/not SmartScreen-trusted and needs Josef's real Windows laptop click-through/playtest before claiming final public confidence.
+- Caveat remains intentionally open: this is unsigned/not notarized/not SmartScreen-trusted, no longer public, and needs the release identity/product investigation closed before any renewed Windows retest or public confidence claim.
 
 ## Evidence - 2026-04-25 click-level GUI audit
 
