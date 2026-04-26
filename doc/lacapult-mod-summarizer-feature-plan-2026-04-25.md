@@ -324,7 +324,7 @@ This lane is complete only when all of the following are true:
 
 ### Slice 6 — real generation/apply UI v0
 
-Status: **preview, confirmed writer seam, and first backend-generation seam landed 2026-04-26 / API+OpenVINO live generation still gated.**
+Status: **preview, confirmed writer seam, backend-generation seam, target chooser polish, and optional live-local Ollama smoke landed 2026-04-26 / API+OpenVINO live generation still gated.**
 
 Goal: promote the existing read-only/dry-run Summarizer surfaces into a real, user-confirmed generation/apply path without turning proof work into real user-data mutation.
 
@@ -338,4 +338,4 @@ Goal: promote the existing read-only/dry-run Summarizer surfaces into a real, us
 
 ## Recommended next implementation handoff
 
-Slice 6 now has the bounded preview, confirmed writer/apply seam, and first backend-generation seam: Settings can preview an eligible contextual mod/world, the confirmed path requires a separate backend-call allowance, fixture generation is sandbox-proven, live Ollama HTTP wiring exists for an already-local configured model with no pulls, and the apply path writes a generated companion summary pack plus `mods.json` update with backup/rollback visibility in sandbox proof. The next bounded implementation step is UI/error polish and optional real-local Ollama generation smoke behind the same backend-readiness and explicit-confirmation gates. Do not widen it into signing/notarization, public release publication, OpenVINO package installation, model-download automation, arbitrary external mod catalog support, or C-AOL runtime schema rewrites.
+Slice 6 now has the bounded preview, confirmed writer/apply seam, target chooser/error polish, and backend-generation seam: Settings can preview an eligible contextual mod/world, the confirmed path requires a separate backend-call allowance, fixture generation is sandbox-proven, and the apply path writes a generated companion summary pack plus `mods.json` update with backup/rollback visibility in sandbox proof. The optional live-local Ollama smoke is also proven on Josef's Mac with already-local `mistral:latest` from `ollama list`: it used the live Ollama HTTP generation path, staged the generated entry through the same sandboxed companion-pack apply seam, and did not pull models, call remote APIs, install packages, read secrets, or touch real Application Support/game state. The next bounded implementation step is final retestable-state polish or the queued Windows retest package. Do not widen it into signing/notarization, public release publication, OpenVINO package installation, model-download automation, arbitrary external mod catalog support, or C-AOL runtime schema rewrites.

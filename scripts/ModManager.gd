@@ -1851,7 +1851,7 @@ def ollama(req):
               'Return only JSON with keys selector, topic, your_background, your_expression, source_tag. '
               'Do not invent secrets or launcher metadata. Source mod id: %s. Source mod name: %s. Content flags: %s.'
               % (source_id, source_name, json.dumps(req.get('content_flags') or {}, sort_keys=True)))
-    body = json.dumps({'model': model, 'prompt': prompt, 'stream': False, 'options': {'temperature': 0.2}}).encode('utf-8')
+    body = json.dumps({'model': model, 'prompt': prompt, 'stream': False, 'format': 'json', 'options': {'temperature': 0.2, 'num_predict': 240}}).encode('utf-8')
     http_req = urllib.request.Request(endpoint + '/api/generate', data=body, headers={'Content-Type': 'application/json'}, method='POST')
     try:
         with urllib.request.urlopen(http_req, timeout=45) as resp:

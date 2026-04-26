@@ -18,6 +18,14 @@ Use the smallest evidence that honestly matches the change.
 
 Slice 6 is active. Use `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` as the contract: promote the existing read-only/dry-run Summarizer surfaces into a user-confirmed generation/apply path for eligible contextual C-AOL mods/worlds. Proofs must remain sandboxed/non-mutating: no package installs, model pulls/downloads, API calls/secrets, or real Application Support/game-state writes without explicit confirmation and a safe path.
 
+## Evidence - 2026-04-26 Summarizer Slice 6 live-local Ollama smoke v0
+
+- Added `tools/prove_caol_summarizer_live_ollama_smoke.py`, an optional local proof that first checks existing `ollama list` inventory, selects an already-local model, and then runs the existing Godot Summarizer apply smoke under isolated `/tmp/lacapult-summarizer-apply-home.*` HOME with fixture backend disabled and expected backend `ollama`.
+- Extended `tools/godot_caol_summarizer_apply_smoke.gd` so the same sandbox writer/apply proof can assert either fixture generation or live-local Ollama generation; the default remains fixture for deterministic gates.
+- Tightened the Ollama backend bridge request to use Ollama JSON mode and a bounded `num_predict`, reducing malformed live-response risk without adding model pulls/downloads, remote APIs, package installs, secrets, or real user-data mutation.
+- Validation passed locally with already-local model `mistral:latest` from `/opt/homebrew/bin/ollama list`: `python3 -m py_compile tools/prove_caol_summarizer_live_ollama_smoke.py tools/caol_mod_status_model.py tools/prove_caol_mod_status_model.py tools/prove_caol_summary_pack_apply.py tools/prove_caol_summary_error_matrix.py tools/prove_caol_summarizer_ui_polish.py`, `python3 tools/prove_caol_summarizer_live_ollama_smoke.py`, `python3 tools/prove_caol_summarizer_ui_polish.py`, fixture-backend isolated-HOME `/opt/homebrew/bin/godot --path . --no-window --script tools/godot_caol_summarizer_apply_smoke.gd`, `/opt/homebrew/bin/godot --path . --no-window --quit`, and `git diff --check`. Evidence JSON: `.proof-cache/slice6-live-ollama-smoke/latest.json`; Godot/output payload: `.proof-cache/slice6-live-ollama-smoke/godot-live-ollama-apply.json`; gate log: `.proof-cache/slice6-live-ollama-gates.log`. Godot emitted known headless macOS cleanup/icon/sound warnings but exited 0.
+- Result: live Ollama HTTP generated one C-AOL summary entry and Lacapult applied/staged it through the same isolated companion-pack seam (`npcs/Backgrounds/Summaries_extra`, manifest, selected world `mods.json`, backup/rollback visibility). API/OpenVINO live generation remains gated.
+
 
 ## Evidence - 2026-04-26 Summarizer Slice 6 UI target selection/error polish v0
 
@@ -26,7 +34,7 @@ Slice 6 is active. Use `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` 
 - Added disabled/no-candidate UI states so blocked status is visible before a user tries to confirm generation/apply.
 - Added `tools/prove_caol_summarizer_ui_polish.py`, a non-mutating static proof that the Settings surface exposes the selectors, preview/confirm paths use the selected world/mod id, and existing confirmation/backend-call gates remain in place.
 - Validation passed: `python3 -m py_compile tools/caol_mod_status_model.py tools/prove_caol_mod_status_model.py tools/prove_caol_summary_pack_apply.py tools/prove_caol_summary_error_matrix.py tools/prove_caol_summarizer_ui_polish.py`, `python3 tools/prove_caol_mod_status_model.py`, `python3 tools/prove_caol_summarizer_ui_polish.py`, fixture-root `tools/godot_caol_mod_ux_status_smoke.gd`, fixture-backend isolated-HOME `tools/godot_caol_summarizer_apply_smoke.gd`, `python3 tools/prove_caol_backend_contract.py`, `/opt/homebrew/bin/godot --path . --no-window --quit`, and `git diff --check`. Evidence log: `.proof-cache/slice6-ui-polish-gates.log`; UX JSON: `.proof-cache/slice6-ui-polish-ux.json`; apply JSON: `.proof-cache/slice6-ui-polish-apply.json`. Godot emitted known fixture parse/headless macOS cleanup warnings but exited 0.
-- Remaining honest gap: this polished the chooser/error surface and re-proved sandbox generation/apply; no real local Ollama generation smoke was claimed, and API/OpenVINO live generation remains gated.
+- Remaining honest gap at this checkpoint: this polished the chooser/error surface and re-proved sandbox generation/apply; the subsequent live-local Ollama smoke above closes the optional local-model evidence on Josef's Mac, while API/OpenVINO live generation remains gated.
 
 
 ## Evidence - 2026-04-26 Summarizer Slice 6 backend-generation seam v0
@@ -36,7 +44,7 @@ Slice 6 is active. Use `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` 
 - Updated the Settings button to `Confirm backend generation and apply Summary pack`, so the visible confirmed path is now generation+apply rather than writer-only staging.
 - Extended `tools/godot_caol_summarizer_apply_smoke.gd` to prove the extra backend-call confirmation block, fixture generation result, companion pack apply, `mods.json` order, and rollback visibility under isolated `/tmp/lacapult-summarizer-apply-home.*` HOME.
 - Validation passed: `python3 -m py_compile tools/caol_mod_status_model.py tools/prove_caol_mod_status_model.py tools/prove_caol_summary_pack_apply.py tools/prove_caol_summary_error_matrix.py`, `python3 tools/prove_caol_mod_status_model.py`, fixture-root `tools/godot_caol_mod_ux_status_smoke.gd`, fixture-backend isolated-HOME `tools/godot_caol_summarizer_apply_smoke.gd`, `python3 tools/prove_caol_backend_contract.py`, `/opt/homebrew/bin/godot --path . --no-window --quit`, and `git diff --check`. Evidence log: `.proof-cache/slice6-backend-generation-gates.log`; generation/apply JSON: `.proof-cache/slice6-backend-generation-smoke.json`. Godot emitted known fixture parse/headless macOS cleanup warnings but exited 0.
-- Remaining honest gap: fixture generation is sandbox-proven and Ollama live wiring exists behind confirmation/readiness gates, but no real model/API/OpenVINO generation smoke was claimed in this run; API/OpenVINO live generation remains gated.
+- Remaining honest gap at this checkpoint: fixture generation was sandbox-proven and Ollama live wiring existed behind confirmation/readiness gates, but no real model/API/OpenVINO generation smoke was claimed in that run. The subsequent live-local Ollama smoke above closes the Ollama part on Josef's Mac; API/OpenVINO live generation remains gated.
 
 
 ## Evidence - 2026-04-26 Summarizer Slice 6 confirmed apply/writer seam v0

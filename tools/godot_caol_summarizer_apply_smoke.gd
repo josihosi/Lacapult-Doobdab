@@ -9,6 +9,9 @@ func _init() -> void:
 	var home = OS.get_environment("HOME")
 	var output_path = OS.get_environment("LACAPULT_CAOL_SUMMARIZER_APPLY_OUTPUT")
 	var ollama_model = OS.get_environment("LACAPULT_TEST_OLLAMA_MODEL")
+	var expected_generation_backend = OS.get_environment("LACAPULT_EXPECT_SUMMARIZER_BACKEND")
+	if expected_generation_backend == "":
+		expected_generation_backend = "fixture"
 	if home == "" or home.find("/tmp/lacapult-summarizer-apply-home.") != 0:
 		_fail("HOME must be an isolated /tmp/lacapult-summarizer-apply-home.* path for this smoke")
 		return
@@ -46,8 +49,8 @@ func _init() -> void:
 	if not result.get("rollback_visible", false):
 		_fail("apply result did not expose rollback visibility")
 		return
-	if result.get("generation", {}).get("backend_mode", "") != "fixture":
-		_fail("fixture backend generation was not recorded")
+	if result.get("generation", {}).get("backend_mode", "") != expected_generation_backend:
+		_fail("expected %s backend generation, got %s" % [expected_generation_backend, result.get("generation", {}).get("backend_mode", "")])
 		return
 
 	var details = result.get("details", {})
@@ -95,7 +98,7 @@ func _init() -> void:
 
 	if output_path != "":
 		_write_json(output_path, {"preview": preview, "blocked_generation": blocked_generation, "result": result, "applied_status": applied_status})
-	print("godot caol summarizer apply smoke: applied=true companion=%s backup=%s" % [companion_dir, backup_dir])
+	print("godot caol summarizer apply smoke: backend=%s applied=true companion=%s backup=%s" % [expected_generation_backend, companion_dir, backup_dir])
 	quit(0)
 
 
