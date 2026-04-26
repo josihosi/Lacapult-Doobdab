@@ -25,6 +25,6 @@ func _set_localized_text() -> void:
 
 
 func _on_Tabs_tab_changed(tab: int) -> void:
-	# About tab is index 7
-	if tab == 7:
-		_set_localized_text() 
+	var tabs = get_parent()
+	if tabs != null and tabs.get_child(tab) == self:
+		_set_localized_text()

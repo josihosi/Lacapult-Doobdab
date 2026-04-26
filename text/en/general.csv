@@ -31,13 +31,9 @@
 "about_app_desc","Lacapult Doobdab adapts Dabdoob/Catapult into a C-AOL-specific installer and setup helper. Credits and MIT license lineage are preserved for qrrk's Catapult, Hihahahalol's Dabdoob, and the Cataclysm projects this launcher builds on."
 "about_links","Links"
 "thank_you_title","Thank you for downloading Lacapult Doobdab!"
-"thank_you_message","Thank you for installing Lacapult Doobdab! I hope you enjoy C-AOL.
+"thank_you_message","Thank you for installing Lacapult Doobdab. This launcher is built from Dabdoob/Catapult under the MIT license and adapted for Cataclysm: Arsenic and Old Lace.
 
-This may not be relevant to you right now, but if you are feeling depressed, anxious or unsure of yourself, please reach out to a loved one, a friend or someone you trust.
-This does not make you a burden.
-The way you may feel is not final and things will get better.
-
-I wish you a pleasant day and I hope you have fun with my launcher."
+Please keep the attribution and license files with redistributed copies. Have fun exploring C-AOL."
 ,
 "msg_extract_create_dir_failed","Failed to create extraction directory %s (error: %s)"
 "msg_extract_tool_not_found","Extraction tool not found: %s"

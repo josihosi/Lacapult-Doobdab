@@ -21,7 +21,7 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CAOL_ROOT = Path("/Users/josefhorvath/Schanigarten/Cataclysm-AOL")
 BACKEND_MANAGER = REPO_ROOT / "scripts" / "BackendConfigManager.gd"
-SETTINGS_UI = REPO_ROOT / "scripts" / "SettingsUI.gd"
+SETTINGS_UI = REPO_ROOT / "scripts" / "BackendSetupUI.gd"
 PROOF_DIR = REPO_ROOT / ".proof-cache" / "caol-backend-contract"
 
 REQUIRED_CAOL_OPTIONS = {
@@ -57,14 +57,17 @@ REQUIRED_BACKEND_TOKENS = {
     "openvino_model_dir",
     "ollama_command_present_server_running_model_present",
     "get_backend_guidance",
-    "OpenVINO is Windows-first for Lacapult v0",
+    "OpenVINO setup checks Python imports/model-dir presence only",
 }
 REQUIRED_UI_TOKENS = {
+    "C-AOL LLM backend setup",
     "Python / venv",
-    "API key env",
-    "Model dir",
-    "No model pull is attempted",
-    "OpenVINO is Windows-first for Lacapult v0",
+    "API key env var",
+    "Model directory",
+    "mistral-v0.3",
+    "nemotron-9b",
+    "ConfirmExternalBackendAction",
+    "does not download models",
 }
 
 
@@ -140,7 +143,7 @@ def verify_lacapult_tokens() -> list[str]:
         if token not in backend_text
     )
     missing.extend(
-        f"SettingsUI.gd:{token}" for token in sorted(REQUIRED_UI_TOKENS) if token not in ui_text
+        f"BackendSetupUI.gd:{token}" for token in sorted(REQUIRED_UI_TOKENS) if token not in ui_text
     )
     forbidden_hits = sorted(
         token for token in FORBIDDEN_SECRET_FIELDS if token in backend_text.lower()
@@ -269,7 +272,7 @@ def main() -> int:
     print("C-AOL backend option/readiness contract proof")
     print(f"  C-AOL root: {args.caol_root}")
     print(f"  Lacapult file: {BACKEND_MANAGER.relative_to(REPO_ROOT)}")
-    print(f"  Settings UI: {SETTINGS_UI.relative_to(REPO_ROOT)}")
+    print(f"  Backend setup UI: {SETTINGS_UI.relative_to(REPO_ROOT)}")
     print(f"  Required option names: {', '.join(sorted(REQUIRED_CAOL_OPTIONS))}")
 
     if missing_in_caol:
@@ -307,7 +310,7 @@ def main() -> int:
 
     print(f"  API dependency probe with current Python: rc={any_llm_probe[0]} {any_llm_probe[1]}")
     print(f"  OpenVINO dependency probe with current Python: rc={openvino_probe[0]} {openvino_probe[1]}")
-    print("  OpenVINO installer posture: Windows-first for Lacapult v0; non-Windows is detect-only/status-only until explicitly widened")
+    print("  OpenVINO installer posture: specialized detect/config path; installs/downloads are confirmation-gated")
     print(f"  Ollama probe: {ollama_probe}")
     print("  No API call, secret readout, model pull, OpenVINO install, or real user config mutation was performed")
     return 0

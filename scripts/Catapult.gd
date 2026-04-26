@@ -161,7 +161,8 @@ func assign_localized_text() -> void:
 	_tabs.set_tab_title(4, tr("tab_fonts"))
 	_tabs.set_tab_title(5, tr("tab_backups"))
 	_tabs.set_tab_title(6, tr("tab_settings"))
-	_tabs.set_tab_title(7, tr("tab_about"))
+	_tabs.set_tab_title(7, "C-AOL LLM backend setup")
+	_tabs.set_tab_title(8, tr("tab_about"))
 	
 	_lbl_changelog.bbcode_text = tr("lbl_changelog")
 	

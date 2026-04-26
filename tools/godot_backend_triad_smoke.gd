@@ -98,29 +98,29 @@ func _assert_backend_recommendations(supported: Array, summary: String) -> bool:
 		if str(item.get("recommendation", "")).strip_edges() == "" or str(item.get("v0_warning", "")).strip_edges() == "":
 			_fail("backend recommendation/warning missing for %s" % expected[i])
 			return false
-	if summary.find("API = fastest onboarding/debug") < 0:
-		_fail("recommendation summary does not prioritize API")
+	if summary.find("API / AnyLLM") < 0:
+		_fail("recommendation summary does not describe API")
 		return false
-	if summary.find("Ollama = mainstream local") < 0:
+	if summary.find("Ollama for mainstream local play") < 0:
 		_fail("recommendation summary does not describe Ollama")
 		return false
-	if summary.find("OpenVINO = Windows-first specialized/detect-only") < 0:
-		_fail("recommendation summary does not warn about OpenVINO")
+	if summary.find("OpenVINO for specialized local acceleration") < 0:
+		_fail("recommendation summary does not describe OpenVINO")
 		return false
 	return true
 
 
 func _assert_settings_ui_recommendation_copy() -> bool:
 	var f := File.new()
-	var err := f.open("res://scripts/SettingsUI.gd", File.READ)
+	var err := f.open("res://scripts/BackendSetupUI.gd", File.READ)
 	if err != OK:
-		_fail("could not read SettingsUI.gd for recommendation UI proof")
+		_fail("could not read BackendSetupUI.gd for backend setup UI proof")
 		return false
 	var text := f.get_as_text()
 	f.close()
-	for token in ["Recommended: API backend", "Local: Ollama backend", "Windows-first: OpenVINO backend", "Recommendation #", "Summarizer dry-run/status-only"]:
+	for token in ["C-AOL LLM backend setup", "API / AnyLLM", "Ollama local", "OpenVINO specialized", "mistral-v0.3", "nemotron-9b", "ConfirmExternalBackendAction", "does not download models"]:
 		if text.find(token) < 0:
-			_fail("Settings UI recommendation/status-only token missing: %s" % token)
+			_fail("backend setup UI token missing: %s" % token)
 			return false
 	return true
 
