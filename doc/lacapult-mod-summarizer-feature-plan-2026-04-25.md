@@ -1,6 +1,6 @@
 # Lacapult mod install/enable + Summarizer feature plan
 
-Status: **ACTIVE / SLICES 1-5 PROVEN THROUGH ERROR-ROLLBACK MATRIX / SLICE 6 PREVIEW+CONFIRMED WRITER SEAM LANDED**
+Status: **ACTIVE / SLICES 1-5 PROVEN THROUGH ERROR-ROLLBACK MATRIX / SLICE 6 PREVIEW+WRITER+BACKEND-GENERATION SEAMS LANDED**
 
 This packet turns the read-only C-AOL mod compatibility report into the next bounded implementation family. It does **not** implement the feature yet. It defines the contract Andi should execute in slices after backend-good hardening.
 
@@ -324,7 +324,7 @@ This lane is complete only when all of the following are true:
 
 ### Slice 6 — real generation/apply UI v0
 
-Status: **preview and confirmed writer seam landed 2026-04-26 / live backend generation integration still gated.**
+Status: **preview, confirmed writer seam, and first backend-generation seam landed 2026-04-26 / API+OpenVINO live generation still gated.**
 
 Goal: promote the existing read-only/dry-run Summarizer surfaces into a real, user-confirmed generation/apply path without turning proof work into real user-data mutation.
 
@@ -338,4 +338,4 @@ Goal: promote the existing read-only/dry-run Summarizer surfaces into a real, us
 
 ## Recommended next implementation handoff
 
-Slice 6 now has the bounded preview plus confirmed writer/apply seam: Settings can preview an eligible contextual mod/world, and the confirmed path writes a generated companion summary pack plus `mods.json` update with backup/rollback visibility in sandbox proof. The next bounded implementation step is live backend generation integration/error handling behind the same backend-readiness and explicit-confirmation gates. Do not widen it into signing/notarization, public release publication, OpenVINO package installation, model-download automation, arbitrary external mod catalog support, or C-AOL runtime schema rewrites.
+Slice 6 now has the bounded preview, confirmed writer/apply seam, and first backend-generation seam: Settings can preview an eligible contextual mod/world, the confirmed path requires a separate backend-call allowance, fixture generation is sandbox-proven, live Ollama HTTP wiring exists for an already-local configured model with no pulls, and the apply path writes a generated companion summary pack plus `mods.json` update with backup/rollback visibility in sandbox proof. The next bounded implementation step is UI/error polish and optional real-local Ollama generation smoke behind the same backend-readiness and explicit-confirmation gates. Do not widen it into signing/notarization, public release publication, OpenVINO package installation, model-download automation, arbitrary external mod catalog support, or C-AOL runtime schema rewrites.

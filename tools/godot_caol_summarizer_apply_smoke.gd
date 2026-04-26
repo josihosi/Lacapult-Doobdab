@@ -2,8 +2,8 @@ extends SceneTree
 
 # Headless Godot 3 smoke for Slice 6 confirmed Summarizer writer/apply seam.
 # It builds a tiny C-AOL-like install/userdata tree inside the isolated HOME,
-# applies a generated companion summary pack only after explicit confirmation,
-# and verifies backup/rollback visibility without touching real user state.
+# exercises the live-generation seam with a fixture backend only after explicit
+# confirmation, then verifies backup/rollback visibility without touching real user state.
 
 func _init() -> void:
 	var home = OS.get_environment("HOME")
@@ -34,12 +34,20 @@ func _init() -> void:
 		_fail("unconfirmed preview did not require explicit confirmation")
 		return
 
-	var result = mods.apply_caol_summarizer_generated_pack("Sandbox World", "fixture_world_custom", true, [_generated_entry()])
+	var blocked_generation = mods.generate_and_apply_caol_summarizer_pack("Sandbox World", "fixture_world_custom", true, false)
+	if blocked_generation.get("applied", true):
+		_fail("generation applied without separate backend-call confirmation")
+		return
+
+	var result = mods.generate_and_apply_caol_summarizer_pack("Sandbox World", "fixture_world_custom", true, true)
 	if not result.get("applied", false):
-		_fail("confirmed apply did not apply: %s" % result.get("message", "missing message"))
+		_fail("confirmed generation/apply did not apply: %s" % result.get("message", "missing message"))
 		return
 	if not result.get("rollback_visible", false):
 		_fail("apply result did not expose rollback visibility")
+		return
+	if result.get("generation", {}).get("backend_mode", "") != "fixture":
+		_fail("fixture backend generation was not recorded")
 		return
 
 	var details = result.get("details", {})
@@ -86,7 +94,7 @@ func _init() -> void:
 		return
 
 	if output_path != "":
-		_write_json(output_path, {"preview": preview, "result": result, "applied_status": applied_status})
+		_write_json(output_path, {"preview": preview, "blocked_generation": blocked_generation, "result": result, "applied_status": applied_status})
 	print("godot caol summarizer apply smoke: applied=true companion=%s backup=%s" % [companion_dir, backup_dir])
 	quit(0)
 
@@ -109,17 +117,6 @@ func _build_fixture(paths: Node) -> void:
 
 func _modinfo(mod_id: String, name: String) -> Dictionary:
 	return {"type": "MOD_INFO", "id": mod_id, "name": name, "category": "content", "dependencies": []}
-
-
-func _generated_entry() -> Dictionary:
-	return {
-		"type": "npc_personality_summary",
-		"selector": "fixture_world_custom:guide",
-		"topic": "fixture_world_custom_world_context",
-		"your_background": "You know the sandbox world's custom faction context from the generated Lacapult companion pack.",
-		"your_expression": "Mention the sandbox faction only as proof-context.",
-		"source_tag": "lacapult-generated:fixture_world_custom",
-	}
 
 
 func _find_record(status: Dictionary, mod_id: String, source_type: String) -> Dictionary:

@@ -1680,6 +1680,37 @@ func apply_caol_summarizer_generated_pack(world_name := "", selected_mod_id := "
 	return _caol_apply_result(true, preview, "C-AOL Summarizer companion pack applied after explicit confirmation. Backup/rollback manifest is available at %s." % backup_dir, result_details)
 
 
+func generate_and_apply_caol_summarizer_pack(world_name := "", selected_mod_id := "", confirmation_received := false, allow_backend_call := false) -> Dictionary:
+	# Slice 6 live-generation seam. This is stricter than the writer-only helper:
+	# it requires explicit confirmation plus an explicit backend-call allowance, then
+	# asks the selected backend for C-AOL-native summary entries before reusing the
+	# same sandbox-proven apply/backup machinery. Automated proof can force the
+	# fixture backend with LACAPULT_SUMMARIZER_FIXTURE_BACKEND=1; normal Ollama
+	# generation talks only to the configured local Ollama endpoint/model and never
+	# pulls models. API/OpenVINO return player-facing blocked errors until their
+	# live runner path is explicitly implemented.
+	var preview = get_caol_summarizer_apply_preview(world_name, selected_mod_id, confirmation_received)
+	if preview.get("would_mutate", false) != true:
+		return _caol_apply_result(false, preview, "Summarizer generation/apply blocked; preview did not pass confirmation/backend/world gates.", {})
+	if allow_backend_call != true:
+		return _caol_apply_result(false, preview, "Summarizer generation blocked before mutation: a separate explicit backend-call confirmation is required.", {"generation_blocked_before_backend_call": true})
+
+	var status = get_caol_mod_summarizer_status(world_name)
+	var selected = _find_caol_status_record(status, preview.get("selected_mod_id", ""))
+	if selected.empty():
+		return _caol_apply_result(false, preview, "Summarizer generation blocked; selected source mod disappeared before backend call.", {})
+
+	var generated = _caol_generate_summary_entries(preview, selected)
+	if generated.get("ok", false) != true:
+		return _caol_apply_result(false, preview, "Summarizer generation failed before any pack write: %s" % generated.get("message", "unknown backend error"), {"generation": generated})
+
+	var result = apply_caol_summarizer_generated_pack(world_name, preview.get("selected_mod_id", selected_mod_id), true, generated.get("entries", []))
+	result["generation"] = generated
+	if result.get("applied", false):
+		result["message"] = "C-AOL Summarizer generated entries with %s and applied the companion pack after explicit confirmation. Backup/rollback manifest is available at %s." % [generated.get("backend_mode", "backend"), result.get("details", {}).get("backup_dir", "the backup folder")]
+	return result
+
+
 func get_caol_summarizer_dry_run(world_name := "") -> Dictionary:
 	# Dry-run prompt/action state. This intentionally does not call a backend,
 	# generate files, enable mods, apply packs, or mutate saves/userdata.
@@ -1700,6 +1731,148 @@ func _current_backend_status(mode: String) -> String:
 		if backend.get("id", "") == mode:
 			return backend.get("status", "unknown")
 	return "unknown_backend"
+
+func _current_backend_model(mode: String) -> String:
+	if mode == "ollama":
+		return str(Settings.read("backend_ollama_model"))
+	if mode == "api":
+		return str(Settings.read("backend_api_model"))
+	return ""
+
+
+func _current_backend_endpoint(mode: String) -> String:
+	if mode == "ollama":
+		return str(Settings.read("backend_ollama_endpoint"))
+	return ""
+
+
+func _caol_generate_summary_entries(preview: Dictionary, selected: Dictionary) -> Dictionary:
+	var mode = str(preview.get("backend_mode", Settings.read("backend_mode")))
+	var request = {
+		"mode": "fixture" if OS.get_environment("LACAPULT_SUMMARIZER_FIXTURE_BACKEND") == "1" else mode,
+		"backend_mode": mode,
+		"backend_status": str(preview.get("backend_status", "")),
+		"endpoint": _current_backend_endpoint(mode),
+		"model": _current_backend_model(mode),
+		"source_mod_id": str(selected.get("id", preview.get("selected_mod_id", "unknown"))),
+		"source_mod_name": str(selected.get("name", preview.get("selected_mod_name", "unknown"))),
+		"source_type": str(selected.get("source_type", "unknown")),
+		"content_flags": selected.get("json_content", {}).get("content_flags", {}),
+		"summary_status": str(selected.get("summary_status", "summary-unknown")),
+	}
+	var d = Directory.new()
+	if d.make_dir_recursive(Paths.tmp_dir) != OK:
+		return {"ok": false, "message": "could not create Lacapult temp directory for backend bridge"}
+	var stamp = _caol_apply_timestamp()
+	var request_path = Paths.tmp_dir.plus_file("lacapult_summarizer_backend_request_%s.json" % stamp)
+	var output_path = Paths.tmp_dir.plus_file("lacapult_summarizer_backend_output_%s.json" % stamp)
+	var script_path = Paths.tmp_dir.plus_file("lacapult_summarizer_backend_bridge_%s.py" % stamp)
+	_write_text_file(request_path, JSON.print(request, "  "))
+	_write_text_file(script_path, _caol_backend_bridge_script())
+	var output = []
+	var exit_code = OS.execute(_caol_python_command(), [script_path, request_path, output_path], true, output, true)
+	if exit_code != 0:
+		var failed_payload = Helpers.load_json_file(output_path)
+		if typeof(failed_payload) == TYPE_DICTIONARY:
+			failed_payload["request"] = request
+			return failed_payload
+		return {"ok": false, "message": "backend bridge exited %s: %s" % [exit_code, "\n".join(output).strip_edges()], "request": request}
+	var parsed = Helpers.load_json_file(output_path)
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return {"ok": false, "message": "backend bridge did not return JSON", "request": request}
+	return parsed
+
+
+func _caol_python_command() -> String:
+	var configured = str(Settings.read("backend_python_path")).strip_edges()
+	if configured != "":
+		return configured
+	return "python" if OS.get_name() == "Windows" else "python3"
+
+
+func _caol_backend_bridge_script() -> String:
+	return """
+import json, sys, urllib.request
+
+def write(path, payload):
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(payload, f, indent=2, sort_keys=True)
+
+def fixture(req):
+    source_id = req.get('source_mod_id') or 'unknown'
+    source_name = req.get('source_mod_name') or source_id
+    return {
+        'ok': True,
+        'backend_mode': 'fixture',
+        'message': 'fixture backend generated deterministic C-AOL summary entries; no live backend was called',
+        'entries': [{
+            'type': 'npc_personality_summary',
+            'selector': source_id + ':context',
+            'topic': source_id + '_world_context',
+            'your_background': 'You know the important contextual details from ' + source_name + ' because Lacapult generated a C-AOL-native companion summary pack.',
+            'your_expression': 'Treat ' + source_name + ' as active world context loaded from a generated companion mod.',
+            'source_tag': 'lacapult-generated:' + source_id,
+        }],
+    }
+
+def ollama(req):
+    endpoint = (req.get('endpoint') or 'http://127.0.0.1:11434').rstrip('/')
+    model = req.get('model') or ''
+    source_id = req.get('source_mod_id') or 'unknown'
+    source_name = req.get('source_mod_name') or source_id
+    if not model:
+        return {'ok': False, 'backend_mode': 'ollama', 'message': 'Ollama model is not selected; no model pull was attempted.'}
+    prompt = ('Generate exactly one compact JSON object for a Cataclysm: Arsenic and Old Lace NPC personality summary. '
+              'Return only JSON with keys selector, topic, your_background, your_expression, source_tag. '
+              'Do not invent secrets or launcher metadata. Source mod id: %s. Source mod name: %s. Content flags: %s.'
+              % (source_id, source_name, json.dumps(req.get('content_flags') or {}, sort_keys=True)))
+    body = json.dumps({'model': model, 'prompt': prompt, 'stream': False, 'options': {'temperature': 0.2}}).encode('utf-8')
+    http_req = urllib.request.Request(endpoint + '/api/generate', data=body, headers={'Content-Type': 'application/json'}, method='POST')
+    try:
+        with urllib.request.urlopen(http_req, timeout=45) as resp:
+            raw = resp.read().decode('utf-8', 'replace')
+    except Exception as exc:
+        return {'ok': False, 'backend_mode': 'ollama', 'message': 'Ollama generation failed before any file write: ' + str(exc), 'endpoint': endpoint, 'model': model}
+    try:
+        response = json.loads(raw).get('response', '').strip()
+    except Exception as exc:
+        return {'ok': False, 'backend_mode': 'ollama', 'message': 'Ollama response was not valid JSON envelope: ' + str(exc), 'raw_sample': raw[:500]}
+    if response.startswith('```'):
+        response = response.strip('`').replace('json\\n', '', 1).strip()
+    try:
+        entry = json.loads(response)
+    except Exception as exc:
+        return {'ok': False, 'backend_mode': 'ollama', 'message': 'Ollama response was not a JSON summary object: ' + str(exc), 'raw_sample': response[:500]}
+    if not isinstance(entry, dict):
+        return {'ok': False, 'backend_mode': 'ollama', 'message': 'Ollama response was not a JSON object.'}
+    entry.setdefault('type', 'npc_personality_summary')
+    entry.setdefault('selector', source_id + ':context')
+    entry.setdefault('topic', source_id + '_world_context')
+    entry.setdefault('your_background', 'Generated summary for ' + source_name + '.')
+    entry.setdefault('your_expression', 'Refer to generated context from ' + source_name + '.')
+    entry.setdefault('source_tag', 'lacapult-generated:' + source_id)
+    return {'ok': True, 'backend_mode': 'ollama', 'model': model, 'message': 'Ollama generated one C-AOL summary entry; no model pull or API secret was used.', 'entries': [entry]}
+
+def main():
+    req_path, out_path = sys.argv[1], sys.argv[2]
+    with open(req_path, encoding='utf-8') as f:
+        req = json.load(f)
+    mode = req.get('mode')
+    if mode == 'fixture':
+        result = fixture(req)
+    elif mode == 'ollama':
+        result = ollama(req)
+    elif mode in ('api', 'openvino'):
+        result = {'ok': False, 'backend_mode': mode, 'message': mode + ' live summary generation is still gated; no API secret, package install, model conversion, or file write was attempted.'}
+    else:
+        result = {'ok': False, 'backend_mode': mode or 'unknown', 'message': 'Unsupported Summarizer backend mode.'}
+    write(out_path, result)
+    return 0 if result.get('ok') else 2
+
+if __name__ == '__main__':
+    raise SystemExit(main())
+"""
+
 
 func _find_caol_status_record(status: Dictionary, mod_id: String) -> Dictionary:
 	for record in status.get("mods", []):

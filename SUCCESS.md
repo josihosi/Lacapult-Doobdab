@@ -74,7 +74,7 @@ Done only when all are true:
 
 ## Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply
 
-Status: **SLICES 1-5 PROVEN / SLICE 6 CONFIRMED APPLY WRITER SEAM LANDED / LIVE LLM GENERATION STILL GATED**
+Status: **SLICES 1-5 PROVEN / SLICE 6 PREVIEW+WRITER+BACKEND-GENERATION SEAMS LANDED / API+OPENVINO LIVE GENERATION STILL GATED**
 
 Done only when all are true:
 
@@ -82,7 +82,7 @@ Done only when all are true:
 - [x] Enabled vs disabled status is world-aware for at least one sandbox world in the Slice 1 fixture proof.
 - [x] Obsolete mods, broken metadata, content parse errors, missing roots, missing dependencies, partial summaries, stale summaries, conflicts, backend-not-ready gates, and disabled mods produce visible statuses in the sandbox status/error matrix.
 - [x] After mod install, and from persistent Mods/Settings status surfaces, Lacapult offers a Summarizer prompt/button rather than burying the next action, currently dry-run/status-only.
-- [x] Real generation/apply UI v0 lets the player choose an eligible contextual mod/world, see a preview/plan, and explicitly confirm before Lacapult writes a companion summary pack or changes a world `mods.json`. The Settings preview and confirmed apply writer seam are landed and sandbox-smoked; live LLM text generation remains separately gated.
+- [x] Real generation/apply UI v0 lets the player choose an eligible contextual mod/world, see a preview/plan, and explicitly confirm before Lacapult writes a companion summary pack or changes a world `mods.json`. The Settings preview, confirmed apply writer seam, and first backend-generation seam are landed and sandbox-smoked; live Ollama wiring exists for an already-local configured model, while API/OpenVINO live generation remains separately gated.
 - [x] The launcher shows whether all enabled extra NPC/content is summarized, blocked, needs summaries, or unknown.
 - [x] API, Ollama, and OpenVINO generation readiness is gated through the backend-good checks for real generation/apply; no API calls, model pulls/downloads, package installs, or user-data writes happen without explicit confirmation. Slice 6 preview and confirmed writer both carry the backend-good gate and block apply when the selected backend is not generation-ready.
 - [x] A sandbox fixture generated pack is C-AOL-native under `npcs/Backgrounds/Summaries_extra`, not launcher-only metadata.
@@ -98,7 +98,7 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [ ] Large model download/model-pull automation or Ollama model recommendation UX. Local model inventory can inform a future backend recommendation lane, but nothing in Slice 1 pulls or recommends models yet.
 - [ ] API-key/backend live smoke test requiring real secrets.
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.
-- [active above] Feature-complete mod install/enable plus Summarizer UX; the current Mods/Settings surfaces show read-only status, dry-run prompts, apply preview, and a confirmed writer seam that applies a generated companion pack with backups in sandbox proof. The current surface still does not call a live backend or automate model/package setup.
+- [active above] Feature-complete mod install/enable plus Summarizer UX; the current Mods/Settings surfaces show read-only status, dry-run prompts, apply preview, a confirmed writer seam, and a first backend-generation seam that applies generated companion packs with backups in sandbox proof. The current API/OpenVINO surface still does not call live backends or automate model/package setup.
 - [ ] Lacapult post-mod UI Windows retest release packet: after the current UI/mod-installer/Summarizer lane is honestly retestable, publish a fresh Lacapult GitHub test/prerelease with downloadable Windows artifacts for Josef. Canonical contract: `doc/lacapult-post-mod-ui-windows-retest-release-packet-2026-04-26.md`.
 - [x] Slice 5 fixture/error coverage for obsolete mods, parse errors, missing dependencies, partial/stale summaries, conflicts, backend-not-ready, and rollback-restores-replacement handling is landed as a sandbox-only proof.
 - [x] Controlled selected macOS DMG download/mount/launchability-shape proof, without launching or installing the game.

@@ -19,6 +19,16 @@ Use the smallest evidence that honestly matches the change.
 Slice 6 is active. Use `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` as the contract: promote the existing read-only/dry-run Summarizer surfaces into a user-confirmed generation/apply path for eligible contextual C-AOL mods/worlds. Proofs must remain sandboxed/non-mutating: no package installs, model pulls/downloads, API calls/secrets, or real Application Support/game-state writes without explicit confirmation and a safe path.
 
 
+## Evidence - 2026-04-26 Summarizer Slice 6 backend-generation seam v0
+
+- Added `ModManager.generate_and_apply_caol_summarizer_pack()`, a stricter Slice 6 path that requires the existing preview/backend/world/confirmation gates plus a separate explicit backend-call allowance before generation. It then reuses the confirmed writer seam, backup, manifest, native `Summaries_extra`, and world `mods.json` apply machinery.
+- Added a proof-safe backend bridge: automated smoke can force `LACAPULT_SUMMARIZER_FIXTURE_BACKEND=1` for deterministic C-AOL summary entries; the live Ollama path calls only the configured local Ollama HTTP endpoint/model with a timeout and does not pull models; API and OpenVINO currently return player-facing gated errors without reading secrets, installing packages, converting/downloading models, or writing files.
+- Updated the Settings button to `Confirm backend generation and apply Summary pack`, so the visible confirmed path is now generation+apply rather than writer-only staging.
+- Extended `tools/godot_caol_summarizer_apply_smoke.gd` to prove the extra backend-call confirmation block, fixture generation result, companion pack apply, `mods.json` order, and rollback visibility under isolated `/tmp/lacapult-summarizer-apply-home.*` HOME.
+- Validation passed: `python3 -m py_compile tools/caol_mod_status_model.py tools/prove_caol_mod_status_model.py tools/prove_caol_summary_pack_apply.py tools/prove_caol_summary_error_matrix.py`, `python3 tools/prove_caol_mod_status_model.py`, fixture-root `tools/godot_caol_mod_ux_status_smoke.gd`, fixture-backend isolated-HOME `tools/godot_caol_summarizer_apply_smoke.gd`, `python3 tools/prove_caol_backend_contract.py`, `/opt/homebrew/bin/godot --path . --no-window --quit`, and `git diff --check`. Evidence log: `.proof-cache/slice6-backend-generation-gates.log`; generation/apply JSON: `.proof-cache/slice6-backend-generation-smoke.json`. Godot emitted known fixture parse/headless macOS cleanup warnings but exited 0.
+- Remaining honest gap: fixture generation is sandbox-proven and Ollama live wiring exists behind confirmation/readiness gates, but no real model/API/OpenVINO generation smoke was claimed in this run; API/OpenVINO live generation remains gated.
+
+
 ## Evidence - 2026-04-26 Summarizer Slice 6 confirmed apply/writer seam v0
 
 - Added `ModManager.apply_caol_summarizer_generated_pack()`, the first confirmed writer seam for Slice 6. It reuses the apply preview/backend-good/world gates, requires explicit confirmation, stages a C-AOL-native companion mod, writes `modinfo.json`, `lacapult_summary_pack_manifest.json`, and `npcs/Backgrounds/Summaries_extra/generated_<source>.json`, updates the selected world `mods.json` order so the companion loads after the source mod, and records backup/rollback paths.
