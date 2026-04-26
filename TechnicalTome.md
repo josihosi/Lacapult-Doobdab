@@ -221,9 +221,15 @@ This is intentionally not a new metadata or application system. The repeatable p
 
 ## 2026-04-25 read-only C-AOL macOS launch preflight status
 
-`scripts/Catapult.gd` now creates a read-only Game-tab launch preflight label for the active C-AOL install on macOS. The check reuses Lacapult's app-bundle executable discovery, runs `otool -L` against the launch binary, and classifies absolute local dylib paths under `/opt/local`, `/usr/local`, or `/opt/homebrew`. Missing local dylibs block Play/Resume and post an explanatory status; present local dylibs are reported as a portability warning; unavailable `otool` does not pretend to prove launchability.
+`scripts/Catapult.gd` now creates a Game-tab launch preflight label for the active C-AOL install on macOS. The check reuses Lacapult's app-bundle executable discovery, runs `otool -L` against the launch binary, and classifies absolute local dylib paths under `/opt/local`, `/usr/local`, or `/opt/homebrew`. Missing local dylibs first block Play/Resume and post an explanatory status; present local dylibs are reported as a portability warning; unavailable `otool` does not pretend to prove launchability.
 
-For the selected C-AOL `v0.2.0` macOS DMG, the preflight distinguishes the layers clearly: Lacapult install/copy succeeds, `Cataclysm.app` exists, and the actual `Contents/Resources/cataclysm-tiles` binary is blocked by missing `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib`. This is launcher-side UX/status only. It does not rebuild, bundle, sign, notarize, publish, install MacPorts/Homebrew libraries, contact upstream, or mutate real Application Support state.
+For the selected C-AOL `v0.2.0` macOS DMG, the preflight distinguishes the layers clearly: Lacapult install/copy succeeds, `Cataclysm.app` exists, and the actual `Contents/Resources/cataclysm-tiles` binary ships with missing `/opt/local/lib/libfreetype.6.dylib` and `/opt/local/lib/libz.1.dylib` dependencies on a clean Mac.
+
+## 2026-04-26 Lacapult-side C-AOL macOS launch repair
+
+Lacapult now repairs that installed-app dependency shape for the selected C-AOL `v0.2.0` macOS package. It vendors universal `libfreetype.6.dylib` and `libpng16.16.dylib` under `resources/caol_macos_repair/`, copies them into `Cataclysm.app/Contents/Resources`, rewrites the launch binary and freetype load paths to app-relative/system paths with `install_name_tool`, and ad-hoc signs the changed dylibs/binary/app before launch.
+
+The repeatable proof first reproduces the old blocker, then runs `python3 tools/prove_caol_game_launch_smoke.py --repair --keep-sandbox --observe-seconds 8`. The repaired app has no `/opt/local`, `/usr/local`, or `/opt/homebrew` paths left in the checked load graph, passes the C-AOL portability verifier against the repaired app bundle, and remains running past the 8-second launch-smoke observation window. This is a Lacapult install/launch repair, not a notarized/new C-AOL DMG release, and it still avoids real Application Support mutation, public releases, upstream contact, API secrets, and model pulls.
 
 ## 2026-04-25 backend-good v0-safe hardening
 

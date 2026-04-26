@@ -4,7 +4,7 @@ Success-state ledger for Lacapult Doobdab.
 
 ## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-Status: **CLICKED INSTALL + BACKEND TRIAD V0-SAFE CONFIG/READINESS + SANDBOX OPTIONS APPLY PROVEN + MOD UI STATUS + BACKEND RECOMMENDATION UX PROVEN + CLICK-LEVEL GUI AUDIT READY-FOR-JOSEF-WINDOWS-TEST + LOCAL UNSIGNED APP/PACKAGE EXPORTS PROVEN + LAUNCH PREFLIGHT STATUS PROVEN / GAME-LAUNCH BLOCKED ON C-AOL DYLIBS / PUBLIC RELEASE NOT CLAIMED**
+Status: **CLICKED INSTALL + BACKEND TRIAD V0-SAFE CONFIG/READINESS + SANDBOX OPTIONS APPLY PROVEN + MOD UI STATUS + BACKEND RECOMMENDATION UX PROVEN + CLICK-LEVEL GUI AUDIT READY-FOR-JOSEF-WINDOWS-TEST + LOCAL UNSIGNED APP/PACKAGE EXPORTS PROVEN + macOS C-AOL v0.2.0 LAUNCH REPAIR PROVEN / PUBLIC RELEASE NOT CLAIMED**
 
 Done only when all are true:
 
@@ -32,12 +32,13 @@ Done only when all are true:
 - [x] C-AOL mod compatibility investigation records inherited source assumptions and marks first useful compatibility statuses as supported, untested, broken, or unknown.
 - [x] Per-mod packaged C-AOL `v0.2.0` compatibility/summarizer bridge report exists, classifies obsolete blockers vs supported packaged mods, and points future summary packs at C-AOL `Summaries_short` / `Summaries_extra` roots.
 - [x] Settings tab surfaces that report as read-only status with packaged-mod counts, blocker/status distinctions, full report reference/regeneration path, C-AOL `npcs/Backgrounds/Summaries_short` / `Summaries_extra` language, and an explicit no-generated-pack-apply boundary.
-- [x] Launcher-side C-AOL macOS launch preflight/status checks the active app-bundle launch binary with `otool -L`, reports missing non-portable local dylibs (`/opt/local/lib/libfreetype.6.dylib`, `/opt/local/lib/libz.1.dylib`) as a C-AOL package portability issue, and does not imply Lacapult can repair the package.
+- [x] Launcher-side C-AOL macOS launch preflight/status checks the active app-bundle launch binary with `otool -L`, reports missing non-portable local dylibs (`/opt/local/lib/libfreetype.6.dylib`, `/opt/local/lib/libz.1.dylib`), and now repairs the installed app by bundling universal repair dylibs, rewriting load paths, and ad-hoc signing the changed bundle pieces before launch.
 - [x] Validation evidence is recorded in `TESTING.md`.
 - [x] Godot 3.6.2 GUI smoke proves the project launches, the Game tab prioritizes the C-AOL `v0.2.0` macOS DMG, and the Settings tab exposes backend setup controls.
 - [x] Public repo existence is recorded (`https://github.com/josihosi/Lacapult-Doobdab`), and public releases/contact remain blocked without fresh Josef/Schani clearance.
 - [x] Lacapult itself has local unsigned app/executable/package evidence for Windows, macOS, and Linux; developer-only Godot project launch or raw PCK export is not the final bar.
 - [x] Click-level GUI audit doc exists at `doc/lacapult-click-level-gui-audit-2026-04-25.md`; binary verdict is `ready-for-Josef-Windows-test`, not public release.
+- [x] Isolated macOS launch smoke with repair proves the selected C-AOL `v0.2.0` app no longer aborts on `/opt/local` dylib paths after Lacapult repair; the repaired app stays running past the smoke observation window, with no package-manager paths left in the checked load graph.
 - [x] C-AOL release/changelog link no longer opens an inherited empty changelog path; for C-AOL it opens the selected/fallback GitHub release page.
 - [x] Fresh no-install state does not display a checked `Update current active install` checkbox, and unavailable Lacapult self-update is labeled as unavailable instead of implying a working update action.
 
@@ -76,7 +77,7 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [x] Physical clicked GUI macOS DMG extraction/install pass, without launching the game.
 - [x] Local Godot export-pack/PCK release-prep proof for macOS/Linux/Windows into ignored `.proof-cache/`, with `export_presets.cfg` restored afterward.
 - [x] Local unsigned Lacapult app/executable/package export proof for macOS/Linux/Windows into ignored `.proof-cache/`, with app/package shape checks, sizes, hashes, and `export_presets.cfg` restored afterward.
-- [ ] C-AOL game-launch smoke from an isolated installed app bundle reaches a running game process. Current proof is attempted but blocked by unbundled upstream macOS dylib dependencies (`/opt/local/lib/libfreetype.6.dylib`, `/opt/local/lib/libz.1.dylib`) in the selected C-AOL `v0.2.0` DMG.
+- [x] C-AOL game-launch smoke from an isolated installed app bundle reaches a running process after Lacapult repairs the selected C-AOL `v0.2.0` app's non-portable `/opt/local` dylib paths.
 - [x] Full local unsigned app exports / package-shaped Lacapult distribution artifacts for Windows/Linux/macOS; no binaries committed.
 - [ ] Signed/notarized/public Lacapult release publication and normal-player install QA.
 

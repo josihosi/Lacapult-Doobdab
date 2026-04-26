@@ -66,12 +66,12 @@ Click path:
 Audit read:
 
 - `ReleaseInstaller.gd` searches the extracted root differently on Windows vs Linux/macOS and has specific `.app` bundle handling.
-- macOS has C-AOL launch preflight for missing/non-portable local dylibs and blocks launch when known missing dylibs would make the package fail.
-- The preflight text explicitly says Lacapult can report package portability issues, not repair them.
+- macOS has C-AOL launch preflight for missing/non-portable local dylibs and now applies the Lacapult-side repair path before launch when the selected C-AOL `v0.2.0` app hits the known `/opt/local` freetype/zlib shape.
+- The preflight/repair text must stay honest: Lacapult repairs its installed copy, but this is not a notarized replacement C-AOL DMG.
 
 Remaining macOS/Linux caveat:
 
-- This remains package-sensitive. If the C-AOL macOS artifact links `/opt/local`, `/usr/local`, or `/opt/homebrew` dylibs, Lacapult surfaces the problem instead of hiding it. That is acceptable launcher behavior, but not proof that the macOS game package is portable.
+- This remains package-sensitive. If a future C-AOL macOS artifact links other package-manager dylibs, Lacapult must either repair that exact load graph with bundled/app-relative dependencies or surface the problem instead of hiding it. Current proof covers the known `v0.2.0` freetype/libpng/zlib repair path.
 
 ### 3. Backend setup user: API, Ollama, OpenVINO
 
