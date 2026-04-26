@@ -74,7 +74,7 @@ Done only when all are true:
 
 ## Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply
 
-Status: **SLICES 1-5 PROVEN / SLICE 6 PREVIEW+WRITER+BACKEND-GENERATION+TARGET-CHOOSER SEAMS LANDED / API+OPENVINO LIVE GENERATION STILL GATED**
+Status: **SLICES 1-5 PROVEN / SLICE 6 PREVIEW+WRITER+BACKEND-GENERATION+TARGET-CHOOSER SEAMS LANDED / RETESTABLE-STATE PACKAGE-SHAPE PROVEN / API+OPENVINO LIVE GENERATION STILL GATED**
 
 Done only when all are true:
 
@@ -87,6 +87,7 @@ Done only when all are true:
 - [x] API, Ollama, and OpenVINO generation readiness is gated through the backend-good checks for real generation/apply; no API calls, model pulls/downloads, package installs, or user-data writes happen without explicit confirmation. Slice 6 preview and confirmed writer both carry the backend-good gate and block apply when the selected backend is not generation-ready.
 - [x] A sandbox fixture generated pack is C-AOL-native under `npcs/Backgrounds/Summaries_extra`, not launcher-only metadata.
 - [x] Optional live-local Ollama proof uses already-local `mistral:latest` from `ollama list`, calls only the local Ollama HTTP endpoint, and applies/stages the generated entry through the same isolated companion-pack seam without model pulls, package installs, API secrets, remote APIs, or real user-data mutation.
+- [x] A retestable-state proof re-runs the Slice 6 status/UI/apply/backend gates plus local unsigned package export/package-shape proof from current `main`, confirming the Windows package still includes the required `utils/7za.exe` sidecar without publishing a release.
 - [x] Applying a generated companion summary pack and changing a world `mods.json` list is sandbox-proven with backup and rollback.
 - [x] C-AOL runtime consumption is proven in a sandbox/harness, or a concrete C-AOL-side blocker is recorded.
 - [x] Slice 1, Slice 2, Slice 3, Slice 4, and Slice 5 proof scripts do not mutate Josef's real Application Support config, saves, worlds, or mods; Slice 6 automated proofs must keep the same sandbox boundary.
@@ -100,7 +101,7 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [ ] API-key/backend live smoke test requiring real secrets.
 - [ ] C-AOL-specific mod/soundpack/tileset recommendation packs.
 - [x] Feature-complete mod install/enable plus Summarizer UX Slice 6 proof set; the current Mods/Settings surfaces show read-only status, dry-run prompts, selectable target world/mod controls, apply preview, a confirmed writer seam, fixture/live-local-Ollama backend generation, and generated companion-pack apply with backups in sandbox proof. The current API/OpenVINO surface still does not call live backends or automate model/package setup.
-- [ ] Lacapult post-mod UI Windows retest release packet: after the current UI/mod-installer/Summarizer lane is honestly retestable, publish a fresh Lacapult GitHub test/prerelease with downloadable Windows artifacts for Josef. Canonical contract: `doc/lacapult-post-mod-ui-windows-retest-release-packet-2026-04-26.md`.
+- [ ] Lacapult post-mod UI Windows retest release packet: the current UI/mod-installer/Summarizer lane is now honestly retestable with local package-shape evidence, but the fresh GitHub test/prerelease publication remains parked until Schani/Josef explicitly greenlights that external release step. Canonical contract: `doc/lacapult-post-mod-ui-windows-retest-release-packet-2026-04-26.md`.
 - [x] Slice 5 fixture/error coverage for obsolete mods, parse errors, missing dependencies, partial/stale summaries, conflicts, backend-not-ready, and rollback-restores-replacement handling is landed as a sandbox-only proof.
 - [x] Controlled selected macOS DMG download/mount/launchability-shape proof, without launching or installing the game.
 - [x] Sandboxed Lacapult-style macOS DMG copy/move install-shape proof, without touching the real Application Support install state or launching the game.
