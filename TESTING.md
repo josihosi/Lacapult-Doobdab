@@ -219,6 +219,19 @@ Before claiming v0 is done, Andi should record:
 - Decisive result: selected selector `name:Lacapult Runtime Fixture NPC`; `your_tone` was `The generated companion pack makes this NPC speak with sandbox runtime-proof context.`; `your_example_expression` was `Mention the Lacapult-generated summary only because the active companion root supplied it.`
 - Revalidation for this handoff passed: `python3 -m py_compile tools/prove_caol_runtime_summary_consumption.py tools/prove_caol_summary_pack_apply.py tools/caol_mod_status_model.py`, `python3 tools/prove_caol_runtime_summary_consumption.py`, `python3 tools/prove_caol_summary_pack_apply.py`, and `git diff --check`. This is deterministic harness proof plus C++ source-seam inspection; it does not launch a compiled C-AOL game world, call a backend, use API secrets, pull models, mutate real Application Support state, or cover the broader Slice 5 error matrix.
 
+## Pending evidence - real C-AOL mod/Summarizer generation/apply UI v0
+
+Active contract: `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`, Slice 6.
+
+Required before closure:
+
+- Godot/UI proof that the existing dry-run Summarizer button can become a real user-confirmed path only for eligible contextual mods/worlds.
+- Backend readiness gate proof for API/Ollama/OpenVINO before generation/apply actions are enabled.
+- Preview/confirmation proof before any companion summary pack write or `mods.json` change.
+- Sandbox apply/rollback proof using the same C-AOL-native companion pack shape already proven in Slices 3-5.
+- No automated proof may mutate Josef's real Application Support config, saves, worlds, mods, API secrets, packages, or models.
+- `git diff --check` plus the smallest meaningful Godot/project-load/smoke gate.
+
 ## Evidence - 2026-04-25 C-AOL Summarizer Slice 5 error/rollback matrix
 
 - Added `tools/prove_caol_summary_error_matrix.py`, a sandbox-only proof that builds weird C-AOL-like fixtures under `.proof-cache/caol-summary-error-matrix/` and writes compact evidence to `.proof-cache/caol-summary-error-matrix/evidence/evidence.json`.

@@ -74,7 +74,7 @@ Done only when all are true:
 
 ## Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply
 
-Status: **SLICE 1 DISCOVERY/STATUS MODEL PROVEN + SLICE 2 UX/DRY-RUN STATUS SURFACE PROVEN + SLICE 3 SANDBOX SUMMARY-PACK APPLY/ROLLBACK PROVEN + SLICE 4 RUNTIME-HARNESS CONSUMPTION PROVEN + SLICE 5 ERROR/ROLLBACK MATRIX PROVEN / REAL GENERATION UI NOT IMPLEMENTED**
+Status: **SLICES 1-5 PROVEN / REAL GENERATION+APPLY UI V0 ACTIVE**
 
 Done only when all are true:
 
@@ -82,13 +82,13 @@ Done only when all are true:
 - [x] Enabled vs disabled status is world-aware for at least one sandbox world in the Slice 1 fixture proof.
 - [x] Obsolete mods, broken metadata, content parse errors, missing roots, missing dependencies, partial summaries, stale summaries, conflicts, backend-not-ready gates, and disabled mods produce visible statuses in the sandbox status/error matrix.
 - [x] After mod install, and from persistent Mods/Settings status surfaces, Lacapult offers a Summarizer prompt/button rather than burying the next action, currently dry-run/status-only.
-- [ ] A true post-enable hook is still pending because the current inherited launcher does not yet apply C-AOL world `mods.json` enable changes.
+- [ ] Real generation/apply UI v0 lets the player choose an eligible contextual mod/world, see a preview/plan, and explicitly confirm before Lacapult writes a companion summary pack or changes a world `mods.json`.
 - [x] The launcher shows whether all enabled extra NPC/content is summarized, blocked, needs summaries, or unknown.
-- [ ] API, Ollama, and OpenVINO generation readiness is gated through the backend-good checks for real generation/apply; current Slice 2 dry-run only reports selected backend status and performs no API calls/model pulls/downloads.
+- [ ] API, Ollama, and OpenVINO generation readiness is gated through the backend-good checks for real generation/apply; no API calls, model pulls/downloads, package installs, or user-data writes happen without explicit confirmation.
 - [x] A sandbox fixture generated pack is C-AOL-native under `npcs/Backgrounds/Summaries_extra`, not launcher-only metadata.
 - [x] Applying a generated companion summary pack and changing a world `mods.json` list is sandbox-proven with backup and rollback.
 - [x] C-AOL runtime consumption is proven in a sandbox/harness, or a concrete C-AOL-side blocker is recorded.
-- [x] Slice 1, Slice 2, Slice 3, Slice 4, and Slice 5 proof scripts do not mutate Josef's real Application Support config, saves, worlds, or mods; future real apply/generation UI must keep the same boundary until explicitly approved.
+- [x] Slice 1, Slice 2, Slice 3, Slice 4, and Slice 5 proof scripts do not mutate Josef's real Application Support config, saves, worlds, or mods; Slice 6 automated proofs must keep the same sandbox boundary.
 
 ## Parked next slices
 

@@ -1,6 +1,6 @@
 # Lacapult mod install/enable + Summarizer feature plan
 
-Status: **ACTIVE NEXT LANE / SLICES 1-5 PROVEN THROUGH ERROR-ROLLBACK MATRIX / REAL GENERATION UI NOT IMPLEMENTED**
+Status: **ACTIVE / SLICES 1-5 PROVEN THROUGH ERROR-ROLLBACK MATRIX / SLICE 6 REAL GENERATION+APPLY UI V0 GREENLIT**
 
 This packet turns the read-only C-AOL mod compatibility report into the next bounded implementation family. It does **not** implement the feature yet. It defines the contract Andi should execute in slices after backend-good hardening.
 
@@ -322,8 +322,20 @@ This lane is complete only when all of the following are true:
 - No claim that inherited DDA/BN/TLG downloadable catalogs are C-AOL-compatible.
 - No upstream contact or C-AOL package mutation without fresh explicit clearance.
 
+### Slice 6 — real generation/apply UI v0
+
+Status: **greenlit 2026-04-26 by Josef / active next implementation slice.**
+
+Goal: promote the existing read-only/dry-run Summarizer surfaces into a real, user-confirmed generation/apply path without turning proof work into real user-data mutation.
+
+- Let the player choose an eligible contextual mod/world from the existing status model.
+- Reuse backend-good readiness checks before enabling generation/apply.
+- Generate or stage a C-AOL-native companion summary pack using the already-proven pack shape: `modinfo.json`, manifest, and `npcs/Backgrounds/Summaries_short` / `Summaries_extra` content.
+- Show a preview/apply plan before writing a companion pack or changing a world `mods.json`.
+- Require explicit confirmation before any real user-data write, model pull/download, package install, or backend/API action.
+- Keep automated proofs sandboxed; they must not mutate Josef's real Application Support config, saves, worlds, mods, API secrets, packages, or models.
+- Preserve backup/rollback visibility from Slices 3-5 and expose failures in player-facing language.
+
 ## Recommended next implementation handoff
 
-No further implementation slice is recommended inside the current Windows-test-readiness lane. Slices 1-5 are landed and proven through the sandbox-only error/rollback matrix, including obsolete mods, parse errors, missing dependencies, partial/stale/conflicting summaries, backend-not-ready gates, and replacement rollback.
-
-The remaining work is decision/test gated rather than an unblocked Andi implementation task: Josef's Windows packaged-build click-through, or a fresh Schani/Josef decision to reopen real generation/apply UI, post-enable world-mod mutation, signing/notarization, public release publication, model/download automation, or upstream/C-AOL package-portability work.
+Andi should execute Slice 6 as one bounded implementation/proof attempt. Do not widen it into signing/notarization, public release publication, OpenVINO package installation, model-download automation, arbitrary external mod catalog support, or C-AOL runtime schema rewrites.
