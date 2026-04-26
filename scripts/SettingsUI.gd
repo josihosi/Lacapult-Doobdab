@@ -94,9 +94,15 @@ func _add_caol_mod_bridge_status_controls() -> void:
 	preview_button.connect("pressed", self, "_on_CaolSummarizerApplyPreview_pressed")
 	section.add_child(preview_button)
 
+	var apply_button = Button.new()
+	apply_button.text = "Confirm and apply generated Summary pack"
+	apply_button.hint_tooltip = "Explicit confirmation: if backend/world gates pass, writes a generated companion summary pack, backs up state, and updates the selected world mods.json."
+	apply_button.connect("pressed", self, "_on_CaolSummarizerApplyConfirmed_pressed")
+	section.add_child(apply_button)
+
 	var summary_roots = Label.new()
 	summary_roots.autowrap = true
-	summary_roots.text = "C-AOL summary roots stay native: generated companion packs belong in active mod roots under npcs/Backgrounds/Summaries_short or npcs/Backgrounds/Summaries_extra. The preview button shows the real apply/backup plan; Lacapult still requires an explicit confirmation step before any backend call, pack write, or mods.json change."
+	summary_roots.text = "C-AOL summary roots stay native: generated companion packs belong in active mod roots under npcs/Backgrounds/Summaries_short or npcs/Backgrounds/Summaries_extra. The preview button shows the real apply/backup plan; the confirm button is the explicit confirmation step before a pack write or mods.json change, and backend/package/model actions remain gated."
 	section.add_child(summary_roots)
 
 	var report_reference = Label.new()
@@ -140,6 +146,19 @@ func _on_CaolSummarizerApplyPreview_pressed() -> void:
 	var preview = mods.get_caol_summarizer_apply_preview()
 	_caol_mod_bridge_status.text = preview.get("message", "Summarizer apply preview unavailable.")
 	Status.post("C-AOL Summarizer apply preview built; explicit confirmation is still required before any backend call, generated pack, or save mutation.")
+
+
+func _on_CaolSummarizerApplyConfirmed_pressed() -> void:
+	var mods = get_node_or_null("/root/Mods")
+	if mods == null or not mods.has_method("apply_caol_summarizer_generated_pack"):
+		_caol_mod_bridge_status.text = "Summarizer apply unavailable: Mods autoload is not ready."
+		return
+	var result = mods.apply_caol_summarizer_generated_pack("", "", true)
+	_caol_mod_bridge_status.text = result.get("message", "Summarizer apply unavailable.")
+	if result.get("applied", false):
+		Status.post("C-AOL Summarizer companion pack applied with backup/rollback visibility.")
+	else:
+		Status.post("C-AOL Summarizer apply blocked before mutation; review the visible reason.", Enums.MSG_ERROR)
 
 
 func _on_obtnLanguage_item_selected(index: int) -> void:

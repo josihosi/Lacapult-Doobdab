@@ -1576,6 +1576,110 @@ func get_caol_summarizer_apply_preview(world_name := "", selected_mod_id := "", 
 	return CaolModStatus.build_generation_apply_plan(get_caol_mod_summarizer_status(world_name), selected_mod_id, mode, backend_status, confirmation_received)
 
 
+func apply_caol_summarizer_generated_pack(world_name := "", selected_mod_id := "", confirmation_received := false, generated_entries := []) -> Dictionary:
+	# Slice 6 confirmed writer seam. This is the first real apply path: after an
+	# explicit confirmation and a backend-good plan, it stages a C-AOL-native
+	# companion summary pack, backs up replaceable state, writes the pack, and
+	# updates the selected world's mods.json so the companion loads after the
+	# source mod. Automated proofs call this only against sandboxed HOME/paths.
+	var preview = get_caol_summarizer_apply_preview(world_name, selected_mod_id, confirmation_received)
+	if preview.get("would_mutate", false) != true:
+		return _caol_apply_result(false, preview, "Summarizer apply blocked; preview did not pass confirmation/backend/world gates.", {})
+
+	var status = get_caol_mod_summarizer_status(world_name)
+	var selected = _find_caol_status_record(status, preview.get("selected_mod_id", ""))
+	if selected.empty():
+		return _caol_apply_result(false, preview, "Summarizer apply blocked; selected source mod disappeared before write.", {})
+
+	var write_plan = preview.get("write_plan", {})
+	var companion_dir = str(preview.get("companion_pack_dir", ""))
+	var mods_json_path = str(write_plan.get("mods_json", ""))
+	if companion_dir == "" or mods_json_path == "":
+		return _caol_apply_result(false, preview, "Summarizer apply blocked; companion pack path or world mods.json path is empty.", {})
+
+	var timestamp = _caol_apply_timestamp()
+	var backup_dir = Paths.save_backups.plus_file("lacapult_summary_apply_%s_%s" % [_safe_id_fragment(preview.get("selected_mod_id", "unknown")), timestamp])
+	var staging_dir = Paths.tmp_dir.plus_file("lacapult_summary_stage_%s_%s" % [_safe_id_fragment(preview.get("selected_mod_id", "unknown")), timestamp])
+	var d = Directory.new()
+	var mkdir_err = d.make_dir_recursive(backup_dir)
+	if mkdir_err != OK:
+		return _caol_apply_result(false, preview, "Summarizer apply failed before writing: could not create backup directory (%s)." % mkdir_err, {"backup_dir": backup_dir})
+	if d.dir_exists(staging_dir):
+		_caol_remove_dir(staging_dir)
+	mkdir_err = d.make_dir_recursive(staging_dir)
+	if mkdir_err != OK:
+		return _caol_apply_result(false, preview, "Summarizer apply failed before writing: could not create staging directory (%s)." % mkdir_err, {"staging_dir": staging_dir})
+
+	var previous_mods_text = _read_text_file(mods_json_path)
+	if previous_mods_text == null:
+		return _caol_apply_result(false, preview, "Summarizer apply failed before writing: target world mods.json could not be read.", {"mods_json": mods_json_path})
+	_write_text_file(backup_dir.plus_file("mods.json.before.exact"), previous_mods_text)
+	Helpers.save_to_json_file(write_plan.get("previous_mod_order", []), backup_dir.plus_file("mods.json.before.json"))
+	var pack_existed_before = d.dir_exists(companion_dir)
+	var pack_backup = backup_dir.plus_file("summary_pack.before")
+	if pack_existed_before:
+		_caol_copy_dir(companion_dir, pack_backup)
+	else:
+		Helpers.save_to_json_file({"path": companion_dir, "state": "missing"}, backup_dir.plus_file("summary_pack.before.missing.json"))
+
+	var entries = generated_entries
+	if typeof(entries) != TYPE_ARRAY or entries.empty():
+		entries = [_caol_default_generated_summary_entry(selected)]
+	var manifest = preview.get("manifest_preview", {}).duplicate(true)
+	manifest["generated_at"] = timestamp
+	manifest["generation_mode"] = "lacapult-staged-v0"
+	manifest["generated_paths"] = ["modinfo.json", "lacapult_summary_pack_manifest.json", "npcs/Backgrounds/Summaries_extra/generated_%s.json" % _safe_id_fragment(preview.get("selected_mod_id", ""))]
+	manifest["apply"] = {
+		"mode": "confirmed-user-companion-mod",
+		"applied_at": timestamp,
+		"target_user_mod_path": companion_dir,
+		"world_mods_json": mods_json_path,
+		"previous_mod_order": write_plan.get("previous_mod_order", []),
+		"new_mod_order": write_plan.get("planned_mod_order", []),
+		"backup_dir": backup_dir,
+		"pack_existed_before_apply": pack_existed_before,
+	}
+	manifest["rollback"] = {
+		"mode": "restore-previous-world-mods-json-and-summary-pack-dir",
+		"restore_paths": [mods_json_path, companion_dir],
+		"expected_mod_order_after_rollback": write_plan.get("previous_mod_order", []),
+	}
+
+	var modinfo = {
+		"type": "MOD_INFO",
+		"id": preview.get("companion_mod_id", ""),
+		"name": "Lacapult generated summaries for %s" % preview.get("selected_mod_name", preview.get("selected_mod_id", "")),
+		"description": "Generated C-AOL NPC/context summaries staged by Lacapult. Contains no gameplay content beyond summaries.",
+		"category": "content",
+		"dependencies": [preview.get("selected_mod_id", "")],
+	}
+	var summary_bundle = {"type": "npc_personality_summary_bundle", "version": 1, "entries": entries}
+	Helpers.save_to_json_file(modinfo, staging_dir.plus_file("modinfo.json"))
+	Helpers.save_to_json_file(manifest, staging_dir.plus_file("lacapult_summary_pack_manifest.json"))
+	var summary_path = staging_dir.plus_file("npcs").plus_file("Backgrounds").plus_file("Summaries_extra").plus_file("generated_%s.json" % _safe_id_fragment(preview.get("selected_mod_id", "")))
+	d.make_dir_recursive(summary_path.get_base_dir())
+	Helpers.save_to_json_file(summary_bundle, summary_path)
+
+	if d.dir_exists(companion_dir):
+		_caol_remove_dir(companion_dir)
+	_caol_copy_dir(staging_dir, companion_dir)
+	var wrote_mods = Helpers.save_to_json_file(write_plan.get("planned_mod_order", []), mods_json_path)
+	if not wrote_mods:
+		return _caol_apply_result(false, preview, "Summarizer apply failed while updating world mods.json; backup is available for rollback.", {"backup_dir": backup_dir, "staging_dir": staging_dir})
+
+	var result_details = {
+		"companion_pack_dir": companion_dir,
+		"mods_json": mods_json_path,
+		"backup_dir": backup_dir,
+		"staging_dir": staging_dir,
+		"manifest_json": companion_dir.plus_file("lacapult_summary_pack_manifest.json"),
+		"summaries_extra_json": companion_dir.plus_file("npcs").plus_file("Backgrounds").plus_file("Summaries_extra").plus_file("generated_%s.json" % _safe_id_fragment(preview.get("selected_mod_id", ""))),
+		"planned_mod_order": write_plan.get("planned_mod_order", []),
+		"pack_existed_before_apply": pack_existed_before,
+	}
+	return _caol_apply_result(true, preview, "C-AOL Summarizer companion pack applied after explicit confirmation. Backup/rollback manifest is available at %s." % backup_dir, result_details)
+
+
 func get_caol_summarizer_dry_run(world_name := "") -> Dictionary:
 	# Dry-run prompt/action state. This intentionally does not call a backend,
 	# generate files, enable mods, apply packs, or mutate saves/userdata.
@@ -1597,5 +1701,101 @@ func _current_backend_status(mode: String) -> String:
 			return backend.get("status", "unknown")
 	return "unknown_backend"
 
+func _find_caol_status_record(status: Dictionary, mod_id: String) -> Dictionary:
+	for record in status.get("mods", []):
+		if record.get("id", "") == mod_id:
+			return record
+	return {}
 
+
+func _caol_apply_result(applied: bool, preview: Dictionary, message: String, details: Dictionary) -> Dictionary:
+	return {
+		"action": "caol_summarizer_confirmed_apply_v0",
+		"version": 1,
+		"applied": applied,
+		"preview": preview,
+		"message": message,
+		"details": details,
+		"would_use_backend": preview.get("would_call_backend", false),
+		"mutated_paths": [details.get("companion_pack_dir", ""), details.get("mods_json", "")] if applied else [],
+		"rollback_visible": applied and details.has("backup_dir"),
+	}
+
+
+func _caol_apply_timestamp() -> String:
+	var dt = OS.get_datetime(true)
+	return "%04d%02d%02dT%02d%02d%02dZ" % [dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second]
+
+
+func _safe_id_fragment(value) -> String:
+	var raw = str(value).to_lower()
+	var out = ""
+	for i in range(raw.length()):
+		var c = raw[i]
+		if (c >= "a" and c <= "z") or (c >= "0" and c <= "9") or c == "_" or c == "-":
+			out += c
+		else:
+			out += "_"
+	return out.strip_edges()
+
+
+func _caol_default_generated_summary_entry(source: Dictionary) -> Dictionary:
+	var source_id = source.get("id", "unknown")
+	var source_name = source.get("name", source_id)
+	return {
+		"type": "npc_personality_summary",
+		"selector": "%s:context" % source_id,
+		"topic": "%s_world_context" % source_id,
+		"your_background": "You remember the contextual details from %s; Lacapult staged this C-AOL-native summary pack after player confirmation." % source_name,
+		"your_expression": "Treat %s as active world context loaded from a generated companion mod." % source_name,
+		"source_tag": "lacapult-generated:%s" % source_id,
+	}
+
+
+func _read_text_file(path: String):
+	var f = File.new()
+	if f.open(path, File.READ) != OK:
+		return null
+	var text = f.get_as_text()
+	f.close()
+	return text
+
+
+func _write_text_file(path: String, text: String) -> bool:
+	var d = Directory.new()
+	d.make_dir_recursive(path.get_base_dir())
+	var f = File.new()
+	if f.open(path, File.WRITE) != OK:
+		return false
+	f.store_string(text)
+	f.close()
+	return true
+
+
+func _caol_copy_dir(source: String, target: String) -> bool:
+	var d = Directory.new()
+	if not d.dir_exists(source):
+		return false
+	d.make_dir_recursive(target)
+	for item in FS.list_dir(source):
+		var src = source.plus_file(item)
+		var dst = target.plus_file(item)
+		if d.dir_exists(src):
+			_caol_copy_dir(src, dst)
+		elif d.file_exists(src):
+			d.copy(src, dst)
+	return true
+
+
+func _caol_remove_dir(path: String) -> void:
+	var d = Directory.new()
+	if not d.dir_exists(path):
+		return
+	for item in FS.list_dir(path):
+		var child = path.plus_file(item)
+		if d.dir_exists(child):
+			_caol_remove_dir(child)
+		elif d.file_exists(child):
+			d.remove(child)
+	d.remove(path)
 
