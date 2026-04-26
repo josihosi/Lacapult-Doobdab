@@ -4,7 +4,7 @@ Success-state ledger for Lacapult Doobdab.
 
 ## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-Status: **LACAPULT LAUNCHER TEST RELEASE ACTIVE / C-AOL v0.2.0 INSTALL+LAUNCH REPAIR PROVEN / C-AOL v0.3 PARKED / FINAL SIGNED PUBLIC RELEASE NOT CLAIMED**
+Status: **LACAPULT LAUNCHER TEST PRERELEASE PUBLISHED / C-AOL v0.2.0 INSTALL+LAUNCH REPAIR PROVEN / C-AOL v0.3 PARKED / FINAL SIGNED PUBLIC RELEASE NOT CLAIMED**
 
 Done only when all are true:
 
@@ -41,10 +41,10 @@ Done only when all are true:
 - [x] Isolated macOS launch smoke with repair proves the selected C-AOL `v0.2.0` app no longer aborts on `/opt/local` dylib paths after Lacapult repair; the repaired app stays running past the smoke observation window, with no package-manager paths left in the checked load graph.
 - [x] C-AOL release/changelog link no longer opens an inherited empty changelog path; for C-AOL it opens the selected/fallback GitHub release page.
 - [x] Fresh no-install state does not display a checked `Update current active install` checkbox, and unavailable Lacapult self-update is labeled as unavailable instead of implying a working update action.
-- [ ] Fresh Lacapult launcher packages are regenerated from current `main` after the macOS launch repair/canon commits.
-- [ ] A Lacapult-specific GitHub test/prerelease exists with at least a Windows downloadable package for Josef.
-- [ ] Release notes, tag, and asset names clearly distinguish Lacapult launcher test build from C-AOL game releases and C-AOL `v0.3.0`.
-- [ ] SHA-256 hashes, asset sizes, and remote release URL are recorded in `TESTING.md`.
+- [x] Fresh Lacapult launcher packages are regenerated from current `main` after the macOS launch repair/canon commits.
+- [x] A Lacapult-specific GitHub test/prerelease exists with at least a Windows downloadable package for Josef.
+- [x] Release notes, tag, and asset names clearly distinguish Lacapult launcher test build from C-AOL game releases and C-AOL `v0.3.0`.
+- [x] SHA-256 hashes, asset sizes, and remote release URL are recorded in `TESTING.md`.
 
 ## Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply
 
@@ -84,6 +84,17 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 - [x] C-AOL game-launch smoke from an isolated installed app bundle reaches a running process after Lacapult repairs the selected C-AOL `v0.2.0` app's non-portable `/opt/local` dylib paths.
 - [x] Full local unsigned app exports / package-shaped Lacapult distribution artifacts for Windows/Linux/macOS; no binaries committed.
 - [ ] Signed/notarized/public Lacapult release publication and normal-player install QA.
+
+## Evidence - 2026-04-26 Lacapult launcher test/prerelease
+
+- Published prerelease `lacapult-test-2026-04-26`: https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-test-2026-04-26
+- Uploaded fresh unsigned launcher package assets from the 2026-04-26 package proof:
+  - `Lacapult-Doobdab-windows-unsigned.zip` — 59,704,154 bytes — SHA-256 `357e906bb20a3e3ae558774e1bd25a716ebb1952e4a3c93ac515d91cb7d3ef71`
+  - `Lacapult-Doobdab-macos-unsigned.zip` — 84,107,918 bytes — SHA-256 `f14644f94bd930c2567627c46e3e1362cafc1904175c04b732966154526c6b12`
+  - `Lacapult-Doobdab-linux-unsigned.tar.gz` — 32,940,324 bytes — SHA-256 `522885ba710130f2cf95551c566b305638d3db211f493c4e65f9ddfb36c3d935`
+  - `SHA256SUMS.txt` — 311 bytes — SHA-256 `2304fb9067950fc7dd535e431d134f72c3aff0e68b3fc197b140923cf15f8ef1`
+- Re-ran package/release/backend/project-load gates and `git diff --check`; all passed.
+- Caveat remains intentionally open: this is unsigned/not notarized/not SmartScreen-trusted and needs Josef's real Windows laptop click-through/playtest before claiming final public confidence.
 
 ## Evidence - 2026-04-25 click-level GUI audit
 

@@ -2,7 +2,7 @@
 
 ## Classification
 
-ACTIVE / GREENLIT NOW.
+PUBLISHED / PROVEN FOR JOSEF TEST.
 
 ## User request
 
@@ -30,12 +30,14 @@ Josef wants Lacapult Doobdab itself packaged into a clean downloadable launcher 
 
 ## Success state
 
-- [ ] Fresh package proof passes from current `main` after this packet.
-- [ ] Windows launcher package exists, is attached to a Lacapult GitHub test/prerelease, and has a SHA-256 recorded.
-- [ ] Release notes clearly distinguish Lacapult launcher release from C-AOL game releases.
-- [ ] `gh release view` or equivalent proves the release/tag/assets exist remotely.
-- [ ] `TESTING.md` records the package proof, release URL/tag, artifact hashes, and remaining unsigned/not-final caveats.
-- [ ] Repo canon no longer says public release publication is wholly blocked for this test-release lane; it should say final/signed release remains parked while this test release is active/proven.
+- [x] Fresh package proof passes from current `main` after this packet.
+- [x] Windows launcher package exists, is attached to a Lacapult GitHub test/prerelease, and has a SHA-256 recorded.
+- [x] Release notes clearly distinguish Lacapult launcher release from C-AOL game releases.
+- [x] `gh release view` or equivalent proves the release/tag/assets exist remotely.
+- [x] `TESTING.md` records the package proof, release URL/tag, artifact hashes, and remaining unsigned/not-final caveats.
+- [x] Repo canon no longer says public release publication is wholly blocked for this test-release lane; it says final/signed release remains parked while this test prerelease is proven.
+
+Published result: `lacapult-test-2026-04-26` / https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-test-2026-04-26
 
 ## Suggested tag/name
 

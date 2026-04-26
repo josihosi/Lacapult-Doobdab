@@ -16,7 +16,26 @@ Use the smallest evidence that honestly matches the change.
 
 ## Active proof target - 2026-04-26 Lacapult launcher test/prerelease
 
-Josef explicitly cleared a Lacapult launcher test/prerelease so he can download the Windows package on his laptop and test the launcher/game path. This is not a C-AOL game release, not C-AOL `v0.3.0`, and not signing/notarization. The release proof must regenerate fresh packages from current `main`, attach at least the Windows package to a Lacapult-specific GitHub test/prerelease, record hashes/sizes/URL, and verify the remote release/assets with `gh release view`. Use `doc/lacapult-launcher-test-release-packet-2026-04-26.md` as the execution contract.
+Josef explicitly cleared a Lacapult launcher test/prerelease so he can download the Windows package on his laptop and test the launcher/game path. This is not a C-AOL game release, not C-AOL `v0.3.0`, and not signing/notarization. The proof regenerated fresh packages from current `main`, attached Windows/macOS/Linux unsigned packages to a Lacapult-specific GitHub prerelease, recorded hashes/sizes/URL, and verified the remote release/assets with `gh release view`. Use `doc/lacapult-launcher-test-release-packet-2026-04-26.md` as the execution contract and release ledger.
+
+## Evidence - 2026-04-26 Lacapult launcher test/prerelease
+
+- Removed stale `.proof-cache/lacapult-export` output before packaging, then regenerated fresh unsigned Lacapult launcher packages from `main` at source commit `c7ccd26` (`Greenlight Lacapult launcher test release`).
+- Created GitHub prerelease `lacapult-test-2026-04-26`: https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-test-2026-04-26
+- Release title: `Lacapult Doobdab test build 2026-04-26`; `gh release view lacapult-test-2026-04-26 --repo josihosi/Lacapult-Doobdab --json tagName,name,isPrerelease,assets,url` verified `isPrerelease=true` and the uploaded assets below.
+- Uploaded assets:
+  - `Lacapult-Doobdab-windows-unsigned.zip` — 59,704,154 bytes — SHA-256 `357e906bb20a3e3ae558774e1bd25a716ebb1952e4a3c93ac515d91cb7d3ef71`
+  - `Lacapult-Doobdab-macos-unsigned.zip` — 84,107,918 bytes — SHA-256 `f14644f94bd930c2567627c46e3e1362cafc1904175c04b732966154526c6b12`
+  - `Lacapult-Doobdab-linux-unsigned.tar.gz` — 32,940,324 bytes — SHA-256 `522885ba710130f2cf95551c566b305638d3db211f493c4e65f9ddfb36c3d935`
+  - `SHA256SUMS.txt` — 311 bytes — SHA-256 `2304fb9067950fc7dd535e431d134f72c3aff0e68b3fc197b140923cf15f8ef1`
+- Proof commands passed:
+  - `python3 tools/prove_lacapult_export_packaging.py`
+  - `python3 tools/prove_caol_release.py --all-platforms`
+  - `python3 tools/prove_caol_backend_contract.py`
+  - `/opt/homebrew/bin/godot --path . --no-window --quit`
+  - `git diff --check`
+- Release notes and tag are Lacapult-specific and state that this is an unsigned Lacapult launcher test build, not a C-AOL game release and not C-AOL `v0.3.0`.
+- Remaining caveats: unsigned Windows/macOS/Linux launcher packages; no Apple notarization; no Windows code signing or SmartScreen reputation; not final public confidence; Josef's real Windows laptop download/extract/run/install/launch click-through still remains his test step.
 
 ## Current evidence
 
