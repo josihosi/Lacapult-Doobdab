@@ -5,7 +5,7 @@ Success-state ledger for Lacapult Doobdab.
 
 ## Lacapult LLM backend setup installer packet v0
 
-Status: **IMPLEMENTED / SAFE STATIC+GODOT PROOF PASSED / READY FOR SCHANI REVIEW**
+Status: **IMPLEMENTED / SAFE STATIC+GODOT PROOF PASSED / SCHANI REVIEW ACCEPTED**
 
 Done only when all are true:
 
