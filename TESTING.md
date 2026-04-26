@@ -456,3 +456,36 @@ Lacapult is the installer/launcher, so release-prep evidence must distinguish La
 - Re-ran the closure gate packet into `.proof-cache/remove-maybe/gates.log`: `python3 -m py_compile` for relevant proof helpers, `python3 tools/prove_caol_backend_contract.py`, `python3 tools/prove_caol_mod_status_model.py`, the backend recommendation Godot smoke, C-AOL mod status and UX Godot smokes, `/opt/homebrew/bin/godot --path . --no-window --quit`, `python3 tools/prove_lacapult_export_packaging.py`, and `git diff --check`; all exited 0. Godot still prints the known fixture parse-error and macOS/headless cleanup warnings.
 - Local unsigned export/package proof still produces a Windows test packet candidate without publishing: `.proof-cache/lacapult-export/app/Lacapult-Doobdab.exe` (59,697,824 bytes, SHA-256 `765fd75dad39bd573e4f32691d88ff88153fa80e09843b23a0633b85161a29fd`) and `.proof-cache/lacapult-export/packages/Lacapult-Doobdab-windows-unsigned.zip` (59,697,962 bytes, SHA-256 `8cc5432784b76b7d2ca71231227dc4e249933012d97b2b6b86e243728455452e`). Manifest: `.proof-cache/lacapult-export/manifest.json`.
 - Binary verdict for launcher handoff is now `ready-for-Josef-Windows-test`. This still does not claim public release readiness, signing/notarization, GitHub release publication, Windows SmartScreen/security-prompt behavior, live API/backend inference, model downloads, OpenVINO runtime setup, or that the upstream C-AOL macOS package launch blocker is fixed.
+
+
+## Evidence - 2026-04-26 Lacapult Windows 7-Zip hotfix prerelease
+
+Josef's real Windows laptop test of `lacapult-test-2026-04-26` found a hard install/extract blocker: C-AOL release download completed, then Lacapult failed with `7za.exe not found at .../Lacapult-Doobdab-windows-unsigned/utils/7za.exe`. The same test also found that the C-AOL install list exposed five install rows when the product expectation is four port releases, and that the startup lineage note was too shrine-like.
+
+Fixes landed in this hotfix:
+
+- `tools/prove_lacapult_export_packaging.py` now exports resources with `utils/*`, `fonts/*`, and `resources/caol_macos_repair/*` included explicitly.
+- Windows packages now include sidecar `utils/7za.exe` and `utils/7-ZIP_LICENSE`; Linux packages include sidecar `utils/7za` and license.
+- Package proof now fails unless Windows/Linux package shapes contain the 7-Zip sidecar.
+- `scripts/ReleaseManager.gd` now curates C-AOL visible release rows to four expected port tag prefixes: `caol-cdda-master`, `caol-ctlg-master`, `caol-cdda-0-h`, and `caol-cdda-0-i`; plain `v0.2.0` no longer appears as a fifth install row in this Lacapult lane.
+- `scripts/dotd.gd` now says a plain thank-you to Dabdoob/Catapult developers instead of the previous lineage plaque.
+
+Local proof:
+
+- `python3 -m py_compile tools/prove_lacapult_export_packaging.py tools/prove_caol_release.py`
+- `git diff --check`
+- `python3 tools/prove_caol_release.py --all-platforms` proved exactly four curated C-AOL release rows, installable on Linux/macOS/Windows.
+- `python3 tools/prove_lacapult_export_packaging.py` regenerated unsigned macOS/Linux/Windows packages and `SHA256SUMS.txt`.
+- `/opt/homebrew/bin/godot --path . --no-window --quit` completed with existing harmless/headless warnings.
+- Windows package zip contents verified: `Lacapult-Doobdab.exe`, `utils/7-ZIP_LICENSE`, `utils/7za.exe`.
+
+Published hotfix prerelease: `lacapult-test-2026-04-26-2` / https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-test-2026-04-26-2
+
+Assets:
+
+- `Lacapult-Doobdab-windows-unsigned.zip` — 66,426,171 bytes — SHA-256 `22617e7b195cc0e26f82354b6634f41feffb54d50bc749eb895aed83085eda21`
+- `Lacapult-Doobdab-macos-unsigned.zip` — 90,238,414 bytes — SHA-256 `53b3aade2655c7a4b2290060664a62ff79a2b8f37be35ed2eb4cd01132f9881b`
+- `Lacapult-Doobdab-linux-unsigned.tar.gz` — 37,458,834 bytes — SHA-256 `d2b76a829218a976dd5f320f7fb94f29089db1c8fdaf5882c0ee13c6e7ee26f7`
+- `SHA256SUMS.txt` — 311 bytes — SHA-256 `853d8273a3ecc67896721d98deba6cf99f9ec8f1975aeb15ba7c028b1e227b77`
+
+Remaining caveat: Josef's note about the Windows custom title bar looking low-resolution/awkwardly large is recorded as UI polish/follow-up; this hotfix release prioritizes the hard missing-7za install blocker plus the misleading release list and lineage note.

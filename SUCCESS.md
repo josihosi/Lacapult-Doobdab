@@ -4,7 +4,7 @@ Success-state ledger for Lacapult Doobdab.
 
 ## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-Status: **LACAPULT LAUNCHER TEST PRERELEASE PUBLISHED / C-AOL v0.2.0 INSTALL+LAUNCH REPAIR PROVEN / C-AOL v0.3 PARKED / FINAL SIGNED PUBLIC RELEASE NOT CLAIMED**
+Status: **LACAPULT LAUNCHER HOTFIX PRERELEASE PUBLISHED / WINDOWS 7ZA PACKAGE BLOCKER FIXED / C-AOL v0.2.0 INSTALL+LAUNCH REPAIR PROVEN / C-AOL v0.3 PARKED / FINAL SIGNED PUBLIC RELEASE NOT CLAIMED**
 
 Done only when all are true:
 
@@ -87,12 +87,13 @@ These are not part of v0 unless Josef/Schani explicitly reopens them:
 
 ## Evidence - 2026-04-26 Lacapult launcher test/prerelease
 
-- Published prerelease `lacapult-test-2026-04-26`: https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-test-2026-04-26
+- Published original prerelease `lacapult-test-2026-04-26`: https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-test-2026-04-26
+- Published hotfix prerelease `lacapult-test-2026-04-26-2`: https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-test-2026-04-26-2
 - Uploaded fresh unsigned launcher package assets from the 2026-04-26 package proof:
-  - `Lacapult-Doobdab-windows-unsigned.zip` — 59,704,154 bytes — SHA-256 `357e906bb20a3e3ae558774e1bd25a716ebb1952e4a3c93ac515d91cb7d3ef71`
-  - `Lacapult-Doobdab-macos-unsigned.zip` — 84,107,918 bytes — SHA-256 `f14644f94bd930c2567627c46e3e1362cafc1904175c04b732966154526c6b12`
-  - `Lacapult-Doobdab-linux-unsigned.tar.gz` — 32,940,324 bytes — SHA-256 `522885ba710130f2cf95551c566b305638d3db211f493c4e65f9ddfb36c3d935`
-  - `SHA256SUMS.txt` — 311 bytes — SHA-256 `2304fb9067950fc7dd535e431d134f72c3aff0e68b3fc197b140923cf15f8ef1`
+  - `Lacapult-Doobdab-windows-unsigned.zip` — 66,426,171 bytes — SHA-256 `22617e7b195cc0e26f82354b6634f41feffb54d50bc749eb895aed83085eda21` — includes `utils/7za.exe` sidecar
+  - `Lacapult-Doobdab-macos-unsigned.zip` — 90,238,414 bytes — SHA-256 `53b3aade2655c7a4b2290060664a62ff79a2b8f37be35ed2eb4cd01132f9881b`
+  - `Lacapult-Doobdab-linux-unsigned.tar.gz` — 37,458,834 bytes — SHA-256 `d2b76a829218a976dd5f320f7fb94f29089db1c8fdaf5882c0ee13c6e7ee26f7` — includes `utils/7za` sidecar
+  - `SHA256SUMS.txt` — 311 bytes — SHA-256 `853d8273a3ecc67896721d98deba6cf99f9ec8f1975aeb15ba7c028b1e227b77`
 - Re-ran package/release/backend/project-load gates and `git diff --check`; all passed.
 - Caveat remains intentionally open: this is unsigned/not notarized/not SmartScreen-trusted and needs Josef's real Windows laptop click-through/playtest before claiming final public confidence.
 

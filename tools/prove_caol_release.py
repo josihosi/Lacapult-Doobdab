@@ -5,7 +5,7 @@ No release archive is downloaded. This only reads GitHub JSON and filters asset 
 using the same platform substrings wired in scripts/ReleaseManager.gd.
 
 By default it proves the current host platform. Pass ``--all-platforms`` to prove the
-v0.2.0 asset contract for Linux, macOS, and Windows in one API read.
+curated C-AOL port release asset contract for Linux, macOS, and Windows in one API read.
 """
 
 from __future__ import annotations
@@ -23,6 +23,13 @@ FILTERS = {
     "Darwin": ["_macos.dmg", "_macos.tar.gz", "_macos.zip"],
     "Windows": ["_windows.zip"],
 }
+
+CURATED_CAOL_TAG_PREFIXES = (
+    "caol-cdda-master",
+    "caol-ctlg-master",
+    "caol-cdda-0-h",
+    "caol-cdda-0-i",
+)
 
 
 def select_asset(release: dict[str, Any], system: str) -> dict[str, Any]:
@@ -60,9 +67,21 @@ def select_asset(release: dict[str, Any], system: str) -> dict[str, Any]:
     }
 
 
-def order_for_ui(releases: list[dict[str, Any]], system: str, preferred_tag: str = "v0.2.0") -> list[dict[str, Any]]:
+def is_curated_caol_release(release: dict[str, Any]) -> bool:
+    tag = release.get("tag_name", "")
+    return any(tag.startswith(prefix) for prefix in CURATED_CAOL_TAG_PREFIXES)
+
+
+def curated_releases_in_ui_order(releases: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    ordered = []
+    for prefix in CURATED_CAOL_TAG_PREFIXES:
+        ordered.extend(release for release in releases if release.get("tag_name", "").startswith(prefix))
+    return ordered
+
+
+def order_for_ui(releases: list[dict[str, Any]], system: str) -> list[dict[str, Any]]:
     shaped = []
-    for release in releases:
+    for release in curated_releases_in_ui_order(releases):
         asset_result = select_asset(release, system)
         shaped.append(
             {
@@ -72,11 +91,7 @@ def order_for_ui(releases: list[dict[str, Any]], system: str, preferred_tag: str
                 "filename": asset_result["installer_shape"]["filename"],
             }
         )
-    return (
-        [item for item in shaped if item["tag_name"] == preferred_tag or preferred_tag in item["name"]]
-        + [item for item in shaped if item["installable"] and item["tag_name"] != preferred_tag and preferred_tag not in item["name"]]
-        + [item for item in shaped if not item["installable"] and item["tag_name"] != preferred_tag and preferred_tag not in item["name"]]
-    )
+    return shaped
 
 
 def main() -> int:
@@ -98,28 +113,40 @@ def main() -> int:
     with urllib.request.urlopen(req, timeout=30) as resp:
         releases = json.load(resp)
 
-    v020 = next((r for r in releases if r.get("tag_name") == "v0.2.0" or r.get("name") == "v0.2.0"), None)
-    if not v020:
-        print("v0.2.0 release not found", file=sys.stderr)
+    curated = curated_releases_in_ui_order(releases)
+    if len(curated) != len(CURATED_CAOL_TAG_PREFIXES):
+        print(f"expected {len(CURATED_CAOL_TAG_PREFIXES)} curated C-AOL releases, got {len(curated)}", file=sys.stderr)
         return 1
 
-    platform_results = [select_asset(v020, system) for system in systems]
+    platform_results = [
+        {
+            "system": system,
+            "releases": [select_asset(release, system) for release in curated],
+        }
+        for system in systems
+    ]
     ui_order = order_for_ui(releases, systems[0])
     proof = {
-        "release": v020.get("tag_name"),
-        "release_name": v020.get("name"),
-        "published_at": v020.get("published_at", ""),
-        "asset_count": len(v020.get("assets", [])),
-        "ui_first_release_after_priority": ui_order[0] if ui_order else None,
+        "allowed_tag_prefixes": CURATED_CAOL_TAG_PREFIXES,
+        "curated_release_tags": [release.get("tag_name", "") for release in curated],
+        "ui_release_count": len(ui_order),
+        "ui_order": ui_order,
         "platform_results": platform_results,
     }
     print(json.dumps(proof, indent=2))
 
-    if not all(result["installable"] for result in platform_results):
+    if len(ui_order) != len(CURATED_CAOL_TAG_PREFIXES):
+        print("curated UI order does not contain exactly the expected C-AOL release rows", file=sys.stderr)
         return 1
-    if not ui_order or ui_order[0]["tag_name"] != "v0.2.0" or not ui_order[0]["installable"]:
-        print("v0.2.0 is not first/installable in prioritized UI order", file=sys.stderr)
+    expected_order = list(CURATED_CAOL_TAG_PREFIXES)
+    actual_order = [next(prefix for prefix in CURATED_CAOL_TAG_PREFIXES if item["tag_name"].startswith(prefix)) for item in ui_order]
+    if actual_order != expected_order:
+        print(f"curated UI order mismatch: {actual_order}", file=sys.stderr)
         return 1
+    for platform in platform_results:
+        if not all(result["installable"] for result in platform["releases"]):
+            print(f"not all curated releases are installable for {platform['system']}", file=sys.stderr)
+            return 1
     return 0
 
 

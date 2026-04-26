@@ -2,7 +2,7 @@
 
 ## Classification
 
-PUBLISHED / PROVEN FOR JOSEF TEST.
+HOTFIX PUBLISHED / PROVEN FOR JOSEF TEST AFTER WINDOWS 7-ZIP BLOCKER.
 
 ## User request
 
@@ -39,6 +39,8 @@ Josef wants Lacapult Doobdab itself packaged into a clean downloadable launcher 
 
 Published result: `lacapult-test-2026-04-26` / https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-test-2026-04-26
 
+Hotfix result after Josef Windows testing found missing `utils/7za.exe`: `lacapult-test-2026-04-26-2` / https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-test-2026-04-26-2
+
 ## Suggested tag/name
 
 Use a Lacapult-specific tag that cannot be confused with C-AOL game versions, for example:
@@ -62,3 +64,10 @@ gh release view <tag> --repo josihosi/Lacapult-Doobdab --json tagName,name,isPre
 ```
 
 Add any extra checks needed if the packaging/release path changes.
+
+
+## Hotfix addendum - 2026-04-26
+
+Josef's Windows test found the first prerelease could download the C-AOL archive but could not extract it because the Windows package did not contain `utils/7za.exe` next to the launcher. The hotfix release `lacapult-test-2026-04-26-2` fixes that packaging shape, includes sidecar 7-Zip binaries for Windows/Linux, proves the Windows zip contains `utils/7za.exe`, curates the C-AOL install list to the four expected port releases, and replaces the startup lineage note with a plain Dabdoob/Catapult developer thank-you.
+
+The Windows custom-title-bar rendering note remains follow-up UI polish; it is not claimed fixed by this hotfix.

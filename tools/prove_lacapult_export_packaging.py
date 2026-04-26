@@ -170,7 +170,7 @@ platform="{platform}"
 runnable={"true" if app else "false"}
 custom_features=""
 export_filter="all_resources"
-include_filter=""
+include_filter="utils/*,fonts/*,resources/caol_macos_repair/*"
 exclude_filter=""
 export_path="{export_path}"
 script_export_mode=1
@@ -411,6 +411,18 @@ def tar_gz_path(source: Path, destination: Path) -> None:
         tf.add(source, arcname=source.name, recursive=True)
 
 
+def _package_contains_7zip(platform: str, package_path: Path) -> bool:
+    if platform == "windows":
+        with zipfile.ZipFile(package_path, "r") as zf:
+            names = {name.replace("\\", "/") for name in zf.namelist()}
+        return "utils/7za.exe" in names
+    if platform == "linux":
+        with tarfile.open(package_path, "r:gz") as tf:
+            names = {member.name.replace("\\", "/") for member in tf.getmembers()}
+        return "linux/utils/7za" in names or "utils/7za" in names
+    return True
+
+
 def package_shape(platform: str, package_path: Path, source_path: Path) -> dict[str, Any]:
     if platform == "linux":
         with tarfile.open(package_path, "r:gz") as tf:
@@ -427,14 +439,83 @@ def package_shape(platform: str, package_path: Path, source_path: Path) -> dict[
     with zipfile.ZipFile(package_path, "r") as zf:
         names = zf.namelist()
     expected = source_path.name
+    contains_expected_root = any(name == expected or name.startswith(expected + "/") for name in names)
+    contains_root_executable = any("/" not in name and name.lower().endswith(".exe") for name in names)
     return {
         "platform": platform,
         "path": str(package_path.relative_to(ROOT)),
         "format": "zip",
         "member_count": len(names),
-        "contains_expected_root": any(name == expected or name.startswith(expected + "/") for name in names),
-        "ready_unsigned_local_package": any(name == expected or name.startswith(expected + "/") for name in names),
+        "contains_expected_root": contains_expected_root,
+        "contains_root_executable": contains_root_executable,
+        "ready_unsigned_local_package": contains_expected_root or contains_root_executable,
     }
+
+
+def _copy_sidecar_utils(platform: str, destination_root: Path) -> list[str]:
+    copied: list[str] = []
+    names = []
+    if platform == "windows":
+        names = ["7za.exe", "7-ZIP_LICENSE"]
+    elif platform == "linux":
+        names = ["7za", "7-ZIP_LICENSE"]
+
+    if not names:
+        return copied
+
+    utils_dest = destination_root / "utils"
+    utils_dest.mkdir(parents=True, exist_ok=True)
+    for name in names:
+        src = ROOT / "utils" / name
+        if not src.exists():
+            continue
+        dest = utils_dest / name
+        shutil.copy2(src, dest)
+        if name == "7za":
+            dest.chmod(dest.stat().st_mode | 0o755)
+        copied.append(str(dest.relative_to(destination_root)))
+    return copied
+
+
+def _stage_package_source(platform: str, source_path: Path) -> tuple[Path, dict[str, Any]]:
+    if platform not in ("windows", "linux"):
+        return source_path, {"staged": False, "sidecar_utils": []}
+
+    staging_root = OUTPUT_ROOT / "staging" / platform
+    if staging_root.exists():
+        shutil.rmtree(staging_root)
+    staging_root.mkdir(parents=True)
+
+    if source_path.is_dir():
+        staged_source = staging_root / source_path.name
+        shutil.copytree(source_path, staged_source, symlinks=True)
+    else:
+        staged_source = staging_root / source_path.name
+        shutil.copy2(source_path, staged_source)
+        if platform == "linux":
+            staged_source.chmod(staged_source.stat().st_mode | 0o755)
+
+    copied = _copy_sidecar_utils(platform, staging_root)
+    return staging_root, {
+        "staged": True,
+        "staging_root": str(staging_root.relative_to(ROOT)),
+        "source": str(source_path.relative_to(ROOT)),
+        "sidecar_utils": copied,
+    }
+
+
+def write_package_checksums(package_results: list[dict[str, Any]]) -> dict[str, Any]:
+    checksum_path = OUTPUT_ROOT / "packages" / "SHA256SUMS.txt"
+    lines = []
+    for item in package_results:
+        artifact_info = item.get("artifact", {})
+        digest = artifact_info.get("sha256", "")
+        artifact_path = artifact_info.get("path", "")
+        if not digest or not artifact_path:
+            continue
+        lines.append(f"{digest}  {Path(artifact_path).name}")
+    checksum_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return artifact(checksum_path)
 
 
 def package_exports(app_paths: dict[str, Path]) -> list[dict[str, Any]]:
@@ -450,14 +531,20 @@ def package_exports(app_paths: dict[str, Path]) -> list[dict[str, Any]]:
             })
             continue
         package_path = OUTPUT_ROOT / spec["path"]
+        package_source, staging = _stage_package_source(platform, source_path)
         if platform == "linux":
-            tar_gz_path(source_path, package_path)
+            tar_gz_path(package_source, package_path)
         else:
-            zip_path(source_path, package_path, keep_parent=True)
+            zip_path(package_source, package_path, keep_parent=False if staging.get("staged") else True)
+        shape = package_shape(platform, package_path, package_source)
+        shape["contains_7zip_sidecar"] = _package_contains_7zip(platform, package_path)
+        if platform in ("windows", "linux"):
+            shape["ready_unsigned_local_package"] = shape.get("ready_unsigned_local_package", False) and shape["contains_7zip_sidecar"]
         results.append({
             "platform": platform,
             "artifact": artifact(package_path),
-            "shape": package_shape(platform, package_path, source_path),
+            "shape": shape,
+            "staging": staging,
         })
     return results
 
@@ -501,6 +588,7 @@ def main() -> int:
             app_results.append(result)
 
         package_results = package_exports(app_paths)
+        checksum_artifact = write_package_checksums(package_results)
 
         proof = {
             "godot": godot,
@@ -511,6 +599,7 @@ def main() -> int:
             "pack_exports": pack_results,
             "app_exports": app_results,
             "package_exports": package_results,
+            "package_checksums": checksum_artifact,
             "skipped_app_exports": skipped_app_exports,
         }
         manifest = OUTPUT_ROOT / "manifest.json"

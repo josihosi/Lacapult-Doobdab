@@ -91,18 +91,18 @@ const _ASSET_FILTERS = {
 	"caol-release-linux": {
 		"field": "name",
 		"substring": "_linux.tar.gz",
-		"preferred_tag": "v0.2.0",
+		"allowed_tag_prefixes": ["caol-cdda-master", "caol-ctlg-master", "caol-cdda-0-h", "caol-cdda-0-i"],
 	},
 	"caol-release-win": {
 		"field": "name",
 		"substring": "_windows.zip",
-		"preferred_tag": "v0.2.0",
+		"allowed_tag_prefixes": ["caol-cdda-master", "caol-ctlg-master", "caol-cdda-0-h", "caol-cdda-0-i"],
 	},
 	"caol-release-mac": {
 		"field": "name",
 		"substring": "_macos.dmg",
 		"fallback_substrings": ["_macos.tar.gz", "_macos.zip"],
-		"preferred_tag": "v0.2.0",
+		"allowed_tag_prefixes": ["caol-cdda-master", "caol-ctlg-master", "caol-cdda-0-h", "caol-cdda-0-i"],
 	},
 }
 
@@ -444,6 +444,9 @@ func _parse_builds(data: PoolByteArray, write_to: Array, filter: Dictionary) -> 
 	var tmp_arr = []
 
 	for rec in json:
+		if not _release_allowed_by_filter(rec, filter):
+			continue
+
 		var build = {}
 		build["name"] = rec["name"]
 		build["tag_name"] = rec.get("tag_name", "")
@@ -473,13 +476,34 @@ func _parse_builds(data: PoolByteArray, write_to: Array, filter: Dictionary) -> 
 		# Include all releases, even those without matching assets
 		tmp_arr.append(build)
 
-	if "preferred_tag" in filter:
+	if "allowed_tag_prefixes" in filter:
+		tmp_arr = _order_release_builds_by_prefix(tmp_arr, filter["allowed_tag_prefixes"])
+	elif "preferred_tag" in filter:
 		tmp_arr = _prioritize_release_builds(tmp_arr, filter["preferred_tag"])
 
 	if len(tmp_arr) > 0:
 		write_to.clear()
 		write_to.append_array(tmp_arr)
 		Status.post(tr("msg_got_n_releases") % len(tmp_arr))
+
+
+func _release_allowed_by_filter(rec: Dictionary, filter: Dictionary) -> bool:
+	if not "allowed_tag_prefixes" in filter:
+		return true
+	var tag_name = rec.get("tag_name", "")
+	for prefix in filter["allowed_tag_prefixes"]:
+		if tag_name.begins_with(prefix):
+			return true
+	return false
+
+
+func _order_release_builds_by_prefix(builds: Array, allowed_tag_prefixes: Array) -> Array:
+	var ordered = []
+	for prefix in allowed_tag_prefixes:
+		for build in builds:
+			if build.get("tag_name", "").begins_with(prefix):
+				ordered.append(build)
+	return ordered
 
 
 func _prioritize_release_builds(builds: Array, preferred_tag: String) -> Array:
