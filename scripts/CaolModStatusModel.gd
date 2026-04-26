@@ -221,6 +221,117 @@ func build_dry_run_summarizer_prompt(status: Dictionary, backend_mode := "", bac
 	}
 
 
+func build_generation_apply_plan(status: Dictionary, selected_mod_id := "", backend_mode := "", backend_status := "", confirmation_received := false) -> Dictionary:
+	# Slice 6 preview/action-plan model. This chooses one eligible enabled
+	# contextual mod from the existing status model, reuses the backend gate, and
+	# returns the exact companion-pack / mods.json / backup plan that a confirmed
+	# apply flow would use. Building this plan is non-mutating: no backend call,
+	# generated files, pack apply, or mods.json write happens here.
+	var candidates := []
+	for record in status.get("mods", []):
+		if _record_is_apply_candidate(record):
+			candidates.append(record)
+
+	var selected = null
+	for candidate in candidates:
+		if selected_mod_id == "" or candidate.get("id", "") == selected_mod_id:
+			selected = candidate
+			break
+
+	var world = status.get("world", {})
+	var world_path = str(world.get("world_path", ""))
+	var mods_json_path = world_path.plus_file("mods.json") if world_path != "" else ""
+	var backend_ready = _backend_gate_ready({"mode": backend_mode, "status": backend_status})
+	if backend_ready == null:
+		backend_ready = status.get("backend_gate", {}).get("generation_ready", null)
+	var blocked_reasons := []
+	if selected == null:
+		blocked_reasons.append("No enabled contextual C-AOL mod currently needs a generated summary pack.")
+	if world_path == "" or world.get("mods_json_present", false) != true:
+		blocked_reasons.append("Select a world with a readable mods.json before applying a summary companion pack.")
+	if backend_ready != true:
+		blocked_reasons.append("Backend generation is not ready; API/Ollama/OpenVINO readiness must pass before generation/apply.")
+	if confirmation_received != true:
+		blocked_reasons.append("Explicit player confirmation is required before any generated pack or mods.json write.")
+
+	var companion_id = ""
+	var source_id = ""
+	var source_name = ""
+	var user_mods_root = str(status.get("paths", {}).get("user_mods", ""))
+	var companion_dir = ""
+	var new_mod_order := []
+	var enabled_ids = world.get("enabled_mod_ids", [])
+	for id in enabled_ids:
+		new_mod_order.append(id)
+	if selected != null:
+		source_id = selected.get("id", "")
+		source_name = selected.get("name", source_id)
+		companion_id = "lacapult_summary_%s" % _safe_id_fragment(source_id)
+		companion_dir = user_mods_root.plus_file(companion_id) if user_mods_root != "" else companion_id
+		if not new_mod_order.has(source_id):
+			new_mod_order.append(source_id)
+		if new_mod_order.has(companion_id):
+			new_mod_order.erase(companion_id)
+		new_mod_order.append(companion_id)
+
+	var would_write = blocked_reasons.empty()
+	var lines := []
+	lines.append("C-AOL Summarizer apply preview: %s." % ("ready after confirmation" if would_write else "blocked"))
+	if selected != null:
+		lines.append("Selected mod/world: %s (%s) in %s." % [source_name, source_id, world.get("world_name", "unknown world")])
+		lines.append("Companion summary mod: %s." % companion_id)
+		lines.append("Writes after confirmation: modinfo.json, lacapult_summary_pack_manifest.json, and npcs/Backgrounds/Summaries_extra/generated_%s.json under %s; then update %s so the companion loads after the source mod." % [_safe_id_fragment(source_id), companion_dir, mods_json_path])
+	if blocked_reasons.empty():
+		lines.append("Backups before write: existing companion pack folder if present, target world mods.json bytes, and an apply manifest with rollback paths.")
+	else:
+		for reason in blocked_reasons:
+			lines.append("Blocked: %s" % reason)
+
+	return {
+		"action": "caol_summarizer_generation_apply_plan_v0",
+		"version": 1,
+		"read_only_preview": true,
+		"candidate_count": candidates.size(),
+		"selected_mod_id": source_id,
+		"selected_mod_name": source_name,
+		"world_name": world.get("world_name", null),
+		"world_path": world_path,
+		"backend_mode": backend_mode,
+		"backend_status": backend_status,
+		"backend_generation_ready": backend_ready,
+		"requires_confirmation": true,
+		"confirmation_received": confirmation_received,
+		"would_call_backend": would_write,
+		"would_generate_pack": would_write,
+		"would_mutate": would_write,
+		"would_enable_mods": would_write,
+		"blocked_reasons": blocked_reasons,
+		"companion_mod_id": companion_id,
+		"companion_pack_dir": companion_dir,
+		"write_plan": {
+			"modinfo_json": companion_dir.plus_file("modinfo.json") if companion_dir != "" else "",
+			"manifest_json": companion_dir.plus_file("lacapult_summary_pack_manifest.json") if companion_dir != "" else "",
+			"summaries_extra_json": companion_dir.plus_file(SUMMARY_EXTRA_REL).plus_file("generated_%s.json" % _safe_id_fragment(source_id)) if companion_dir != "" and source_id != "" else "",
+			"summaries_short_dir": companion_dir.plus_file(SUMMARY_SHORT_REL) if companion_dir != "" else "",
+			"mods_json": mods_json_path,
+			"previous_mod_order": enabled_ids,
+			"planned_mod_order": new_mod_order,
+		},
+		"backup_plan": ["backup existing companion pack folder before replacement", "backup target world mods.json bytes before editing", "write apply manifest listing old/new paths and rollback order"],
+		"manifest_preview": {
+			"type": "lacapult_summary_pack_manifest",
+			"version": 1,
+			"source_mod_id": source_id,
+			"source_mod_name": source_name,
+			"source_fingerprint": selected.get("source_fingerprint", "") if selected != null else "",
+			"backend": backend_mode,
+			"model": _backend_model_from_status(backend_status),
+			"target_schema": "c-aol npc_personality_summary_bundle v1",
+		},
+		"message": "\n".join(lines),
+	}
+
+
 func _scan_mod_root(root: String, source_type: String) -> Array:
 	var d = Directory.new()
 	if root == "" or not d.dir_exists(root):
@@ -479,6 +590,39 @@ func _backend_gate_ready(backend_gate) :
 	if mode == "openvino":
 		return status.find("imports_ok") >= 0 and status.find("model_dir_present") >= 0
 	return false
+
+
+func _record_is_apply_candidate(record: Dictionary) -> bool:
+	if not _record_is_enabled_source_mod(record):
+		return false
+	if not _record_has_contextual_content(record):
+		return false
+	if _record_is_blocked(record):
+		return false
+	return ["summary-missing", "summary-partial", "summary-stale", "summary-conflict", "summary-unknown"].has(record.get("summary_status", "summary-unknown"))
+
+
+func _safe_id_fragment(value: String) -> String:
+	var result := ""
+	for i in range(value.length()):
+		var ch = value.substr(i, 1).to_lower()
+		if (ch >= "a" and ch <= "z") or (ch >= "0" and ch <= "9") or ch == "_" or ch == "-":
+			result += ch
+		else:
+			result += "_"
+	if result == "":
+		return "unknown"
+	return result
+
+
+func _backend_model_from_status(status: String) -> String:
+	# Status strings are intentionally not secret-bearing. If a future backend
+	# status embeds a model token as model:<name>, surface only that non-secret
+	# name in the preview manifest; otherwise keep it unknown.
+	for token in status.split(" "):
+		if token.begins_with("model:"):
+			return token.substr(6, token.length() - 6)
+	return "unknown-model"
 
 
 func _record_is_enabled_source_mod(record: Dictionary) -> bool:

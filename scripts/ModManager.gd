@@ -1551,12 +1551,15 @@ func _store_mod_download_date(mod_id: String) -> void:
 
 
 func get_caol_mod_summarizer_status(world_name := "") -> Dictionary:
-	# Slice 1 read-only bridge for C-AOL mod/Summarizer status. Later UX slices
-	# can render this shape without the Mods tab having to know the filesystem
-	# details for stock/user/catalog/world-custom roots.
+	# Slice 1+6 bridge for C-AOL mod/Summarizer status. The status model is
+	# still non-mutating, but now carries the current backend generation gate so
+	# real apply previews can be blocked/enabled by the same backend-good checks.
 	if Settings.read("game") != "caol":
 		return {"model": "caol_mod_summarizer_status", "version": 1, "read_only": true, "mods": [], "counts": {}, "world": {"errors": ["C-AOL status model only runs for game=caol"]}}
-	return CaolModStatus.build_current_status(world_name)
+	var paths = get_node_or_null("/root/Paths")
+	if paths == null:
+		return {"model": "caol_mod_summarizer_status", "version": 1, "read_only": true, "mods": [], "counts": {}, "world": {"errors": ["Paths autoload is unavailable"]}}
+	return CaolModStatus.build_status(paths.mods_stock, paths.mods_user, paths.mod_repo, paths.savegames, world_name, _current_backend_gate())
 
 
 func get_caol_mod_summarizer_overview(world_name := "") -> Dictionary:
@@ -1565,12 +1568,25 @@ func get_caol_mod_summarizer_overview(world_name := "") -> Dictionary:
 	return CaolModStatus.build_ux_overview(get_caol_mod_summarizer_status(world_name))
 
 
+func get_caol_summarizer_apply_preview(world_name := "", selected_mod_id := "", confirmation_received := false) -> Dictionary:
+	# Slice 6 preview/action plan. This builds a player-facing plan but does not
+	# call a backend, generate files, apply packs, enable mods, or mutate saves.
+	var mode = Settings.read("backend_mode")
+	var backend_status = _current_backend_status(mode)
+	return CaolModStatus.build_generation_apply_plan(get_caol_mod_summarizer_status(world_name), selected_mod_id, mode, backend_status, confirmation_received)
+
+
 func get_caol_summarizer_dry_run(world_name := "") -> Dictionary:
 	# Dry-run prompt/action state. This intentionally does not call a backend,
 	# generate files, enable mods, apply packs, or mutate saves/userdata.
 	var mode = Settings.read("backend_mode")
 	var backend_status = _current_backend_status(mode)
 	return CaolModStatus.build_dry_run_summarizer_prompt(get_caol_mod_summarizer_status(world_name), mode, backend_status)
+
+
+func _current_backend_gate() -> Dictionary:
+	var mode = Settings.read("backend_mode")
+	return {"mode": mode, "status": _current_backend_status(mode)}
 
 
 func _current_backend_status(mode: String) -> String:

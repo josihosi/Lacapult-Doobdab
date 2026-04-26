@@ -88,9 +88,15 @@ func _add_caol_mod_bridge_status_controls() -> void:
 	dry_run_button.connect("pressed", self, "_on_CaolSummarizerDryRun_pressed")
 	section.add_child(dry_run_button)
 
+	var preview_button = Button.new()
+	preview_button.text = "Preview Summarizer apply plan"
+	preview_button.hint_tooltip = "Shows the eligible mod/world, backend gate, companion pack paths, backups, and confirmation requirement before any real write."
+	preview_button.connect("pressed", self, "_on_CaolSummarizerApplyPreview_pressed")
+	section.add_child(preview_button)
+
 	var summary_roots = Label.new()
 	summary_roots.autowrap = true
-	summary_roots.text = "C-AOL summary roots stay native: future generated packs belong in active mod roots under npcs/Backgrounds/Summaries_short or npcs/Backgrounds/Summaries_extra. Lacapult v0 does not apply generated summary packs or enable mods from this status block."
+	summary_roots.text = "C-AOL summary roots stay native: generated companion packs belong in active mod roots under npcs/Backgrounds/Summaries_short or npcs/Backgrounds/Summaries_extra. The preview button shows the real apply/backup plan; Lacapult still requires an explicit confirmation step before any backend call, pack write, or mods.json change."
 	section.add_child(summary_roots)
 
 	var report_reference = Label.new()
@@ -99,8 +105,8 @@ func _add_caol_mod_bridge_status_controls() -> void:
 	section.add_child(report_reference)
 
 	# Keep this read-only status surface before the long inherited settings list.
-	# The button is dry-run/status-only; applying/generated summary packs is a later
-	# explicit flow.
+	# The dry-run remains status-only; the preview button exposes the Slice 6
+	# confirmation-gated write plan without performing the write here.
 	move_child(section, 3)
 	_refresh_caol_mod_bridge_status()
 
@@ -124,6 +130,16 @@ func _on_CaolSummarizerDryRun_pressed() -> void:
 	var dry_run = mods.get_caol_summarizer_dry_run()
 	_caol_mod_bridge_status.text = dry_run.get("message", "Summarizer dry-run unavailable.")
 	Status.post("C-AOL Summarizer dry-run/status-only check complete; no backend call, pack apply, or save mutation was attempted.")
+
+
+func _on_CaolSummarizerApplyPreview_pressed() -> void:
+	var mods = get_node_or_null("/root/Mods")
+	if mods == null or not mods.has_method("get_caol_summarizer_apply_preview"):
+		_caol_mod_bridge_status.text = "Summarizer apply preview unavailable: Mods autoload is not ready."
+		return
+	var preview = mods.get_caol_summarizer_apply_preview()
+	_caol_mod_bridge_status.text = preview.get("message", "Summarizer apply preview unavailable.")
+	Status.post("C-AOL Summarizer apply preview built; explicit confirmation is still required before any backend call, generated pack, or save mutation.")
 
 
 func _on_obtnLanguage_item_selected(index: int) -> void:

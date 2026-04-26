@@ -14,9 +14,18 @@ Use the smallest evidence that honestly matches the change.
 - Mod Summarizer/apply changes: prove status/discovery first, then sandbox generated packs and rollback; never mutate Josef's real Application Support saves/config/mods for proof work.
 - Public pushes/release publication/upstream contact: external actions, require explicit clearance.
 
-## Active proof target - 2026-04-26 LLM backend setup installer packet v0
+## Active proof target - 2026-04-26 real C-AOL mod/Summarizer generation/apply UI v0
 
-The active backend setup installer packet is now implemented and proofed safely. Use `doc/lacapult-llm-backend-setup-installer-packet-v0-2026-04-26.md` as the contract and `doc/lacapult-gui-reasoning-reddit-cdda-install-run-2026-04-26.md` as the outsider GUI reasoning artifact. Proofs must remain non-mutating: no package installs, no model pulls/downloads, no API calls/secrets, and no real Application Support/game-state mutation without explicit confirmation and a safe path.
+Slice 6 is active. Use `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md` as the contract: promote the existing read-only/dry-run Summarizer surfaces into a user-confirmed generation/apply path for eligible contextual C-AOL mods/worlds. Proofs must remain sandboxed/non-mutating: no package installs, model pulls/downloads, API calls/secrets, or real Application Support/game-state writes without explicit confirmation and a safe path.
+
+
+## Evidence - 2026-04-26 Summarizer Slice 6 apply-preview v0
+
+- Added a Slice 6 generation/apply plan model in `scripts/CaolModStatusModel.gd`: it selects an eligible enabled contextual mod from the existing status model, carries the backend-good gate, names the companion summary mod, previews C-AOL-native `npcs/Backgrounds/Summaries_extra` / `Summaries_short` write paths, shows the planned world `mods.json` order, and lists backup/rollback responsibilities.
+- Added `ModManager.get_caol_summarizer_apply_preview()` and a Settings button `Preview Summarizer apply plan`. The button is still non-mutating: it renders the plan and confirmation requirement only; it does not call a backend, generate files, apply packs, enable mods, or edit saves.
+- Extended `tools/godot_caol_mod_ux_status_smoke.gd` so the sandbox fixture proves three Slice 6 states: unconfirmed preview is blocked and non-mutating, confirmed+backend-ready plan exposes the real would-write/would-generate/would-enable side effects plus native summary-root path, and confirmed+backend-not-ready remains blocked.
+- Validation passed: `python3 -m py_compile tools/caol_mod_status_model.py tools/prove_caol_mod_status_model.py tools/prove_caol_summary_pack_apply.py tools/prove_caol_summary_error_matrix.py`, `python3 tools/prove_caol_mod_status_model.py`, `LACAPULT_CAOL_MOD_STATUS_FIXTURE=... /opt/homebrew/bin/godot --path . --no-window --script tools/godot_caol_mod_ux_status_smoke.gd`, `python3 tools/prove_caol_backend_contract.py`, `/opt/homebrew/bin/godot --path . --no-window --quit`, and `git diff --check`. Godot emitted known fixture parse errors/headless macOS cleanup warnings but exited 0. Evidence log: `.proof-cache/slice6-preview-gates.log`; plan JSON: `.proof-cache/caol-mod-status-fixture/ux_slice6.json`.
+- This is the first real UI/action-plan step, not the final writer: automated proof still writes only ignored sandbox/proof-cache artifacts and does not mutate Josef's real Application Support config, saves, worlds, mods, API secrets, packages, or models.
 
 ## Evidence - 2026-04-26 LLM backend setup installer packet v0
 

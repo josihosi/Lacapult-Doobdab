@@ -74,7 +74,7 @@ Done only when all are true:
 
 ## Feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply
 
-Status: **SLICES 1-5 PROVEN / REAL GENERATION+APPLY UI V0 ACTIVE**
+Status: **SLICES 1-5 PROVEN / SLICE 6 APPLY-PREVIEW UI LANDED / REAL WRITER STILL ACTIVE**
 
 Done only when all are true:
 
@@ -82,9 +82,9 @@ Done only when all are true:
 - [x] Enabled vs disabled status is world-aware for at least one sandbox world in the Slice 1 fixture proof.
 - [x] Obsolete mods, broken metadata, content parse errors, missing roots, missing dependencies, partial summaries, stale summaries, conflicts, backend-not-ready gates, and disabled mods produce visible statuses in the sandbox status/error matrix.
 - [x] After mod install, and from persistent Mods/Settings status surfaces, Lacapult offers a Summarizer prompt/button rather than burying the next action, currently dry-run/status-only.
-- [ ] Real generation/apply UI v0 lets the player choose an eligible contextual mod/world, see a preview/plan, and explicitly confirm before Lacapult writes a companion summary pack or changes a world `mods.json`.
+- [ ] Real generation/apply UI v0 lets the player choose an eligible contextual mod/world, see a preview/plan, and explicitly confirm before Lacapult writes a companion summary pack or changes a world `mods.json`. First Settings-tab apply-preview plan is landed and sandbox-smoked; the actual confirmed writer/backend generation step remains active.
 - [x] The launcher shows whether all enabled extra NPC/content is summarized, blocked, needs summaries, or unknown.
-- [ ] API, Ollama, and OpenVINO generation readiness is gated through the backend-good checks for real generation/apply; no API calls, model pulls/downloads, package installs, or user-data writes happen without explicit confirmation.
+- [ ] API, Ollama, and OpenVINO generation readiness is gated through the backend-good checks for real generation/apply; no API calls, model pulls/downloads, package installs, or user-data writes happen without explicit confirmation. Slice 6 preview now carries the backend-good gate and blocks confirmed apply when the selected backend is not generation-ready.
 - [x] A sandbox fixture generated pack is C-AOL-native under `npcs/Backgrounds/Summaries_extra`, not launcher-only metadata.
 - [x] Applying a generated companion summary pack and changing a world `mods.json` list is sandbox-proven with backup and rollback.
 - [x] C-AOL runtime consumption is proven in a sandbox/harness, or a concrete C-AOL-side blocker is recorded.
