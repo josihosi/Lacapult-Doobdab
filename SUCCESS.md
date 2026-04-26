@@ -14,7 +14,8 @@ Done only when all are true:
 - [ ] API/AnyLLM, Ollama, and OpenVINO each expose a guided setup/install pathway with explicit confirmation before external changes.
 - [ ] Ollama setup offers `mistral-v0.3` and `nemotron-9b` choices, with hardware-based recommendation and manual override.
 - [ ] Installer-path tests prove package/model install actions are gated, mocked, or sandboxed and do not mutate Josef's real machine.
-- [ ] About/thank-you copy is checked and cleaned for Lacapult while required attribution/license credit remains intact.
+- [ ] Inherited About/thank-you personal support message is preserved, while backend/setup installer copy is cleaned so no Josef/test-run wording leaks into normal setup surfaces.
+- [ ] A GUI reasoning roleplay from a Reddit C:DDA aficionado installing C-AOL has been run, and its findings are reflected in UI/copy/proof expectations.
 
 Canonical contract: `doc/lacapult-llm-backend-setup-installer-packet-v0-2026-04-26.md`.
 

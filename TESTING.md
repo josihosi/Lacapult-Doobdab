@@ -501,5 +501,6 @@ Required before closure:
 - Text scan proving no Josef/test-run wording and no casual platform-first recommendation copy remains in player-facing backend setup text.
 - Safe installer-path proof for API/AnyLLM, Ollama, and OpenVINO showing explicit confirmation before external package/model install actions; tests must not mutate Josef's real machine.
 - Ollama model recommendation fixture proof covering at least a low/unknown hardware case and a stronger hardware case for `mistral-v0.3` vs `nemotron-9b` recommendation.
-- About/thank-you copy provenance check and cleanup proof; inherited `feeling depressed, anxious or unsure of yourself` text was present from the initial imported scaffold (`4eb2a84`) and should be replaced with normal product copy unless Josef explicitly keeps it.
+- About/thank-you provenance note: inherited `feeling depressed, anxious or unsure of yourself` text was present from the initial imported scaffold (`4eb2a84`) and Josef explicitly okayed leaving it in place. Proof should not fail on that support message; copy cleanup belongs to backend/setup installer surfaces where `Josef` or test-run wording would confuse anonymous players.
+- Add/keep a GUI reasoning-run artifact from the perspective of a Reddit C:DDA aficionado installing C-AOL through Lacapult. It should answer what they click first, what `Josef` means if visible, which backend path seems easiest/local/specialized, and which visible steps make the installer feel complete.
 - `git diff --check` plus the smallest meaningful Godot/project-load gate.

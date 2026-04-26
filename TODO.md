@@ -15,7 +15,8 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
    - [ ] Rewrite backend setup copy so it is neutral player-facing C-AOL installer text: no Josef/test-run wording, no casual `Windows-first` recommendation copy, no raw debug/status-key clutter where prose belongs.
    - [ ] Add guided installer pathways for API/AnyLLM, Ollama, and OpenVINO, with explicit confirmation before any external package/model install or download.
    - [ ] Add Ollama model choices for `mistral-v0.3` and `nemotron-9b`, with safe hardware-based recommendation text and manual override rather than silent auto-pick.
-   - [ ] Check and clean About/thank-you copy, including the inherited depressed/anxious/loved-one text, while preserving attribution/license credit.
+   - [ ] Leave the inherited About/thank-you depressed/anxious/loved-one support text in place; Josef explicitly okayed it. Still preserve attribution/license credit and keep backend/setup copy free of Josef/test-run leakage.
+   - [ ] Run a GUI reasoning roleplay from the perspective of a C:DDA aficionado who read about C-AOL on Reddit and wants to install/play it; use it to answer open installer flow/look/backend-choice/unexplained-name questions.
    - [ ] Prove the tab/copy/install-confirmation/model-recommendation shape with safe static/Godot/fixture checks; do not mutate Josef's real machine in tests.
 
 0. Lacapult launcher hotfix prerelease — published for Josef Windows test

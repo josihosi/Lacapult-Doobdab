@@ -64,8 +64,6 @@ def main() -> None:
     backend_player_facing = "\n".join([backend_ui, backend_config, scene])
     for banned in ["Josef", "Windows test", "pre-release testing", "Windows-first"]:
         require(banned not in backend_player_facing, f"backend/setup banned wording remains: {banned}")
-    for banned in ["depressed", "anxious", "unsure of yourself"]:
-        require(banned not in en_text, f"out-of-place About/thank-you support wording remains: {banned}")
 
     low = recommendation_for_fixture(0)
     strong = recommendation_for_fixture(32768)
@@ -81,7 +79,7 @@ def main() -> None:
     print("  confirmation-gated actions: present, non-mutating proof text present")
     print(f"  Ollama choices: {MODEL_MISTRAL}, {MODEL_NEMOTRON}")
     print("  fixture recommendations: low/unknown -> mistral-v0.3; stronger -> nemotron-9b permitted/recommended")
-    print("  About thank-you copy: cleaned with attribution/license credit preserved")
+    print("  About thank-you copy: inherited support message preserved; backend/setup copy scan passed")
 
 
 if __name__ == "__main__":
