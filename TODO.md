@@ -13,7 +13,7 @@ Product north star: `doc/lacapult-one-shot-installer-vision.md`. Use it for deta
 0. Lacapult launcher hotfix prerelease — published for Josef Windows test
    - [x] Regenerate fresh Lacapult package artifacts from current `main` with `python3 tools/prove_lacapult_export_packaging.py`; do not reuse stale packages from before `7ba1043`/`4d7198e`/`c7ccd26`.
    - [x] Create a Lacapult-specific GitHub test/prerelease, tag `lacapult-test-2026-04-26`, with the Windows unsigned zip attached and SHA-256 recorded.
-   - [x] Republish hotfix prerelease `lacapult-test-2026-04-26-2` after Josef Windows testing found `utils/7za.exe` missing from the Windows package; fixed package includes sidecar `utils/7za.exe` and recorded SHA-256 `a6a0e23eb71552d9e67168b879f2581027554c0793b86638e4f27f6eade5a961`.
+   - [x] Republish hotfix prerelease `lacapult-test-2026-04-26-2` after Josef Windows testing found `utils/7za.exe` missing from the Windows package; fixed package includes sidecar `utils/7za.exe` and recorded SHA-256 `22617e7b195cc0e26f82354b6634f41feffb54d50bc749eb895aed83085eda21`.
    - [x] Curate the C-AOL release list to the four expected port rows (CDDA master, CTLG master, CDDA 0.H, CDDA 0.I) instead of showing plain `v0.2.0` as a fifth install option.
    - [x] Include release notes/instructions that say this is an unsigned Lacapult launcher test build for Josef Windows testing, not a new C-AOL game release and not C-AOL `v0.3.0`.
    - [x] Verify the remote release/assets with `gh release view` and record URL, artifact names, sizes, and hashes in `TESTING.md`.
