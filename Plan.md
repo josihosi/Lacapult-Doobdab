@@ -20,7 +20,7 @@ This repo is a standalone C-AOL-specific launcher/installer derived from Dabdoob
 
 ### Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
-**Status:** LACAPULT LAUNCHER HOTFIX PRERELEASE PUBLISHED / WINDOWS 7ZA PACKAGE BLOCKER FIXED / C-AOL v0.2.0 INSTALL+LAUNCH REPAIR PROVEN / C-AOL v0.3 RELEASE PARKED / FINAL SIGNED PUBLIC RELEASE NOT CLAIMED
+**Status:** LACAPULT LLM BACKEND SETUP INSTALLER PACKET ACTIVE / HOTFIX PRERELEASE PUBLISHED / C-AOL v0.2.0 INSTALL+LAUNCH REPAIR PROVEN / C-AOL v0.3 RELEASE PARKED
 
 Build from the local standalone repo at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdab`, then turn the first product slice into a C-AOL-specific launcher that can fetch and install the existing `v0.2.0` C-AOL releases from `josihosi/Cataclysm-AOL`. The local proof packet is complete as of 2026-04-25, a Godot 3.6.2 GUI smoke proves the project launches, surfaces the prioritized C-AOL `v0.2.0` macOS DMG first, and exposes the Settings-tab backend setup controls. Controlled DMG proofs now confirm the selected macOS asset exposes a launchable `.app` shape and that a sandboxed Lacapult-style copy/move install leaves `Cataclysm.app` plus `catapult_install_info.json` in the final install folder without touching the real Application Support install state or launching the game.
 
@@ -29,6 +29,16 @@ The active scope now includes a visible three-option backend setup selector for 
 Product north star: `doc/lacapult-one-shot-installer-vision.md`. It is greenlit as direction, but execution still follows proof order: v0.2.0 release metadata/install path first, backend skeleton second, mod compatibility investigation third. Lacapult is itself an installer/launcher product, so its own distribution must be easy for normal users to install on Windows, macOS, and Linux; do not let C-AOL package launchability work obscure the separate Lacapult app packaging/installability bar.
 
 Josef explicitly greenlit the next delivery step on 2026-04-26: create a clean downloadable **Lacapult launcher test/prerelease** so he can download it on his Windows laptop and test the launcher/game path. The original test prerelease was published, Josef immediately found the Windows package missing `utils/7za.exe`, and the hotfix prerelease is now published at https://github.com/josihosi/Lacapult-Doobdab/releases/tag/lacapult-test-2026-04-26-2 with fresh Windows, macOS, and Linux unsigned launcher packages plus recorded SHA-256 hashes. This is a Lacapult release packet, not a C-AOL game release; unsigned/signed-final release work remains parked, and Josef's real Windows laptop click-through/playtest is still the external confidence step. The hotfix also curates the C-AOL install list to the four expected port releases and replaces the startup lineage plaque with a plain Dabdoob/Catapult thank-you. Use `doc/lacapult-launcher-test-release-packet-2026-04-26.md` and `TESTING.md` as the release ledger. C-AOL `v0.3.0` release shape remains unknown/parked and must not block this v0.2.0 launcher test release.
+
+### Active lane - Lacapult LLM backend setup installer packet v0
+
+**Status:** ACTIVE / GREENLIT FOR ANDI
+
+Canonical contract: `doc/lacapult-llm-backend-setup-installer-packet-v0-2026-04-26.md`.
+
+Josef's post-hotfix launcher test promoted backend setup from status-only Settings clutter into the next active product lane. The backend flow should become its own tab/page titled exactly `C-AOL LLM backend setup`, with neutral player-facing copy instead of Josef/test-run/platform-first wording. Lacapult is an installer: API/AnyLLM, Ollama, and OpenVINO should each have guided setup/install pathways with explicit confirmation before external changes. Ollama should offer `mistral-v0.3` and `nemotron-9b`, use safe hardware signals to recommend rather than auto-pick, and leave final choice to the player. Automated proof must keep installs/model pulls mocked, sandboxed, or confirmation-gated; do not mutate Josef's real machine during tests. The About/thank-you page should also be checked and cleaned where inherited personal-crisis copy feels out of place, while preserving real attribution and license credit.
+
+Non-goals remain: no C-AOL `v0.3.0`, no signing/notarization, no new C-AOL game release, no API secrets, and no pretending OpenVINO is a trivial mainstream path if the first implementation is only guided/specialized.
 
 ### Active next implementation family
 

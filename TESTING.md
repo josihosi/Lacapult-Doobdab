@@ -489,3 +489,17 @@ Assets:
 - `SHA256SUMS.txt` — 311 bytes — SHA-256 `853d8273a3ecc67896721d98deba6cf99f9ec8f1975aeb15ba7c028b1e227b77`
 
 Remaining caveat: Josef's note about the Windows custom title bar looking low-resolution/awkwardly large is recorded as UI polish/follow-up; this hotfix release prioritizes the hard missing-7za install blocker plus the misleading release list and lineage note.
+
+
+## Pending evidence - Lacapult LLM backend setup installer packet v0
+
+Contract: `doc/lacapult-llm-backend-setup-installer-packet-v0-2026-04-26.md`.
+
+Required before closure:
+
+- UI/static or Godot smoke proving backend setup exists as its own tab/page titled `C-AOL LLM backend setup`.
+- Text scan proving no Josef/test-run wording and no casual platform-first recommendation copy remains in player-facing backend setup text.
+- Safe installer-path proof for API/AnyLLM, Ollama, and OpenVINO showing explicit confirmation before external package/model install actions; tests must not mutate Josef's real machine.
+- Ollama model recommendation fixture proof covering at least a low/unknown hardware case and a stronger hardware case for `mistral-v0.3` vs `nemotron-9b` recommendation.
+- About/thank-you copy provenance check and cleanup proof; inherited `feeling depressed, anxious or unsure of yourself` text was present from the initial imported scaffold (`4eb2a84`) and should be replaced with normal product copy unless Josef explicitly keeps it.
+- `git diff --check` plus the smallest meaningful Godot/project-load gate.

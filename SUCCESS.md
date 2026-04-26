@@ -2,6 +2,22 @@
 
 Success-state ledger for Lacapult Doobdab.
 
+
+## Lacapult LLM backend setup installer packet v0
+
+Status: **ACTIVE / GREENLIT FOR ANDI**
+
+Done only when all are true:
+
+- [ ] Backend setup has its own visible tab/page titled exactly `C-AOL LLM backend setup`.
+- [ ] Player-facing backend copy is neutral and no longer mentions Josef, Windows test positioning, or raw internal/debug status wording where a normal installer sentence belongs.
+- [ ] API/AnyLLM, Ollama, and OpenVINO each expose a guided setup/install pathway with explicit confirmation before external changes.
+- [ ] Ollama setup offers `mistral-v0.3` and `nemotron-9b` choices, with hardware-based recommendation and manual override.
+- [ ] Installer-path tests prove package/model install actions are gated, mocked, or sandboxed and do not mutate Josef's real machine.
+- [ ] About/thank-you copy is checked and cleaned for Lacapult while required attribution/license credit remains intact.
+
+Canonical contract: `doc/lacapult-llm-backend-setup-installer-packet-v0-2026-04-26.md`.
+
 ## Lacapult Doobdab v0.2.0 release installer plus first backend setup options
 
 Status: **LACAPULT LAUNCHER HOTFIX PRERELEASE PUBLISHED / WINDOWS 7ZA PACKAGE BLOCKER FIXED / C-AOL v0.2.0 INSTALL+LAUNCH REPAIR PROVEN / C-AOL v0.3 PARKED / FINAL SIGNED PUBLIC RELEASE NOT CLAIMED**
