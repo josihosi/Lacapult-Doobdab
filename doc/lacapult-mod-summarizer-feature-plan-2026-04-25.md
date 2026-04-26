@@ -324,4 +324,6 @@ This lane is complete only when all of the following are true:
 
 ## Recommended next implementation handoff
 
-Next implement **Slice 5: error/rollback/backup proof**. Slice 4 now proves that a sandbox active generated companion summary root can reach C-AOL deterministic prompt construction. The next cut should broaden fixture coverage for obsolete mods, parse errors, missing dependencies, partial summaries, stale summaries, conflicts, backend-not-ready, and rollback failure handling.
+No further implementation slice is recommended inside the current Windows-test-readiness lane. Slices 1-5 are landed and proven through the sandbox-only error/rollback matrix, including obsolete mods, parse errors, missing dependencies, partial/stale/conflicting summaries, backend-not-ready gates, and replacement rollback.
+
+The remaining work is decision/test gated rather than an unblocked Andi implementation task: Josef's Windows packaged-build click-through, or a fresh Schani/Josef decision to reopen real generation/apply UI, post-enable world-mod mutation, signing/notarization, public release publication, model/download automation, or upstream/C-AOL package-portability work.
