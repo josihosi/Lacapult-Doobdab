@@ -2,7 +2,7 @@
 
 ## Classification
 
-ACTIVE / GREENLIT FOR ANDI.
+IMPLEMENTED / SAFE STATIC+GODOT PROOF PASSED / READY FOR SCHANI REVIEW.
 
 ## User request
 
@@ -39,13 +39,13 @@ Josef's Windows launcher test showed that the current backend setup surface is t
 
 ## Success state
 
-- [ ] Backend setup appears as its own tab/page titled `C-AOL LLM backend setup`.
-- [ ] Player-facing text is neutral and contains no Josef/test-run copy or casual platform-first recommendation phrasing.
-- [ ] API/AnyLLM, Ollama, and OpenVINO each have a visible guided setup path with confirmation before external install/download actions.
-- [ ] Ollama setup offers `mistral-v0.3` and `nemotron-9b` choices, with hardware-based recommendation text and manual override.
-- [ ] Automated proof covers the UI/tab/copy shape and confirms installer actions are gated behind explicit confirmation or mocked/sandboxed execution.
-- [ ] Inherited About/thank-you support text remains intact, while backend/setup installer copy is checked so `Josef`, test-run wording, and unexplained internal context do not leak into normal player-facing setup surfaces.
-- [ ] A GUI reasoning run roleplays a C:DDA aficionado who read about C-AOL on Reddit and now wants to install/play it; findings answer installer flow, look, backend choice, and unexplained-name questions.
+- [x] Backend setup appears as its own tab/page titled `C-AOL LLM backend setup`.
+- [x] Player-facing text is neutral and contains no Josef/test-run copy or casual platform-first recommendation phrasing.
+- [x] API/AnyLLM, Ollama, and OpenVINO each have a visible guided setup path with confirmation before external install/download actions.
+- [x] Ollama setup offers `mistral-v0.3` and `nemotron-9b` choices, with hardware-based recommendation text and manual override.
+- [x] Automated proof covers the UI/tab/copy shape and confirms installer actions are gated behind explicit confirmation or mocked/sandboxed execution.
+- [x] Inherited About/thank-you support text remains intact, while backend/setup installer copy is checked so `Josef`, test-run wording, and unexplained internal context do not leak into normal player-facing setup surfaces.
+- [x] A GUI reasoning run roleplays a C:DDA aficionado who read about C-AOL on Reddit and now wants to install/play it; findings answer installer flow, look, backend choice, and unexplained-name questions.
 
 ## Testing / evidence bar
 
