@@ -18,7 +18,7 @@ If these disagree, `Plan.md` wins; repair the other file instead of inventing a 
 
 ## Current status
 
-**State:** RELEASE QUARANTINE ACTIVE / DEBUG NOTES PARKED / NO ACTIVE LACAPULT IMPLEMENTATION
+**State:** RELEASE QUARANTINE ACTIVE / DEBUG-NOTE IMPLEMENTATION REOPENED / ALEX ACTIVE
 
 The 2026-04-26 Lacapult prerelease family is quarantined as Draft after Josef reported that the download looked like CAOL rather than clearly like Lacapult. No Lacapult release from that family should be republished until the quarantine/identity investigation is closed and Josef/Schani explicitly re-greenlight.
 
@@ -36,19 +36,19 @@ Canonical incident note: `doc/lacapult-release-quarantine-investigation-2026-04-
 
 Do not schedule repeated reminders for this. It is a ledger item, not an implementation blocker.
 
-## Parked debug-note correction stack
+## Active debug-note correction stack
 
-Canonical parked contract: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
+Canonical contract: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
 
-Josef asked on 2026-04-27 to put the collected Catapult/Lacapult debug notes into Lacapult canon under parked, without pointing Andi at them yet. They are parked in this order unless Josef/Schani reprioritizes:
+Josef reopened the collected Lacapult debug notes on 2026-04-27 and asked for a separate Lacapult execution worker, Alex, so C-AOL Andi can continue independently. Alex should work the stack in this order unless Josef/Schani reprioritizes:
 
-1. **LLM tab de-clutter + backend-scope correction v0** - rename visible backend tab to `LLM`, cut top/helper text, remove visible Lacapult OpenVINO installer path for now, and correct API token copy.
-2. **Setup save/check action pattern v0** - add Save options / Check / status-light behavior and make Install save current options first.
-3. **API / AnyLLM real setup workflow v0** - provider-aware API setup with base URL/provider/model, safe API-key/env-var workflow, and real AnyLLM setup path behind explicit confirmation.
-4. **Ollama real installer + model readiness workflow v0** - one model-choice control, Mistral/Nemotron readiness lights, Check/Install behavior, and venv setup if still needed.
-5. **Lacapult window chrome investigation v0** - identify whether oversized close/minimize/top-bar controls are native chrome, Godot UI/theme/scale, DPI, or platform packaging before fixing.
+1. **ACTIVE: LLM tab de-clutter + backend-scope correction v0** - rename visible backend tab to `LLM`, cut top/helper text, remove visible Lacapult OpenVINO installer path for now, and correct API token copy.
+2. **GREENLIT NEXT: Setup save/check action pattern v0** - add Save options / Check / status-light behavior and make Install save current options first.
+3. **GREENLIT: API / AnyLLM real setup workflow v0** - provider-aware API setup with base URL/provider/model, safe API-key/env-var workflow, and real AnyLLM setup path behind explicit confirmation.
+4. **GREENLIT: Ollama real installer + model readiness workflow v0** - one model-choice control, Mistral/Nemotron readiness lights, Check/Install behavior, and venv setup if still needed.
+5. **GREENLIT: Lacapult window chrome investigation v0** - identify whether oversized close/minimize/top-bar controls are native chrome, Godot UI/theme/scale, DPI, or platform packaging before fixing.
 
-This stack is not active while Andi is on the C-AOL cadence.
+This reopens implementation only for the debug-note stack. It does **not** lift the release quarantine or authorize republishing.
 
 ## Completed footing
 

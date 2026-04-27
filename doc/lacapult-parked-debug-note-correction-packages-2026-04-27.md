@@ -1,12 +1,12 @@
-# Parked Lacapult debug-note correction packages (2026-04-27)
+# Lacapult debug-note correction packages (2026-04-27)
 
-Status: PARKED CANON / not active / do not implement until Lacapult is explicitly reopened.
+Status: ACTIVE CANON / Alex execution lane reopened on 2026-04-27.
 
-Source intake: `/Users/josefhorvath/.openclaw/workspace/runtime/lacapult-debug-intake.md`; promoted from workspace draft after Josef explicitly asked on 2026-04-27 to write the Lacapult debug notes into canon under parked.
+Source intake: `/Users/josefhorvath/.openclaw/workspace/runtime/lacapult-debug-intake.md`; promoted from workspace draft after Josef explicitly asked on 2026-04-27 to write the Lacapult debug notes into canon under parked, then reopened later that day for Alex execution.
 
-Repo target when activated: `/Users/josefhorvath/Schanigarten/Lacapult-Doobdab`.
+Repo target: `/Users/josefhorvath/Schanigarten/Lacapult-Doobdab`.
 
-Classification: parked. Keep this stack below the active C-AOL work and do not republish Lacapult releases from the quarantined 2026-04-26 family until the quarantine/identity investigation is closed and Josef/Schani explicitly re-greenlight.
+Classification: active stack for Alex. Keep it separate from C-AOL Andi work and do not republish Lacapult releases from the quarantined 2026-04-26 family until the quarantine/identity investigation is closed and Josef/Schani explicitly re-greenlight.
 
 ## Raw intake checklist preserved from Josef's notes
 
@@ -38,7 +38,7 @@ Taste note: the GUI has too much senseless text, text overflows the window, and 
 
 ## Package 1 — LLM tab de-clutter + backend-scope correction v0
 
-request_kind: parked-request
+request_kind: active-request
 
 summary: Clean the Lacapult backend setup surface so it behaves like an installer page instead of a wall of explanatory text. Rename the visible backend tab to `LLM`, reduce top/backend-selected copy to short player-facing sentences, remove OpenVINO from the Lacapult installer UI for now, and correct the API token-cost copy using logged C-AOL evidence.
 
@@ -72,7 +72,7 @@ testing_impact:
   - Godot scene/load or UI smoke proving the LLM tab and selected-helper text render.
   - No external installs/downloads/API calls.
 
-classification: parked
+classification: active
 aux_doc_needed: yes
 handoff_needed: yes
 open_questions:
@@ -80,7 +80,7 @@ open_questions:
 
 ## Package 2 — Setup save/check action pattern v0
 
-request_kind: parked-request
+request_kind: greenlit-request
 
 summary: Apply a consistent setup-form behavior across Lacapult backend setup: manual field edits can be saved without installing, and every install action saves current options before doing work. Replace long explanatory blocks with compact status lights and explicit Check actions.
 
@@ -110,7 +110,7 @@ testing_impact:
   - Sandboxed config/options round-trip proof.
   - Non-mutating readiness check proof.
 
-classification: parked
+classification: greenlit
 aux_doc_needed: yes
 handoff_needed: yes
 open_questions:
@@ -118,7 +118,7 @@ open_questions:
 
 ## Package 3 — API / AnyLLM real setup workflow v0
 
-request_kind: parked-request
+request_kind: greenlit-request
 
 summary: Turn the API setup path from OpenAI-centric config clutter into a provider-aware AnyLLM installer workflow. The UI should expose API base URL, provider, and model; explain base URL plainly; install AnyLLM/provider support when asked; and provide a carefully designed safe API-key environment-variable workflow.
 
@@ -155,7 +155,7 @@ testing_impact:
   - Secret-handling proof should scan logs/output/state for no key echoing.
   - No real remote API call unless explicitly gated as a manual optional proof.
 
-classification: parked
+classification: greenlit
 aux_doc_needed: yes
 handoff_needed: yes
 open_questions:
@@ -164,7 +164,7 @@ open_questions:
 
 ## Package 4 — Ollama real installer + model readiness workflow v0
 
-request_kind: parked-request
+request_kind: greenlit-request
 
 summary: Simplify Ollama setup into one model-choice control plus real install/readiness actions. The installer should install Ollama and pull supported models when explicitly asked, show Mistral/Nemotron readiness via lights, and set up/fill the Python venv path through an install action instead of dumping prose at the user.
 
@@ -199,7 +199,7 @@ testing_impact:
   - Mocked or fixture proof for model-present/missing/error light states.
   - Optional local proof may use already-installed Ollama/model only; no new pulls in automated default gates.
 
-classification: parked
+classification: greenlit
 aux_doc_needed: yes
 handoff_needed: yes
 open_questions:
@@ -208,7 +208,7 @@ open_questions:
 
 ## Package 5 — Lacapult window chrome investigation v0
 
-request_kind: parked-request
+request_kind: greenlit-request
 
 summary: Investigate and fix the oversized/messed-up close/minimize/top-bar controls. The first step is evidence: determine whether the problem reproduces in the local macOS Godot run, the Windows package, or only one platform/theme/window mode, then patch the smallest responsible UI/theme/window setting.
 
@@ -236,18 +236,18 @@ testing_impact:
   - Godot project/window setting inspection.
   - Windows confirmation remains human/device-dependent unless a Windows runner/screenshot path exists.
 
-classification: parked
+classification: greenlit
 aux_doc_needed: yes
 handoff_needed: yes
 open_questions:
 - Need Windows screenshot/confirmation from Josef or a Windows automation path before final cross-platform claim.
 
-## Suggested parked order after current C-AOL fixes
+## Active order for Alex
 
-1. LLM tab de-clutter + backend-scope correction v0.
-2. Setup save/check action pattern v0.
-3. API / AnyLLM real setup workflow v0.
-4. Ollama real installer + model readiness workflow v0.
-5. Lacapult window chrome investigation v0.
+1. ACTIVE - LLM tab de-clutter + backend-scope correction v0.
+2. GREENLIT NEXT - Setup save/check action pattern v0.
+3. GREENLIT - API / AnyLLM real setup workflow v0.
+4. GREENLIT - Ollama real installer + model readiness workflow v0.
+5. GREENLIT - Lacapult window chrome investigation v0.
 
-Reasoning: first cut the visible rot and remove misleading scope; then add the shared save/check skeleton; then wire backend-specific real installs; then investigate the chrome bug with evidence rather than guessing. If Andi has to do one narrow first slice, start with Package 1 because it removes the most visible nonsense without touching secrets/model installs.
+Reasoning: first cut the visible rot and remove misleading scope; then add the shared save/check skeleton; then wire backend-specific real installs; then investigate the chrome bug with evidence rather than guessing. Alex starts with Package 1 because it removes the most visible nonsense without touching secrets/model installs.

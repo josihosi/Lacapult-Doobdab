@@ -4,7 +4,7 @@ Success-state ledger for Lacapult Doobdab. Keep it compact; full evidence belong
 
 ## Release quarantine / identity investigation
 
-Status: ACTIVE QUARANTINE / PARKED UNTIL REOPENED
+Status: ACTIVE QUARANTINE / REPUBLISH HELD
 
 Success state:
 - [x] 2026-04-26 Lacapult prerelease family converted to Draft/quarantine.
@@ -19,14 +19,14 @@ Canonical docs:
 - `doc/lacapult-post-mod-ui-windows-retest-release-packet-2026-04-26.md`
 - `doc/lacapult-launcher-test-release-packet-2026-04-26.md`
 
-## Parked Lacapult debug-note correction stack
+## Lacapult debug-note correction stack
 
-Status: PARKED / NOT IMPLEMENTED
+Status: ACTIVE / ALEX EXECUTION LANE
 
 Success state:
 - [x] Raw 2026-04-26 debug-note intake found in workspace memory/runtime files.
 - [x] All notes are preserved in canon under `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
-- [x] Stack is classified as parked and explicitly not assigned to Andi yet.
+- [x] Stack was parked until Josef explicitly reopened it for Alex on 2026-04-27.
 - [ ] Package 1 complete: LLM tab de-clutter/backend-scope correction.
 - [ ] Package 2 complete: setup Save/Check/Install action pattern.
 - [ ] Package 3 complete: API / AnyLLM real setup workflow.

@@ -15,7 +15,14 @@ Use the smallest evidence that honestly matches the change.
 
 ## Current proof target
 
-**No active Lacapult implementation is running.** Current validation state is quarantine + parked canon hygiene.
+**Active Lacapult implementation is reopened for Alex.** Current validation target is Package 1 from the debug-note correction stack: `LLM tab de-clutter + backend-scope correction v0`.
+
+Package 1 evidence must include:
+
+- static scan proving the visible backend tab/page is now `LLM`;
+- static scan proving old sprawling helper copy and the stale `around 1000 tokens` claim are gone;
+- static scan proving visible Lacapult OpenVINO installer/setup choices are removed while hidden/in-game support is not accidentally deleted;
+- Godot scene/load or UI smoke proving the changed label/helper copy render in the actual UI.
 
 Before any renewed republish/confidence claim, evidence must include:
 
@@ -24,11 +31,11 @@ Before any renewed republish/confidence claim, evidence must include:
 - release-row wording and install/download impression check;
 - confirmation that the player sees Lacapult as launcher, not as a mistaken C-AOL game archive.
 
-## Pending evidence - parked debug-note correction stack
+## Pending evidence - debug-note correction stack
 
-Canonical parked contract: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
+Canonical contract: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
 
-When Lacapult is reopened, validate packages as follows:
+Validate packages as follows:
 
 - LLM tab de-clutter/backend-scope correction: static scan plus Godot scene/load or UI smoke proving `LLM` tab label, short helper copy, no stale `1000 tokens` claim, and no visible Lacapult OpenVINO installer choice while hidden in-game support remains deliberate.
 - Setup save/check pattern: UI/static proof for Save options, Check, status lights, and Install-saves-first ordering; sandboxed config/options round-trip proof.
@@ -36,7 +43,7 @@ When Lacapult is reopened, validate packages as follows:
 - Ollama workflow: UI proof for one model-choice control, Mistral/Nemotron readiness lights, Check, Save, and Install actions; mocked/fixture model-present/missing/error states; no automated model pulls unless cleared.
 - Window chrome investigation: screenshot/UI artifact evidence separated by macOS/local versus Windows/Josef behavior before claiming a cross-platform fix.
 
-No parked-package proof may mutate real Application Support config/saves/mods, install packages/models, use API secrets, publish releases, or republish quarantined artifacts without explicit clearance.
+No debug-stack proof may mutate real Application Support config/saves/mods, install packages/models, use API secrets, publish releases, or republish quarantined artifacts without explicit clearance.
 
 ## Evidence index
 
@@ -52,11 +59,11 @@ Detailed evidence is intentionally stored in auxiliary docs instead of repeated 
 - Outsider GUI reasoning run: `doc/lacapult-gui-reasoning-reddit-cdda-install-run-2026-04-26.md`.
 - One-shot installer north star: `doc/lacapult-one-shot-installer-vision.md`.
 - v0.2 release/backend/modding contract: `doc/lacapult-v02-release-backend-modding-contract.md`.
-- Parked debug-note correction stack: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
+- Debug-note correction stack: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
 
 Recent gate commands used for canon-only cleanup:
 - `git diff --check`
-- static presence checks for parked stack / active quarantine references
+- static presence checks for debug stack / active quarantine references
 
 ## Known risk spots
 

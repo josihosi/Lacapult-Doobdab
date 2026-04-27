@@ -21,9 +21,11 @@ Then inspect only the source files needed for the active target.
 
 ## Current rule
 
-Lacapult is currently in release quarantine with a parked debug-note correction stack. Do not start implementation, point Andi at this repo, republish releases, or widen scope unless Josef/Schani explicitly reopens Lacapult.
+Lacapult remains in release quarantine, but Josef/Schani explicitly reopened the debug-note correction stack for Alex on 2026-04-27.
 
-If reopened, use `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md` as the parked stack source and start with the narrowest package unless reprioritized.
+Use `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md` as the active stack source and start with Package 1 unless reprioritized. Keep Andi on C-AOL; do not point Andi at this repo.
+
+This reopening does **not** authorize republishing releases, pushing public release artifacts, mutating real user data, installing packages/models, or widening scope beyond the canonized debug-note stack.
 
 ## External/public actions
 
