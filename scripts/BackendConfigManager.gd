@@ -81,6 +81,27 @@ func get_backend_guidance(mode: String) -> String:
 	return "Unsupported backend."
 
 
+func check_backend_status(mode: String, endpoint: String = "", model: String = "", python_path: String = "", api_provider: String = DEFAULT_API_PROVIDER, api_key_env: String = DEFAULT_API_KEY_ENV, openvino_model_dir: String = "", openvino_device: String = DEFAULT_OPENVINO_DEVICE) -> String:
+	if not mode in [BACKEND_API, BACKEND_OLLAMA, BACKEND_OPENVINO]:
+		return "unsupported_backend"
+	var normalized = _normalize_backend_fields(mode, endpoint, model, python_path, api_provider, api_key_env, openvino_model_dir, openvino_device)
+	return _detect_backend_status(mode, normalized)
+
+
+func get_status_light(raw_status: String) -> Dictionary:
+	if raw_status == "ok":
+		return {"icon": "🟢", "state": "Ready", "summary": "Options saved."}
+	if raw_status.find("unsupported") >= 0 or raw_status.find("write_error") >= 0 or raw_status.find("config_dir_error") >= 0:
+		return {"icon": "🔴", "state": "Error", "summary": "Save/check failed."}
+	if raw_status.find("api_python_missing") >= 0 or raw_status.find("ollama_command_missing") >= 0 or raw_status.find("openvino_python_missing") >= 0:
+		return {"icon": "🔴", "state": "Missing", "summary": _status_summary(raw_status)}
+	if raw_status.find("api_python_ready_any_llm_import_ok") >= 0 and raw_status.find("model_configured") >= 0 and raw_status.find("api_key_env_present_secret_not_read") >= 0:
+		return {"icon": "🟢", "state": "Ready", "summary": "Python, AnyLLM, model, and API-key env-var are present."}
+	if raw_status.find("ollama_command_present_server_running_model_present") >= 0:
+		return {"icon": "🟢", "state": "Ready", "summary": "Ollama server and selected model are present."}
+	return {"icon": "🟡", "state": "Needs action", "summary": _status_summary(raw_status)}
+
+
 func write_launcher_backend_config(mode: String, endpoint: String = "", model: String = "", python_path: String = "", api_provider: String = DEFAULT_API_PROVIDER, api_key_env: String = DEFAULT_API_KEY_ENV, openvino_model_dir: String = "", openvino_device: String = DEFAULT_OPENVINO_DEVICE) -> String:
 	if not mode in [BACKEND_API, BACKEND_OLLAMA, BACKEND_OPENVINO]:
 		return "unsupported_backend"
@@ -115,6 +136,30 @@ func write_launcher_backend_config(mode: String, endpoint: String = "", model: S
 	if not Helpers.save_to_json_file(options_patch, Paths.config.plus_file(C_AOL_OPTIONS_PATCH_FILENAME)):
 		return "options_patch_write_error"
 	return "ok"
+
+
+func _status_summary(raw_status: String) -> String:
+	if raw_status.find("api_python_missing") >= 0:
+		return "Python is missing; C-AOL needs Python to run the LLM helper."
+	if raw_status.find("any_llm_missing") >= 0:
+		return "Python works, but AnyLLM is not installed in that environment."
+	if raw_status.find("api_key_env_not_set") >= 0:
+		return "API-key env-var is named but not set; Lacapult did not read a secret."
+	if raw_status.find("api_key_env_missing") >= 0:
+		return "Choose an API-key env-var name; Lacapult stores the name only."
+	if raw_status.find("model_missing") >= 0:
+		return "Choose a model name before using this backend."
+	if raw_status.find("ollama_command_missing") >= 0:
+		return "Ollama is not on PATH."
+	if raw_status.find("ollama_command_present_server_unreachable") >= 0:
+		return "Ollama is installed, but the local server did not answer."
+	if raw_status.find("ollama_command_present_server_running_model_missing") >= 0:
+		return "Ollama is running, but the selected model is not installed."
+	if raw_status.find("ollama_command_present_server_running_model_not_selected") >= 0:
+		return "Ollama is running; choose a model."
+	if raw_status.find("openvino") >= 0:
+		return "OpenVINO is detect-only/hidden in Lacapult v0."
+	return raw_status
 
 
 func write_sandboxed_options_config(options_path: String, mode: String, endpoint: String = "", model: String = "", python_path: String = "", api_provider: String = DEFAULT_API_PROVIDER, api_key_env: String = DEFAULT_API_KEY_ENV, openvino_model_dir: String = "", openvino_device: String = DEFAULT_OPENVINO_DEVICE) -> String:

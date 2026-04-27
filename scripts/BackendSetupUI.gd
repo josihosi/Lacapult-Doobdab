@@ -20,6 +20,9 @@ var _hardware_hint: Label = null
 var _backend_python_path: LineEdit = null
 var _backend_api_key_env: LineEdit = null
 var _backend_status: Label = null
+var _save_button: Button = null
+var _check_button: Button = null
+var _install_button: Button = null
 var _confirm_dialog: ConfirmationDialog = null
 
 
@@ -141,15 +144,21 @@ func _build_controls() -> void:
 	var button_row = HBoxContainer.new()
 	button_row.name = "BackendActions"
 	add_child(button_row)
-	var save_button = Button.new()
-	save_button.text = "Save C-AOL backend setup"
-	save_button.connect("pressed", self, "_on_SaveBackendSetup_pressed")
-	button_row.add_child(save_button)
-	var install_button = Button.new()
-	install_button.text = "Confirm guided install step"
-	install_button.hint_tooltip = "Opens a confirmation prompt first; automated tests do not install packages or pull models."
-	install_button.connect("pressed", self, "_on_ConfirmGuidedInstall_pressed")
-	button_row.add_child(install_button)
+	_save_button = Button.new()
+	_save_button.text = "Save options"
+	_save_button.hint_tooltip = "Persist the current backend options without installing packages, pulling models, or calling an API."
+	_save_button.connect("pressed", self, "_on_SaveBackendSetup_pressed")
+	button_row.add_child(_save_button)
+	_check_button = Button.new()
+	_check_button.text = "Check"
+	_check_button.hint_tooltip = "Refresh readiness lights only; no install, model pull, or API call."
+	_check_button.connect("pressed", self, "_on_CheckBackendSetup_pressed")
+	button_row.add_child(_check_button)
+	_install_button = Button.new()
+	_install_button.text = "Install setup"
+	_install_button.hint_tooltip = "Saves current options first, then opens a confirmation prompt; automated tests do not install packages or pull models."
+	_install_button.connect("pressed", self, "_on_ConfirmGuidedInstall_pressed")
+	button_row.add_child(_install_button)
 
 	_confirm_dialog = ConfirmationDialog.new()
 	_confirm_dialog.name = "ConfirmExternalBackendAction"
@@ -197,16 +206,8 @@ func _refresh_backend_setup_controls() -> void:
 	_backend_api_key_env.text = Settings.read("backend_api_key_env")
 	_hardware_hint.text = ""
 
-	var status = "Backend status: unknown"
-	for backend in BackendConfig.get_supported_backends():
-		if backend.get("id", "") == mode:
-			status = "%s readiness: %s" % [backend.get("label", mode), _human_readiness(backend.get("status", "unknown"))]
-			break
-	if mode == "api":
-		status += "\nAPI secrets stay in the environment; Lacapult stores only the env-var name."
-	elif mode == "ollama":
-		status += "\nNo model pull is attempted until the player confirms the action."
-	_backend_status.text = status
+	var raw_status = _check_current_backend_status()
+	_set_backend_status(mode, raw_status)
 
 
 func _read_safe_hardware_signals() -> Dictionary:
@@ -223,24 +224,23 @@ func _build_ollama_hardware_recommendation_text(signals: Dictionary) -> String:
 	return "Hardware recommendation: if memory/GPU capacity is unknown or modest, start with %s. Choose %s manually if you know the machine has enough headroom. Lacapult will not pull either model without confirmation." % [OLLAMA_MODEL_MISTRAL, OLLAMA_MODEL_NEMOTRON]
 
 
-func _human_readiness(raw_status: String) -> String:
-	if raw_status.find("api_python_missing") >= 0:
-		return "Python was not found; choose a Python or virtual environment before using API mode."
-	if raw_status.find("any_llm_missing") >= 0:
-		return "Python is available, but AnyLLM is not installed in the selected environment."
-	if raw_status.find("api_python_ready_any_llm_import_ok") >= 0:
-		return "Python and AnyLLM are available. Check provider, model, and API-key environment variable before launching C-AOL."
-	if raw_status.find("ollama_command_missing") >= 0:
-		return "Ollama was not found on PATH. Install or choose a manual local setup before using this path."
-	if raw_status.find("ollama_command_present_server_unreachable") >= 0:
-		return "Ollama is installed, but the local server did not answer. Start Ollama and check again."
-	if raw_status.find("ollama_command_present_server_running_model_present") >= 0:
-		return "Ollama is running and the selected model appears in the local model list."
-	if raw_status.find("ollama_command_present_server_running_model_missing") >= 0:
-		return "Ollama is running, but the selected model is not installed. Lacapult will ask before any model pull."
-	if raw_status.find("ollama_command_present_server_running_model_not_selected") >= 0:
-		return "Ollama is running. Choose a model before saving the final setup."
-	return "Readiness could not be summarized yet; save the setup and check the guidance above."
+func _check_current_backend_status() -> String:
+	var fields = _collect_current_backend_fields()
+	return BackendConfig.check_backend_status(fields.get("mode", "api"), fields.get("endpoint", ""), fields.get("model", ""), fields.get("python_path", ""), fields.get("api_provider", BackendConfig.DEFAULT_API_PROVIDER), fields.get("api_key_env", BackendConfig.DEFAULT_API_KEY_ENV), fields.get("openvino_model_dir", ""), fields.get("openvino_device", BackendConfig.DEFAULT_OPENVINO_DEVICE))
+
+
+func _set_backend_status(mode: String, raw_status: String, prefix: String = "") -> void:
+	var light = BackendConfig.get_status_light(raw_status)
+	var lines = []
+	var lead = "%s %s" % [light.get("icon", "🟡"), light.get("state", "Needs action")]
+	if prefix != "":
+		lead = "%s — %s" % [prefix, lead]
+	lines.append("%s: %s" % [lead, light.get("summary", raw_status)])
+	if mode == "api":
+		lines.append("Secret policy: env-var name only; no API call from Check.")
+	elif mode == "ollama":
+		lines.append("Install policy: no model pull until confirmed.")
+	_backend_status.text = "\n".join(lines)
 
 
 func _select_ollama_choice(model_name: String) -> void:
@@ -259,6 +259,38 @@ func _store_backend_field(setting_prefix: String, value: String) -> void:
 	var mode = Settings.read("backend_mode")
 	if mode == "api" or mode == "ollama":
 		Settings.store("backend_%s_%s" % [mode, setting_prefix], value)
+
+
+func _collect_current_backend_fields() -> Dictionary:
+	return {
+		"mode": Settings.read("backend_mode"),
+		"endpoint": "" if _backend_endpoint == null else _backend_endpoint.text,
+		"model": "" if _backend_model == null else _backend_model.text,
+		"python_path": "" if _backend_python_path == null else _backend_python_path.text,
+		"api_provider": Settings.read("backend_api_provider"),
+		"api_key_env": "" if _backend_api_key_env == null else _backend_api_key_env.text,
+		"openvino_model_dir": Settings.read("backend_openvino_model_dir"),
+		"openvino_device": Settings.read("backend_openvino_device")
+	}
+
+
+func _persist_current_fields_to_settings() -> void:
+	var fields = _collect_current_backend_fields()
+	var mode = fields.get("mode", "api")
+	Settings.store("backend_python_path", fields.get("python_path", ""))
+	if mode == "api":
+		Settings.store("backend_api_endpoint", fields.get("endpoint", ""))
+		Settings.store("backend_api_model", fields.get("model", ""))
+		Settings.store("backend_api_key_env", fields.get("api_key_env", BackendConfig.DEFAULT_API_KEY_ENV))
+	elif mode == "ollama":
+		Settings.store("backend_ollama_endpoint", fields.get("endpoint", BackendConfig.DEFAULT_OLLAMA_URL))
+		Settings.store("backend_ollama_model", fields.get("model", ""))
+
+
+func _save_current_backend_setup() -> String:
+	_persist_current_fields_to_settings()
+	var fields = _collect_current_backend_fields()
+	return BackendConfig.write_launcher_backend_config(fields.get("mode", "api"), fields.get("endpoint", ""), fields.get("model", ""), fields.get("python_path", ""), fields.get("api_provider", BackendConfig.DEFAULT_API_PROVIDER), fields.get("api_key_env", BackendConfig.DEFAULT_API_KEY_ENV), fields.get("openvino_model_dir", ""), fields.get("openvino_device", BackendConfig.DEFAULT_OPENVINO_DEVICE))
 
 
 func _on_BackendMode_item_selected(index: int) -> void:
@@ -290,21 +322,25 @@ func _on_BackendApiKeyEnv_text_changed(new_text: String) -> void:
 
 
 func _on_SaveBackendSetup_pressed() -> void:
+	var result = _save_current_backend_setup()
 	var mode = Settings.read("backend_mode")
-	var endpoint = "" if _backend_endpoint == null else _backend_endpoint.text
-	var model = "" if _backend_model == null else _backend_model.text
-	var python_path = "" if _backend_python_path == null else _backend_python_path.text
-	var api_provider = Settings.read("backend_api_provider")
-	var api_key_env = "" if _backend_api_key_env == null else _backend_api_key_env.text
-	var openvino_model_dir = Settings.read("backend_openvino_model_dir")
-	var openvino_device = Settings.read("backend_openvino_device")
-	var result = BackendConfig.write_launcher_backend_config(mode, endpoint, model, python_path, api_provider, api_key_env, openvino_model_dir, openvino_device)
-	_refresh_backend_setup_controls()
-	_backend_status.text = "Backend setup save result: %s\n%s" % [result, _backend_status.text]
+	if result != "ok":
+		_set_backend_status(mode, result, "Save options")
+		return
+	_set_backend_status(mode, _check_current_backend_status(), "Saved options")
+
+
+func _on_CheckBackendSetup_pressed() -> void:
+	_set_backend_status(Settings.read("backend_mode"), _check_current_backend_status(), "Checked")
 
 
 func _on_ConfirmGuidedInstall_pressed() -> void:
+	var result = _save_current_backend_setup()
 	_pending_confirm_action = Settings.read("backend_mode")
+	if result != "ok":
+		_set_backend_status(_pending_confirm_action, result, "Install setup save failed")
+		return
+	_set_backend_status(_pending_confirm_action, _check_current_backend_status(), "Saved before install")
 	_confirm_dialog.dialog_text = _confirmation_text_for_mode(_pending_confirm_action)
 	_confirm_dialog.popup_centered()
 

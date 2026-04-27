@@ -86,7 +86,7 @@ open_questions:
 
 ## Package 2 — Setup save/check action pattern v0
 
-request_kind: active-request
+request_kind: completed
 
 summary: Apply a consistent setup-form behavior across Lacapult backend setup: manual field edits can be saved without installing, and every install action saves current options before doing work. Replace long explanatory blocks with compact status lights and explicit Check actions.
 
@@ -116,15 +116,15 @@ testing_impact:
   - Sandboxed config/options round-trip proof.
   - Non-mutating readiness check proof.
 
-classification: active
-aux_doc_needed: yes
-handoff_needed: yes
-open_questions:
-- Whether this should be a shared helper first or implemented locally in the LLM tab depends on current GDScript structure.
+classification: complete
+aux_doc_needed: no
+handoff_needed: no
+completion_note:
+- Landed 2026-04-27 with local BackendSetupUI helpers plus reusable BackendConfigManager status/check helpers. Evidence: `tools/godot_backend_setup_save_check_smoke.gd`, LLM tab smoke, backend triad smoke, and focused source scans.
 
 ## Package 3 — API / AnyLLM real setup workflow v0
 
-request_kind: greenlit-request
+request_kind: active-request
 
 summary: Turn the API setup path from OpenAI-centric config clutter into a provider-aware AnyLLM installer workflow. The UI should expose API base URL, provider, and model; explain base URL plainly; install AnyLLM/provider support when asked; and provide a carefully designed safe API-key environment-variable workflow.
 
@@ -161,7 +161,7 @@ testing_impact:
   - Secret-handling proof should scan logs/output/state for no key echoing.
   - No real remote API call unless explicitly gated as a manual optional proof.
 
-classification: greenlit
+classification: active
 aux_doc_needed: yes
 handoff_needed: yes
 open_questions:
@@ -251,9 +251,9 @@ open_questions:
 ## Active order for Alex
 
 1. COMPLETE - LLM tab de-clutter + backend-scope correction v0.
-2. ACTIVE - Setup save/check action pattern v0.
-3. GREENLIT - API / AnyLLM real setup workflow v0.
+2. COMPLETE - Setup save/check action pattern v0.
+3. ACTIVE - API / AnyLLM real setup workflow v0.
 4. GREENLIT - Ollama real installer + model readiness workflow v0.
 5. GREENLIT - Lacapult window chrome investigation v0.
 
-Reasoning: first cut the visible rot and remove misleading scope; then add the shared save/check skeleton; then wire backend-specific real installs; then investigate the chrome bug with evidence rather than guessing. Package 1 is complete; Alex should continue with Package 2 because it gives the setup UI its save/check/status-light skeleton before deeper backend-specific installers touch secrets, packages, or models.
+Reasoning: first cut the visible rot and remove misleading scope; then add the shared save/check skeleton; then wire backend-specific real installs; then investigate the chrome bug with evidence rather than guessing. Packages 1 and 2 are complete; Alex should continue with Package 3 to make the API/AnyLLM path real while preserving the no-secrets/no-live-API/no-unapproved-install boundary.

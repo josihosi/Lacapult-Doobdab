@@ -28,8 +28,8 @@ Success state:
 - [x] All notes are preserved in canon under `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
 - [x] Stack was parked until Josef explicitly reopened it for Alex on 2026-04-27.
 - [x] Package 1 complete: LLM tab de-clutter/backend-scope correction.
-- [ ] Package 2 active: setup Save/Check/Install action pattern.
-- [ ] Package 3 complete: API / AnyLLM real setup workflow.
+- [x] Package 2 complete: setup Save/Check/Install action pattern.
+- [ ] Package 3 active: API / AnyLLM real setup workflow.
 - [ ] Package 4 complete: Ollama real installer + model readiness workflow.
 - [ ] Package 5 complete: window chrome investigation/fix.
 

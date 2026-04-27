@@ -231,6 +231,13 @@ Lacapult now repairs that installed-app dependency shape for the selected C-AOL 
 
 The repeatable proof first reproduces the old blocker, then runs `python3 tools/prove_caol_game_launch_smoke.py --repair --keep-sandbox --observe-seconds 8`. The repaired app has no `/opt/local`, `/usr/local`, or `/opt/homebrew` paths left in the checked load graph, passes the C-AOL portability verifier against the repaired app bundle, and remains running past the 8-second launch-smoke observation window. This is a Lacapult install/launch repair, not a notarized/new C-AOL DMG release, and it still avoids real Application Support mutation, public releases, upstream contact, API secrets, and model pulls.
 
+
+## 2026-04-27 backend setup Save/Check action pattern
+
+`scripts/BackendSetupUI.gd` now exposes the cross-cutting backend setup action pattern required before deeper API/Ollama setup work: `Save options`, `Check`, and `Install setup`. `Check` refreshes readiness from the current UI fields without writing backend config, installing packages, pulling models, or calling APIs. `Save options` persists launcher-side backend metadata/options-patch only. `Install setup` calls the same save path before opening the existing confirmation-gated setup intent. `scripts/BackendConfigManager.gd` owns the reusable `check_backend_status()` and compact `get_status_light()` vocabulary (`🟢` ready, `🟡` needs action, `🔴` missing/error).
+
+The repeatable proof is `tools/godot_backend_setup_save_check_smoke.gd`, run with an isolated `HOME`. It creates a sandbox active C-AOL install shape, proves Check is detection-only/no-config-write, proves Save persists current API fields without storing secrets, and proves Install setup saves current Ollama fields before the no-download confirmation step.
+
 ## 2026-04-25 backend-good v0-safe hardening
 
 C-AOL backend truth from the reference checkout:
