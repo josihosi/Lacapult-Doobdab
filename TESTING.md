@@ -15,7 +15,7 @@ Use the smallest evidence that honestly matches the change.
 
 ## Current proof target
 
-**Active Lacapult implementation is reopened for Alex.** Current validation target is Package 5 from the debug-note correction stack: `Lacapult window chrome investigation v0`.
+**Active Lacapult implementation is locally complete for the reopened debug-note stack.** Current remaining validation target is external Windows/Josef confirmation for Package 5: `Lacapult window chrome investigation v0`.
 
 Package 2 evidence landed on 2026-04-27:
 
@@ -65,7 +65,7 @@ Validate packages as follows:
 - Setup save/check pattern: UI/static proof for Save options, Check, status lights, and Install-saves-first ordering; sandboxed config/options round-trip proof.
 - API / AnyLLM workflow: UI proof for API base URL/provider/model/env-var controls and status lights; sandboxed install/import proof where safe; no real secrets or remote API calls in automated gates.
 - Ollama workflow: COMPLETE via UI proof for one model-choice control, Mistral/Nemotron readiness lights, Check, Save, Install Ollama / model, Install venv, and mocked/fixture model-present/missing/error states; no automated model pulls/installs were performed.
-- Window chrome investigation: ACTIVE; `HOME=$(mktemp -d /tmp/lacapult-window-chrome-home.XXXXXX) godot --path . --no-window -s tools/godot_window_chrome_inspection.gd` proves the local root-cause class is custom scene chrome (`project.godot` borderless window + `scenes/CustomTitleBar.tscn` inside `scenes/Catapult.tscn`), not native OS chrome, and proves the visible metric seam changed from titlebar `32px` / main offset `36px` / icon `24x24` / buttons `32x24` / vertical margins `4px` to titlebar `28px` / main offset `32px` / icon `20x20` / buttons `28x20` / vertical margins `2px`. Windows/Josef visual confirmation is still separate and required before claiming cross-platform appearance fixed.
+- Window chrome investigation: LOCAL COMPLETE / WINDOWS CONFIRMATION PENDING; `HOME=$(mktemp -d /tmp/lacapult-window-chrome-home.XXXXXX) godot --path . --no-window -s tools/godot_window_chrome_inspection.gd` proves the local root-cause class is custom scene chrome (`project.godot` borderless window + `scenes/CustomTitleBar.tscn` inside `scenes/Catapult.tscn`), not native OS chrome, and proves the visible metric seam changed from titlebar `32px` / main offset `36px` / icon `24x24` / buttons `32x24` / vertical margins `4px` to titlebar `28px` / main offset `32px` / icon `20x20` / buttons `28x20` / vertical margins `2px`. The Windows confirmation checklist is in `doc/lacapult-window-chrome-investigation-packet-2026-04-27.md`; Windows/Josef visual confirmation is still separate and required before claiming cross-platform appearance fixed.
 
 No debug-stack proof may mutate real Application Support config/saves/mods, install packages/models, use API secrets, publish releases, or republish quarantined artifacts without explicit clearance.
 
@@ -84,6 +84,7 @@ Detailed evidence is intentionally stored in auxiliary docs instead of repeated 
 - One-shot installer north star: `doc/lacapult-one-shot-installer-vision.md`.
 - v0.2 release/backend/modding contract: `doc/lacapult-v02-release-backend-modding-contract.md`.
 - Debug-note correction stack: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
+- Window chrome investigation packet / Windows checklist: `doc/lacapult-window-chrome-investigation-packet-2026-04-27.md`.
 
 Recent gate commands used for Package 5:
 - `HOME=$(mktemp -d /tmp/lacapult-window-chrome-home.XXXXXX) godot --path . --no-window -s tools/godot_window_chrome_inspection.gd`

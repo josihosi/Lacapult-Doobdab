@@ -249,15 +249,16 @@ testing_impact:
   - Godot project/window setting inspection.
   - Windows confirmation remains human/device-dependent unless a Windows runner/screenshot path exists.
 
-classification: active
-current_evidence:
+classification: local-complete-windows-confirmation-pending
+completion_evidence:
 - Local/project inspection on 2026-04-27 names the root-cause class as custom scene chrome rather than native OS chrome: `project.godot` sets `display/window/size/borderless=true`, `scenes/Catapult.tscn` instances `scenes/CustomTitleBar.tscn`, and the custom titlebar owns TextureButton Minimize/Maximize/Close controls.
 - Smallest-seam local patch tightened custom chrome metrics: titlebar `32px -> 28px`, `Main.margin_top 36px -> 32px`, app icon `24x24 -> 20x20`, close/min/max buttons `32x24 -> 28x20`, and vertical titlebar margins `4px -> 2px`.
 - Evidence command: `HOME=$(mktemp -d /tmp/lacapult-window-chrome-home.XXXXXX) godot --path . --no-window -s tools/godot_window_chrome_inspection.gd`.
+- Bounded handoff/checklist: `doc/lacapult-window-chrome-investigation-packet-2026-04-27.md`.
 remaining_evidence:
 - Windows/Josef screenshot or Windows automation is still required before a cross-platform visual-fix claim.
-aux_doc_needed: yes
-handoff_needed: yes
+aux_doc_needed: done
+handoff_needed: done
 open_questions:
 - Need Windows screenshot/confirmation from Josef or a Windows automation path before final cross-platform claim.
 - Windows/Josef screenshot should confirm whether the tightened custom chrome resolves the complaint, or whether a native-chrome/product decision is still needed.
@@ -268,6 +269,6 @@ open_questions:
 2. COMPLETE - Setup save/check action pattern v0.
 3. COMPLETE - API / AnyLLM real setup workflow v0.
 4. COMPLETE - Ollama real installer + model readiness workflow v0.
-5. ACTIVE - Lacapult window chrome investigation v0.
+5. LOCAL COMPLETE / PARKED FOR WINDOWS CONFIRMATION - Lacapult window chrome investigation v0.
 
-Reasoning: first cut the visible rot and remove misleading scope; then add the shared save/check skeleton; then wire backend-specific setup paths; then investigate the chrome bug with evidence rather than guessing. Packages 1-4 are complete under their automated no-secret/no-live-API/no-unapproved-install/no-model-pull gates; Alex should continue with Package 5 by investigating the window chrome root-cause class with separated macOS/local versus Windows/Josef evidence.
+Reasoning: first cut the visible rot and remove misleading scope; then add the shared save/check skeleton; then wire backend-specific setup paths; then investigate the chrome bug with evidence rather than guessing. Packages 1-4 are complete under their automated no-secret/no-live-API/no-unapproved-install/no-model-pull gates; Package 5 is locally implemented/proofed with separated macOS/local versus Windows/Josef evidence. No further Alex-side unblocked debug-stack package remains unless Windows/Josef confirmation reopens the chrome seam.

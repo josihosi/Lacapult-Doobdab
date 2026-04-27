@@ -21,7 +21,7 @@ Canonical docs:
 
 ## Lacapult debug-note correction stack
 
-Status: ACTIVE / ALEX EXECUTION LANE
+Status: LOCAL IMPLEMENTATION COMPLETE / WINDOWS CONFIRMATION PENDING
 
 Success state:
 - [x] Raw 2026-04-26 debug-note intake found in workspace memory/runtime files.
@@ -31,7 +31,8 @@ Success state:
 - [x] Package 2 complete: setup Save/Check/Install action pattern.
 - [x] Package 3 complete: API / AnyLLM real setup workflow.
 - [x] Package 4 complete: Ollama real installer + model readiness workflow.
-- [ ] Package 5 complete: window chrome investigation/fix.
+- [x] Package 5 locally complete: window chrome investigation/fix root-cause class named, smallest CustomTitleBar metric seam patched/proofed, and bounded Windows confirmation checklist written.
+- [ ] Windows/Josef visual confirmation before any cross-platform chrome-fix claim.
 
 ## Completed product footing
 

@@ -4,7 +4,7 @@ Short queue only. Remove finished items instead of turning this into a museum.
 
 ## Now
 
-**Active target:** Lacapult window chrome investigation v0.
+**Active target:** debug-note stack parked after Package 5 local boundary; Windows/Josef chrome confirmation is the remaining external check.
 
 - [x] Quarantine the 2026-04-26 Lacapult prerelease family as Draft and verify public removal.
 - [x] Record the release identity/product failure in canon.
@@ -34,7 +34,8 @@ Short queue only. Remove finished items instead of turning this into a museum.
 - [x] Name the local root-cause class: custom scene chrome (`borderless=true` + `CustomTitleBar.tscn`), not native OS chrome.
 - [x] Patch the smallest custom-titlebar metric seam first: titlebar height, vertical margins, app icon size, close/min/max button size, and matching main content offset.
 - [x] Prove the visible seam changed with local Godot smoke comparing old baseline metrics to new scene metrics.
-- [ ] Keep Windows/Josef screenshot confirmation separate before any cross-platform visual-fix claim.
+- [x] Keep Windows/Josef screenshot confirmation separate before any cross-platform visual-fix claim.
+- [x] Write the Package 5 bounded handoff/checklist for Windows confirmation.
 
 ## Josef playtest ledger
 
@@ -48,7 +49,7 @@ Canonical contract: `doc/lacapult-parked-debug-note-correction-packages-2026-04-
 2. [x] COMPLETE - Setup save/check action pattern v0.
 3. [x] COMPLETE - API / AnyLLM real setup workflow v0.
 4. [x] COMPLETE - Ollama real installer + model readiness workflow v0.
-5. [ ] ACTIVE - Lacapult window chrome investigation v0.
+5. [x] LOCAL COMPLETE / PARKED FOR WINDOWS CONFIRMATION - Lacapult window chrome investigation v0.
 
 ## Do not do without fresh clearance
 

@@ -18,7 +18,7 @@ If these disagree, `Plan.md` wins; repair the other file instead of inventing a 
 
 ## Current status
 
-**State:** RELEASE QUARANTINE ACTIVE / DEBUG-NOTE IMPLEMENTATION REOPENED / ALEX ACTIVE
+**State:** RELEASE QUARANTINE ACTIVE / DEBUG-NOTE LOCAL IMPLEMENTATION COMPLETE / WINDOWS CONFIRMATION PENDING
 
 The 2026-04-26 Lacapult prerelease family is quarantined as Draft after Josef reported that the download looked like CAOL rather than clearly like Lacapult. No Lacapult release from that family should be republished until the quarantine/identity investigation is closed and Josef/Schani explicitly re-greenlight.
 
@@ -46,7 +46,7 @@ Josef reopened the collected Lacapult debug notes on 2026-04-27 and asked for a 
 2. **COMPLETE: Setup save/check action pattern v0** - backend setup now has `Save options`, `Check`, compact status-light text, and `Install setup` saves the current fields before the confirmation-gated setup step.
 3. **COMPLETE: API / AnyLLM real setup workflow v0** - provider-aware API setup with base URL/provider/model, safe API-key/env-var workflow, and real AnyLLM setup path behind explicit confirmation/proof gates.
 4. **COMPLETE: Ollama real installer + model readiness workflow v0** - one visible model-choice control, Mistral/Nemotron readiness lights, Check/Save/Install behavior, and confirmation-gated Python venv/Ollama setup intents are implemented/proofed without automated pulls/installs.
-5. **ACTIVE: Lacapult window chrome investigation v0** - local root cause is custom scene chrome; the smallest CustomTitleBar metric seam is patched/proofed locally, while Windows/Josef visual confirmation remains separate before any cross-platform fix claim.
+5. **LOCAL COMPLETE / PARKED FOR WINDOWS CONFIRMATION: Lacapult window chrome investigation v0** - local root cause is custom scene chrome; the smallest CustomTitleBar metric seam is patched/proofed locally, and the bounded handoff/checklist lives in `doc/lacapult-window-chrome-investigation-packet-2026-04-27.md`. Windows/Josef visual confirmation remains separate before any cross-platform fix claim.
 
 This reopens implementation only for the debug-note stack. It does **not** lift the release quarantine or authorize republishing.
 
