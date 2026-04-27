@@ -118,9 +118,13 @@ func _assert_settings_ui_recommendation_copy() -> bool:
 		return false
 	var text := f.get_as_text()
 	f.close()
-	for token in ["C-AOL LLM backend setup", "API / AnyLLM", "Ollama local", "OpenVINO specialized", "mistral-v0.3", "nemotron-9b", "ConfirmExternalBackendAction", "does not download models"]:
+	for token in ["title.text = \"LLM\"", "Choose how C-AOL should reach an LLM backend", "API / AnyLLM", "Ollama local", "mistral-v0.3", "nemotron-9b", "ConfirmExternalBackendAction", "does not download models"]:
 		if text.find(token) < 0:
 			_fail("backend setup UI token missing: %s" % token)
+			return false
+	for forbidden in ["C-AOL LLM backend setup", "OpenVINO specialized", "Model directory"]:
+		if text.find(forbidden) >= 0:
+			_fail("backend setup UI should not expose token: %s" % forbidden)
 			return false
 	return true
 

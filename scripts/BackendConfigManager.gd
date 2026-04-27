@@ -159,7 +159,7 @@ func _build_caol_options_patch(mode: String, fields: Dictionary) -> Dictionary:
 			{
 				"name": "LLM_INTENT_BACKEND",
 				"value": mode,
-				"reason": "Select the NPC LLM backend."
+				"reason": "Select the LLM backend."
 			}
 		]
 	}

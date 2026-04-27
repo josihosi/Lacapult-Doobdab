@@ -1502,7 +1502,7 @@ value = 100.0
 editable = false
 suffix = "%"
 
-[node name="C-AOL LLM backend setup" type="VBoxContainer" parent="Main/Tabs"]
+[node name="LLM" type="VBoxContainer" parent="Main/Tabs"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0

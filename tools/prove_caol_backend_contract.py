@@ -60,10 +60,10 @@ REQUIRED_BACKEND_TOKENS = {
     "OpenVINO setup checks Python imports/model-dir presence only",
 }
 REQUIRED_UI_TOKENS = {
-    "C-AOL LLM backend setup",
+    "title.text = \"LLM\"",
+    "Choose how C-AOL should reach an LLM backend",
     "Python / venv",
     "API key env var",
-    "Model directory",
     "mistral-v0.3",
     "nemotron-9b",
     "ConfirmExternalBackendAction",

@@ -38,7 +38,7 @@ Taste note: the GUI has too much senseless text, text overflows the window, and 
 
 ## Package 1 — LLM tab de-clutter + backend-scope correction v0
 
-request_kind: active-request
+request_kind: completed-request
 
 summary: Clean the Lacapult backend setup surface so it behaves like an installer page instead of a wall of explanatory text. Rename the visible backend tab to `LLM`, reduce top/backend-selected copy to short player-facing sentences, remove OpenVINO from the Lacapult installer UI for now, and correct the API token-cost copy using logged C-AOL evidence.
 
@@ -72,15 +72,21 @@ testing_impact:
   - Godot scene/load or UI smoke proving the LLM tab and selected-helper text render.
   - No external installs/downloads/API calls.
 
-classification: active
+classification: completed
 aux_doc_needed: yes
 handoff_needed: yes
+completion_evidence:
+- `scripts/Catapult.gd` and `scenes/Catapult.tscn` now expose tab `LLM`.
+- `scripts/BackendSetupUI.gd` renders the short top sentence, API `300-400 tokens`-with-variation note, and Ollama helper `Use ollama for local LLM utilization.`
+- `scripts/BackendSetupUI.gd` exposes only API / AnyLLM and Ollama local setup choices; hidden OpenVINO config/readiness support remains in `scripts/BackendConfigManager.gd` and sandbox proof tooling.
+- `tools/godot_llm_tab_declutter_smoke.gd` renders the actual BackendSetupUI labels/options under isolated `HOME` and loads `scenes/Catapult.tscn` with `Main/Tabs/LLM`.
+
 open_questions:
-- Exact hidden in-game OpenVINO option path should be verified before removal from Lacapult UI.
+- Exact hidden in-game OpenVINO option path remains a future C-AOL/game-side verification item; Lacapult visible setup removal is complete.
 
 ## Package 2 — Setup save/check action pattern v0
 
-request_kind: greenlit-request
+request_kind: active-request
 
 summary: Apply a consistent setup-form behavior across Lacapult backend setup: manual field edits can be saved without installing, and every install action saves current options before doing work. Replace long explanatory blocks with compact status lights and explicit Check actions.
 
@@ -110,7 +116,7 @@ testing_impact:
   - Sandboxed config/options round-trip proof.
   - Non-mutating readiness check proof.
 
-classification: greenlit
+classification: active
 aux_doc_needed: yes
 handoff_needed: yes
 open_questions:
@@ -244,10 +250,10 @@ open_questions:
 
 ## Active order for Alex
 
-1. ACTIVE - LLM tab de-clutter + backend-scope correction v0.
-2. GREENLIT NEXT - Setup save/check action pattern v0.
+1. COMPLETE - LLM tab de-clutter + backend-scope correction v0.
+2. ACTIVE - Setup save/check action pattern v0.
 3. GREENLIT - API / AnyLLM real setup workflow v0.
 4. GREENLIT - Ollama real installer + model readiness workflow v0.
 5. GREENLIT - Lacapult window chrome investigation v0.
 
-Reasoning: first cut the visible rot and remove misleading scope; then add the shared save/check skeleton; then wire backend-specific real installs; then investigate the chrome bug with evidence rather than guessing. Alex starts with Package 1 because it removes the most visible nonsense without touching secrets/model installs.
+Reasoning: first cut the visible rot and remove misleading scope; then add the shared save/check skeleton; then wire backend-specific real installs; then investigate the chrome bug with evidence rather than guessing. Package 1 is complete; Alex should continue with Package 2 because it gives the setup UI its save/check/status-light skeleton before deeper backend-specific installers touch secrets, packages, or models.

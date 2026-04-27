@@ -4,7 +4,7 @@ extends VBoxContainer
 const OLLAMA_MODEL_MISTRAL = "mistral-v0.3"
 const OLLAMA_MODEL_NEMOTRON = "nemotron-9b"
 
-var _backend_modes := ["api", "ollama", "openvino"]
+var _backend_modes := ["api", "ollama"]
 var _pending_confirm_action := ""
 
 var _backend_mode_button: OptionButton = null
@@ -32,13 +32,13 @@ func _build_controls() -> void:
 	add_constant_override("separation", 6)
 
 	var title = Label.new()
-	title.text = "C-AOL LLM backend setup"
+	title.text = "LLM"
 	title.align = Label.ALIGN_CENTER
 	add_child(title)
 
 	_intro = Label.new()
 	_intro.autowrap = true
-	_intro.text = "Choose how C-AOL should reach an NPC LLM backend. Lacapult checks what is already available, saves setup metadata, and asks before any external package or model action. API keys stay outside Lacapult in environment variables."
+	_intro.text = "Choose how C-AOL should reach an LLM backend"
 	add_child(_intro)
 
 	var mode_row = HBoxContainer.new()
@@ -53,7 +53,6 @@ func _build_controls() -> void:
 	_backend_mode_button.size_flags_horizontal = SIZE_SHRINK_END
 	_backend_mode_button.add_item("API / AnyLLM")
 	_backend_mode_button.add_item("Ollama local")
-	_backend_mode_button.add_item("OpenVINO specialized")
 	_backend_mode_button.connect("item_selected", self, "_on_BackendMode_item_selected")
 	mode_row.add_child(_backend_mode_button)
 
@@ -104,6 +103,7 @@ func _build_controls() -> void:
 	_hardware_hint = Label.new()
 	_hardware_hint.name = "HardwareRecommendation"
 	_hardware_hint.autowrap = true
+	_hardware_hint.visible = false
 	add_child(_hardware_hint)
 
 	var python_row = HBoxContainer.new()
@@ -167,6 +167,7 @@ func _refresh_backend_setup_controls() -> void:
 	if mode_idx < 0:
 		mode_idx = 0
 		mode = _backend_modes[mode_idx]
+		Settings.store("backend_mode", mode)
 	_backend_mode_button.select(mode_idx)
 
 	var choice_row = _ollama_model_choice.get_parent()
@@ -179,10 +180,10 @@ func _refresh_backend_setup_controls() -> void:
 		_backend_model.text = Settings.read("backend_api_model")
 		_backend_api_key_env.get_parent().visible = true
 		choice_row.visible = false
-		_guidance.text = "API / AnyLLM path: choose a provider and model, set an API-key environment variable outside Lacapult, then save metadata for C-AOL. Lacapult can guide installing Python package dependencies, but only after confirmation."
+		_guidance.text = "Use an API provider through AnyLLM. Recent C-AOL logs show many calls around 300-400 tokens, with variation by prompt/provider/model."
 	elif mode == "ollama":
 		_backend_endpoint_label.text = "Ollama URL"
-		_backend_model_label.text = "Ollama model"
+		_backend_model_label.text = "Ollama model tag"
 		_backend_endpoint.placeholder_text = BackendConfig.DEFAULT_OLLAMA_URL
 		_backend_model.placeholder_text = "%s or %s" % [OLLAMA_MODEL_MISTRAL, OLLAMA_MODEL_NEMOTRON]
 		_backend_endpoint.text = Settings.read("backend_ollama_endpoint")
@@ -190,36 +191,21 @@ func _refresh_backend_setup_controls() -> void:
 		_backend_api_key_env.get_parent().visible = false
 		choice_row.visible = true
 		_select_ollama_choice(Settings.read("backend_ollama_model"))
-		_guidance.text = "Ollama path: install or start Ollama, choose a local model, and let C-AOL talk to the local Ollama server. Lacapult recommends from safe hardware signals, but you choose the model and confirm before any pull/download step."
-	else:
-		_backend_endpoint_label.text = "Model directory"
-		_backend_model_label.text = "Device"
-		_backend_endpoint.placeholder_text = "OpenVINO model directory"
-		_backend_model.placeholder_text = "AUTO, CPU, GPU, NPU"
-		_backend_endpoint.text = Settings.read("backend_openvino_model_dir")
-		_backend_model.text = Settings.read("backend_openvino_device")
-		_backend_api_key_env.get_parent().visible = false
-		choice_row.visible = false
-		_guidance.text = "OpenVINO path: choose a Python environment with OpenVINO packages and a local model directory. This is a specialized setup path; Lacapult checks readiness and asks before any package/model action."
+		_guidance.text = "Use ollama for local LLM utilization."
 
 	_backend_python_path.text = Settings.read("backend_python_path")
 	_backend_api_key_env.text = Settings.read("backend_api_key_env")
-	_hardware_hint.text = _build_ollama_hardware_recommendation_text(_read_safe_hardware_signals())
+	_hardware_hint.text = ""
 
 	var status = "Backend status: unknown"
 	for backend in BackendConfig.get_supported_backends():
 		if backend.get("id", "") == mode:
 			status = "%s readiness: %s" % [backend.get("label", mode), _human_readiness(backend.get("status", "unknown"))]
-			status += "\n%s" % backend.get("recommendation", "Choose the setup path that matches your machine and preferences.")
-			status += "\n%s" % backend.get("v0_warning", "Lacapult asks before external changes and does not store API secrets.")
-			status += "\nSetup notes: %s" % backend.get("guidance", BackendConfig.get_backend_guidance(mode))
 			break
 	if mode == "api":
-		status += "\nProvider intent: %s. API secrets stay in the environment; Lacapult stores only the env-var name." % Settings.read("backend_api_provider")
+		status += "\nAPI secrets stay in the environment; Lacapult stores only the env-var name."
 	elif mode == "ollama":
-		status += "\nModel choices offered here: %s and %s. No model pull is attempted until the player confirms the action." % [OLLAMA_MODEL_MISTRAL, OLLAMA_MODEL_NEMOTRON]
-	else:
-		status += "\nOpenVINO setup remains specialized: detection and config are available now; installs/downloads require explicit confirmation."
+		status += "\nNo model pull is attempted until the player confirms the action."
 	_backend_status.text = status
 
 
@@ -254,14 +240,6 @@ func _human_readiness(raw_status: String) -> String:
 		return "Ollama is running, but the selected model is not installed. Lacapult will ask before any model pull."
 	if raw_status.find("ollama_command_present_server_running_model_not_selected") >= 0:
 		return "Ollama is running. Choose a model before saving the final setup."
-	if raw_status.find("openvino_python_missing") >= 0:
-		return "Python was not found; choose a Python or virtual environment with OpenVINO packages."
-	if raw_status.find("missing_openvino") >= 0:
-		return "Python is available, but OpenVINO packages are missing in the selected environment."
-	if raw_status.find("model_dir_missing") >= 0:
-		return "Choose a local OpenVINO model directory before using this path."
-	if raw_status.find("model_dir_present") >= 0:
-		return "OpenVINO package checks and model directory checks have enough information for a guided setup attempt."
 	return "Readiness could not be summarized yet; save the setup and check the guidance above."
 
 
@@ -281,11 +259,6 @@ func _store_backend_field(setting_prefix: String, value: String) -> void:
 	var mode = Settings.read("backend_mode")
 	if mode == "api" or mode == "ollama":
 		Settings.store("backend_%s_%s" % [mode, setting_prefix], value)
-	elif mode == "openvino":
-		if setting_prefix == "endpoint":
-			Settings.store("backend_openvino_model_dir", value)
-		elif setting_prefix == "model":
-			Settings.store("backend_openvino_device", value)
 
 
 func _on_BackendMode_item_selected(index: int) -> void:
@@ -323,8 +296,8 @@ func _on_SaveBackendSetup_pressed() -> void:
 	var python_path = "" if _backend_python_path == null else _backend_python_path.text
 	var api_provider = Settings.read("backend_api_provider")
 	var api_key_env = "" if _backend_api_key_env == null else _backend_api_key_env.text
-	var openvino_model_dir = endpoint if mode == "openvino" else Settings.read("backend_openvino_model_dir")
-	var openvino_device = model if mode == "openvino" else Settings.read("backend_openvino_device")
+	var openvino_model_dir = Settings.read("backend_openvino_model_dir")
+	var openvino_device = Settings.read("backend_openvino_device")
 	var result = BackendConfig.write_launcher_backend_config(mode, endpoint, model, python_path, api_provider, api_key_env, openvino_model_dir, openvino_device)
 	_refresh_backend_setup_controls()
 	_backend_status.text = "Backend setup save result: %s\n%s" % [result, _backend_status.text]
@@ -341,7 +314,7 @@ func _confirmation_text_for_mode(mode: String) -> String:
 		return "Confirm before installing AnyLLM/Python packages. This proof build records the intent only and does not run pip or read API secrets."
 	if mode == "ollama":
 		return "Confirm before installing Ollama or pulling model %s. This proof build records the intent only and does not download models." % Settings.read("backend_ollama_model")
-	return "Confirm before installing OpenVINO packages or preparing model files. This proof build records the intent only and does not run package managers or download models."
+	return "Confirm before running an external backend setup action. This proof build records the intent only and does not run package managers or download models."
 
 
 func _on_ExternalBackendAction_confirmed() -> void:

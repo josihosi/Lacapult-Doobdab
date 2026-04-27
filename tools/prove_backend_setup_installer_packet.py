@@ -43,16 +43,18 @@ def main() -> None:
     settings_ui = read(SETTINGS_UI)
     en_text = read(EN_TEXT)
 
-    require('[node name="C-AOL LLM backend setup" type="VBoxContainer" parent="Main/Tabs"]' in scene, "backend tab node missing")
+    require('[node name="LLM" type="VBoxContainer" parent="Main/Tabs"]' in scene, "LLM tab node missing")
     require('script = ExtResource( 53 )' in scene, "backend tab script missing")
-    require('_tabs.set_tab_title(7, "C-AOL LLM backend setup")' in read(REPO / "scripts" / "Catapult.gd"), "backend tab title assignment missing")
+    require('_tabs.set_tab_title(7, "LLM")' in read(REPO / "scripts" / "Catapult.gd"), "LLM tab title assignment missing")
     require("_add_backend_setup_controls" not in settings_ui, "old Settings-tab backend setup is still constructed")
 
     for token in [
-        "C-AOL LLM backend setup",
+        "title.text = \"LLM\"",
+        "Choose how C-AOL should reach an LLM backend",
+        "Use an API provider through AnyLLM. Recent C-AOL logs show many calls around 300-400 tokens",
+        "Use ollama for local LLM utilization.",
         "API / AnyLLM",
         "Ollama local",
-        "OpenVINO specialized",
         MODEL_MISTRAL,
         MODEL_NEMOTRON,
         "ConfirmExternalBackendAction",
@@ -61,8 +63,8 @@ def main() -> None:
     ]:
         require(token in backend_ui, f"backend setup UI token missing: {token}")
 
-    backend_player_facing = "\n".join([backend_ui, backend_config, scene])
-    for banned in ["Josef", "Windows test", "pre-release testing", "Windows-first"]:
+    backend_player_facing = "\n".join([backend_ui, scene])
+    for banned in ["C-AOL LLM backend setup", "OpenVINO specialized", "Model directory", "around 1000 tokens", "1000 tokens", "Josef", "Windows test", "pre-release testing", "Windows-first"]:
         require(banned not in backend_player_facing, f"backend/setup banned wording remains: {banned}")
 
     low = recommendation_for_fixture(0)
@@ -74,11 +76,11 @@ def main() -> None:
     require("MIT license" in en_text and "Dabdoob/Catapult" in en_text, "license/lineage thank-you credit missing")
 
     print("Backend setup installer packet proof passed")
-    print("  tab: C-AOL LLM backend setup")
+    print("  tab: LLM")
     print("  old Settings backend panel: not constructed")
+    print("  visible setup choices: API / AnyLLM and Ollama local only")
     print("  confirmation-gated actions: present, non-mutating proof text present")
     print(f"  Ollama choices: {MODEL_MISTRAL}, {MODEL_NEMOTRON}")
-    print("  fixture recommendations: low/unknown -> mistral-v0.3; stronger -> nemotron-9b permitted/recommended")
     print("  About thank-you copy: inherited support message preserved; backend/setup copy scan passed")
 
 

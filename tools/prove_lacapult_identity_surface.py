@@ -69,7 +69,7 @@ def main() -> None:
         "Fonts",
         "Backups",
         "Settings",
-        "C-AOL LLM backend setup",
+        "LLM",
         "About",
     ]
     for tab in tabs:

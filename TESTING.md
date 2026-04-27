@@ -15,14 +15,16 @@ Use the smallest evidence that honestly matches the change.
 
 ## Current proof target
 
-**Active Lacapult implementation is reopened for Alex.** Current validation target is Package 1 from the debug-note correction stack: `LLM tab de-clutter + backend-scope correction v0`.
+**Active Lacapult implementation is reopened for Alex.** Current validation target is Package 2 from the debug-note correction stack: `Setup save/check action pattern v0`.
 
-Package 1 evidence must include:
+Package 1 evidence landed on 2026-04-27:
 
-- static scan proving the visible backend tab/page is now `LLM`;
-- static scan proving old sprawling helper copy and the stale `around 1000 tokens` claim are gone;
-- static scan proving visible Lacapult OpenVINO installer/setup choices are removed while hidden/in-game support is not accidentally deleted;
-- Godot scene/load or UI smoke proving the changed label/helper copy render in the actual UI.
+- source/scene scan: visible backend tab/page is now `LLM`;
+- source/scene scan: old sprawling helper copy and stale `around 1000 tokens` product copy are absent from the visible UI seam;
+- source/scene scan: visible Lacapult OpenVINO setup choice is removed from `BackendSetupUI.gd` while `BackendConfigManager.gd` still preserves hidden/sandboxed OpenVINO config/readiness support;
+- Godot UI smoke: `godot --path . --no-window -s tools/godot_llm_tab_declutter_smoke.gd` rendered the actual BackendSetupUI labels/options and loaded `scenes/Catapult.tscn` with `Main/Tabs/LLM`.
+
+Package 2 evidence must include UI/static proof for Save options, Check actions, status lights, and Install-saves-first ordering, plus sandboxed config/options round-trip proof.
 
 Before any renewed republish/confidence claim, evidence must include:
 
@@ -61,9 +63,12 @@ Detailed evidence is intentionally stored in auxiliary docs instead of repeated 
 - v0.2 release/backend/modding contract: `doc/lacapult-v02-release-backend-modding-contract.md`.
 - Debug-note correction stack: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
 
-Recent gate commands used for canon-only cleanup:
-- `git diff --check`
-- static presence checks for debug stack / active quarantine references
+Recent gate commands used for Package 1:
+- `python3 tools/prove_backend_setup_installer_packet.py`
+- `python3 tools/prove_caol_backend_contract.py`
+- `HOME=$(mktemp -d /tmp/lacapult-llm-ui-home.XXXXXX) godot --path . --no-window -s tools/godot_llm_tab_declutter_smoke.gd`
+- `HOME=$(mktemp -d /tmp/lacapult-backend-triad-home.XXXXXX) godot --path . --no-window -s tools/godot_backend_triad_smoke.gd`
+- focused `rg` source/scene scans for LLM tab copy, stale helper/token copy, and visible OpenVINO setup absence
 
 ## Known risk spots
 
