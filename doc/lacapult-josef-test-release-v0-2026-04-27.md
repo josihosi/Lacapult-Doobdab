@@ -1,6 +1,6 @@
 # Lacapult Josef test release v0 — 2026-04-27
 
-Status: active release-test slice.
+Status: ready for Josef Windows validation / Draft test release created.
 
 ## Clearance and boundary
 
@@ -59,11 +59,38 @@ Josef should test:
 
 ## Success state
 
-- [ ] Fresh packaging proof passes from current debug-stack-complete `main`.
-- [ ] Windows package contains `Lacapult-Doobdab.exe` and `utils/7za.exe`.
-- [ ] GitHub Draft/prerelease test release exists with Windows asset, checksums, and build notes.
-- [ ] Release notes preserve quarantine language and include Josef's checklist.
-- [ ] Remote release shape is verified with `gh release view`.
+- [x] Fresh packaging proof passes from current debug-stack-complete `main`.
+- [x] Windows package contains `Lacapult-Doobdab.exe` and `utils/7za.exe`.
+- [x] GitHub Draft/prerelease test release exists with Windows asset, checksums, and build notes.
+- [x] Release notes preserve quarantine language and include Josef's checklist.
+- [x] Remote release shape is verified with `gh release view`.
+- [ ] Josef completes Windows validation from the Draft test release.
+
+## Published Draft test release
+
+Remote release: `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-62e620a97f3b0edaa8ca`.
+
+`gh release view` reports:
+
+- tag: `lacapult-josef-test-2026-04-27`
+- name: `Lacapult Doobdab Josef test build 2026-04-27`
+- draft: `true`
+- prerelease: `true`
+- target commit: `e1c05d66d7937010e98adab52355c7987ec21f08`
+
+Attached assets:
+
+- `Lacapult-Doobdab-windows-unsigned.zip` — 66,552,571 bytes — SHA-256 `cb999fdee5d6aaf1b8f8adde428923ee65265266666b281108ec2ecc624caaf7`
+- `SHA256SUMS.txt` — SHA-256 `3d37262be1267e51a3c4868fbd8b150ca9c1263a898a3b4d8e15b4e6618f15a7`
+- `manifest.json` — SHA-256 `4ac42282af5eb0568644cdc153d89afc7e989c73419dbed2e8b8d69de9db5e84`
+
+Windows package entries:
+
+```text
+Lacapult-Doobdab.exe
+utils/7-ZIP_LICENSE
+utils/7za.exe
+```
 
 ## Hollow-rock suspicion
 

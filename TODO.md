@@ -6,12 +6,12 @@ Short queue only. Remove finished items instead of turning this into a museum.
 
 **Active target:** Lacapult Josef test release v0.
 
-- [ ] Record the bounded Josef test-release lane in canon without lifting release quarantine.
-- [ ] Build/package the current debug-stack-complete Lacapult state from `main`.
-- [ ] Create a clearly labelled GitHub Draft test release if feasible, otherwise prerelease, with no stable/latest/final/public-confidence claim.
-- [ ] Attach the Windows unsigned package and checksums/build notes.
-- [ ] Include Josef's checklist: first launch/top bar, first visible tab, release row wording, install/download impression.
-- [ ] Verify the remote release shape with `gh release view`.
+- [x] Record the bounded Josef test-release lane in canon without lifting release quarantine.
+- [x] Build/package the current debug-stack-complete Lacapult state from `main`.
+- [x] Create a clearly labelled GitHub Draft test release if feasible, otherwise prerelease, with no stable/latest/final/public-confidence claim.
+- [x] Attach the Windows unsigned package and checksums/build notes.
+- [x] Include Josef's checklist: first launch/top bar, first visible tab, release row wording, install/download impression.
+- [x] Verify the remote release shape with `gh release view`.
 
 ## Completed debug-note stack
 

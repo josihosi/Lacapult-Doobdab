@@ -36,15 +36,16 @@ Success state:
 
 ## Lacapult Josef test release v0
 
-Status: ACTIVE / TEST RELEASE ONLY / QUARANTINE STILL ACTIVE
+Status: READY FOR JOSEF / TEST RELEASE ONLY / QUARANTINE STILL ACTIVE
 
 Success state:
-- [ ] Canon records Josef's 2026-04-27 clearance for a bounded test release without lifting quarantine.
-- [ ] Fresh package proof from current debug-stack-complete `main` passes.
-- [ ] Windows unsigned package and checksums/build notes are attached to a GitHub Draft/prerelease test release.
-- [ ] Release copy says this is for Josef Windows validation, not a final/public confidence claim or C-AOL game release.
-- [ ] Josef checklist is included: first launch/top bar, first visible tab, release row wording, install/download impression.
-- [ ] `gh release view` proves the remote release/tag/assets exist.
+- [x] Canon records Josef's 2026-04-27 clearance for a bounded test release without lifting quarantine.
+- [x] Fresh package proof from current debug-stack-complete `main` passes.
+- [x] Windows unsigned package and checksums/build notes are attached to a GitHub Draft/prerelease test release.
+- [x] Release copy says this is for Josef Windows validation, not a final/public confidence claim or C-AOL game release.
+- [x] Josef checklist is included: first launch/top bar, first visible tab, release row wording, install/download impression.
+- [x] `gh release view` proves the remote release/tag/assets exist: `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-62e620a97f3b0edaa8ca`.
+- [ ] Josef completes Windows validation from the Draft test release.
 
 ## Completed product footing
 

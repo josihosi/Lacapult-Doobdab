@@ -18,7 +18,7 @@ If these disagree, `Plan.md` wins; repair the other file instead of inventing a 
 
 ## Current status
 
-**State:** RELEASE QUARANTINE ACTIVE / JOSEF TEST RELEASE V0 ACTIVE
+**State:** RELEASE QUARANTINE ACTIVE / JOSEF TEST RELEASE V0 READY
 
 The 2026-04-26 Lacapult prerelease family is quarantined as Draft after Josef reported that the download looked like CAOL rather than clearly like Lacapult. No Lacapult release from that family should be republished until the quarantine/identity investigation is closed and Josef/Schani explicitly re-greenlight.
 
@@ -32,7 +32,7 @@ Canonical incident note: `doc/lacapult-release-quarantine-investigation-2026-04-
 
 ## Josef test release slice
 
-**ACTIVE: Lacapult Josef test release v0** - Josef superseded the parking/deactivate idea on 2026-04-27 and explicitly asked for a Lacapult release he can test. This is fresh clearance for a bounded GitHub **draft/prerelease test release only**, preferably Draft if owner access works. It does **not** lift quarantine, authorize a stable/latest/final claim, announce broadly, or start C-AOL release work.
+**READY FOR JOSEF: Lacapult Josef test release v0** - Josef superseded the parking/deactivate idea on 2026-04-27 and explicitly asked for a Lacapult release he can test. A bounded GitHub Draft/prerelease test release now exists for Josef Windows validation: `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-62e620a97f3b0edaa8ca`. This does **not** lift quarantine, authorize a stable/latest/final claim, announce broadly, or start C-AOL release work.
 
 Test-release target:
 - Build/package the current locally-complete debug-stack state from `main`.

@@ -24,6 +24,15 @@ Minimum evidence for this slice:
 - GitHub release is Draft if feasible, or prerelease if draft asset access is awkward;
 - release notes include Josef's checklist: first launch/top bar, first visible tab, release row wording, install/download impression.
 
+Josef test release evidence landed on 2026-04-27:
+
+- GitHub Draft/prerelease test release: `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-62e620a97f3b0edaa8ca`.
+- Tag/name reported by `gh release view`: `lacapult-josef-test-2026-04-27` / `Lacapult Doobdab Josef test build 2026-04-27`; target commit `e1c05d66d7937010e98adab52355c7987ec21f08`.
+- Attached Windows asset: `Lacapult-Doobdab-windows-unsigned.zip`, 66,552,571 bytes, SHA-256 `cb999fdee5d6aaf1b8f8adde428923ee65265266666b281108ec2ecc624caaf7`.
+- Attached build notes/checksums: `SHA256SUMS.txt` SHA-256 `3d37262be1267e51a3c4868fbd8b150ca9c1263a898a3b4d8e15b4e6618f15a7`; `manifest.json` SHA-256 `4ac42282af5eb0568644cdc153d89afc7e989c73419dbed2e8b8d69de9db5e84`.
+- Package shape proof: Windows zip entries are exactly `Lacapult-Doobdab.exe`, `utils/7-ZIP_LICENSE`, and `utils/7za.exe`.
+- Safety boundary: Draft/prerelease test release only; no stable/latest/final claim, no C-AOL release work, no package/model install, no live API call, and no real user-data mutation as proof.
+
 Package 2 evidence landed on 2026-04-27:
 
 - source/UI scan: backend setup action row now renders `Save options`, `Check`, and backend-specific install actions instead of the old long save/install copy;
