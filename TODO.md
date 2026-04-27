@@ -4,7 +4,7 @@ Short queue only. Remove finished items instead of turning this into a museum.
 
 ## Now
 
-**Active target:** Ollama real installer + model readiness workflow v0.
+**Active target:** Lacapult window chrome investigation v0.
 
 - [x] Quarantine the 2026-04-26 Lacapult prerelease family as Draft and verify public removal.
 - [x] Record the release identity/product failure in canon.
@@ -25,6 +25,11 @@ Short queue only. Remove finished items instead of turning this into a museum.
 - [x] Add provider/base URL/model/API-key env-var controls in the API setup path without storing secrets.
 - [x] Add real AnyLLM/Python setup/check workflow behind explicit confirmation only.
 - [x] Prove API setup with UI smoke plus sandboxed config/status proof; do not call live APIs or use secrets.
+- [x] Work from `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`, Package 4.
+- [x] Keep one visible Ollama model-choice control for Mistral/Nemotron and remove the duplicate freeform model field from Ollama mode.
+- [x] Add compact Ollama command/server, Mistral, Nemotron, Python/venv, and options readiness lights plus non-mutating `Check`.
+- [x] Add confirmation-gated `Install Ollama / model` and `Install venv` setup intents that save first and remain proof-only in automated gates.
+- [x] Prove Ollama setup with UI smoke plus fixture command/server/model states; do not install Ollama, create a venv, or pull models in automated proof.
 
 ## Josef playtest ledger
 
@@ -37,8 +42,8 @@ Canonical contract: `doc/lacapult-parked-debug-note-correction-packages-2026-04-
 1. [x] COMPLETE - LLM tab de-clutter + backend-scope correction v0.
 2. [x] COMPLETE - Setup save/check action pattern v0.
 3. [x] COMPLETE - API / AnyLLM real setup workflow v0.
-4. [ ] ACTIVE - Ollama real installer + model readiness workflow v0.
-5. [ ] GREENLIT - Lacapult window chrome investigation v0.
+4. [x] COMPLETE - Ollama real installer + model readiness workflow v0.
+5. [ ] ACTIVE - Lacapult window chrome investigation v0.
 
 ## Do not do without fresh clearance
 

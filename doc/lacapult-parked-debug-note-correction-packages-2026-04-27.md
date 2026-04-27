@@ -209,12 +209,15 @@ testing_impact:
   - Mocked or fixture proof for model-present/missing/error light states.
   - Optional local proof may use already-installed Ollama/model only; no new pulls in automated default gates.
 
-classification: active
-aux_doc_needed: yes
-handoff_needed: yes
+classification: complete
+completion_note:
+- Landed 2026-04-27 with one visible Ollama model-choice control (`mistral-v0.3` / `nemotron-9b`), compact command/server/model/Python/options readiness lights, detection-only Check, sandboxed Save options, confirmation-gated `Install Ollama / model`, and confirmation-gated `Install venv`. C-AOL source inspection in `TechnicalTome.md` confirms the shared Python runner path is needed for Ollama too. Automated proof records setup intents only and performs no platform install, venv creation, or model pull. Evidence: `tools/godot_ollama_workflow_smoke.gd`, Package 2/3 regression smokes, backend contract proof, and focused source scans.
+remaining_manual_evidence:
+- Actual platform installer/model-pull proof remains optional/future and requires explicit package/model-install clearance; automated gates intentionally stay no-install/no-pull.
+aux_doc_needed: no
+handoff_needed: no
 open_questions:
-- Exact platform-specific safe install commands for Ollama need classification.
-- Whether Python/venv is needed for Ollama-only path must be verified from C-AOL backend bridge code.
+- Which platform-specific Ollama install paths Josef wants to bless for normal users beyond Homebrew/winget/manual fallback remains a future product decision.
 
 ## Package 5 — Lacapult window chrome investigation v0
 
@@ -257,7 +260,7 @@ open_questions:
 1. COMPLETE - LLM tab de-clutter + backend-scope correction v0.
 2. COMPLETE - Setup save/check action pattern v0.
 3. COMPLETE - API / AnyLLM real setup workflow v0.
-4. ACTIVE - Ollama real installer + model readiness workflow v0.
-5. GREENLIT - Lacapult window chrome investigation v0.
+4. COMPLETE - Ollama real installer + model readiness workflow v0.
+5. ACTIVE - Lacapult window chrome investigation v0.
 
-Reasoning: first cut the visible rot and remove misleading scope; then add the shared save/check skeleton; then wire backend-specific setup paths; then investigate the chrome bug with evidence rather than guessing. Packages 1-3 are complete under their automated no-secret/no-live-API/no-unapproved-install gates; Alex should continue with Package 4 to make the Ollama path real while preserving the no-model-pull/no-package-manager boundary in automated proof.
+Reasoning: first cut the visible rot and remove misleading scope; then add the shared save/check skeleton; then wire backend-specific setup paths; then investigate the chrome bug with evidence rather than guessing. Packages 1-4 are complete under their automated no-secret/no-live-API/no-unapproved-install/no-model-pull gates; Alex should continue with Package 5 by investigating the window chrome root-cause class with separated macOS/local versus Windows/Josef evidence.

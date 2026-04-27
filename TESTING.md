@@ -15,13 +15,13 @@ Use the smallest evidence that honestly matches the change.
 
 ## Current proof target
 
-**Active Lacapult implementation is reopened for Alex.** Current validation target is Package 4 from the debug-note correction stack: `Ollama real installer + model readiness workflow v0`.
+**Active Lacapult implementation is reopened for Alex.** Current validation target is Package 5 from the debug-note correction stack: `Lacapult window chrome investigation v0`.
 
 Package 2 evidence landed on 2026-04-27:
 
-- source/UI scan: backend setup action row now renders `Save options`, `Check`, and `Install setup` instead of the old long save/install copy;
+- source/UI scan: backend setup action row now renders `Save options`, `Check`, and backend-specific install actions instead of the old long save/install copy;
 - source/UI scan: setup status text uses compact `🟢/🟡/🔴` status-light vocabulary via `BackendConfig.get_status_light()`;
-- Godot UI smoke: `godot --path . --no-window -s tools/godot_backend_setup_save_check_smoke.gd` proved Check refreshes readiness without writing backend config, Save persists current API UI fields to sandboxed launcher config/options metadata, and Install setup saves Ollama fields before the confirm-gated setup intent;
+- Godot UI smoke: `godot --path . --no-window -s tools/godot_backend_setup_save_check_smoke.gd` proved Check refreshes readiness without writing backend config, Save persists current API UI fields to sandboxed launcher config/options metadata, and the Ollama install action saves fields before the confirm-gated setup intent;
 - safety boundary: no package install, model pull, live API call, API-secret read, or real Application Support mutation in the proof.
 
 Package 1 evidence landed on 2026-04-27:
@@ -31,7 +31,12 @@ Package 1 evidence landed on 2026-04-27:
 - source/scene scan: visible Lacapult OpenVINO setup choice is removed from `BackendSetupUI.gd` while `BackendConfigManager.gd` still preserves hidden/sandboxed OpenVINO config/readiness support;
 - Godot UI smoke: `godot --path . --no-window -s tools/godot_llm_tab_declutter_smoke.gd` rendered the actual BackendSetupUI labels/options and loaded `scenes/Catapult.tscn` with `Main/Tabs/LLM`.
 
-Package 3 evidence must include UI proof for API provider/base URL/model/API-key env-var controls and status lights, sandboxed config/options round-trip proof, and a safe AnyLLM setup/check proof behind explicit confirmation only. Automated proof must not call live APIs, read API secrets, or install packages without clearance.
+Package 4 evidence landed on 2026-04-27:
+
+- Godot UI smoke: `HOME=$(mktemp -d /tmp/lacapult-ollama-workflow-home.XXXXXX) godot --path . --no-window -s tools/godot_ollama_workflow_smoke.gd` proved Ollama mode renders exactly one visible model-choice control (`mistral-v0.3` / `nemotron-9b`), compact Ollama command/server/Mistral/Nemotron/Python/options readiness lights, `Save options`, `Check`, `Install Ollama / model`, and `Install venv`.
+- Fixture readiness proof: the same smoke uses `LACAPULT_OLLAMA_FIXTURE` to prove command-missing, server-unreachable, model-present, and model-missing light states without contacting/pulling real models.
+- Check/save/setup proof: `Check` remains detection-only/no config write; `Save options` round-trips Ollama endpoint/model/Python metadata into sandbox launcher config/options patch; `Install Ollama / model` and `Install venv` save first and record confirmation-gated setup intents in proof mode.
+- Safety boundary: automated proof performs no platform package-manager install, no Ollama model pull, no Python venv creation, no API call, and no real Application Support/user-data mutation.
 
 Package 3 evidence landed on 2026-04-27:
 
@@ -59,8 +64,8 @@ Validate packages as follows:
 - LLM tab de-clutter/backend-scope correction: static scan plus Godot scene/load or UI smoke proving `LLM` tab label, short helper copy, no stale `1000 tokens` claim, and no visible Lacapult OpenVINO installer choice while hidden in-game support remains deliberate.
 - Setup save/check pattern: UI/static proof for Save options, Check, status lights, and Install-saves-first ordering; sandboxed config/options round-trip proof.
 - API / AnyLLM workflow: UI proof for API base URL/provider/model/env-var controls and status lights; sandboxed install/import proof where safe; no real secrets or remote API calls in automated gates.
-- Ollama workflow: UI proof for one model-choice control, Mistral/Nemotron readiness lights, Check, Save, and Install actions; mocked/fixture model-present/missing/error states; no automated model pulls unless cleared.
-- Window chrome investigation: screenshot/UI artifact evidence separated by macOS/local versus Windows/Josef behavior before claiming a cross-platform fix.
+- Ollama workflow: COMPLETE via UI proof for one model-choice control, Mistral/Nemotron readiness lights, Check, Save, Install Ollama / model, Install venv, and mocked/fixture model-present/missing/error states; no automated model pulls/installs were performed.
+- Window chrome investigation: ACTIVE; screenshot/UI artifact evidence separated by macOS/local versus Windows/Josef behavior before claiming a cross-platform fix.
 
 No debug-stack proof may mutate real Application Support config/saves/mods, install packages/models, use API secrets, publish releases, or republish quarantined artifacts without explicit clearance.
 
@@ -79,6 +84,13 @@ Detailed evidence is intentionally stored in auxiliary docs instead of repeated 
 - One-shot installer north star: `doc/lacapult-one-shot-installer-vision.md`.
 - v0.2 release/backend/modding contract: `doc/lacapult-v02-release-backend-modding-contract.md`.
 - Debug-note correction stack: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
+
+Recent gate commands used for Package 4:
+- `HOME=$(mktemp -d /tmp/lacapult-ollama-workflow-home.XXXXXX) godot --path . --no-window -s tools/godot_ollama_workflow_smoke.gd`
+- `HOME=$(mktemp -d /tmp/lacapult-api-anyllm-home.XXXXXX) godot --path . --no-window -s tools/godot_api_anyllm_workflow_smoke.gd`
+- `HOME=$(mktemp -d /tmp/lacapult-save-check-home.XXXXXX) godot --path . --no-window -s tools/godot_backend_setup_save_check_smoke.gd`
+- `python3 tools/prove_caol_backend_contract.py`
+- focused `rg` source/UI scans for duplicate Ollama model fields, Mistral/Nemotron lights, confirmation-gated Ollama/model and Python venv setup intents, and fixture no-pull boundaries
 
 Recent gate commands used for Package 3:
 - `HOME=$(mktemp -d /tmp/lacapult-api-anyllm-home.XXXXXX) godot --path . --no-window -s tools/godot_api_anyllm_workflow_smoke.gd`

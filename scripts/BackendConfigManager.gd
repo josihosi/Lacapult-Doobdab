@@ -10,11 +10,15 @@ const BACKEND_OPENVINO = "openvino"
 const BACKEND_CONFIG_FILENAME = "caol_backend_setup.json"
 const C_AOL_OPTIONS_PATCH_FILENAME = "caol_llm_options_patch.json"
 const API_SETUP_INTENT_FILENAME = "caol_api_setup_intent.json"
+const OLLAMA_SETUP_INTENT_FILENAME = "caol_ollama_setup_intent.json"
+const PYTHON_VENV_SETUP_INTENT_FILENAME = "caol_python_venv_setup_intent.json"
 
 const DEFAULT_API_PROVIDER = "openai"
 const DEFAULT_API_KEY_ENV = "CATA_API_KEY"
 const DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
 const DEFAULT_OPENVINO_DEVICE = "AUTO"
+const OLLAMA_MODEL_MISTRAL = "mistral-v0.3"
+const OLLAMA_MODEL_NEMOTRON = "nemotron-9b"
 
 const API_PROVIDER_CHOICES = [
 	{
@@ -123,6 +127,144 @@ func run_api_setup(provider_id: String, python_path: String = "", proof_only: bo
 	}
 
 
+
+func get_ollama_model_choices() -> Array:
+	return [OLLAMA_MODEL_MISTRAL, OLLAMA_MODEL_NEMOTRON]
+
+
+func get_ollama_readiness(endpoint: String = DEFAULT_OLLAMA_URL, python_path: String = "") -> Dictionary:
+	var inventory = _ollama_inventory(endpoint)
+	var py = _resolve_python(python_path)
+	var command_light = "🔴"
+	var server_light = "🔴"
+	if inventory.get("command", "missing") == "present":
+		command_light = "🟢"
+	if inventory.get("server", "unreachable") == "running":
+		server_light = "🟢"
+	elif inventory.get("command", "missing") == "present":
+		server_light = "🟡"
+	var model_lights = {}
+	for model_name in get_ollama_model_choices():
+		var model_light = "🔴"
+		if inventory.get("server", "unreachable") == "running":
+			model_light = "🟢" if _ollama_model_list_has(inventory.get("models", []), model_name) else "🟡"
+		model_lights[model_name] = model_light
+	return {
+		"command": inventory.get("command", "missing"),
+		"server": inventory.get("server", "unreachable"),
+		"models": inventory.get("models", []),
+		"command_light": command_light,
+		"server_light": server_light,
+		"model_lights": model_lights,
+		"python_light": "🟢" if py.get("ok", false) else "🔴",
+		"python_command": py.get("command", ""),
+		"options_light": "🟢",
+		"proof_policy": "detect_only_no_pull_no_install"
+	}
+
+
+func build_ollama_setup_plan(endpoint: String = DEFAULT_OLLAMA_URL, model: String = "") -> Dictionary:
+	var selected_model = model.strip_edges()
+	if selected_model == "":
+		selected_model = OLLAMA_MODEL_MISTRAL
+	var inventory = _ollama_inventory(endpoint)
+	var commands = []
+	var installer = "manual"
+	var os_name = OS.get_name()
+	if inventory.get("command", "missing") != "present":
+		if os_name == "OSX" and _command_exists("brew"):
+			installer = "homebrew"
+			commands.append({"command": "brew", "args": ["install", "ollama"], "purpose": "Install Ollama through Homebrew."})
+		elif os_name == "Windows" and _command_exists("winget"):
+			installer = "winget"
+			commands.append({"command": "winget", "args": ["install", "--id", "Ollama.Ollama", "-e"], "purpose": "Install Ollama through winget."})
+		else:
+			installer = "manual_required"
+	if selected_model != "":
+		commands.append({"command": "ollama", "args": ["pull", selected_model], "purpose": "Pull the selected model after confirmation."})
+	var preview = []
+	for step in commands:
+		preview.append("%s %s" % [step.get("command", ""), " ".join(step.get("args", []))])
+	return {
+		"action": "install_ollama_and_pull_model",
+		"endpoint": endpoint.strip_edges() if endpoint.strip_edges() != "" else DEFAULT_OLLAMA_URL,
+		"model": selected_model,
+		"platform": os_name,
+		"installer": installer,
+		"commands": commands,
+		"command_preview": " && ".join(preview) if preview.size() > 0 else "Manual Ollama install required; no safe platform installer found.",
+		"requires_confirmation": true,
+		"automated_proof_policy": "plan_only_no_installer_no_model_pull"
+	}
+
+
+func run_ollama_setup(endpoint: String = DEFAULT_OLLAMA_URL, model: String = "", proof_only: bool = false) -> Dictionary:
+	var plan = build_ollama_setup_plan(endpoint, model)
+	if proof_only:
+		var proof_result = write_ollama_setup_intent(endpoint, plan.get("model", model), false, [], "proof_only_no_installer_no_model_pull")
+		return {
+			"status": proof_result,
+			"plan": plan,
+			"performed_external_install": false,
+			"proof_only": true
+		}
+	var results = []
+	var failed = false
+	for step in plan.get("commands", []):
+		var output = []
+		var exit_code = OS.execute(step.get("command", ""), step.get("args", []), true, output, true)
+		results.append({"command": step.get("command", ""), "args": step.get("args", []), "exit_code": exit_code, "output_line_count": output.size()})
+		if exit_code != 0:
+			failed = true
+			break
+	var summary = "ollama_setup_failed" if failed else "ollama_setup_commands_ok"
+	var write_result = write_ollama_setup_intent(endpoint, plan.get("model", model), true, results, summary)
+	var status = "ollama_setup_install_failed" if failed else "ollama_setup_install_ok"
+	if write_result != "ok":
+		status = write_result
+	return {
+		"status": status,
+		"plan": plan,
+		"performed_external_install": true,
+		"proof_only": false,
+		"results": results
+	}
+
+
+func build_python_venv_setup_plan(python_path: String = "") -> Dictionary:
+	var input_path = python_path.strip_edges()
+	var target = input_path
+	var py = _resolve_python(input_path if _looks_like_python_executable_path(input_path) else "")
+	if target == "" or _looks_like_python_executable_path(target):
+		target = Paths.config.plus_file("caol-llm-python-venv")
+	if not py.get("ok", false):
+		py = _resolve_python("")
+	var python_command = py.get("command", "python3") if py.get("ok", false) else "python3"
+	return {
+		"action": "create_python_venv",
+		"target_path": target,
+		"python_command": python_command,
+		"command_preview": "%s -m venv %s" % [python_command, target],
+		"requires_confirmation": true,
+		"automated_proof_policy": "plan_only_no_venv_mutation"
+	}
+
+
+func run_python_venv_setup(python_path: String = "", proof_only: bool = false) -> Dictionary:
+	var plan = build_python_venv_setup_plan(python_path)
+	if proof_only:
+		var proof_result = write_python_venv_setup_intent(plan.get("target_path", ""), false, -1, "proof_only_no_venv_mutation")
+		return {"status": proof_result, "plan": plan, "performed_external_install": false, "proof_only": true}
+	var output = []
+	var exit_code = OS.execute(plan.get("python_command", "python3"), ["-m", "venv", plan.get("target_path", "")], true, output, true)
+	var summary = "venv_create_ok" if exit_code == 0 else "venv_create_failed"
+	var write_result = write_python_venv_setup_intent(plan.get("target_path", ""), true, exit_code, summary)
+	var status = "python_venv_setup_ok" if exit_code == 0 else "python_venv_setup_failed_%s" % exit_code
+	if write_result != "ok":
+		status = write_result
+	return {"status": status, "plan": plan, "performed_external_install": true, "proof_only": false, "exit_code": exit_code, "output_line_count": output.size()}
+
+
 func get_supported_backends() -> Array:
 	var python_path = _setting_or_default("backend_python_path", "")
 	var api_model = _setting_or_default("backend_api_model", "")
@@ -153,7 +295,7 @@ func get_supported_backends() -> Array:
 			"recommendation_rank": 2,
 			"recommendation": "Mainstream local path: use when Ollama is installed, the local server is running, and a model is already present.",
 			"setup_role": "mainstream_local",
-			"v0_warning": "Lacapult detects command/server/model-list state only; it does not pull models or run an Ollama installer.",
+			"v0_warning": "Lacapult detects command/server/model-list state on Check; Install Ollama / model is confirmation-gated before any platform installer or model pull.",
 			"status": _detect_ollama_status(ollama_endpoint, ollama_model),
 			"guidance": get_backend_guidance(BACKEND_OLLAMA),
 			"endpoint": ollama_endpoint,
@@ -177,13 +319,13 @@ func get_supported_backends() -> Array:
 
 
 func get_backend_recommendation_summary() -> String:
-	return "Setup paths: API / AnyLLM for a hosted backend, Ollama for mainstream local play, and OpenVINO for specialized local acceleration. This page saves metadata/status only: no API call, model pull, package install, generated summary-pack apply, or real C-AOL config mutation happens without an explicit confirmation step."
+	return "Setup paths: API / AnyLLM for a hosted backend, Ollama for mainstream local play, and OpenVINO for specialized local acceleration. Check/Save are metadata/status only: no API call, model pull, package install, generated summary-pack apply, or real C-AOL config mutation happens without an explicit confirmation step."
 
 func get_backend_guidance(mode: String) -> String:
 	if mode == BACKEND_API:
 		return "Install Python plus the AnyLLM package/provider extra in the Python/venv selected here; set the named API-key environment variable outside Lacapult. Lacapult can check imports and env-var presence, but never reads or stores the secret."
 	if mode == BACKEND_OLLAMA:
-		return "Install Ollama for this OS, start the local server, and select a model already present in `ollama list`. Lacapult checks presence only and will not pull models without permission."
+		return "Install Ollama for this OS, start the local server, and select or pull Mistral/Nemotron only after explicit confirmation. Check reads command/server/model-list state without pulling models."
 	if mode == BACKEND_OPENVINO:
 		return "Select a Python/venv with OpenVINO packages and a local model directory; Lacapult checks imports/model path but does not install runtimes or download models without confirmation."
 	return "Unsupported backend."
@@ -270,6 +412,54 @@ func write_api_setup_intent(provider_id: String, python_path: String = "", perfo
 	}
 	if not Helpers.save_to_json_file(intent, Paths.config.plus_file(API_SETUP_INTENT_FILENAME)):
 		return "api_setup_intent_write_error"
+	return "ok"
+
+
+
+func write_ollama_setup_intent(endpoint: String = DEFAULT_OLLAMA_URL, model: String = "", performed_external_install: bool = false, command_results: Array = [], result_summary: String = "plan_only_no_installer_no_model_pull") -> String:
+	var d = Directory.new()
+	if not d.dir_exists(Paths.config):
+		var err = d.make_dir_recursive(Paths.config)
+		if err != OK:
+			return "config_dir_error_%s" % err
+	var plan = build_ollama_setup_plan(endpoint, model)
+	var intent = {
+		"action": "install_ollama_and_pull_model",
+		"endpoint": plan.get("endpoint", DEFAULT_OLLAMA_URL),
+		"model": plan.get("model", model),
+		"platform": plan.get("platform", OS.get_name()),
+		"installer": plan.get("installer", "manual_required"),
+		"command_preview": plan.get("command_preview", ""),
+		"confirmed": true,
+		"performed_external_install": performed_external_install,
+		"command_results": command_results,
+		"result_summary": result_summary,
+		"proof_policy": plan.get("automated_proof_policy", "plan_only_no_installer_no_model_pull"),
+		"recorded_at": OS.get_datetime()
+	}
+	if not Helpers.save_to_json_file(intent, Paths.config.plus_file(OLLAMA_SETUP_INTENT_FILENAME)):
+		return "ollama_setup_intent_write_error"
+	return "ok"
+
+
+func write_python_venv_setup_intent(target_path: String, performed_external_install: bool = false, exit_code: int = -1, result_summary: String = "plan_only_no_venv_mutation") -> String:
+	var d = Directory.new()
+	if not d.dir_exists(Paths.config):
+		var err = d.make_dir_recursive(Paths.config)
+		if err != OK:
+			return "config_dir_error_%s" % err
+	var intent = {
+		"action": "create_python_venv",
+		"target_path": target_path,
+		"confirmed": true,
+		"performed_external_install": performed_external_install,
+		"exit_code": exit_code,
+		"result_summary": result_summary,
+		"proof_policy": "plan_only_no_venv_mutation",
+		"recorded_at": OS.get_datetime()
+	}
+	if not Helpers.save_to_json_file(intent, Paths.config.plus_file(PYTHON_VENV_SETUP_INTENT_FILENAME)):
+		return "python_venv_setup_intent_write_error"
 	return "ok"
 
 
@@ -414,7 +604,7 @@ func _backend_notes(mode: String) -> String:
 	if mode == BACKEND_API:
 		return "API setup checks the configured/default Python can import any_llm without using API secrets. Lacapult stores provider/model/env-var names only."
 	if mode == BACKEND_OLLAMA:
-		return "Ollama setup checks command/server/model-list readiness without pulling models. C-AOL still launches runner.py through Python."
+		return "Ollama setup checks command/server/model-list readiness without pulling models. Install is confirmation-gated for platform setup/model pull, and C-AOL still launches runner.py through Python."
 	if mode == BACKEND_OPENVINO:
 		return "OpenVINO setup checks Python imports/model-dir presence only. It does not install runtimes or download models without confirmation."
 	return "Launcher-side C-AOL backend setup metadata."
@@ -484,22 +674,78 @@ func _detect_openvino_status(python_path: String, model_dir: String = "") -> Str
 
 
 func _detect_ollama_status(ollama_url: String = DEFAULT_OLLAMA_URL, model: String = "") -> String:
+	var inventory = _ollama_inventory(ollama_url)
+	if inventory.get("command", "missing") != "present":
+		return "ollama_command_missing"
+	if inventory.get("server", "unreachable") != "running":
+		return "ollama_command_present_server_unreachable"
+	if model.strip_edges() == "":
+		return "ollama_command_present_server_running_model_not_selected"
+	if _ollama_model_list_has(inventory.get("models", []), model.strip_edges()):
+		return "ollama_command_present_server_running_model_present"
+	return "ollama_command_present_server_running_model_missing_no_pull_attempted"
+
+
+func _ollama_inventory(ollama_url: String = DEFAULT_OLLAMA_URL) -> Dictionary:
+	var fixture = OS.get_environment("LACAPULT_OLLAMA_FIXTURE")
+	if fixture != "":
+		return _ollama_fixture_inventory(fixture)
 	var output = []
 	var command_lookup = "where" if OS.get_name() == "Windows" else "which"
 	var exit_code = OS.execute(command_lookup, ["ollama"], true, output, true)
 	if exit_code != 0:
-		return "ollama_command_missing"
-
+		return {"command": "missing", "server": "unreachable", "models": []}
 	output.clear()
 	exit_code = OS.execute("ollama", ["list"], true, output, true)
 	if exit_code != 0:
-		return "ollama_command_present_server_unreachable"
-	if model.strip_edges() == "":
-		return "ollama_command_present_server_running_model_not_selected"
-	var list_text = "\n".join(output)
-	if list_text.find(model.strip_edges()) >= 0:
-		return "ollama_command_present_server_running_model_present"
-	return "ollama_command_present_server_running_model_missing_no_pull_attempted"
+		return {"command": "present", "server": "unreachable", "models": []}
+	return {"command": "present", "server": "running", "models": _parse_ollama_list_models("\n".join(output))}
+
+
+func _ollama_fixture_inventory(fixture: String) -> Dictionary:
+	if fixture == "command_missing":
+		return {"command": "missing", "server": "unreachable", "models": []}
+	if fixture == "server_unreachable":
+		return {"command": "present", "server": "unreachable", "models": []}
+	var text = fixture
+	if fixture.begins_with("models:"):
+		text = fixture.substr(7, fixture.length() - 7)
+	return {"command": "present", "server": "running", "models": _parse_ollama_list_models(text)}
+
+
+func _parse_ollama_list_models(text: String) -> Array:
+	var models = []
+	for raw_line in text.split("\n"):
+		var line = raw_line.strip_edges()
+		if line == "" or line.begins_with("NAME"):
+			continue
+		var first = line.split(" ")[0].strip_edges()
+		if first != "" and not first in models:
+			models.append(first)
+	return models
+
+
+func _ollama_model_list_has(models: Array, model: String) -> bool:
+	var wanted = model.strip_edges()
+	for entry in models:
+		var candidate = str(entry).strip_edges()
+		if candidate == wanted or candidate.begins_with(wanted + ":") or wanted.begins_with(candidate + ":"):
+			return true
+	return false
+
+
+func _command_exists(command: String) -> bool:
+	var output = []
+	var command_lookup = "where" if OS.get_name() == "Windows" else "which"
+	return OS.execute(command_lookup, [command], true, output, true) == 0
+
+
+func _looks_like_python_executable_path(path: String) -> bool:
+	var cleaned = path.strip_edges().replace("\\", "/")
+	if cleaned == "":
+		return false
+	var base = cleaned.get_file().to_lower()
+	return base == "python" or base == "python3" or base.begins_with("python3.") or base == "python.exe" or base == "py.exe" or cleaned == "python" or cleaned == "python3" or cleaned == "py"
 
 
 func _resolve_python(python_path: String) -> Dictionary:

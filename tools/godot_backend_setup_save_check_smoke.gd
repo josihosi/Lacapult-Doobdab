@@ -2,7 +2,7 @@ extends SceneTree
 
 # Headless UI smoke for Package 2: setup Save/Check/Install action pattern.
 # It instantiates the actual BackendSetupUI under an isolated HOME and proves:
-# - Save options / Check / Install setup controls render;
+# - Save options / Check / backend-specific Install controls render;
 # - Check refreshes status without writing backend config;
 # - Save writes the current UI fields to launcher-side config/options metadata;
 # - Install setup saves current options before opening the confirm-gated setup step.
@@ -34,6 +34,8 @@ func _run() -> void:
 	settings.store("backend_python_path", "")
 	settings.store("backend_ollama_endpoint", backend_config.DEFAULT_OLLAMA_URL)
 	settings.store("backend_ollama_model", "")
+	settings.store("backend_external_setup_proof_only", true)
+	OS.set_environment("LACAPULT_OLLAMA_FIXTURE", "models:mistral-v0.3")
 
 	var ui_script = load("res://scripts/BackendSetupUI.gd")
 	var ui = VBoxContainer.new()
@@ -81,23 +83,23 @@ func _run() -> void:
 	ui._refresh_backend_setup_controls()
 	yield(self, "idle_frame")
 	ui._backend_endpoint.text = "http://127.0.0.1:11434"
-	ui._backend_model.text = "mistral-v0.3"
-	var install_button = _find_button(ui, "Install setup")
-	_require(install_button != null, "Install setup button lookup failed")
+	ui._on_OllamaModelChoice_item_selected(0)
+	var install_button = _find_button(ui, "Install Ollama / model")
+	_require(install_button != null, "Install Ollama / model button lookup failed")
 	install_button.emit_signal("pressed")
 	yield(self, "idle_frame")
 	var ollama_config = helpers.load_json_file(config_path)
-	_require(ollama_config.get("backend", "") == "ollama", "Install setup did not save Ollama backend before confirm")
-	_require(ollama_config.get("endpoint", "") == "http://127.0.0.1:11434", "Install setup did not save current Ollama endpoint")
-	_require(ollama_config.get("model", "") == "mistral-v0.3", "Install setup did not save current Ollama model")
-	_require(ui._backend_status.text.find("Saved before install") >= 0, "Install setup did not report save-before-install ordering")
-	_require(ui._confirm_dialog.dialog_text.find("does not download models") >= 0, "Install setup lost confirmation/no-download boundary")
+	_require(ollama_config.get("backend", "") == "ollama", "Install action did not save Ollama backend before confirm")
+	_require(ollama_config.get("endpoint", "") == "http://127.0.0.1:11434", "Install action did not save current Ollama endpoint")
+	_require(ollama_config.get("model", "") == "mistral-v0.3", "Install action did not save current Ollama model")
+	_require(ui._backend_status.text.find("Saved before install") >= 0, "Install action did not report save-before-install ordering")
+	_require(ui._confirm_dialog.dialog_text.find("Proof mode") >= 0 and ui._confirm_dialog.dialog_text.find("instead of running installers") >= 0, "Install action lost confirmation/proof no-download boundary")
 
 	print("backend setup Save/Check UI smoke passed")
-	print("  rendered actions: Save options / Check / Install API backend")
+	print("  rendered actions: Save options / Check / Install API backend / Install Ollama / model")
 	print("  Check proof: detection-only status refresh; no backend config write")
 	print("  Save proof: API fields persisted to sandboxed launcher config/options patch")
-	print("  Install proof: Ollama fields saved before confirm-gated setup intent; no pull/install/API call")
+	print("  Install proof: Ollama fields saved before confirm-gated setup intent; proof mode does no pull/install/API call")
 	quit(0)
 
 

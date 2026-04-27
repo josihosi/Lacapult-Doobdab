@@ -30,7 +30,7 @@ Success state:
 - [x] Package 1 complete: LLM tab de-clutter/backend-scope correction.
 - [x] Package 2 complete: setup Save/Check/Install action pattern.
 - [x] Package 3 complete: API / AnyLLM real setup workflow.
-- [ ] Package 4 complete: Ollama real installer + model readiness workflow.
+- [x] Package 4 complete: Ollama real installer + model readiness workflow.
 - [ ] Package 5 complete: window chrome investigation/fix.
 
 ## Completed product footing

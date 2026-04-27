@@ -24,7 +24,9 @@ var _backend_python_path: LineEdit = null
 var _backend_api_key_env: LineEdit = null
 var _backend_api_key_secret: LineEdit = null
 var _set_session_key_button: Button = null
+var _install_python_button: Button = null
 var _api_status_lights: Label = null
+var _ollama_status_lights: Label = null
 var _backend_status: Label = null
 var _save_button: Button = null
 var _check_button: Button = null
@@ -149,6 +151,11 @@ func _build_controls() -> void:
 	_backend_python_path.size_flags_horizontal = SIZE_EXPAND_FILL
 	_backend_python_path.connect("text_changed", self, "_on_BackendPython_text_changed")
 	python_row.add_child(_backend_python_path)
+	_install_python_button = Button.new()
+	_install_python_button.text = "Install venv"
+	_install_python_button.hint_tooltip = "Saves options, then asks before creating the Python venv C-AOL uses to launch runner.py."
+	_install_python_button.connect("pressed", self, "_on_ConfirmPythonVenvInstall_pressed")
+	python_row.add_child(_install_python_button)
 
 	var api_env_row = HBoxContainer.new()
 	api_env_row.name = "BackendApiKeyEnv"
@@ -187,6 +194,11 @@ func _build_controls() -> void:
 	_api_status_lights.name = "ApiStatusLights"
 	_api_status_lights.autowrap = true
 	add_child(_api_status_lights)
+
+	_ollama_status_lights = Label.new()
+	_ollama_status_lights.name = "OllamaStatusLights"
+	_ollama_status_lights.autowrap = true
+	add_child(_ollama_status_lights)
 
 	_backend_status = Label.new()
 	_backend_status.autowrap = true
@@ -231,6 +243,7 @@ func _refresh_backend_setup_controls() -> void:
 	_backend_mode_button.select(mode_idx)
 
 	var choice_row = _ollama_model_choice.get_parent()
+	var model_row = _backend_model.get_parent()
 	var provider_row = _backend_provider_button.get_parent()
 	var api_secret_row = _backend_api_key_secret.get_parent()
 	if mode == "api":
@@ -249,7 +262,9 @@ func _refresh_backend_setup_controls() -> void:
 		provider_row.visible = true
 		_api_base_url_help.visible = true
 		_api_status_lights.visible = true
+		_ollama_status_lights.visible = false
 		choice_row.visible = false
+		model_row.visible = true
 		_install_button.text = "Install API backend"
 		_install_button.hint_tooltip = "Saves options, then asks before running AnyLLM/provider setup for the selected Python. No API call or API-secret read is performed."
 		_guidance.text = "Use an API provider through AnyLLM. Recent C-AOL logs show many calls around 300-400 tokens, with variation by prompt/provider/model."
@@ -266,9 +281,11 @@ func _refresh_backend_setup_controls() -> void:
 		provider_row.visible = false
 		_api_base_url_help.visible = false
 		_api_status_lights.visible = false
+		_ollama_status_lights.visible = true
 		choice_row.visible = true
-		_install_button.text = "Install setup"
-		_install_button.hint_tooltip = "Saves current options first, then opens a confirmation prompt; automated tests do not install packages or pull models."
+		model_row.visible = false
+		_install_button.text = "Install Ollama / model"
+		_install_button.hint_tooltip = "Saves options, then asks before installing Ollama or pulling the selected model. Automated proof records intent only."
 		_select_ollama_choice(Settings.read("backend_ollama_model"))
 		_guidance.text = "Use ollama for local LLM utilization."
 
@@ -311,8 +328,20 @@ func _set_backend_status(mode: String, raw_status: String, prefix: String = "") 
 			_api_status_lights.text = _api_status_light_text(raw_status)
 		lines.append("Secret policy: env-var name only; optional pasted key is process-session only, cleared after use, and no API call comes from Check.")
 	elif mode == "ollama":
-		lines.append("Install policy: no model pull until confirmed.")
+		if _ollama_status_lights != null:
+			_ollama_status_lights.text = _ollama_status_light_text()
+		lines.append("Python note: C-AOL launches tools/llm_runner/runner.py through Python for Ollama too; use Install venv only after confirmation.")
+		lines.append("Install policy: no Ollama install or model pull until confirmed.")
 	_backend_status.text = "\n".join(lines)
+
+
+
+func _ollama_status_light_text() -> String:
+	var endpoint = _backend_endpoint.text if _backend_endpoint != null else BackendConfig.DEFAULT_OLLAMA_URL
+	var python_path = _backend_python_path.text if _backend_python_path != null else ""
+	var readiness = BackendConfig.get_ollama_readiness(endpoint, python_path)
+	var model_lights = readiness.get("model_lights", {})
+	return "Ollama cmd %s · Server %s · Mistral %s · Nemotron %s · Python/venv %s · Options %s" % [readiness.get("command_light", "🔴"), readiness.get("server_light", "🔴"), model_lights.get(OLLAMA_MODEL_MISTRAL, "🔴"), model_lights.get(OLLAMA_MODEL_NEMOTRON, "🔴"), readiness.get("python_light", "🔴"), readiness.get("options_light", "🟢")]
 
 
 func _api_status_light_text(raw_status: String) -> String:
@@ -367,10 +396,14 @@ func _store_backend_field(setting_prefix: String, value: String) -> void:
 
 
 func _collect_current_backend_fields() -> Dictionary:
+	var mode = Settings.read("backend_mode")
+	var model_value = "" if _backend_model == null else _backend_model.text
+	if mode == "ollama":
+		model_value = Settings.read("backend_ollama_model")
 	return {
-		"mode": Settings.read("backend_mode"),
+		"mode": mode,
 		"endpoint": "" if _backend_endpoint == null else _backend_endpoint.text,
-		"model": "" if _backend_model == null else _backend_model.text,
+		"model": model_value,
 		"python_path": "" if _backend_python_path == null else _backend_python_path.text,
 		"api_provider": _current_api_provider_id(),
 		"api_key_env": "" if _backend_api_key_env == null else _backend_api_key_env.text,
@@ -465,6 +498,17 @@ func _on_CheckBackendSetup_pressed() -> void:
 	_set_backend_status(Settings.read("backend_mode"), _check_current_backend_status(), "Checked")
 
 
+
+func _on_ConfirmPythonVenvInstall_pressed() -> void:
+	var result = _save_current_backend_setup()
+	_pending_confirm_action = "python_venv"
+	if result != "ok":
+		_set_backend_status(Settings.read("backend_mode"), result, "Install venv save failed")
+		return
+	_confirm_dialog.dialog_text = _confirmation_text_for_mode(_pending_confirm_action)
+	_confirm_dialog.popup_centered()
+
+
 func _on_ConfirmGuidedInstall_pressed() -> void:
 	var result = _save_current_backend_setup()
 	_pending_confirm_action = Settings.read("backend_mode")
@@ -485,13 +529,23 @@ func _confirmation_text_for_mode(mode: String) -> String:
 			proof_note = " Proof mode is enabled for this run, so Lacapult will record the confirmed intent only instead of running pip."
 		return "Confirm API backend setup for %s. Planned command after approval: %s. This may install or upgrade Python packages in the selected Python environment. Lacapult will not read API secrets or make API calls.%s" % [plan.get("provider_label", "provider"), plan.get("command", "python3 -m pip install --upgrade any_llm"), proof_note]
 	if mode == "ollama":
-		return "Confirm before installing Ollama or pulling model %s. This proof build records the intent only and does not download models." % Settings.read("backend_ollama_model")
+		var fields = _collect_current_backend_fields()
+		var plan = BackendConfig.build_ollama_setup_plan(fields.get("endpoint", BackendConfig.DEFAULT_OLLAMA_URL), fields.get("model", ""))
+		var proof_note = " Proof mode is enabled for this run, so Lacapult will record the confirmed intent only instead of running installers or `ollama pull`." if _external_setup_proof_only_enabled() else ""
+		return "Confirm Ollama setup for model %s. Planned command after approval: %s. This may install Ollama through a platform package manager where supported and may pull the selected model. Lacapult will not pull models before this confirmation; proof mode does not download models.%s" % [plan.get("model", Settings.read("backend_ollama_model")), plan.get("command_preview", "manual install required"), proof_note]
+	if mode == "python_venv":
+		var plan = BackendConfig.build_python_venv_setup_plan(_backend_python_path.text if _backend_python_path != null else "")
+		var proof_note = " Proof mode is enabled for this run, so Lacapult records the venv intent only." if _external_setup_proof_only_enabled() else ""
+		return "Confirm Python venv setup. Planned command after approval: %s. This creates or updates the venv path used by C-AOL runner.py.%s" % [plan.get("command_preview", "python3 -m venv"), proof_note]
 	return "Confirm before running an external backend setup action. This proof build records the intent only and does not run package managers or download models."
 
 
 func _api_setup_proof_only_enabled() -> bool:
 	return Settings.read("backend_api_setup_proof_only") == true
 
+
+func _external_setup_proof_only_enabled() -> bool:
+	return Settings.read("backend_external_setup_proof_only") == true or Settings.read("backend_api_setup_proof_only") == true
 
 
 func _on_ExternalBackendAction_confirmed() -> void:
@@ -512,6 +566,41 @@ func _on_ExternalBackendAction_confirmed() -> void:
 		else:
 			_set_backend_status("api", _check_current_backend_status(), "API setup command finished")
 			post_message = "C-AOL API backend setup command finished; pip may have installed/upgraded packages in the selected Python. No API call or API-secret read was performed."
+	elif _pending_confirm_action == "ollama":
+		var fields = _collect_current_backend_fields()
+		var proof_only = _external_setup_proof_only_enabled()
+		var setup_result = BackendConfig.run_ollama_setup(fields.get("endpoint", BackendConfig.DEFAULT_OLLAMA_URL), fields.get("model", ""), proof_only)
+		var status = setup_result.get("status", "ollama_setup_unknown")
+		if status != "ok" and status != "ollama_setup_install_ok":
+			_set_backend_status("ollama", status, "Ollama setup command failed" if not proof_only else "Ollama setup intent failed")
+			post_message = "Ollama setup failed; an installer or model pull may have been attempted after confirmation." if not proof_only else "Ollama setup proof intent failed; no external install/download was performed."
+			Status.post(post_message)
+			return
+		if setup_result.get("proof_only", false):
+			_backend_status.text = "Confirmed Ollama setup intent was recorded. Proof mode performed no installer, model pull, API call, or real machine mutation.\n%s" % _backend_status.text
+			post_message = "Ollama setup intent recorded in proof mode; no external install/download was performed."
+		else:
+			_set_backend_status("ollama", _check_current_backend_status(), "Ollama setup command finished")
+			post_message = "Ollama setup command finished after confirmation; model pull or platform installer may have run."
+	elif _pending_confirm_action == "python_venv":
+		var proof_only = _external_setup_proof_only_enabled()
+		var setup_result = BackendConfig.run_python_venv_setup(_backend_python_path.text if _backend_python_path != null else "", proof_only)
+		var status = setup_result.get("status", "python_venv_setup_unknown")
+		if status != "ok" and status != "python_venv_setup_ok":
+			_set_backend_status(Settings.read("backend_mode"), status, "Python venv setup failed" if not proof_only else "Python venv intent failed")
+			post_message = "Python venv setup failed." if not proof_only else "Python venv proof intent failed; no venv was created."
+			Status.post(post_message)
+			return
+		var target_path = setup_result.get("plan", {}).get("target_path", "")
+		if target_path != "":
+			_backend_python_path.text = target_path
+			Settings.store("backend_python_path", target_path)
+		if setup_result.get("proof_only", false):
+			_backend_status.text = "Confirmed Python venv setup intent was recorded. Proof mode created no venv.\n%s" % _backend_status.text
+			post_message = "Python venv setup intent recorded in proof mode; no venv was created."
+		else:
+			_set_backend_status(Settings.read("backend_mode"), _check_current_backend_status(), "Python venv setup finished")
+			post_message = "Python venv setup command finished after confirmation."
 	else:
 		_backend_status.text = "Confirmed guided setup intent for %s. No external package install, model pull, API call, or real machine mutation was performed by this action.\n%s" % [_pending_confirm_action, _backend_status.text]
 	Status.post(post_message)
