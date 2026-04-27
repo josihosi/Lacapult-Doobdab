@@ -34,6 +34,18 @@ Success state:
 - [x] Package 5 locally complete: window chrome investigation/fix root-cause class named, smallest CustomTitleBar metric seam patched/proofed, and bounded Windows confirmation checklist written.
 - [ ] Windows/Josef visual confirmation before any cross-platform chrome-fix claim.
 
+## Lacapult Josef test release v0
+
+Status: ACTIVE / TEST RELEASE ONLY / QUARANTINE STILL ACTIVE
+
+Success state:
+- [ ] Canon records Josef's 2026-04-27 clearance for a bounded test release without lifting quarantine.
+- [ ] Fresh package proof from current debug-stack-complete `main` passes.
+- [ ] Windows unsigned package and checksums/build notes are attached to a GitHub Draft/prerelease test release.
+- [ ] Release copy says this is for Josef Windows validation, not a final/public confidence claim or C-AOL game release.
+- [ ] Josef checklist is included: first launch/top bar, first visible tab, release row wording, install/download impression.
+- [ ] `gh release view` proves the remote release/tag/assets exist.
+
 ## Completed product footing
 
 Status: CHECKPOINTED / NOT ACTIVE

@@ -18,7 +18,7 @@ If these disagree, `Plan.md` wins; repair the other file instead of inventing a 
 
 ## Current status
 
-**State:** RELEASE QUARANTINE ACTIVE / DEBUG-NOTE LOCAL IMPLEMENTATION COMPLETE / WINDOWS CONFIRMATION PENDING
+**State:** RELEASE QUARANTINE ACTIVE / JOSEF TEST RELEASE V0 ACTIVE
 
 The 2026-04-26 Lacapult prerelease family is quarantined as Draft after Josef reported that the download looked like CAOL rather than clearly like Lacapult. No Lacapult release from that family should be republished until the quarantine/identity investigation is closed and Josef/Schani explicitly re-greenlight.
 
@@ -29,6 +29,18 @@ Current public-release facts:
 - Local artifact inspection says the package is Lacapult-shaped (`Lacapult-Doobdab.exe` plus `utils/7za.exe`), not a full C-AOL archive, but the product surface was too C-AOL-heavy / inherited-name-leaky for public confidence.
 
 Canonical incident note: `doc/lacapult-release-quarantine-investigation-2026-04-26.md`.
+
+## Josef test release slice
+
+**ACTIVE: Lacapult Josef test release v0** - Josef superseded the parking/deactivate idea on 2026-04-27 and explicitly asked for a Lacapult release he can test. This is fresh clearance for a bounded GitHub **draft/prerelease test release only**, preferably Draft if owner access works. It does **not** lift quarantine, authorize a stable/latest/final claim, announce broadly, or start C-AOL release work.
+
+Test-release target:
+- Build/package the current locally-complete debug-stack state from `main`.
+- Attach the Windows unsigned Lacapult launcher package plus checksums/build notes customary for the repo.
+- Release copy must say this is for Josef Windows validation and not final/public confidence.
+- Josef checklist: first launch/top bar, first visible tab, release row wording, install/download impression.
+
+Canonical packet: `doc/lacapult-josef-test-release-v0-2026-04-27.md`.
 
 ## Josef playtest ledger
 

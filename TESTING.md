@@ -15,7 +15,14 @@ Use the smallest evidence that honestly matches the change.
 
 ## Current proof target
 
-**Active Lacapult implementation is locally complete for the reopened debug-note stack.** Current remaining validation target is external Windows/Josef confirmation for Package 5: `Lacapult window chrome investigation v0`.
+**Active validation target:** `Lacapult Josef test release v0`. Josef explicitly cleared a bounded GitHub draft/prerelease test release on 2026-04-27 so he can perform Windows validation. This is not a quarantine lift or final/public-confidence claim.
+
+Minimum evidence for this slice:
+- fresh package proof from current `main` using `python3 tools/prove_lacapult_export_packaging.py`;
+- Windows package shape includes `Lacapult-Doobdab.exe` and `utils/7za.exe`;
+- checksums/build manifest exist for the attached assets;
+- GitHub release is Draft if feasible, or prerelease if draft asset access is awkward;
+- release notes include Josef's checklist: first launch/top bar, first visible tab, release row wording, install/download impression.
 
 Package 2 evidence landed on 2026-04-27:
 
@@ -85,6 +92,7 @@ Detailed evidence is intentionally stored in auxiliary docs instead of repeated 
 - v0.2 release/backend/modding contract: `doc/lacapult-v02-release-backend-modding-contract.md`.
 - Debug-note correction stack: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
 - Window chrome investigation packet / Windows checklist: `doc/lacapult-window-chrome-investigation-packet-2026-04-27.md`.
+- Josef test release packet: `doc/lacapult-josef-test-release-v0-2026-04-27.md`.
 
 Recent gate commands used for Package 5:
 - `HOME=$(mktemp -d /tmp/lacapult-window-chrome-home.XXXXXX) godot --path . --no-window -s tools/godot_window_chrome_inspection.gd`

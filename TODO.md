@@ -4,7 +4,16 @@ Short queue only. Remove finished items instead of turning this into a museum.
 
 ## Now
 
-**Active target:** debug-note stack parked after Package 5 local boundary; Windows/Josef chrome confirmation is the remaining external check.
+**Active target:** Lacapult Josef test release v0.
+
+- [ ] Record the bounded Josef test-release lane in canon without lifting release quarantine.
+- [ ] Build/package the current debug-stack-complete Lacapult state from `main`.
+- [ ] Create a clearly labelled GitHub Draft test release if feasible, otherwise prerelease, with no stable/latest/final/public-confidence claim.
+- [ ] Attach the Windows unsigned package and checksums/build notes.
+- [ ] Include Josef's checklist: first launch/top bar, first visible tab, release row wording, install/download impression.
+- [ ] Verify the remote release shape with `gh release view`.
+
+## Completed debug-note stack
 
 - [x] Quarantine the 2026-04-26 Lacapult prerelease family as Draft and verify public removal.
 - [x] Record the release identity/product failure in canon.
@@ -53,7 +62,7 @@ Canonical contract: `doc/lacapult-parked-debug-note-correction-packages-2026-04-
 
 ## Do not do without fresh clearance
 
-- [ ] Republish quarantined Lacapult releases.
-- [ ] Push to public GitHub / publish releases / contact upstream.
+- [ ] Republish quarantined Lacapult releases as public/non-test releases.
+- [ ] Push non-test public releases / contact upstream.
 - [ ] Start C-AOL `v0.3.0`, signing, notarization, or public-final release work.
 - [ ] Install packages, pull models, call live APIs, handle real API secrets, or mutate real Application Support data in automated proof.

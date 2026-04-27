@@ -21,11 +21,11 @@ Then inspect only the source files needed for the active target.
 
 ## Current rule
 
-Lacapult remains in release quarantine, but Josef/Schani explicitly reopened the debug-note correction stack for Alex on 2026-04-27.
+Lacapult remains in release quarantine, but Josef/Schani explicitly reopened the debug-note correction stack for Alex on 2026-04-27. Later on 2026-04-27, Josef superseded parking and explicitly cleared a bounded Lacapult Josef test release v0 so he can test the current debug-stack-complete state.
 
 Use `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md` as the active stack source and start with Package 1 unless reprioritized. Keep Andi on C-AOL; do not point Andi at this repo.
 
-This reopening does **not** authorize republishing releases, pushing public release artifacts, mutating real user data, installing packages/models, or widening scope beyond the canonized debug-note stack.
+The test-release clearance authorizes only a clearly labelled Draft/prerelease Lacapult launcher test build for Josef validation. It does **not** lift quarantine, authorize stable/latest/final confidence, announce broadly, create C-AOL releases, mutate real user data, install packages/models, or widen scope beyond the canonized debug-note stack plus test-release packaging.
 
 ## External/public actions
 
