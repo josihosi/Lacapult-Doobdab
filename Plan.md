@@ -2,230 +2,90 @@
 
 Canonical roadmap for Lacapult Doobdab.
 
-This repo is a standalone C-AOL-specific launcher/installer derived from Dabdoob / Catapult under the MIT license. It should feel like the front door for Cataclysm: Arsenic and Old Lace, not a generic Cataclysm launcher with a hat glued on.
+Lacapult is a C-AOL-specific launcher/installer derived from Dabdoob/Catapult under the MIT license. It should feel like the front door for Cataclysm: Arsenic and Old Lace, not a generic Cataclysm launcher wearing a hat.
 
 ## File roles
 
-- **Plan.md** - canonical roadmap and current delivery target
-- **TODO.md** - short execution queue for the active target only
-- **SUCCESS.md** - success-state ledger for the active target
-- **TESTING.md** - validation policy and current proof requirements
-- **TechnicalTome.md** - durable technical facts and architecture notes
-- **ATTRIBUTION.md** - credits and license/lineage obligations
-- **doc/lacapult-one-shot-installer-vision.md** - product north star for the one-shot installer
-- **doc/lacapult-v02-release-backend-modding-contract.md** - active scope amendment for v0.2.0/backend/modding work
-- **doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md** - active next-lane plan for C-AOL mod install/enable plus Summarizer UX/status/apply
+- `Plan.md` - current product state and roadmap truth.
+- `TODO.md` - short queue only; no archaeology.
+- `SUCCESS.md` - success ledger for active/parked/completed items.
+- `TESTING.md` - validation policy, current proof needs, and evidence index.
+- `TechnicalTome.md` - durable implementation facts.
+- `ATTRIBUTION.md` - lineage/license obligations.
+- `doc/*.md` - full contracts, evidence packets, investigations, and longer notes.
 
-## Current active target
+If these disagree, `Plan.md` wins; repair the other file instead of inventing a second truth. Detailed evidence belongs in `doc/*.md`, not in the top-level roadmap.
 
-### Lacapult Doobdab v0.2.0 release installer plus first backend setup options
+## Current status
 
-**Status:** LACAPULT RELEASE QUARANTINE ACTIVE / 2026-04-26 PRERELEASE FAMILY DRAFT / IDENTITY INVESTIGATION OPEN / C-AOL v0.2.0 INSTALL+LAUNCH REPAIR PROVEN / C-AOL v0.3 RELEASE PARKED
+**State:** RELEASE QUARANTINE ACTIVE / DEBUG NOTES PARKED / NO ACTIVE LACAPULT IMPLEMENTATION
 
-Build from the local standalone repo at `/Users/josefhorvath/Schanigarten/Lacapult-Doobdab`, then turn the first product slice into a C-AOL-specific launcher that can fetch and install the existing `v0.2.0` C-AOL releases from `josihosi/Cataclysm-AOL`. The local proof packet is complete as of 2026-04-25, a Godot 3.6.2 GUI smoke proves the project launches, surfaces the prioritized C-AOL `v0.2.0` macOS DMG first, and exposes the Settings-tab backend setup controls. Controlled DMG proofs now confirm the selected macOS asset exposes a launchable `.app` shape and that a sandboxed Lacapult-style copy/move install leaves `Cataclysm.app` plus `catapult_install_info.json` in the final install folder without touching the real Application Support install state or launching the game.
+The 2026-04-26 Lacapult prerelease family is quarantined as Draft after Josef reported that the download looked like CAOL rather than clearly like Lacapult. No Lacapult release from that family should be republished until the quarantine/identity investigation is closed and Josef/Schani explicitly re-greenlight.
 
-The active scope now includes a visible three-option backend setup selector for **API**, **Ollama**, and **OpenVINO** after the v0.2.0 release install path is proven. The Settings UI now makes Schani's player-facing recommendation order explicit: **API** is first for fastest Windows pre-release onboarding/debug, **Ollama** is the mainstream local path, and **OpenVINO** is Windows-first specialized/detect-only. API, Ollama, and OpenVINO now have v0-safe config/readiness paths. Lacapult stores provider/model/env-var names rather than API secrets, checks the configured/default Python runner path for backend imports where safe, detects Ollama command/server/model-list state without pulling models, detects OpenVINO Python imports and model-dir presence without installing runtimes, and has a sandbox-guarded proof path that applies backend option patches to copied C-AOL `config/options.json` files for all three backends. This is still not full live backend automation: current local proof reports `any_llm` missing from the default Python, OpenVINO packages/model availability missing unless supplied, C-AOL runtime provider use still hardcoded to OpenAI, and no API calls/model pulls/downloads are attempted. The product target is that AnyLLM/API and Ollama/llama-family setups become genuinely good across Windows/macOS/Linux wherever dependencies are available; OpenVINO may remain Windows-first for v0, but Lacapult must say that plainly and check it well. Modding support is the next planned lane, not secretly implemented in this backend hardening slice: inherited mod/soundpack/tileset support must be investigated against C-AOL enough to tell what is preserved, what is untested, and what metadata shape can later feed NPC/LLM summaries. A headless Godot installer smoke exercises the real `ReleaseInstaller.install_release()` path against the selected cached macOS DMG inside an isolated HOME. A stronger full-scene Godot smoke instantiates the main Catapult scene, waits for the live C-AOL release fetch, selects the prioritized `v0.2.0` build row, emits the real Install button signal, and verifies the isolated install. A physical GUI pass now launched the visible Godot window under an isolated HOME, used a real mouse click on `Install Selected`, and verified the final sandbox install folder contains `Cataclysm.app` plus `catapult_install_info.json`. The modding lane now has a read-only per-mod compatibility/summarizer bridge report for all packaged C-AOL `v0.2.0` stock mods, plus a Settings-tab read-only status block that surfaces the key counts and report reference: 42 non-obsolete packaged mods are path-supported, 7 are obsolete blockers, no packaged mod currently ships C-AOL summary roots, and 30 context-relevant mods are ready for future generated summary packs in C-AOL-compatible `Summaries_short` / `Summaries_extra` roots rather than launcher-only metadata. A release-prep export proof now generates temporary safe Godot presets, exports macOS/Linux/Windows PCK packs plus real unsigned app/executable outputs into ignored `.proof-cache/`, creates unsigned macOS/Linux/Windows package archives, validates their shape/hashes, and restores `export_presets.cfg`; this proves local app exportability with the installed Godot 3.6.2 templates, but still does not claim signing, notarization, GitHub release publication, or end-user install QA. The former C-AOL `v0.2.0` macOS launch blocker is now repaired in Lacapult's install/launch path: Lacapult bundles universal `libfreetype.6.dylib` and `libpng16.16.dylib` repair dylibs, rewrites the installed app's absolute `/opt/local` load paths to app-relative/system paths, ad-hoc signs the changed app bundle pieces, verifies no package-manager paths remain in the repaired load graph, and proves the isolated repaired app stays running past the launch-smoke window. This is portable-by-construction for the Lacapult-repaired install path and does not depend on MacPorts/Homebrew on the target Mac, but it is still not a notarized/new C-AOL DMG release. The 2026-04-25 click-level GUI audit in `doc/lacapult-click-level-gui-audit-2026-04-25.md` found the launcher coherent enough for a Josef Windows pre-release test but not public-release ready: the C-AOL changelog link now opens the selected/fallback GitHub release page instead of an inherited empty PR dialog, the debug/test window is no longer a one-pixel postage stamp, the no-install update-current checkbox no longer advertises an impossible update, self-update remains disabled honestly in the button label itself, and Summarizer/backend controls remain status/config-only where real mutation is not implemented. Signing/notarization, public release packaging/publication, live compiled C-AOL game-world launch proof, and any upstream packaging fix remain separate decisions.
-
-Product north star: `doc/lacapult-one-shot-installer-vision.md`. It is greenlit as direction, but execution still follows proof order: v0.2.0 release metadata/install path first, backend skeleton second, mod compatibility investigation third. Lacapult is itself an installer/launcher product, so its own distribution must be easy for normal users to install on Windows, macOS, and Linux; do not let C-AOL package launchability work obscure the separate Lacapult app packaging/installability bar.
-
-Josef explicitly greenlit the 2026-04-26 delivery step to create a clean downloadable **Lacapult launcher test/prerelease** so he could download it on his Windows laptop and test the launcher/game path. The original test prerelease was published, Josef immediately found the Windows package missing `utils/7za.exe`, and the hotfix prerelease fixed that package blocker with fresh Windows, macOS, and Linux unsigned launcher packages plus recorded SHA-256 hashes. That whole 2026-04-26 prerelease family is now Draft/quarantined after Josef's later CAOL/Lacapult identity complaint. This remains a Lacapult release packet, not a C-AOL game release; unsigned/signed-final release work remains parked, and any renewed Windows retest or republish waits on the identity investigation. The hotfix also curates the C-AOL install list to the four expected port releases and replaces the startup lineage plaque with a plain Dabdoob/Catapult thank-you. Use `doc/lacapult-launcher-test-release-packet-2026-04-26.md`, `doc/lacapult-release-quarantine-investigation-2026-04-26.md`, and `TESTING.md` as the release ledger. C-AOL `v0.3.0` release shape remains unknown/parked and must not block this v0.2.0 launcher test release.
-
-### Completed lane - Lacapult LLM backend setup installer packet v0
-
-**Status:** IMPLEMENTED / SAFE STATIC+GODOT PROOF PASSED / SCHANI REVIEW ACCEPTED
-
-Canonical contract: `doc/lacapult-llm-backend-setup-installer-packet-v0-2026-04-26.md`.
-
-Josef's post-hotfix launcher test promoted backend setup from status-only Settings clutter into the next active product lane. The backend flow now has its own tab/page titled exactly `C-AOL LLM backend setup`, with neutral player-facing copy instead of Josef/test-run/platform-first wording. Lacapult stages API/AnyLLM, Ollama, and OpenVINO guided setup pathways with explicit confirmation before external changes; current confirmation actions record intent only and do not install packages, pull models, call APIs, or mutate real user state. Ollama offers `mistral-v0.3` and `nemotron-9b`, uses safe hardware-recommendation text rather than auto-picking, and leaves final choice to the player. Automated proof keeps installs/model pulls mocked, sandboxed, or confirmation-gated. The inherited About/thank-you personal support message remains in place as explicitly okayed, with attribution/license credit preserved. The required Reddit C:DDA aficionado GUI reasoning run exists at `doc/lacapult-gui-reasoning-reddit-cdda-install-run-2026-04-26.md` and treats unexplained `Josef`/test-run wording as internal scaffolding leakage unless it appears in credits/history.
-
-Non-goals remain: no C-AOL `v0.3.0`, no signing/notarization, no new C-AOL game release, no API secrets, and no pretending OpenVINO is a trivial mainstream path if the first implementation is only guided/specialized.
-
-### Completed lane - real C-AOL mod/Summarizer generation/apply UI v0
-
-Josef greenlit the Lacapult lane on 2026-04-26: activate **feature-complete C-AOL mod install/enable plus Summarizer UX/status/apply**, defined in `doc/lacapult-mod-summarizer-feature-plan-2026-04-25.md`, starting with the bounded real generation/apply UI slice. That lane is now closed at a Windows-retestable prerelease state. Slice 1 is implemented as a read-only C-AOL mod/Summarizer discovery/status model with sandbox proof, Slice 2 is implemented as a read-only Mods/Settings UX status surface plus dry-run Summarizer prompt/button, Slice 3 is implemented as a sandbox-only C-AOL-native companion summary-pack generation/apply/rollback proof with manifest, backups, exact `mods.json` restore, and status-model visibility, Slice 4 is implemented as a deterministic C-AOL `npc_harness.py` plus C++ source-seam proof that a sandbox active generated companion root reaches prompt construction as `your_tone` / `your_example_expression`, and Slice 5 is implemented as a sandbox-only error/rollback matrix for broken metadata, content parse errors, missing dependencies, obsolete mods, partial/stale/conflicting summaries, backend-not-ready gating, and replacement rollback. The backend recommendation/setup target is now closed for Windows pre-release readiness, not promoted into sandbox-gated real generation/apply UI wiring: API is presented as the fastest onboarding/debug path, Ollama as the mainstream local path, and OpenVINO as a Windows-first specialized/detect-only path until a clearer guided install exists. Release/signing remains product-judgment-heavy and needs Josef/Schani decision; the current binary launcher verdict is `ready-for-Josef-Windows-test`, not public release. The completed slice promotes the existing read-only/dry-run surface into a user-confirmed real generation/apply path: choose an eligible contextual mod/world, require backend readiness, generate or stage a C-AOL-native companion summary pack under `npcs/Backgrounds/Summaries_short` / `Summaries_extra`, preview the apply plan, require explicit confirmation before changing a world mod list or user mod root, and preserve backup/rollback visibility. The Slice 6 Settings apply-preview, confirmed writer seam, first backend-generation seam, target world/mod chooser error polish, optional live-local Ollama smoke, and final retestable-state package-shape proof are now landed: the Settings surface lets the player choose a readable world and eligible contextual mod from the world-aware status model, gates on backend readiness, and shows companion pack paths / world `mods.json` order / backup responsibilities; the confirmed path now requires explicit backend-call allowance, can produce deterministic proof entries through a fixture backend, has live Ollama HTTP wiring for an already-local configured model with no pulls, gates API/OpenVINO live generation with player-facing errors, stages a C-AOL-native companion summary pack, writes manifest/summary files, updates the selected world mod order, and preserves backup/rollback visibility in isolated sandbox proof. The live-local smoke used already-local `mistral:latest` from `ollama list`, exercised the local Ollama HTTP generation path, and applied the generated entry through the same sandboxed companion-pack seam without model pulls, package installs, API secrets, remote APIs, or real Application Support mutation. The retestable-state proof re-ran the Slice 6 status/UI/apply/backend gates and regenerated local unsigned package artifacts from current `main`, confirming the Windows package still contains `utils/7za.exe` without publishing a release. Josef explicitly greenlit the queued Windows retest package publication on 2026-04-26; that GitHub prerelease was published, then Draft/quarantined after Josef's CAOL/Lacapult identity complaint. This is still a Lacapult launcher retest package, not a public-final release or unconfirmed real user-data mutation. Automated proof must stay sandboxed and must not mutate Josef's real Application Support config, saves, worlds, mods, API secrets, packages, or models. C-AOL owns runtime schema/loading/consumption; Lacapult owns installer UX, status, generation orchestration, apply/rollback help, and backend-readiness gates.
-
-### Active incident - Lacapult 2026-04-26 release quarantine and identity investigation
-
-**Status:** ACTIVE QUARANTINE / ALL 2026-04-26 GITHUB PRERELEASES DRAFT / DO NOT REPUBLISH
+Current public-release facts:
+- Draft/quarantined releases: `lacapult-post-mod-ui-retest-2026-04-26`, `lacapult-test-2026-04-26-2`, `lacapult-test-2026-04-26`.
+- Public GitHub releases API returned zero public releases after quarantine.
+- The old latest Windows asset URL returned `404`.
+- Local artifact inspection says the package is Lacapult-shaped (`Lacapult-Doobdab.exe` plus `utils/7za.exe`), not a full C-AOL archive, but the product surface was too C-AOL-heavy / inherited-name-leaky for public confidence.
 
 Canonical incident note: `doc/lacapult-release-quarantine-investigation-2026-04-26.md`.
 
-Josef reported that the 2026-04-26 Lacapult / “Leckerpult” download looked completely faulty — “there's CAOL in there, there's not Leckerpult in there” — and asked for it to be taken off the website. The 2026-04-26 GitHub prerelease family is now quarantined as Draft: `lacapult-post-mod-ui-retest-2026-04-26`, `lacapult-test-2026-04-26-2`, and `lacapult-test-2026-04-26`. Unauthenticated GitHub releases API inspection now returns zero public releases, and the old latest Windows asset URL returns `404`. Initial artifact inspection says the latest Windows zip is a Lacapult package shape (`Lacapult-Doobdab.exe` plus `utils/7za.exe`), not a full C-AOL game archive, but the executable intentionally embeds a very C-AOL-heavy launcher/product surface plus inherited Catapult/Dabdoob naming. Treat this as an active release/identity investigation, not as a closed retest package. No Lacapult release from this family should be republished until Josef/Schani explicitly re-greenlight after the identity/product failure is understood.
+## Josef playtest ledger
 
-### Quarantined follow-up - post-mod UI Windows retest release
+- [ ] Real Windows first-launch click-through before any renewed confidence/republish claim: extract/open package, inspect first window/tab, release-row wording, and install/download impression.
 
-**Status:** QUARANTINED / WAS PUBLISHED FOR JOSEF WINDOWS RETEST / NOT PUBLIC-FINAL
+Do not schedule repeated reminders for this. It is a ledger item, not an implementation blocker.
 
-Canonical contract: `doc/lacapult-post-mod-ui-windows-retest-release-packet-2026-04-26.md`.
+## Parked debug-note correction stack
 
-After the UI/mod-installer/Summarizer lane reached an honest retestable state, Josef explicitly greenlit the external release publication. The Lacapult GitHub test/prerelease was published at `lacapult-post-mod-ui-retest-2026-04-26` with unsigned Windows/macOS/Linux packages regenerated from source commit `8c9d8f3d5e3bc9757fffd69b7eeecd8cb8bcbdba`; the Windows package includes `utils/7za.exe`. It is now Draft/quarantined after Josef's release-identity complaint. This follow-up remains a Lacapult launcher retest package for Josef's Windows laptop, not a C-AOL game release, not C-AOL `v0.3.0`, not signing/notarization, and not public-final release confidence.
+Canonical parked contract: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
 
-### Product intent
+Josef asked on 2026-04-27 to put the collected Catapult/Lacapult debug notes into Lacapult canon under parked, without pointing Andi at them yet. They are parked in this order unless Josef/Schani reprioritizes:
 
-Lacapult Doobdab should install and launch C-AOL releases with the minimum friction possible.
+1. **LLM tab de-clutter + backend-scope correction v0** - rename visible backend tab to `LLM`, cut top/helper text, remove visible Lacapult OpenVINO installer path for now, and correct API token copy.
+2. **Setup save/check action pattern v0** - add Save options / Check / status-light behavior and make Install save current options first.
+3. **API / AnyLLM real setup workflow v0** - provider-aware API setup with base URL/provider/model, safe API-key/env-var workflow, and real AnyLLM setup path behind explicit confirmation.
+4. **Ollama real installer + model readiness workflow v0** - one model-choice control, Mistral/Nemotron readiness lights, Check/Install behavior, and venv setup if still needed.
+5. **Lacapult window chrome investigation v0** - identify whether oversized close/minimize/top-bar controls are native chrome, Godot UI/theme/scale, DPI, or platform packaging before fixing.
 
-The player-facing v0 story:
-1. Download/install Lacapult Doobdab easily on Windows, macOS, or Linux.
-2. Open Lacapult without developer tooling.
-3. See C-AOL as the only real game target.
-4. Refresh available C-AOL releases.
-5. Pick a platform-appropriate `v0.2.0` asset from GitHub releases.
-6. Install/update the game while preserving user data.
-7. Choose a backend setup path from API, Ollama, or OpenVINO, with v0 honesty about what each path can actually configure.
-8. Launch the installed game.
+This stack is not active while Andi is on the C-AOL cadence.
 
-### Required source lineage
+## Completed footing
 
-The repo is derived from:
-- qrrk's Catapult
-- Hihahahalol's Dabdoob / Catapult_Dabdoob
-- Cataclysm: Dark Days Ahead
-- Cataclysm: The Last Generation
-- Cataclysm: Bright Nights, while inherited support or credits remain
-- Cataclysm: Arsenic and Old Lace
+These are implemented/proofed enough to serve as footing, not active work:
 
-Preserve MIT license notice and attribution. Do not make the repo look like an unattributed copy.
+- C-AOL `v0.2.0` release metadata/install path and macOS DMG install-shape proof.
+- Backend triad status/config proof for API, Ollama, and OpenVINO at v0-safe readiness level.
+- Read-only C-AOL mod compatibility/Summarizer status model.
+- Real C-AOL mod/Summarizer generation/apply UI v0, sandbox proof, fixture backend proof, and already-local Ollama smoke.
+- Local unsigned macOS/Linux/Windows Lacapult package-shape proof, including Windows `utils/7za.exe` sidecar.
+- Lacapult-side macOS repair path for selected C-AOL `v0.2.0` app dylib/load-path issues.
+- Identity-surface correction after quarantine: first Game-tab launcher framing and About GitHub link retargeted to Lacapult.
 
-## Active slice scope
+Detailed evidence lives in `TESTING.md` as an index and in the relevant `doc/*.md` packets.
 
-### In scope for v0
+## Held / out of scope unless reopened
 
-- Standalone local repo with no inherited `.git` history.
-- Minimal repo-local canon and attribution docs.
-- Rebrand obvious launcher identity:
-  - project name/window title
-  - version-check URL or disable version check until Lacapult releases exist
-  - README top-level identity
-  - about/credits text where currently visible
-- Make the launcher C-AOL-first / C-AOL-only:
-  - default setting `game = "caol"`
-  - remove or hide generic game chooser from the first surface unless hiding breaks layout badly
-  - replace game description with C-AOL description
-- Add C-AOL release fetching, with `v0.2.0` as the first proof target:
-  - GitHub API endpoint: `https://api.github.com/repos/josihosi/Cataclysm-AOL/releases`
-  - release key: `caol-release` or similar, but keep the naming consistent across settings, release manager, UI, paths, and installer
-  - platform asset filtering for release assets currently shaped like the `v0.2.0` assets:
-    - Linux: asset names containing `_linux.tar.gz`
-    - Windows: asset names containing `_windows.zip`
-    - macOS: asset names containing `_macos.dmg` (and tolerate `_macos.tar.gz` / `_macos.zip` if future releases change packaging)
-  - include releases even when no matching asset exists, but show them as non-installable rather than pretending install works
-- Reuse existing installer/update/userdata preservation behavior where possible.
-- Update launch executable discovery to handle C-AOL's actual packaged executable names:
-  - `cataclysm-tiles`
-  - `cataclysm-tiles.exe`
-  - any C-AOL package-specific executable name discovered in release archives
-- Add first LLM backend setup options after the v0.2.0 install path is structurally proven:
-  - API backend: selectable mode plus config-writing/checking path; check Python/`any_llm` import readiness without using secrets; store API-key env-var name/provider/model only
-  - Ollama backend: selectable mode plus local `ollama` command/server/model-list detection and C-AOL config path; do not pull huge models or automate risky installs without clearance
-  - OpenVINO backend: selectable third mode with Python import/model-dir/device detection and C-AOL config path; full OpenVINO install/setup automation remains later
+- Public GitHub push/release publication, signing, notarization, and final public release confidence.
+- New C-AOL game release or C-AOL `v0.3.0` packaging.
+- API secrets or live remote API calls in automated proof.
+- Automated package-manager installs or model pulls without explicit clearance.
+- Full OpenVINO installer automation; OpenVINO remains hidden/specialized until a clearer product path exists.
+- Real user Application Support / saves / worlds / mods mutation in automated tests.
+- DDA/TLG/BN/EOD/TISH as visible first-class launcher targets.
 
-### Out of scope for v0
+## Product intent
 
-- Pushing to the public GitHub repo, publishing releases, or contacting upstream without fresh explicit clearance from Josef/Schani. The public repo exists at `https://github.com/josihosi/Lacapult-Doobdab`, but public writes remain clearance-gated.
-- Full all-three-backend installation automation, model downloads, or secret-bearing live API calls.
-- OpenVINO implementation beyond v0-safe detection/config/status metadata; runtime install/model download/live inference remain later. Future direction may grow into a guided, explicit-approval setup path with a fixed package list and model-dir setup, but that is not implemented in this mod-status slice.
-- Pulling or installing large local models without explicit clearance. Ollama model recommendation UX is a later backend lane; Slice 1 does not recommend, rename, verify provenance for, or pull models.
-- Modpack curation beyond investigating inherited mod/soundpack/tileset behavior, marking C-AOL compatibility honestly, and starting a bounded compatibility-summary shape; feature-complete mod install/enable plus summarizer apply UX is the next planned lane.
-- Supporting DDA/TLG/BN/EOD/TISH as first-class visible targets.
-- New artwork/icon polish unless needed to remove misleading Dabdoob branding.
-- Cross-platform signed release builds of Lacapult itself.
-- Perfect translation pass across every locale.
+The v0 player story is still simple:
 
-## Expected implementation shape
+1. Download/open Lacapult without developer tooling.
+2. See a clearly Lacapult launcher surface for C-AOL.
+3. Fetch existing C-AOL releases from `josihosi/Cataclysm-AOL`.
+4. Install/update the selected game package while preserving user data.
+5. Configure or check LLM backend readiness with honest API/Ollama guidance.
+6. Optionally generate/apply C-AOL-native companion summary packs through explicit confirmation and rollback-aware paths.
+7. Launch the installed game.
 
-### 1. Repo hygiene / identity
+## Required source lineage
 
-- Keep original `LICENSE` MIT text and copyright notices.
-- Add/maintain `ATTRIBUTION.md`.
-- Rewrite README to explain Lacapult Doobdab as a C-AOL installer derived from Dabdoob/Catapult.
-- Keep credits near the top, not buried in a legal cellar.
-- Update `project.godot` name/description.
-- Replace self-update URL in `scripts/Catapult.gd` with a Lacapult placeholder or disable update check cleanly until releases exist.
-
-### 2. Game model simplification
-
-Current Dabdoob supports many game keys (`dda`, `bn`, `tlg`, `eod`, `tish`). For v0, avoid deep generic abstraction unless it is cheaper than removal.
-
-Preferred bounded approach:
-- Add `caol` as the only configured/default game.
-- Hide the game choice UI or make it a one-item selector.
-- Keep internal arrays/dictionaries simple but consistent.
-- Preserve path isolation under a `caol/` folder in launcher data.
-
-### 3. Release manager
-
-- Add `_RELEASE_URLS["caol-release"] = "https://api.github.com/repos/josihosi/Cataclysm-AOL/releases"`.
-- Add platform filters for C-AOL release assets.
-- Add a request-completed callback for C-AOL or refactor duplicated callbacks lightly.
-- Add `releases["caol-release"] = []`.
-- Update `fetch()` so the selected C-AOL channel uses this key.
-- Confirm GitHub auth-token path still works for higher rate limits.
-
-### 4. UI/channel behavior
-
-- C-AOL can initially have one channel called `Release` / `Latest releases`.
-- Stable/Experimental radio buttons can be hidden, disabled, or repurposed only if done honestly.
-- Build list should show release name/tag, publish date, and installability.
-- Changelog link can be disabled or pointed to the C-AOL release page for v0.
-
-### 5. Installer / launcher behavior
-
-- Use existing archive download/extract flow.
-- Validate installed folder contains a plausible game executable before marking install active.
-- Preserve update/current-install behavior if the existing code path already does it.
-- Launch should find executable across Windows/Linux/macOS package shapes.
-- macOS permission-fix script should include C-AOL executable/app bundle names once known.
-
-
-### 6. LLM backend setup behavior
-
-- Add C-AOL backend setup as a visible concept only after the release install path is not vapor.
-- The player-facing selector should expose three options: API, Ollama, and OpenVINO.
-- API setup should focus on mode/config fields, AnyLLM/Python readiness, guided missing-dependency messages, and safe validation without exposing secrets.
-- Ollama setup should detect local availability/server/model-list status and write/check C-AOL config; installation/model-pull automation is later unless explicitly cleared.
-- OpenVINO setup should be selectable and honest in v0: Windows-first detection/config/status metadata is enough, but it should not disappear as if only two backends exist.
-
-### 7. Modding compatibility investigation
-
-- Keep inherited Dabdoob mod/soundpack/tileset support unless it blocks C-AOL-first UX.
-- Identify where inherited mod metadata, download sources, compatibility rules, and UI entry points live.
-- Check how those inherited assumptions map onto an installed C-AOL `v0.2.0` tree and mark the result honestly as supported, untested, broken, or unknown.
-- Start a C-AOL compatibility-summary note for mods.
-- Treat NPC/LLM mod summaries as the next feature-complete lane, not current backend work: after mod install/enable, Lacapult should offer Summarizer UX/status/apply help while C-AOL owns `Summaries_short` / `Summaries_extra` schema and runtime consumption.
-
-## Testing / evidence bar
-
-Andi must not stop at "code looks fine". Godot launcher code has a talent for smiling while one node path is broken, naturally.
-
-Minimum evidence for v0 handoff:
-1. Static sanity:
-   - grep shows old version-check URL and obvious Dabdoob/Catapult public identity are either intentionally credited or replaced
-   - grep shows C-AOL release URL and asset filters exist
-   - settings default to `caol`
-2. GitHub release parsing proof:
-   - run a small script or Godot-adjacent parser test against live `josihosi/Cataclysm-AOL` release JSON
-   - prove it selects at least one asset for the current platform from `v0.2.0`
-3. Installer path proof:
-   - either run the launcher far enough to fetch/show C-AOL releases, or create a narrow executable-free test that proves selected asset metadata reaches `ReleaseInstaller.install_release()` shape: `name`, `url`, `filename`, `published_at`, `has_any_assets`
-4. Backend setup proof:
-   - API config/readiness path is present and does not leak secrets
-   - Ollama detection/config path is present or the blocker is recorded
-   - OpenVINO is surfaced as Windows-first v0 detection/config/status rather than fake cross-platform automation
-   - sandboxed C-AOL `config/options.json` apply proof exists for API, Ollama, and OpenVINO
-5. Modding investigation proof:
-   - inherited mod-support entry points are identified
-   - first compatibility-summary direction is documented
-6. No public repo push unless explicitly cleared.
-
-## Done means
-
-The v0 target is done when:
-- local repo exists and is committed locally
-- docs/README/LICENSE/ATTRIBUTION tell the truth
-- launcher identity says Lacapult Doobdab / C-AOL, not generic Dabdoob except in credits
-- C-AOL `v0.2.0` releases are fetched from `josihosi/Cataclysm-AOL`
-- platform asset matching works for current `v0.2.0` assets
-- install/update/launch paths are at least plausibly wired and tested to the smallest honest extent available on this Mac
-- API, Ollama, and OpenVINO backend setup options are represented in canon and in the UI selector, with v0-honest capability/status/guidance for each
-- OpenVINO is selectable but not falsely implemented beyond Windows-first detection/config/status metadata
-- inherited modding support is preserved and the C-AOL compatibility/NPC-summary investigation records entry points, assumptions, and next proof needs
+Preserve MIT license notice and credits for qrrk's Catapult, Hihahahalol's Dabdoob/Catapult_Dabdoob, Cataclysm: DDA/TLG/BN while inherited support or credits remain, and Cataclysm: Arsenic and Old Lace. Do not erase lineage; remove only misleading public product identity.

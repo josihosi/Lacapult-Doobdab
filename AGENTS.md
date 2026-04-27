@@ -21,7 +21,9 @@ Then inspect only the source files needed for the active target.
 
 ## Current rule
 
-The active target is the v0 standalone scaffold and C-AOL release installer. Do not widen into full LLM backend installation unless the v0 release installer is already proven and the extra work is genuinely tiny.
+Lacapult is currently in release quarantine with a parked debug-note correction stack. Do not start implementation, point Andi at this repo, republish releases, or widen scope unless Josef/Schani explicitly reopens Lacapult.
+
+If reopened, use `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md` as the parked stack source and start with the narrowest package unless reprioritized.
 
 ## External/public actions
 
