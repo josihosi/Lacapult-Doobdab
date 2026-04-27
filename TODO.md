@@ -30,6 +30,11 @@ Short queue only. Remove finished items instead of turning this into a museum.
 - [x] Add compact Ollama command/server, Mistral, Nemotron, Python/venv, and options readiness lights plus non-mutating `Check`.
 - [x] Add confirmation-gated `Install Ollama / model` and `Install venv` setup intents that save first and remain proof-only in automated gates.
 - [x] Prove Ollama setup with UI smoke plus fixture command/server/model states; do not install Ollama, create a venv, or pull models in automated proof.
+- [x] Work from `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`, Package 5.
+- [x] Name the local root-cause class: custom scene chrome (`borderless=true` + `CustomTitleBar.tscn`), not native OS chrome.
+- [x] Patch the smallest custom-titlebar metric seam first: titlebar height, vertical margins, app icon size, close/min/max button size, and matching main content offset.
+- [x] Prove the visible seam changed with local Godot smoke comparing old baseline metrics to new scene metrics.
+- [ ] Keep Windows/Josef screenshot confirmation separate before any cross-platform visual-fix claim.
 
 ## Josef playtest ledger
 

@@ -251,7 +251,8 @@ testing_impact:
 
 classification: active
 current_evidence:
-- Local/project inspection on 2026-04-27 names the root-cause class as custom scene chrome rather than native OS chrome: `project.godot` sets `display/window/size/borderless=true`, `scenes/Catapult.tscn` instances `scenes/CustomTitleBar.tscn`, and the custom titlebar owns TextureButton Minimize/Maximize/Close controls sized `32x24` with SVG expansion/stretch.
+- Local/project inspection on 2026-04-27 names the root-cause class as custom scene chrome rather than native OS chrome: `project.godot` sets `display/window/size/borderless=true`, `scenes/Catapult.tscn` instances `scenes/CustomTitleBar.tscn`, and the custom titlebar owns TextureButton Minimize/Maximize/Close controls.
+- Smallest-seam local patch tightened custom chrome metrics: titlebar `32px -> 28px`, `Main.margin_top 36px -> 32px`, app icon `24x24 -> 20x20`, close/min/max buttons `32x24 -> 28x20`, and vertical titlebar margins `4px -> 2px`.
 - Evidence command: `HOME=$(mktemp -d /tmp/lacapult-window-chrome-home.XXXXXX) godot --path . --no-window -s tools/godot_window_chrome_inspection.gd`.
 remaining_evidence:
 - Windows/Josef screenshot or Windows automation is still required before a cross-platform visual-fix claim.
@@ -259,7 +260,7 @@ aux_doc_needed: yes
 handoff_needed: yes
 open_questions:
 - Need Windows screenshot/confirmation from Josef or a Windows automation path before final cross-platform claim.
-- Product/taste choice remains: tighten the custom titlebar metrics, or retire it and use native OS chrome.
+- Windows/Josef screenshot should confirm whether the tightened custom chrome resolves the complaint, or whether a native-chrome/product decision is still needed.
 
 ## Active order for Alex
 
