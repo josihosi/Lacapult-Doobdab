@@ -4,7 +4,7 @@ Short queue only. Remove finished items instead of turning this into a museum.
 
 ## Now
 
-**Active target:** API / AnyLLM real setup workflow v0.
+**Active target:** Ollama real installer + model readiness workflow v0.
 
 - [x] Quarantine the 2026-04-26 Lacapult prerelease family as Draft and verify public removal.
 - [x] Record the release identity/product failure in canon.
@@ -21,10 +21,10 @@ Short queue only. Remove finished items instead of turning this into a museum.
 - [x] Add/standardize `Check` actions that refresh readiness without installing.
 - [x] Make install actions save current options before attempting setup.
 - [x] Replace long setup status text with compact status-light state.
-- [ ] Work from `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`, Package 3.
-- [ ] Add provider/base URL/model/API-key env-var controls in the API setup path without storing secrets.
-- [ ] Add real AnyLLM/Python setup/check workflow behind explicit confirmation only.
-- [ ] Prove API setup with UI smoke plus sandboxed config/status proof; do not call live APIs or use secrets.
+- [x] Work from `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`, Package 3.
+- [x] Add provider/base URL/model/API-key env-var controls in the API setup path without storing secrets.
+- [x] Add real AnyLLM/Python setup/check workflow behind explicit confirmation only.
+- [x] Prove API setup with UI smoke plus sandboxed config/status proof; do not call live APIs or use secrets.
 
 ## Josef playtest ledger
 
@@ -36,8 +36,8 @@ Canonical contract: `doc/lacapult-parked-debug-note-correction-packages-2026-04-
 
 1. [x] COMPLETE - LLM tab de-clutter + backend-scope correction v0.
 2. [x] COMPLETE - Setup save/check action pattern v0.
-3. [ ] ACTIVE - API / AnyLLM real setup workflow v0.
-4. [ ] GREENLIT - Ollama real installer + model readiness workflow v0.
+3. [x] COMPLETE - API / AnyLLM real setup workflow v0.
+4. [ ] ACTIVE - Ollama real installer + model readiness workflow v0.
 5. [ ] GREENLIT - Lacapult window chrome investigation v0.
 
 ## Do not do without fresh clearance

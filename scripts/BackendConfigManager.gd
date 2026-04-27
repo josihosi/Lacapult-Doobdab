@@ -9,11 +9,119 @@ const BACKEND_OLLAMA = "ollama"
 const BACKEND_OPENVINO = "openvino"
 const BACKEND_CONFIG_FILENAME = "caol_backend_setup.json"
 const C_AOL_OPTIONS_PATCH_FILENAME = "caol_llm_options_patch.json"
+const API_SETUP_INTENT_FILENAME = "caol_api_setup_intent.json"
 
 const DEFAULT_API_PROVIDER = "openai"
 const DEFAULT_API_KEY_ENV = "CATA_API_KEY"
 const DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
 const DEFAULT_OPENVINO_DEVICE = "AUTO"
+
+const API_PROVIDER_CHOICES = [
+	{
+		"id": "openai",
+		"label": "OpenAI",
+		"default_base_url": "https://api.openai.com/v1",
+		"default_model": "gpt-4.1-mini",
+		"install_extra": "openai"
+	},
+	{
+		"id": "openrouter",
+		"label": "OpenRouter",
+		"default_base_url": "https://openrouter.ai/api/v1",
+		"default_model": "openai/gpt-4.1-mini",
+		"install_extra": "openrouter"
+	},
+	{
+		"id": "anthropic",
+		"label": "Anthropic / Claude",
+		"default_base_url": "",
+		"default_model": "claude-3-5-haiku-latest",
+		"install_extra": "anthropic"
+	},
+	{
+		"id": "gemini",
+		"label": "Google Gemini",
+		"default_base_url": "",
+		"default_model": "gemini-1.5-flash",
+		"install_extra": "gemini"
+	},
+	{
+		"id": "custom_any_llm",
+		"label": "AnyLLM custom provider",
+		"default_base_url": "",
+		"default_model": "",
+		"install_extra": ""
+	}
+]
+
+
+func get_api_provider_choices() -> Array:
+	return API_PROVIDER_CHOICES.duplicate(true)
+
+
+func get_api_provider_choice(provider_id: String) -> Dictionary:
+	var normalized_id = _normalize_api_provider(provider_id)
+	for choice in API_PROVIDER_CHOICES:
+		if choice.get("id", "") == normalized_id:
+			return choice.duplicate(true)
+	return API_PROVIDER_CHOICES[0].duplicate(true)
+
+
+func get_api_provider_default_base_url(provider_id: String) -> String:
+	return get_api_provider_choice(provider_id).get("default_base_url", "")
+
+
+func get_api_provider_default_model(provider_id: String) -> String:
+	return get_api_provider_choice(provider_id).get("default_model", "")
+
+
+func build_api_setup_plan(provider_id: String, python_path: String = "") -> Dictionary:
+	var choice = get_api_provider_choice(provider_id)
+	var package_spec = "any_llm"
+	var install_extra = choice.get("install_extra", "")
+	if install_extra != "":
+		package_spec = "any_llm[%s]" % install_extra
+	var py = _resolve_python(python_path)
+	var python_command = py.get("command", "python3") if py.get("ok", false) else (python_path.strip_edges() if python_path.strip_edges() != "" else "python3")
+	return {
+		"provider": choice.get("id", DEFAULT_API_PROVIDER),
+		"provider_label": choice.get("label", "OpenAI"),
+		"python_command": python_command,
+		"package_spec": package_spec,
+		"command": "%s -m pip install --upgrade %s" % [python_command, package_spec],
+		"requires_confirmation": true,
+		"automated_proof_policy": "plan_only_no_pip_no_secret_no_api_call"
+	}
+
+
+func run_api_setup(provider_id: String, python_path: String = "", proof_only: bool = false) -> Dictionary:
+	var plan = build_api_setup_plan(provider_id, python_path)
+	if proof_only:
+		var proof_result = write_api_setup_intent(provider_id, python_path, false, -1, "proof_only_no_pip_no_secret_no_api_call")
+		return {
+			"status": proof_result,
+			"plan": plan,
+			"performed_external_install": false,
+			"exit_code": -1,
+			"proof_only": true
+		}
+
+	var output = []
+	var exit_code = OS.execute(plan.get("python_command", "python3"), ["-m", "pip", "install", "--upgrade", plan.get("package_spec", "any_llm")], true, output, true)
+	var summary = "pip_install_ok" if exit_code == 0 else "pip_install_failed"
+	var write_result = write_api_setup_intent(provider_id, python_path, true, exit_code, summary)
+	var status = "api_setup_install_ok" if exit_code == 0 else "api_setup_install_failed_%s" % exit_code
+	if write_result != "ok":
+		status = write_result
+	return {
+		"status": status,
+		"plan": plan,
+		"performed_external_install": true,
+		"exit_code": exit_code,
+		"proof_only": false,
+		"output_line_count": output.size()
+	}
+
 
 func get_supported_backends() -> Array:
 	var python_path = _setting_or_default("backend_python_path", "")
@@ -138,6 +246,33 @@ func write_launcher_backend_config(mode: String, endpoint: String = "", model: S
 	return "ok"
 
 
+func write_api_setup_intent(provider_id: String, python_path: String = "", performed_external_install: bool = false, exit_code: int = -1, result_summary: String = "plan_only_no_pip_no_secret_no_api_call") -> String:
+	var d = Directory.new()
+	if not d.dir_exists(Paths.config):
+		var err = d.make_dir_recursive(Paths.config)
+		if err != OK:
+			return "config_dir_error_%s" % err
+	var plan = build_api_setup_plan(provider_id, python_path)
+	var intent = {
+		"action": "install_api_backend",
+		"provider": plan.get("provider", DEFAULT_API_PROVIDER),
+		"provider_label": plan.get("provider_label", "OpenAI"),
+		"python_command": plan.get("python_command", "python3"),
+		"package_spec": plan.get("package_spec", "any_llm"),
+		"command_preview": plan.get("command", "python3 -m pip install --upgrade any_llm"),
+		"confirmed": true,
+		"performed_external_install": performed_external_install,
+		"exit_code": exit_code,
+		"result_summary": result_summary,
+		"proof_policy": plan.get("automated_proof_policy", "plan_only_no_pip_no_secret_no_api_call"),
+		"secret_policy": "No API key is stored or displayed; only the env-var name belongs in backend config.",
+		"recorded_at": OS.get_datetime()
+	}
+	if not Helpers.save_to_json_file(intent, Paths.config.plus_file(API_SETUP_INTENT_FILENAME)):
+		return "api_setup_intent_write_error"
+	return "ok"
+
+
 func _status_summary(raw_status: String) -> String:
 	if raw_status.find("api_python_missing") >= 0:
 		return "Python is missing; C-AOL needs Python to run the LLM helper."
@@ -177,17 +312,32 @@ func _normalize_backend_fields(mode: String, endpoint: String, model: String, py
 		"endpoint": endpoint.strip_edges(),
 		"model": model.strip_edges(),
 		"python_path": python_path.strip_edges(),
-		"api_provider": api_provider.strip_edges() if api_provider.strip_edges() != "" else DEFAULT_API_PROVIDER,
+		"api_provider": _normalize_api_provider(api_provider),
 		"api_key_env": api_key_env.strip_edges() if api_key_env.strip_edges() != "" else DEFAULT_API_KEY_ENV,
 		"openvino_model_dir": openvino_model_dir.strip_edges(),
 		"openvino_device": openvino_device.strip_edges().to_upper() if openvino_device.strip_edges() != "" else DEFAULT_OPENVINO_DEVICE
 	}
+	if mode == BACKEND_API:
+		if normalized["endpoint"] == "":
+			normalized["endpoint"] = get_api_provider_default_base_url(normalized["api_provider"])
+		if normalized["model"] == "":
+			normalized["model"] = get_api_provider_default_model(normalized["api_provider"])
 	if mode == BACKEND_OLLAMA and normalized["endpoint"] == "":
 		normalized["endpoint"] = DEFAULT_OLLAMA_URL
 	if mode == BACKEND_OPENVINO:
 		normalized["endpoint"] = ""
 		normalized["model"] = ""
 	return normalized
+
+
+func _normalize_api_provider(provider_id: String) -> String:
+	var normalized_id = provider_id.strip_edges().to_lower()
+	if normalized_id == "":
+		normalized_id = DEFAULT_API_PROVIDER
+	for choice in API_PROVIDER_CHOICES:
+		if choice.get("id", "") == normalized_id:
+			return normalized_id
+	return "custom_any_llm"
 
 
 func _build_caol_options_patch(mode: String, fields: Dictionary) -> Dictionary:
@@ -217,6 +367,11 @@ func _build_caol_options_patch(mode: String, fields: Dictionary) -> Dictionary:
 		})
 
 	if mode == BACKEND_API:
+		patch["options"].append({
+			"name": "LLM_INTENT_API_PROVIDER",
+			"value": fields.get("api_provider", DEFAULT_API_PROVIDER),
+			"reason": "Selected API provider metadata; current C-AOL runtime still consumes OpenAI-compatible paths first."
+		})
 		patch["options"].append({
 			"name": "LLM_INTENT_API_KEY_ENV",
 			"value": fields.get("api_key_env", DEFAULT_API_KEY_ENV),
@@ -280,9 +435,11 @@ func _detect_api_status(python_path: String, provider: String, model: String, ap
 	if not py.get("ok", false):
 		return "api_python_missing_runner_requires_python"
 	var import_status = _python_import_status(py.get("command", ""), ["any_llm"])
-	if import_status != "imports_ok":
-		return "api_python_ready_any_llm_missing_%s" % import_status
-	var parts = ["api_python_ready_any_llm_import_ok"]
+	var parts = []
+	if import_status == "imports_ok":
+		parts.append("api_python_ready_any_llm_import_ok")
+	else:
+		parts.append("api_python_ready_any_llm_missing_%s" % import_status)
 	if provider.strip_edges() == "":
 		parts.append("provider_missing")
 	else:
@@ -348,7 +505,16 @@ func _detect_ollama_status(ollama_url: String = DEFAULT_OLLAMA_URL, model: Strin
 func _resolve_python(python_path: String) -> Dictionary:
 	var candidates = []
 	if python_path.strip_edges() != "":
-		candidates.append(python_path.strip_edges())
+		var requested = python_path.strip_edges()
+		var d = Directory.new()
+		if d.dir_exists(requested):
+			if OS.get_name() == "Windows":
+				candidates.append(requested.plus_file("Scripts").plus_file("python.exe"))
+				candidates.append(requested.plus_file("python.exe"))
+			else:
+				candidates.append(requested.plus_file("bin").plus_file("python"))
+				candidates.append(requested.plus_file("bin").plus_file("python3"))
+		candidates.append(requested)
 	else:
 		if OS.get_name() == "Windows":
 			candidates = ["python", "py"]

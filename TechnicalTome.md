@@ -232,6 +232,14 @@ Lacapult now repairs that installed-app dependency shape for the selected C-AOL 
 The repeatable proof first reproduces the old blocker, then runs `python3 tools/prove_caol_game_launch_smoke.py --repair --keep-sandbox --observe-seconds 8`. The repaired app has no `/opt/local`, `/usr/local`, or `/opt/homebrew` paths left in the checked load graph, passes the C-AOL portability verifier against the repaired app bundle, and remains running past the 8-second launch-smoke observation window. This is a Lacapult install/launch repair, not a notarized/new C-AOL DMG release, and it still avoids real Application Support mutation, public releases, upstream contact, API secrets, and model pulls.
 
 
+## 2026-04-27 API / AnyLLM provider-aware setup seam
+
+`scripts/BackendSetupUI.gd` now gives API mode its own provider-aware form: `API base URL`, `Provider`, `API model`, shared `Python / venv`, API-key env-var name, and an optional secret paste field labelled session-only. The secret field uses Godot's hidden `LineEdit.secret` display, `Use for this session` sets only the named process environment variable, then clears the field; launcher settings/config/options patches still store only the env-var name, never the key.
+
+`scripts/BackendConfigManager.gd` owns the provider choices for OpenAI, OpenRouter, Anthropic/Claude, Gemini, and a custom AnyLLM-compatible provider, plus provider default base URLs/models where known. `Install API backend` saves current options before confirmation, previews the provider-specific `python -m pip install --upgrade any_llm[...]` setup command, and can run that command through `OS.execute` without shell interpolation when proof mode is off. The setup result written to `caol_api_setup_intent.json` stores provider/package/exit-code summary only; it never stores API-key material or command output.
+
+Repeatable proof: `tools/godot_api_anyllm_workflow_smoke.gd` under isolated `HOME` renders the API controls/status lights, proves `Check` is detection-only, proves provider/base URL/model/env-var round-trip without secret leakage, and enables `backend_api_setup_proof_only` so the confirmation-gated setup path records the command intent without running pip/API calls during automated gates.
+
 ## 2026-04-27 backend setup Save/Check action pattern
 
 `scripts/BackendSetupUI.gd` now exposes the cross-cutting backend setup action pattern required before deeper API/Ollama setup work: `Save options`, `Check`, and `Install setup`. `Check` refreshes readiness from the current UI fields without writing backend config, installing packages, pulling models, or calling APIs. `Save options` persists launcher-side backend metadata/options-patch only. `Install setup` calls the same save path before opening the existing confirmation-gated setup intent. `scripts/BackendConfigManager.gd` owns the reusable `check_backend_status()` and compact `get_status_light()` vocabulary (`🟢` ready, `🟡` needs action, `🔴` missing/error).

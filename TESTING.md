@@ -15,7 +15,7 @@ Use the smallest evidence that honestly matches the change.
 
 ## Current proof target
 
-**Active Lacapult implementation is reopened for Alex.** Current validation target is Package 3 from the debug-note correction stack: `API / AnyLLM real setup workflow v0`.
+**Active Lacapult implementation is reopened for Alex.** Current validation target is Package 4 from the debug-note correction stack: `Ollama real installer + model readiness workflow v0`.
 
 Package 2 evidence landed on 2026-04-27:
 
@@ -32,6 +32,15 @@ Package 1 evidence landed on 2026-04-27:
 - Godot UI smoke: `godot --path . --no-window -s tools/godot_llm_tab_declutter_smoke.gd` rendered the actual BackendSetupUI labels/options and loaded `scenes/Catapult.tscn` with `Main/Tabs/LLM`.
 
 Package 3 evidence must include UI proof for API provider/base URL/model/API-key env-var controls and status lights, sandboxed config/options round-trip proof, and a safe AnyLLM setup/check proof behind explicit confirmation only. Automated proof must not call live APIs, read API secrets, or install packages without clearance.
+
+Package 3 evidence landed on 2026-04-27:
+
+- Godot UI smoke: `HOME=$(mktemp -d /tmp/lacapult-api-anyllm-home.XXXXXX) godot --path . --no-window -s tools/godot_api_anyllm_workflow_smoke.gd` proved API base URL/provider/model/env-var/session-key controls, compact status lights, `Save options`, `Check`, and `Install API backend` render in API mode without Ollama/hardware copy leaking into the API seam.
+- Sandbox config/options proof: provider `openrouter`, API base URL, model, Python path, and env-var name round-trip into launcher metadata/options patch without storing the pasted fake API key.
+- Safe setup/install-path proof: `Install API backend` saves first, shows a confirmation-gated AnyLLM pip command preview, and the production path can run `python -m pip install --upgrade any_llm[...]` through `OS.execute` without shell interpolation; the automated smoke enables proof mode so it records the setup intent only. No automated pip install, live API call, real secret read, model pull, or real Application Support mutation is performed.
+- Source/static proof: API setup output stores only provider/model/base URL/env-var metadata and setup result summary; it does not store command output or API-key material.
+
+Package 3 remaining manual/cleared evidence: an actual pip install/import run in a deliberately disposable Python environment may be added later if Josef/Schani explicitly clears package installation proof. It is not required for the no-install automated gate.
 
 Before any renewed republish/confidence claim, evidence must include:
 
@@ -69,6 +78,13 @@ Detailed evidence is intentionally stored in auxiliary docs instead of repeated 
 - One-shot installer north star: `doc/lacapult-one-shot-installer-vision.md`.
 - v0.2 release/backend/modding contract: `doc/lacapult-v02-release-backend-modding-contract.md`.
 - Debug-note correction stack: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
+
+Recent gate commands used for Package 3:
+- `HOME=$(mktemp -d /tmp/lacapult-api-anyllm-home.XXXXXX) godot --path . --no-window -s tools/godot_api_anyllm_workflow_smoke.gd`
+- `HOME=$(mktemp -d /tmp/lacapult-save-check-home.XXXXXX) godot --path . --no-window -s tools/godot_backend_setup_save_check_smoke.gd`
+- `HOME=$(mktemp -d /tmp/lacapult-llm-ui-home.XXXXXX) godot --path . --no-window -s tools/godot_llm_tab_declutter_smoke.gd`
+- `python3 tools/prove_caol_backend_contract.py`
+- focused `rg` source/UI scans for API base URL/provider/model/session-secret controls, `Install API backend`, proof-mode no-pip boundary, and no secret leakage
 
 Recent gate commands used for Package 2:
 - `HOME=$(mktemp -d /tmp/lacapult-save-check-home.XXXXXX) godot --path . --no-window -s tools/godot_backend_setup_save_check_smoke.gd`

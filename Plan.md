@@ -44,8 +44,8 @@ Josef reopened the collected Lacapult debug notes on 2026-04-27 and asked for a 
 
 1. **COMPLETE: LLM tab de-clutter + backend-scope correction v0** - visible backend tab is `LLM`, top/helper text is shortened, visible OpenVINO setup choice is removed while hidden config support remains, and API token copy uses the checked `300-400`-with-variation wording.
 2. **COMPLETE: Setup save/check action pattern v0** - backend setup now has `Save options`, `Check`, compact status-light text, and `Install setup` saves the current fields before the confirmation-gated setup step.
-3. **ACTIVE: API / AnyLLM real setup workflow v0** - provider-aware API setup with base URL/provider/model, safe API-key/env-var workflow, and real AnyLLM setup path behind explicit confirmation.
-4. **GREENLIT: Ollama real installer + model readiness workflow v0** - one model-choice control, Mistral/Nemotron readiness lights, Check/Install behavior, and venv setup if still needed.
+3. **COMPLETE: API / AnyLLM real setup workflow v0** - provider-aware API setup with base URL/provider/model, safe API-key/env-var workflow, and real AnyLLM setup path behind explicit confirmation/proof gates.
+4. **ACTIVE: Ollama real installer + model readiness workflow v0** - one model-choice control, Mistral/Nemotron readiness lights, Check/Install behavior, and venv setup if still needed.
 5. **GREENLIT: Lacapult window chrome investigation v0** - identify whether oversized close/minimize/top-bar controls are native chrome, Godot UI/theme/scale, DPI, or platform packaging before fixing.
 
 This reopens implementation only for the debug-note stack. It does **not** lift the release quarantine or authorize republishing.

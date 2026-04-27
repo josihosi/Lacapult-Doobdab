@@ -12,6 +12,9 @@ var _intro: Label = null
 var _guidance: Label = null
 var _backend_endpoint_label: Label = null
 var _backend_endpoint: LineEdit = null
+var _api_base_url_help: Label = null
+var _backend_provider_label: Label = null
+var _backend_provider_button: OptionButton = null
 var _backend_model_label: Label = null
 var _backend_model: LineEdit = null
 var _ollama_model_choice_label: Label = null
@@ -19,6 +22,9 @@ var _ollama_model_choice: OptionButton = null
 var _hardware_hint: Label = null
 var _backend_python_path: LineEdit = null
 var _backend_api_key_env: LineEdit = null
+var _backend_api_key_secret: LineEdit = null
+var _set_session_key_button: Button = null
+var _api_status_lights: Label = null
 var _backend_status: Label = null
 var _save_button: Button = null
 var _check_button: Button = null
@@ -75,6 +81,27 @@ func _build_controls() -> void:
 	_backend_endpoint.size_flags_horizontal = SIZE_EXPAND_FILL
 	_backend_endpoint.connect("text_changed", self, "_on_BackendEndpoint_text_changed")
 	endpoint_row.add_child(_backend_endpoint)
+
+	_api_base_url_help = Label.new()
+	_api_base_url_help.name = "ApiBaseUrlHelp"
+	_api_base_url_help.autowrap = true
+	_api_base_url_help.text = "API base URL is the server endpoint Lacapult/C-AOL sends API requests to; leave the provider default unless you use a compatible proxy/router."
+	add_child(_api_base_url_help)
+
+	var provider_row = HBoxContainer.new()
+	provider_row.name = "BackendApiProvider"
+	add_child(provider_row)
+	_backend_provider_label = Label.new()
+	_backend_provider_label.text = "Provider"
+	_backend_provider_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	provider_row.add_child(_backend_provider_label)
+	_backend_provider_button = OptionButton.new()
+	_backend_provider_button.rect_min_size = Vector2(300, 0)
+	for choice in BackendConfig.get_api_provider_choices():
+		_backend_provider_button.add_item(choice.get("label", choice.get("id", "provider")))
+		_backend_provider_button.set_item_metadata(_backend_provider_button.get_item_count() - 1, choice.get("id", BackendConfig.DEFAULT_API_PROVIDER))
+	_backend_provider_button.connect("item_selected", self, "_on_ApiProvider_item_selected")
+	provider_row.add_child(_backend_provider_button)
 
 	var model_row = HBoxContainer.new()
 	model_row.name = "BackendModel"
@@ -137,6 +164,30 @@ func _build_controls() -> void:
 	_backend_api_key_env.connect("text_changed", self, "_on_BackendApiKeyEnv_text_changed")
 	api_env_row.add_child(_backend_api_key_env)
 
+	var api_secret_row = HBoxContainer.new()
+	api_secret_row.name = "BackendApiSessionKey"
+	add_child(api_secret_row)
+	var api_secret_label = Label.new()
+	api_secret_label.text = "API key (session only)"
+	api_secret_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	api_secret_row.add_child(api_secret_label)
+	_backend_api_key_secret = LineEdit.new()
+	_backend_api_key_secret.rect_min_size = Vector2(220, 0)
+	_backend_api_key_secret.placeholder_text = "Optional paste; never saved or logged"
+	_backend_api_key_secret.secret = true
+	_backend_api_key_secret.size_flags_horizontal = SIZE_EXPAND_FILL
+	api_secret_row.add_child(_backend_api_key_secret)
+	_set_session_key_button = Button.new()
+	_set_session_key_button.text = "Use for this session"
+	_set_session_key_button.hint_tooltip = "Sets the named environment variable only for this Lacapult process, then clears the paste field. The key is not saved to settings/config."
+	_set_session_key_button.connect("pressed", self, "_on_SetSessionApiKey_pressed")
+	api_secret_row.add_child(_set_session_key_button)
+
+	_api_status_lights = Label.new()
+	_api_status_lights.name = "ApiStatusLights"
+	_api_status_lights.autowrap = true
+	add_child(_api_status_lights)
+
 	_backend_status = Label.new()
 	_backend_status.autowrap = true
 	add_child(_backend_status)
@@ -180,25 +231,44 @@ func _refresh_backend_setup_controls() -> void:
 	_backend_mode_button.select(mode_idx)
 
 	var choice_row = _ollama_model_choice.get_parent()
+	var provider_row = _backend_provider_button.get_parent()
+	var api_secret_row = _backend_api_key_secret.get_parent()
 	if mode == "api":
+		var provider_id = _select_api_provider(Settings.read("backend_api_provider"))
+		var provider_base_url = BackendConfig.get_api_provider_default_base_url(provider_id)
+		var provider_model = BackendConfig.get_api_provider_default_model(provider_id)
 		_backend_endpoint_label.text = "API base URL"
 		_backend_model_label.text = "API model"
-		_backend_endpoint.placeholder_text = "Optional API base URL"
-		_backend_model.placeholder_text = "gpt-4.1-mini or another AnyLLM model"
+		_backend_endpoint.placeholder_text = provider_base_url if provider_base_url != "" else "Optional AnyLLM-compatible base URL"
+		_backend_model.placeholder_text = provider_model if provider_model != "" else "Provider model name"
+		_backend_endpoint.hint_tooltip = "Server endpoint for API requests; leave the provider default unless using a compatible proxy/router."
 		_backend_endpoint.text = Settings.read("backend_api_endpoint")
 		_backend_model.text = Settings.read("backend_api_model")
 		_backend_api_key_env.get_parent().visible = true
+		api_secret_row.visible = true
+		provider_row.visible = true
+		_api_base_url_help.visible = true
+		_api_status_lights.visible = true
 		choice_row.visible = false
+		_install_button.text = "Install API backend"
+		_install_button.hint_tooltip = "Saves options, then asks before running AnyLLM/provider setup for the selected Python. No API call or API-secret read is performed."
 		_guidance.text = "Use an API provider through AnyLLM. Recent C-AOL logs show many calls around 300-400 tokens, with variation by prompt/provider/model."
 	elif mode == "ollama":
 		_backend_endpoint_label.text = "Ollama URL"
 		_backend_model_label.text = "Ollama model tag"
 		_backend_endpoint.placeholder_text = BackendConfig.DEFAULT_OLLAMA_URL
 		_backend_model.placeholder_text = "%s or %s" % [OLLAMA_MODEL_MISTRAL, OLLAMA_MODEL_NEMOTRON]
+		_backend_endpoint.hint_tooltip = "Local Ollama server URL."
 		_backend_endpoint.text = Settings.read("backend_ollama_endpoint")
 		_backend_model.text = Settings.read("backend_ollama_model")
 		_backend_api_key_env.get_parent().visible = false
+		api_secret_row.visible = false
+		provider_row.visible = false
+		_api_base_url_help.visible = false
+		_api_status_lights.visible = false
 		choice_row.visible = true
+		_install_button.text = "Install setup"
+		_install_button.hint_tooltip = "Saves current options first, then opens a confirmation prompt; automated tests do not install packages or pull models."
 		_select_ollama_choice(Settings.read("backend_ollama_model"))
 		_guidance.text = "Use ollama for local LLM utilization."
 
@@ -237,10 +307,45 @@ func _set_backend_status(mode: String, raw_status: String, prefix: String = "") 
 		lead = "%s — %s" % [prefix, lead]
 	lines.append("%s: %s" % [lead, light.get("summary", raw_status)])
 	if mode == "api":
-		lines.append("Secret policy: env-var name only; no API call from Check.")
+		if _api_status_lights != null:
+			_api_status_lights.text = _api_status_light_text(raw_status)
+		lines.append("Secret policy: env-var name only; optional pasted key is process-session only, cleared after use, and no API call comes from Check.")
 	elif mode == "ollama":
 		lines.append("Install policy: no model pull until confirmed.")
 	_backend_status.text = "\n".join(lines)
+
+
+func _api_status_light_text(raw_status: String) -> String:
+	var python_light = "🔴" if raw_status.find("api_python_missing") >= 0 else "🟢"
+	var import_light = "🟢" if raw_status.find("any_llm_import_ok") >= 0 else "🟡"
+	if raw_status.find("any_llm_missing") >= 0:
+		import_light = "🟡"
+	var env_light = "🟢" if raw_status.find("api_key_env_present_secret_not_read") >= 0 else "🟡"
+	if raw_status.find("api_key_env_missing") >= 0:
+		env_light = "🔴"
+	var ready_light = "🟢" if raw_status.find("any_llm_import_ok") >= 0 and raw_status.find("model_configured") >= 0 and raw_status.find("api_key_env_present_secret_not_read") >= 0 else "🟡"
+	return "Python %s · AnyLLM %s · API-key env var %s · API setup %s" % [python_light, import_light, env_light, ready_light]
+
+
+func _select_api_provider(provider_id: String) -> String:
+	if _backend_provider_button == null:
+		return BackendConfig.DEFAULT_API_PROVIDER
+	var normalized = BackendConfig.get_api_provider_choice(provider_id).get("id", BackendConfig.DEFAULT_API_PROVIDER)
+	for i in range(_backend_provider_button.get_item_count()):
+		if str(_backend_provider_button.get_item_metadata(i)) == normalized:
+			_backend_provider_button.select(i)
+			return normalized
+	_backend_provider_button.select(0)
+	return str(_backend_provider_button.get_item_metadata(0))
+
+
+func _current_api_provider_id() -> String:
+	if _backend_provider_button == null:
+		return Settings.read("backend_api_provider")
+	var idx = _backend_provider_button.get_selected()
+	if idx < 0:
+		return BackendConfig.DEFAULT_API_PROVIDER
+	return str(_backend_provider_button.get_item_metadata(idx))
 
 
 func _select_ollama_choice(model_name: String) -> void:
@@ -267,7 +372,7 @@ func _collect_current_backend_fields() -> Dictionary:
 		"endpoint": "" if _backend_endpoint == null else _backend_endpoint.text,
 		"model": "" if _backend_model == null else _backend_model.text,
 		"python_path": "" if _backend_python_path == null else _backend_python_path.text,
-		"api_provider": Settings.read("backend_api_provider"),
+		"api_provider": _current_api_provider_id(),
 		"api_key_env": "" if _backend_api_key_env == null else _backend_api_key_env.text,
 		"openvino_model_dir": Settings.read("backend_openvino_model_dir"),
 		"openvino_device": Settings.read("backend_openvino_device")
@@ -281,6 +386,7 @@ func _persist_current_fields_to_settings() -> void:
 	if mode == "api":
 		Settings.store("backend_api_endpoint", fields.get("endpoint", ""))
 		Settings.store("backend_api_model", fields.get("model", ""))
+		Settings.store("backend_api_provider", fields.get("api_provider", BackendConfig.DEFAULT_API_PROVIDER))
 		Settings.store("backend_api_key_env", fields.get("api_key_env", BackendConfig.DEFAULT_API_KEY_ENV))
 	elif mode == "ollama":
 		Settings.store("backend_ollama_endpoint", fields.get("endpoint", BackendConfig.DEFAULT_OLLAMA_URL))
@@ -306,6 +412,16 @@ func _on_BackendModel_text_changed(new_text: String) -> void:
 	_store_backend_field("model", new_text)
 
 
+func _on_ApiProvider_item_selected(index: int) -> void:
+	var provider_id = str(_backend_provider_button.get_item_metadata(index))
+	Settings.store("backend_api_provider", provider_id)
+	if _backend_endpoint.text.strip_edges() == "":
+		_backend_endpoint.placeholder_text = BackendConfig.get_api_provider_default_base_url(provider_id)
+	if _backend_model.text.strip_edges() == "":
+		_backend_model.placeholder_text = BackendConfig.get_api_provider_default_model(provider_id)
+	_refresh_backend_setup_controls()
+
+
 func _on_OllamaModelChoice_item_selected(index: int) -> void:
 	var model = OLLAMA_MODEL_MISTRAL if index == 0 else OLLAMA_MODEL_NEMOTRON
 	Settings.store("backend_ollama_model", model)
@@ -319,6 +435,21 @@ func _on_BackendPython_text_changed(new_text: String) -> void:
 
 func _on_BackendApiKeyEnv_text_changed(new_text: String) -> void:
 	Settings.store("backend_api_key_env", new_text)
+
+
+func _on_SetSessionApiKey_pressed() -> void:
+	var env_name = _backend_api_key_env.text.strip_edges()
+	var key_value = _backend_api_key_secret.text
+	if env_name == "":
+		_set_backend_status(Settings.read("backend_mode"), "api_key_env_missing", "Session key not set")
+		return
+	if key_value == "":
+		_set_backend_status(Settings.read("backend_mode"), "api_key_env_not_set_no_secret_used", "Session key not set")
+		return
+	OS.set_environment(env_name, key_value)
+	_backend_api_key_secret.text = ""
+	Settings.store("backend_api_key_env", env_name)
+	_set_backend_status("api", _check_current_backend_status(), "Session API key set")
 
 
 func _on_SaveBackendSetup_pressed() -> void:
@@ -347,12 +478,34 @@ func _on_ConfirmGuidedInstall_pressed() -> void:
 
 func _confirmation_text_for_mode(mode: String) -> String:
 	if mode == "api":
-		return "Confirm before installing AnyLLM/Python packages. This proof build records the intent only and does not run pip or read API secrets."
+		var fields = _collect_current_backend_fields()
+		var plan = BackendConfig.build_api_setup_plan(fields.get("api_provider", BackendConfig.DEFAULT_API_PROVIDER), fields.get("python_path", ""))
+		var proof_note = ""
+		if _api_setup_proof_only_enabled():
+			proof_note = " Proof mode is enabled for this run, so Lacapult will record the confirmed intent only instead of running pip."
+		return "Confirm API backend setup for %s. Planned command after approval: %s. This may install or upgrade Python packages in the selected Python environment. Lacapult will not read API secrets or make API calls.%s" % [plan.get("provider_label", "provider"), plan.get("command", "python3 -m pip install --upgrade any_llm"), proof_note]
 	if mode == "ollama":
 		return "Confirm before installing Ollama or pulling model %s. This proof build records the intent only and does not download models." % Settings.read("backend_ollama_model")
 	return "Confirm before running an external backend setup action. This proof build records the intent only and does not run package managers or download models."
 
 
+func _api_setup_proof_only_enabled() -> bool:
+	return Settings.read("backend_api_setup_proof_only") == true
+
+
+
 func _on_ExternalBackendAction_confirmed() -> void:
-	_backend_status.text = "Confirmed guided setup intent for %s. No external package install, model pull, API call, or real machine mutation was performed by this action.\n%s" % [_pending_confirm_action, _backend_status.text]
+	if _pending_confirm_action == "api":
+		var fields = _collect_current_backend_fields()
+		var setup_result = BackendConfig.run_api_setup(fields.get("api_provider", BackendConfig.DEFAULT_API_PROVIDER), fields.get("python_path", ""), _api_setup_proof_only_enabled())
+		var status = setup_result.get("status", "api_setup_unknown")
+		if status != "ok" and status != "api_setup_install_ok":
+			_set_backend_status("api", status, "API setup failed")
+			return
+		if setup_result.get("proof_only", false):
+			_backend_status.text = "Confirmed API backend setup intent was recorded. Proof mode performed no pip install, API call, secret read, or real machine mutation.\n%s" % _backend_status.text
+		else:
+			_set_backend_status("api", _check_current_backend_status(), "API setup command finished")
+	else:
+		_backend_status.text = "Confirmed guided setup intent for %s. No external package install, model pull, API call, or real machine mutation was performed by this action.\n%s" % [_pending_confirm_action, _backend_status.text]
 	Status.post("C-AOL backend setup confirmation recorded; no external install/download was performed.")

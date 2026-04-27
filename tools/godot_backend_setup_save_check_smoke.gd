@@ -46,7 +46,7 @@ func _run() -> void:
 	var all_text = _collect_visible_text(ui)
 	_require(all_text.find("Save options") >= 0, "Save options button did not render")
 	_require(all_text.find("Check") >= 0, "Check button did not render")
-	_require(all_text.find("Install setup") >= 0, "Install setup button did not render")
+	_require(all_text.find("Install API backend") >= 0, "API install button did not render")
 	_require(all_text.find("Confirm guided install step") < 0, "old install button copy still rendered")
 	_require(all_text.find("Backend setup save result") < 0, "old long save status copy rendered")
 	_require(all_text.find("🟡") >= 0 or all_text.find("🔴") >= 0 or all_text.find("🟢") >= 0, "status light did not render")
@@ -94,7 +94,7 @@ func _run() -> void:
 	_require(ui._confirm_dialog.dialog_text.find("does not download models") >= 0, "Install setup lost confirmation/no-download boundary")
 
 	print("backend setup Save/Check UI smoke passed")
-	print("  rendered actions: Save options / Check / Install setup")
+	print("  rendered actions: Save options / Check / Install API backend")
 	print("  Check proof: detection-only status refresh; no backend config write")
 	print("  Save proof: API fields persisted to sandboxed launcher config/options patch")
 	print("  Install proof: Ollama fields saved before confirm-gated setup intent; no pull/install/API call")

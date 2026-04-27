@@ -161,9 +161,13 @@ testing_impact:
   - Secret-handling proof should scan logs/output/state for no key echoing.
   - No real remote API call unless explicitly gated as a manual optional proof.
 
-classification: active
-aux_doc_needed: yes
-handoff_needed: yes
+classification: complete
+completion_note:
+- Landed 2026-04-27 with provider-aware API controls for base URL/provider/model/env-var name plus a session-only secret paste action that sets the named process env var and clears the field without saving/logging the key. `Install API backend` saves first, shows a provider-specific AnyLLM pip command preview behind confirmation, and can run `python -m pip install --upgrade any_llm[...]` through `OS.execute` without shell interpolation when proof mode is off. Automated proof enables `backend_api_setup_proof_only`, records setup intent only, and performs no pip install, API call, secret read, model pull, or real user config mutation. Evidence: `tools/godot_api_anyllm_workflow_smoke.gd`, Package 2 regression smoke, LLM tab smoke, backend contract proof, and focused source scans.
+remaining_manual_evidence:
+- Actual package installation/import proof in a disposable Python environment remains optional/future and requires explicit package-install clearance; automated gates intentionally stay no-install.
+aux_doc_needed: no
+handoff_needed: no
 open_questions:
 - Which secure storage/persistence mechanism is acceptable for API keys per OS: process env only, shell profile, platform keychain/credential store, `.env` file, or C-AOL config indirection?
 - Exact AnyLLM provider enumeration source needs source inspection.
@@ -205,7 +209,7 @@ testing_impact:
   - Mocked or fixture proof for model-present/missing/error light states.
   - Optional local proof may use already-installed Ollama/model only; no new pulls in automated default gates.
 
-classification: greenlit
+classification: active
 aux_doc_needed: yes
 handoff_needed: yes
 open_questions:
@@ -252,8 +256,8 @@ open_questions:
 
 1. COMPLETE - LLM tab de-clutter + backend-scope correction v0.
 2. COMPLETE - Setup save/check action pattern v0.
-3. ACTIVE - API / AnyLLM real setup workflow v0.
-4. GREENLIT - Ollama real installer + model readiness workflow v0.
+3. COMPLETE - API / AnyLLM real setup workflow v0.
+4. ACTIVE - Ollama real installer + model readiness workflow v0.
 5. GREENLIT - Lacapult window chrome investigation v0.
 
-Reasoning: first cut the visible rot and remove misleading scope; then add the shared save/check skeleton; then wire backend-specific real installs; then investigate the chrome bug with evidence rather than guessing. Packages 1 and 2 are complete; Alex should continue with Package 3 to make the API/AnyLLM path real while preserving the no-secrets/no-live-API/no-unapproved-install boundary.
+Reasoning: first cut the visible rot and remove misleading scope; then add the shared save/check skeleton; then wire backend-specific setup paths; then investigate the chrome bug with evidence rather than guessing. Packages 1-3 are complete under their automated no-secret/no-live-API/no-unapproved-install gates; Alex should continue with Package 4 to make the Ollama path real while preserving the no-model-pull/no-package-manager boundary in automated proof.

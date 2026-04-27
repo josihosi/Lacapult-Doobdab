@@ -14,6 +14,7 @@ const _HARDCODED_DEFAULTS = {
 	"backend_api_provider": "openai",
 	"backend_api_key_env": "CATA_API_KEY",
 	"backend_api_model": "",
+	"backend_api_setup_proof_only": false,
 	"backend_ollama_endpoint": "http://127.0.0.1:11434",
 	"backend_ollama_model": "",
 	"backend_openvino_model_dir": "",
