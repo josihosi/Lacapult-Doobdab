@@ -249,11 +249,17 @@ testing_impact:
   - Godot project/window setting inspection.
   - Windows confirmation remains human/device-dependent unless a Windows runner/screenshot path exists.
 
-classification: greenlit
+classification: active
+current_evidence:
+- Local/project inspection on 2026-04-27 names the root-cause class as custom scene chrome rather than native OS chrome: `project.godot` sets `display/window/size/borderless=true`, `scenes/Catapult.tscn` instances `scenes/CustomTitleBar.tscn`, and the custom titlebar owns TextureButton Minimize/Maximize/Close controls sized `32x24` with SVG expansion/stretch.
+- Evidence command: `HOME=$(mktemp -d /tmp/lacapult-window-chrome-home.XXXXXX) godot --path . --no-window -s tools/godot_window_chrome_inspection.gd`.
+remaining_evidence:
+- Windows/Josef screenshot or Windows automation is still required before a cross-platform visual-fix claim.
 aux_doc_needed: yes
 handoff_needed: yes
 open_questions:
 - Need Windows screenshot/confirmation from Josef or a Windows automation path before final cross-platform claim.
+- Product/taste choice remains: tighten the custom titlebar metrics, or retire it and use native OS chrome.
 
 ## Active order for Alex
 

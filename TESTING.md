@@ -65,7 +65,7 @@ Validate packages as follows:
 - Setup save/check pattern: UI/static proof for Save options, Check, status lights, and Install-saves-first ordering; sandboxed config/options round-trip proof.
 - API / AnyLLM workflow: UI proof for API base URL/provider/model/env-var controls and status lights; sandboxed install/import proof where safe; no real secrets or remote API calls in automated gates.
 - Ollama workflow: COMPLETE via UI proof for one model-choice control, Mistral/Nemotron readiness lights, Check, Save, Install Ollama / model, Install venv, and mocked/fixture model-present/missing/error states; no automated model pulls/installs were performed.
-- Window chrome investigation: ACTIVE; screenshot/UI artifact evidence separated by macOS/local versus Windows/Josef behavior before claiming a cross-platform fix.
+- Window chrome investigation: ACTIVE; `HOME=$(mktemp -d /tmp/lacapult-window-chrome-home.XXXXXX) godot --path . --no-window -s tools/godot_window_chrome_inspection.gd` proves the local root-cause class is custom scene chrome (`project.godot` borderless window + `scenes/CustomTitleBar.tscn` inside `scenes/Catapult.tscn`), not native OS chrome. Windows/Josef visual confirmation is still separate and required before claiming cross-platform appearance fixed.
 
 No debug-stack proof may mutate real Application Support config/saves/mods, install packages/models, use API secrets, publish releases, or republish quarantined artifacts without explicit clearance.
 
@@ -84,6 +84,10 @@ Detailed evidence is intentionally stored in auxiliary docs instead of repeated 
 - One-shot installer north star: `doc/lacapult-one-shot-installer-vision.md`.
 - v0.2 release/backend/modding contract: `doc/lacapult-v02-release-backend-modding-contract.md`.
 - Debug-note correction stack: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
+
+Recent gate commands used for Package 5:
+- `HOME=$(mktemp -d /tmp/lacapult-window-chrome-home.XXXXXX) godot --path . --no-window -s tools/godot_window_chrome_inspection.gd`
+- `rg -n "window/size/borderless|CustomTitleBar|MinimizeButton|MaximizeButton|CloseButton|OS.window|allow_hidpi|use_hidpi" project.godot scenes scripts`
 
 Recent gate commands used for Package 4:
 - `HOME=$(mktemp -d /tmp/lacapult-ollama-workflow-home.XXXXXX) godot --path . --no-window -s tools/godot_ollama_workflow_smoke.gd`
