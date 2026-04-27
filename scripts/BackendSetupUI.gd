@@ -495,17 +495,23 @@ func _api_setup_proof_only_enabled() -> bool:
 
 
 func _on_ExternalBackendAction_confirmed() -> void:
+	var post_message = "C-AOL backend setup confirmation recorded; no external install/download was performed."
 	if _pending_confirm_action == "api":
 		var fields = _collect_current_backend_fields()
-		var setup_result = BackendConfig.run_api_setup(fields.get("api_provider", BackendConfig.DEFAULT_API_PROVIDER), fields.get("python_path", ""), _api_setup_proof_only_enabled())
+		var proof_only = _api_setup_proof_only_enabled()
+		var setup_result = BackendConfig.run_api_setup(fields.get("api_provider", BackendConfig.DEFAULT_API_PROVIDER), fields.get("python_path", ""), proof_only)
 		var status = setup_result.get("status", "api_setup_unknown")
 		if status != "ok" and status != "api_setup_install_ok":
-			_set_backend_status("api", status, "API setup failed")
+			_set_backend_status("api", status, "API setup command failed" if not proof_only else "API setup intent failed")
+			post_message = "C-AOL API backend setup command failed; pip may have been attempted in the selected Python. No API call or API-secret read was performed." if not proof_only else "C-AOL API backend setup proof intent failed; no external install/download was performed."
+			Status.post(post_message)
 			return
 		if setup_result.get("proof_only", false):
 			_backend_status.text = "Confirmed API backend setup intent was recorded. Proof mode performed no pip install, API call, secret read, or real machine mutation.\n%s" % _backend_status.text
+			post_message = "C-AOL API backend setup intent recorded in proof mode; no external install/download was performed."
 		else:
 			_set_backend_status("api", _check_current_backend_status(), "API setup command finished")
+			post_message = "C-AOL API backend setup command finished; pip may have installed/upgraded packages in the selected Python. No API call or API-secret read was performed."
 	else:
 		_backend_status.text = "Confirmed guided setup intent for %s. No external package install, model pull, API call, or real machine mutation was performed by this action.\n%s" % [_pending_confirm_action, _backend_status.text]
-	Status.post("C-AOL backend setup confirmation recorded; no external install/download was performed.")
+	Status.post(post_message)
