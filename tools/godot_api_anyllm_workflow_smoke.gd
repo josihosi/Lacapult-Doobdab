@@ -2,7 +2,7 @@ extends SceneTree
 
 # Headless UI smoke for Package 3: API / AnyLLM setup workflow.
 # Proves provider/base URL/model/env-var/session-key controls render and round-trip
-# safely, Check is non-mutating/no-call, and Install API backend records only a
+# safely, Check is non-mutating/no-call, and Install AnyLLM packages records only a
 # confirmation-gated setup intent. It does not run pip, call APIs, install packages,
 # read a real secret, or mutate real Application Support data.
 
@@ -52,7 +52,7 @@ func _run() -> void:
 	_require(_option_has_item(ui._backend_provider_button, "OpenAI") and _option_has_item(ui._backend_provider_button, "OpenRouter") and _option_has_item(ui._backend_provider_button, "AnyLLM custom provider"), "provider choices did not render")
 	_require(all_text.find("server endpoint") >= 0 and all_text.find("proxy/router") >= 0, "API base URL help did not render")
 	_require(all_text.find("Python") >= 0 and all_text.find("AnyLLM") >= 0 and all_text.find("API-key env var") >= 0 and all_text.find("API setup") >= 0, "API status lights did not render")
-	_require(all_text.find("Install API backend") >= 0, "Install API backend action did not render")
+	_require(all_text.find("Install AnyLLM packages") >= 0 and all_text.find("Create venv only") >= 0, "API AnyLLM package/venv actions did not render")
 	_require(all_text.find("hardware") < 0 and all_text.find("Ollama URL") < 0, "API mode leaked Ollama/hardware copy")
 
 	var check_button = _find_button(ui, "Check")
@@ -94,12 +94,13 @@ func _run() -> void:
 	_require(patch_text.find("LLM_INTENT_API_PROVIDER") >= 0 and patch_text.find("openrouter") >= 0, "options patch did not carry provider metadata")
 	_require(patch_text.find(FAKE_SECRET) < 0, "options patch leaked API secret")
 
-	var install_button = _find_button(ui, "Install API backend")
-	_require(install_button != null, "Install API backend button lookup failed")
+	var install_button = _find_button(ui, "Install AnyLLM packages")
+	_require(install_button != null, "Install AnyLLM packages button lookup failed")
 	install_button.emit_signal("pressed")
 	yield(self, "idle_frame")
 	_require(ui._confirm_dialog.dialog_text.find("python3 -m pip install --upgrade") >= 0, "confirmation did not show planned AnyLLM setup command")
 	_require(ui._confirm_dialog.dialog_text.find("may install or upgrade Python packages") >= 0, "confirmation did not explain real install boundary")
+	_require(ui._confirm_dialog.dialog_text.find("\n") >= 0 and ui._confirm_dialog.dialog_autowrap == true, "confirmation dialog did not use wrapped/newline layout")
 	_require(ui._confirm_dialog.dialog_text.find("Proof mode") >= 0 and ui._confirm_dialog.dialog_text.find("instead of running pip") >= 0, "confirmation lost proof-mode no-pip boundary")
 	_require(ui._confirm_dialog.dialog_text.find(FAKE_SECRET) < 0, "confirmation leaked API secret")
 	ui._on_ExternalBackendAction_confirmed()
@@ -113,7 +114,7 @@ func _run() -> void:
 	_require(intent_text.find(FAKE_SECRET) < 0, "setup intent leaked API secret")
 
 	print("API / AnyLLM workflow UI smoke passed")
-	print("  UI proof: API base URL/provider/model/env-var/session-key controls, status lights, and Install API backend rendered")
+	print("  UI proof: API base URL/provider/model/env-var/session-key controls, status lights, Create venv only, and Install AnyLLM packages rendered")
 	print("  Check proof: readiness-only; no backend config write and no API call")
 	print("  Save proof: provider/base URL/model/env-var name round-tripped without storing secret")
 	print("  Install proof: confirmation-gated AnyLLM setup command staged in proof mode; no pip/API call/secret read")

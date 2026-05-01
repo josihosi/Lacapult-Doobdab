@@ -61,6 +61,8 @@ Scope order:
 
 This active lane does **not** lift the release quarantine, authorize a public/final release, start C-AOL release work, or permit automated live API calls/secrets/model pulls/package installs outside explicit confirmation and proof boundaries.
 
+2026-05-01 local implementation checkpoint: scope-order items 1-3 are locally patched/proofed for enlarged window metrics, bounded/wrapped setup dialogs, API venv/package semantics, safe `backend_external_setup_proof_only` default, progress-before-blocking external commands, and Ollama readiness/failure/hardware guidance. Remaining active work is the fresh Josef-only Windows test package/release plus real Windows visual confirmation; this is not a quarantine lift.
+
 ## Active debug-note correction stack
 
 Canonical contract: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.

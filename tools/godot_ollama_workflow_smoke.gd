@@ -57,8 +57,9 @@ func _run() -> void:
 	_require(all_text.find("Ollama model tag") < 0, "duplicate freeform Ollama model field is still visible")
 	_require(_option_has_item(ui._ollama_model_choice, "mistral-v0.3") and _option_has_item(ui._ollama_model_choice, "nemotron-9b"), "supported Ollama model choices did not render")
 	_require(all_text.find("Ollama cmd") >= 0 and all_text.find("Mistral") >= 0 and all_text.find("Nemotron") >= 0 and all_text.find("Python/venv") >= 0, "Ollama status lights did not render")
-	_require(all_text.find("Save options") >= 0 and all_text.find("Check") >= 0 and all_text.find("Install Ollama / model") >= 0 and all_text.find("Install venv") >= 0, "Ollama action row did not render Save/Check/Install/venv actions")
+	_require(all_text.find("Save options") >= 0 and all_text.find("Check") >= 0 and all_text.find("Install Ollama / model") >= 0 and all_text.find("Create venv only") >= 0, "Ollama action row did not render Save/Check/Install/venv actions")
 	_require(all_text.find("API key") < 0 and all_text.find("Provider") < 0, "Ollama mode leaked API-only controls")
+	_require(all_text.find("Hardware recommendation") >= 0 and all_text.find("Mistral") >= 0 and all_text.find("Nemotron") >= 0, "Ollama hardware recommendation did not render")
 
 	var check_button = _find_button(ui, "Check")
 	_require(check_button != null, "Check button lookup failed")
@@ -92,8 +93,8 @@ func _run() -> void:
 	_require(ollama_intent.get("model", "") == "mistral-v0.3", "Ollama setup intent model mismatch")
 	_require(ollama_intent.get("performed_external_install", true) == false, "Ollama setup proof claimed an external install ran")
 
-	var venv_button = _find_button(ui, "Install venv")
-	_require(venv_button != null, "Install venv button lookup failed")
+	var venv_button = _find_button(ui, "Create venv only")
+	_require(venv_button != null, "Create venv only button lookup failed")
 	var executable_venv_plan = backend_config.build_python_venv_setup_plan("python3")
 	_require(executable_venv_plan.get("target_path", "").find("caol-llm-python-venv") >= 0, "Python venv plan treated executable name as the venv target path")
 	ui._backend_python_path.text = ""
@@ -109,7 +110,7 @@ func _run() -> void:
 	_require(ui._backend_python_path.text.find("caol-llm-python-venv") >= 0, "Python venv proof did not fill the intended path field")
 
 	print("Ollama workflow UI smoke passed")
-	print("  UI proof: one Ollama model-choice control, Mistral/Nemotron/Python/options lights, Check, Save, Install Ollama / model, and Install venv rendered")
+	print("  UI proof: one Ollama model-choice control, Mistral/Nemotron/Python/options lights, hardware guidance, Check, Save, Install Ollama / model, and Create venv only rendered")
 	print("  Fixture proof: command-missing, server-unreachable, model-present, and model-missing states are distinguishable without real pulls")
 	print("  Check proof: readiness-only; no backend config write")
 	print("  Save proof: Ollama endpoint/model/Python metadata round-tripped into sandbox launcher config/options patch")

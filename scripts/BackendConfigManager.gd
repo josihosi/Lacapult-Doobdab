@@ -177,7 +177,7 @@ func build_ollama_setup_plan(endpoint: String = DEFAULT_OLLAMA_URL, model: Strin
 			commands.append({"command": "brew", "args": ["install", "ollama"], "purpose": "Install Ollama through Homebrew."})
 		elif os_name == "Windows" and _command_exists("winget"):
 			installer = "winget"
-			commands.append({"command": "winget", "args": ["install", "--id", "Ollama.Ollama", "-e"], "purpose": "Install Ollama through winget."})
+			commands.append({"command": "winget", "args": ["install", "--id", "Ollama.Ollama", "-e"], "purpose": "Install the official Ollama Windows package through winget id Ollama.Ollama."})
 		else:
 			installer = "manual_required"
 	if selected_model != "":
@@ -210,16 +210,19 @@ func run_ollama_setup(endpoint: String = DEFAULT_OLLAMA_URL, model: String = "",
 		}
 	var results = []
 	var failed = false
+	var failed_step = {}
 	for step in plan.get("commands", []):
 		var output = []
 		var exit_code = OS.execute(step.get("command", ""), step.get("args", []), true, output, true)
-		results.append({"command": step.get("command", ""), "args": step.get("args", []), "exit_code": exit_code, "output_line_count": output.size()})
+		var result = {"command": step.get("command", ""), "args": step.get("args", []), "purpose": step.get("purpose", "Ollama setup command."), "exit_code": exit_code, "output_line_count": output.size()}
+		results.append(result)
 		if exit_code != 0:
 			failed = true
+			failed_step = result
 			break
-	var summary = "ollama_setup_failed" if failed else "ollama_setup_commands_ok"
+	var summary = _ollama_setup_failure_summary(failed_step) if failed else "ollama_setup_commands_ok"
 	var write_result = write_ollama_setup_intent(endpoint, plan.get("model", model), true, results, summary)
-	var status = "ollama_setup_install_failed" if failed else "ollama_setup_install_ok"
+	var status = summary if failed else "ollama_setup_install_ok"
 	if write_result != "ok":
 		status = write_result
 	return {
@@ -227,9 +230,9 @@ func run_ollama_setup(endpoint: String = DEFAULT_OLLAMA_URL, model: String = "",
 		"plan": plan,
 		"performed_external_install": true,
 		"proof_only": false,
-		"results": results
+		"results": results,
+		"failed_step": failed_step
 	}
-
 
 func build_python_venv_setup_plan(python_path: String = "") -> Dictionary:
 	var input_path = python_path.strip_edges()
@@ -482,9 +485,25 @@ func _status_summary(raw_status: String) -> String:
 		return "Ollama is running, but the selected model is not installed."
 	if raw_status.find("ollama_command_present_server_running_model_not_selected") >= 0:
 		return "Ollama is running; choose a model."
+	if raw_status.find("ollama_setup_installer_failed") >= 0:
+		return "Ollama installer command failed; CLI/server/model pull should be checked separately."
+	if raw_status.find("ollama_setup_model_pull_failed") >= 0:
+		return "Ollama model pull failed after installer/CLI step; Check can still report command/server readiness separately."
+	if raw_status.find("ollama_setup_command_failed") >= 0:
+		return "Ollama setup command failed; inspect the named step and then run Check again."
 	if raw_status.find("openvino") >= 0:
 		return "OpenVINO is detect-only/hidden in Lacapult v0."
 	return raw_status
+
+
+func _ollama_setup_failure_summary(failed_step: Dictionary) -> String:
+	var command = str(failed_step.get("command", ""))
+	var args = failed_step.get("args", [])
+	if command == "ollama" and args.size() > 0 and str(args[0]) == "pull":
+		return "ollama_setup_model_pull_failed_%s" % str(failed_step.get("exit_code", "unknown"))
+	if command == "brew" or command == "winget":
+		return "ollama_setup_installer_failed_%s" % str(failed_step.get("exit_code", "unknown"))
+	return "ollama_setup_command_failed_%s" % str(failed_step.get("exit_code", "unknown"))
 
 
 func write_sandboxed_options_config(options_path: String, mode: String, endpoint: String = "", model: String = "", python_path: String = "", api_provider: String = DEFAULT_API_PROVIDER, api_key_env: String = DEFAULT_API_KEY_ENV, openvino_model_dir: String = "", openvino_device: String = DEFAULT_OPENVINO_DEVICE) -> String:

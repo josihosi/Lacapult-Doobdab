@@ -5,7 +5,7 @@ extends SceneTree
 # - Save options / Check / backend-specific Install controls render;
 # - Check refreshes status without writing backend config;
 # - Save writes the current UI fields to launcher-side config/options metadata;
-# - Install setup saves current options before opening the confirm-gated setup step.
+# - Install actions save current options before opening the confirm-gated setup step.
 # It does not install packages, pull models, call APIs, read secrets, or mutate real
 # Application Support data.
 
@@ -48,7 +48,7 @@ func _run() -> void:
 	var all_text = _collect_visible_text(ui)
 	_require(all_text.find("Save options") >= 0, "Save options button did not render")
 	_require(all_text.find("Check") >= 0, "Check button did not render")
-	_require(all_text.find("Install API backend") >= 0, "API install button did not render")
+	_require(all_text.find("Install AnyLLM packages") >= 0, "API AnyLLM install button did not render")
 	_require(all_text.find("Confirm guided install step") < 0, "old install button copy still rendered")
 	_require(all_text.find("Backend setup save result") < 0, "old long save status copy rendered")
 	_require(all_text.find("🟡") >= 0 or all_text.find("🔴") >= 0 or all_text.find("🟢") >= 0, "status light did not render")
@@ -96,7 +96,7 @@ func _run() -> void:
 	_require(ui._confirm_dialog.dialog_text.find("Proof mode") >= 0 and ui._confirm_dialog.dialog_text.find("instead of running installers") >= 0, "Install action lost confirmation/proof no-download boundary")
 
 	print("backend setup Save/Check UI smoke passed")
-	print("  rendered actions: Save options / Check / Install API backend / Install Ollama / model")
+	print("  rendered actions: Save options / Check / Install AnyLLM packages / Install Ollama / model")
 	print("  Check proof: detection-only status refresh; no backend config write")
 	print("  Save proof: API fields persisted to sandboxed launcher config/options patch")
 	print("  Install proof: Ollama fields saved before confirm-gated setup intent; proof mode does no pull/install/API call")

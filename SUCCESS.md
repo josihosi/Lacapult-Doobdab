@@ -39,13 +39,13 @@ Success state:
 Status: ACTIVE / GREENLIT / JOSEF WINDOWS FEEDBACK PACKET
 
 Success state:
-- [ ] Shared popup/dialog/tooltip layout no longer cuts off content in the Windows-reported flows.
-- [ ] Long popup/help text wraps, uses deliberate newlines/bullets, or scrolls instead of becoming one over-wide line.
-- [ ] Top row/window metrics receive a follow-up fix and remain Windows-retest-gated.
-- [ ] `backend_external_setup_proof_only` missing-setting log spam is gone.
-- [ ] Long-running install actions show visible in-progress/waiting state instead of looking crashed while work continues.
-- [ ] API / AnyLLM venv/package setup is coherent and user-facing copy makes the step impossible to misunderstand.
-- [ ] Ollama model selection persists, readiness lights are meaningful, install/server/model-pull failures are separated, and Mistral/Nemotron hardware suitability is visible or honestly bounded.
+- [ ] Shared popup/dialog/tooltip layout no longer cuts off content in the Windows-reported flows after Josef/Windows retest.
+- [x] Long backend setup popup/help text wraps via autowrap, bounded confirmation size, and deliberate newlines in local UI smoke.
+- [x] Top row/window metrics received a follow-up local fix: default/test window is now `760x820`; Windows visual confirmation remains required.
+- [x] `backend_external_setup_proof_only` has a safe default and local smoke proves safe-read false.
+- [x] Long-running install actions set a visible in-progress/waiting state before non-proof external commands.
+- [x] API / AnyLLM venv/package setup is split as `Create venv only` vs `Install AnyLLM packages`, with confirmation/status copy explaining the boundary.
+- [x] Ollama model selection/default, readiness lights, installer/model-pull failure separation, Windows `Ollama.Ollama` copy, and Mistral/Nemotron hardware guidance are locally proofed.
 - [ ] Fresh Josef-only Windows test release is built, attached, checksumed, and verified without lifting quarantine.
 
 Canonical docs:

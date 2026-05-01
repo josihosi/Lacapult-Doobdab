@@ -9,10 +9,10 @@ Short queue only. Remove finished items instead of turning this into a museum.
 Canonical contract: `doc/lacapult-windows-retest-fix-packet-v0-2026-05-01.md`.
 Handoff: `doc/alex-lacapult-windows-retest-fix-handoff-2026-05-01.md`.
 
-- [ ] Fix shared popup/window layout: top row/window metrics, clipped dialogs/tooltips, long-text wrapping/newlines, and popup width bounds.
-- [ ] Fix API / AnyLLM setup: `backend_external_setup_proof_only` default/safe read, long-running install progress, and venv/package semantics.
-- [ ] Fix Ollama setup: model selection persistence, readiness lights, split installer/server/model-pull reporting, Windows installer verification, and Mistral/Nemotron hardware guidance.
-- [ ] Run focused UI/static/backend setup gates without live secrets/model pulls/user-data mutation.
+- [x] Fix shared popup/window layout locally: default/test window enlarged, confirmation dialogs bounded/wrapped, and long setup/help copy split with deliberate newlines.
+- [x] Fix API / AnyLLM setup locally: `backend_external_setup_proof_only` default/safe read, long-running install progress, and venv/package semantics.
+- [x] Fix Ollama setup locally: model selection persistence/default, readiness lights, split installer/server/model-pull reporting, Windows installer copy/status separation, and Mistral/Nemotron hardware guidance.
+- [x] Run focused UI/static/backend setup gates without live secrets/model pulls/user-data mutation.
 - [ ] Build/package a fresh Windows unsigned Lacapult test artifact.
 - [ ] Create or update a clearly labelled Josef-only GitHub Draft/prerelease test release with Windows asset, checksums/build notes, and `gh release view` verification.
 
@@ -40,7 +40,7 @@ Handoff: `doc/alex-lacapult-windows-retest-fix-handoff-2026-05-01.md`.
 - [x] Work from `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`, Package 4.
 - [x] Keep one visible Ollama model-choice control for Mistral/Nemotron and remove the duplicate freeform model field from Ollama mode.
 - [x] Add compact Ollama command/server, Mistral, Nemotron, Python/venv, and options readiness lights plus non-mutating `Check`.
-- [x] Add confirmation-gated `Install Ollama / model` and `Install venv` setup intents that save first and remain proof-only in automated gates.
+- [x] Add confirmation-gated `Install Ollama / model` and `Create venv only` setup intents that save first and remain proof-only in automated gates.
 - [x] Prove Ollama setup with UI smoke plus fixture command/server/model states; do not install Ollama, create a venv, or pull models in automated proof.
 - [x] Work from `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`, Package 5.
 - [x] Name the local root-cause class: custom scene chrome (`borderless=true` + `CustomTitleBar.tscn`), not native OS chrome.
