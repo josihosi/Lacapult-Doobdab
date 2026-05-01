@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Local release-prep export proof for Lacapult Doobdab.
+"""Local release-prep export proof for Catapult-Dabubu.
 
 This intentionally does not publish a GitHub release, sign/notarize builds, use
 API secrets, install runtimes, or pull models. It creates a temporary
@@ -32,43 +32,43 @@ PRESET_FILE = ROOT / "export_presets.cfg"
 OUTPUT_ROOT = ROOT / ".proof-cache" / "lacapult-export"
 
 PACK_PRESETS = [
-    ("macOS Pack", "Mac OSX", "Lacapult-Doobdab-macos.pck"),
-    ("Linux Pack", "Linux/X11", "Lacapult-Doobdab-linux.pck"),
-    ("Windows Pack", "Windows Desktop", "Lacapult-Doobdab-windows.pck"),
+    ("macOS Pack", "Mac OSX", "Catapult-Dabubu-macos.pck"),
+    ("Linux Pack", "Linux/X11", "Catapult-Dabubu-linux.pck"),
+    ("Windows Pack", "Windows Desktop", "Catapult-Dabubu-windows.pck"),
 ]
 
 APP_EXPORTS = {
     "macos": {
         "preset": "macOS App",
         "platform": "Mac OSX",
-        "path": "app/Lacapult Doobdab.app",
+        "path": "app/Catapult-Dabubu.app",
         "required_templates": ["osx.zip"],
     },
     "linux": {
         "preset": "Linux App",
         "platform": "Linux/X11",
-        "path": "app/Lacapult-Doobdab.x86_64",
+        "path": "app/Catapult-Dabubu.x86_64",
         "required_templates": ["linux_x11_64_release"],
     },
     "windows": {
         "preset": "Windows App",
         "platform": "Windows Desktop",
-        "path": "app/Lacapult-Doobdab.exe",
+        "path": "app/Catapult-Dabubu.exe",
         "required_templates": ["windows_64_release.exe"],
     },
 }
 
 PACKAGE_EXPORTS = {
     "macos": {
-        "path": "packages/Lacapult-Doobdab-macos-unsigned.zip",
+        "path": "packages/Catapult-Dabubu-macos-unsigned.zip",
         "source_platform": "macos",
     },
     "linux": {
-        "path": "packages/Lacapult-Doobdab-linux-unsigned.tar.gz",
+        "path": "packages/Catapult-Dabubu-linux-unsigned.tar.gz",
         "source_platform": "linux",
     },
     "windows": {
-        "path": "packages/Lacapult-Doobdab-windows-unsigned.zip",
+        "path": "packages/Catapult-Dabubu-windows-unsigned.zip",
         "source_platform": "windows",
     },
 }
@@ -181,10 +181,10 @@ custom_template/debug=""
 custom_template/release=""
 '''
     if platform == "Mac OSX":
-        return common + '''application/name="Lacapult Doobdab"
+        return common + '''application/name="Catapult-Dabubu"
 application/info="C-AOL launcher and installer"
 application/icon="res://icons/appicon.icns"
-application/identifier="at.schanigarten.lacapult-doobdab"
+application/identifier="at.schanigarten.catapult-dabubu"
 application/signature=""
 application/short_version="0.2.0-prep"
 application/version="0.2.0-prep"
@@ -289,7 +289,7 @@ def artifact(path: Path) -> dict[str, Any]:
 
 def macos_app_shape(path: Path) -> dict[str, Any]:
     info_path = path / "Contents" / "Info.plist"
-    resources_pck = path / "Contents" / "Resources" / "Lacapult Doobdab.pck"
+    resources_pck = path / "Contents" / "Resources" / "Catapult-Dabubu.pck"
     macos_dir = path / "Contents" / "MacOS"
     executable_candidates = [item for item in macos_dir.iterdir()] if macos_dir.exists() else []
     executable_files = [item for item in executable_candidates if item.is_file() and os.access(item, os.X_OK)]

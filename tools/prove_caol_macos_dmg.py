@@ -235,8 +235,8 @@ def chmod_app_bundle_executables(install_dir: Path) -> list[str]:
 def sandbox_install_from_mount(mount_point: str, release_name: str) -> dict[str, Any]:
     with tempfile.TemporaryDirectory(prefix="lacapult-caol-install-proof-") as sandbox:
         sandbox_root = Path(sandbox)
-        tmp_dir = sandbox_root / "Library" / "Application Support" / "Lacapult Doobdab" / "caol" / "tmp"
-        install_dir = sandbox_root / "Library" / "Application Support" / "Lacapult Doobdab" / "caol" / "game0"
+        tmp_dir = sandbox_root / "Library" / "Application Support" / "Catapult-Dabubu" / "caol" / "tmp"
+        install_dir = sandbox_root / "Library" / "Application Support" / "Catapult-Dabubu" / "caol" / "game0"
         tmp_dir.mkdir(parents=True, exist_ok=True)
         install_dir.parent.mkdir(parents=True, exist_ok=True)
 

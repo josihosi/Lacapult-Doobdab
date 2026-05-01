@@ -13,8 +13,9 @@ Handoff: `doc/alex-lacapult-windows-retest-fix-handoff-2026-05-01.md`.
 - [x] Fix API / AnyLLM setup locally: `backend_external_setup_proof_only` default/safe read, long-running install progress, and venv/package semantics.
 - [x] Fix Ollama setup locally: model selection persistence/default, readiness lights, split installer/server/model-pull reporting, Windows installer copy/status separation, and Mistral/Nemotron hardware guidance.
 - [x] Run focused UI/static/backend setup gates without live secrets/model pulls/user-data mutation.
-- [ ] Build/package a fresh Windows unsigned Lacapult test artifact.
-- [ ] Create or update a clearly labelled Josef-only GitHub Draft/prerelease test release with Windows asset, checksums/build notes, and `gh release view` verification.
+- [x] Apply `Catapult-Dabubu` identity pass to safe user-facing/package surfaces while retaining upstream attribution and current GitHub repo URL.
+- [x] Build/package a fresh Windows unsigned `Catapult-Dabubu` test artifact.
+- [ ] Create or update a clearly labelled Josef-only GitHub Draft/prerelease test release with `Catapult-Dabubu` Windows asset, checksums/build notes, and `gh release view` verification.
 
 ## Completed debug-note stack
 

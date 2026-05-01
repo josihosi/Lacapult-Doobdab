@@ -33,7 +33,7 @@ def require(condition: bool, message: str) -> None:
 def recommendation_for_fixture(memory_mb: int) -> str:
     if memory_mb >= 24000:
         return f"Hardware recommendation: this machine appears to have enough memory for the larger {MODEL_NEMOTRON} path, but {MODEL_MISTRAL} remains available. Final model choice is yours."
-    return f"Hardware recommendation: if memory/GPU capacity is unknown or modest, start with {MODEL_MISTRAL}. Choose {MODEL_NEMOTRON} manually if you know the machine has enough headroom. Lacapult will not pull either model without confirmation."
+    return f"Hardware recommendation: if memory/GPU capacity is unknown or modest, start with {MODEL_MISTRAL}. Choose {MODEL_NEMOTRON} manually if you know the machine has enough headroom. Catapult-Dabubu will not pull either model without confirmation."
 
 
 def main() -> None:
@@ -72,7 +72,7 @@ def main() -> None:
     require(MODEL_MISTRAL in low and MODEL_NEMOTRON in low and "will not pull" in low, "low/unknown hardware fixture does not recommend safely")
     require(MODEL_NEMOTRON in strong and "Final model choice is yours" in strong, "strong hardware fixture does not leave final choice to player")
 
-    require("Thank you for installing Lacapult Doobdab" in en_text, "thank-you copy missing")
+    require("Thank you for installing Catapult-Dabubu" in en_text, "thank-you copy missing")
     require("MIT license" in en_text and "Dabdoob/Catapult" in en_text, "license/lineage thank-you credit missing")
 
     print("Backend setup installer packet proof passed")

@@ -1,8 +1,8 @@
 # Plan
 
-Canonical roadmap for Lacapult Doobdab.
+Canonical roadmap for Catapult-Dabubu (formerly Lacapult Doobdab).
 
-Lacapult is a C-AOL-specific launcher/installer derived from Dabdoob/Catapult under the MIT license. It should feel like the front door for Cataclysm: Arsenic and Old Lace, not a generic Cataclysm launcher wearing a hat.
+Catapult-Dabubu is a C-AOL-specific launcher/installer derived from Dabdoob/Catapult under the MIT license. It should feel like the front door for Cataclysm: Arsenic and Old Lace, not a generic Cataclysm launcher wearing a hat.
 
 ## File roles
 
@@ -26,7 +26,7 @@ Current public-release facts:
 - Draft/quarantined releases: `lacapult-post-mod-ui-retest-2026-04-26`, `lacapult-test-2026-04-26-2`, `lacapult-test-2026-04-26`.
 - Public GitHub releases API returned zero public releases after quarantine.
 - The old latest Windows asset URL returned `404`.
-- Local artifact inspection says the package is Lacapult-shaped (`Lacapult-Doobdab.exe` plus `utils/7za.exe`), not a full C-AOL archive, but the product surface was too C-AOL-heavy / inherited-name-leaky for public confidence.
+- Local artifact inspection said the quarantined package was launcher-shaped (`Lacapult-Doobdab.exe` plus `utils/7za.exe`), not a full C-AOL archive, but the product surface was too C-AOL-heavy / inherited-name-leaky for public confidence. Current active rename target is `Catapult-Dabubu`; the existing GitHub repository URL remains `josihosi/Lacapult-Doobdab` until an explicit public repo rename is confirmed.
 
 Canonical incident note: `doc/lacapult-release-quarantine-investigation-2026-04-26.md`.
 
@@ -36,7 +36,7 @@ Canonical incident note: `doc/lacapult-release-quarantine-investigation-2026-04-
 
 Test-release target:
 - Build/package the current locally-complete debug-stack state from `main`.
-- Attach the Windows unsigned Lacapult launcher package plus checksums/build notes customary for the repo.
+- Attach the Windows unsigned Catapult-Dabubu launcher package plus checksums/build notes customary for the repo.
 - Release copy must say this is for Josef Windows validation and not final/public confidence.
 - Josef checklist: first launch/top bar, first visible tab, release row wording, install/download impression.
 
@@ -57,12 +57,12 @@ Scope order:
 1. shared popup/window layout repair: top row/window metrics, clipped dialogs/tooltips, wrapping/newlines, and popup width bounds;
 2. API / AnyLLM setup repair: missing `backend_external_setup_proof_only` default/safe read, long-running install progress, and coherent venv/package semantics;
 3. Ollama setup repair: model-choice persistence, readiness lights, installer/server/model-pull reporting, Windows installer verification, and Mistral/Nemotron hardware suitability guidance;
-4. rename / identity pass toward `Catapult-Dabubu` for user-facing/package/release naming, while preserving upstream attribution;
-5. fresh clearly labelled Josef-only Windows test release with package/checksums/build notes verified by `gh release view`.
+4. locally complete rename / identity pass toward `Catapult-Dabubu` for user-facing/package/release naming, while preserving upstream attribution and retaining the current GitHub repo URL until explicitly renamed;
+5. fresh clearly labelled Josef-only Windows test release with `Catapult-Dabubu` package/checksums/build notes verified by `gh release view`.
 
 This active lane does **not** lift the release quarantine, authorize a public/final release, start C-AOL release work, permit automated live API calls/secrets/model pulls/package installs outside explicit confirmation and proof boundaries, or rename the GitHub repository without fresh explicit confirmation.
 
-2026-05-01 local implementation checkpoint: scope-order items 1-3 are locally patched/proofed for enlarged window metrics, bounded/wrapped setup dialogs, API venv/package semantics, safe `backend_external_setup_proof_only` default, progress-before-blocking external commands, and Ollama readiness/failure/hardware guidance. Remaining active work is the fresh Josef-only Windows test package/release plus real Windows visual confirmation; this is not a quarantine lift.
+2026-05-01 local implementation checkpoint: scope-order items 1-4 are locally patched/proofed for enlarged window metrics, bounded/wrapped setup dialogs, API venv/package semantics, safe `backend_external_setup_proof_only` default, progress-before-blocking external commands, Ollama readiness/failure/hardware guidance, and `Catapult-Dabubu` user-facing/package naming. Remaining active work is the fresh Josef-only Windows test package/release plus real Windows visual confirmation; this is not a quarantine lift.
 
 ## Active debug-note correction stack
 
@@ -107,7 +107,7 @@ Detailed evidence lives in `TESTING.md` as an index and in the relevant `doc/*.m
 The v0 player story is still simple:
 
 1. Download/open Lacapult without developer tooling.
-2. See a clearly Lacapult launcher surface for C-AOL.
+2. See a clearly Catapult-Dabubu launcher surface for C-AOL.
 3. Fetch existing C-AOL releases from `josihosi/Cataclysm-AOL`.
 4. Install/update the selected game package while preserving user data.
 5. Configure or check LLM backend readiness with honest API/Ollama guidance.

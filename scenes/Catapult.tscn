@@ -151,14 +151,14 @@ margin_bottom = -7.5
 [node name="LauncherIdentityTitle" type="Label" parent="Main/Tabs/Game"]
 margin_right = 577.0
 margin_bottom = 24.0
-text = "Lacapult Doobdab launcher"
+text = "Catapult-Dabubu launcher"
 align = 1
 
 [node name="LauncherIdentityCopy" type="Label" parent="Main/Tabs/Game"]
 margin_top = 28.0
 margin_right = 577.0
 margin_bottom = 76.0
-text = "This download is the Lacapult launcher, not a C-AOL game archive. Use it to fetch/install existing Cataclysm: Arsenic and Old Lace releases, configure backends, and manage mod/Summarizer helpers."
+text = "This download is Catapult-Dabubu, a launcher, not a C-AOL game archive. Use it to fetch/install existing Cataclysm: Arsenic and Old Lace releases, configure backends, and manage mod/Summarizer helpers."
 autowrap = true
 
 [node name="Channel" type="VBoxContainer" parent="Main/Tabs/Game"]
@@ -360,9 +360,9 @@ size_flags_horizontal = 4
 margin_left = 0.0
 margin_right = 106.0
 margin_bottom = 32.0
-hint_tooltip = "Lacapult self-update is disabled until public Lacapult releases exist"
+hint_tooltip = "Catapult-Dabubu self-update is disabled until public Catapult-Dabubu releases exist"
 size_flags_horizontal = 4
-text = "Update Lacapult"
+text = "Update Catapult-Dabubu"
 icon = ExtResource( 3 )
 
 [node name="GameInstalls" type="VBoxContainer" parent="Main/Tabs/Game"]
@@ -1594,8 +1594,8 @@ margin_bottom = 20.0
 rect_min_size = Vector2( 0, 20 )
 focus_mode = 2
 bbcode_enabled = true
-bbcode_text = "[center][url=https://github.com/josihosi/Lacapult-Doobdab/]Lacapult GitHub Repository[/url][/center]"
-text = "Lacapult GitHub Repository"
+bbcode_text = "[center][url=https://github.com/josihosi/Lacapult-Doobdab/]Catapult-Dabubu GitHub Repository[/url][/center]"
+text = "Catapult-Dabubu GitHub Repository"
 fit_content_height = true
 selection_enabled = true
 

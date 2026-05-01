@@ -40,8 +40,8 @@ REPAIR_DYLIBS = ("libpng16.16.dylib", "libfreetype.6.dylib")
 
 
 def install_from_mount_keep(mount_point: str, release_name: str, sandbox_root: Path) -> tuple[Path, dict[str, Any]]:
-    tmp_dir = sandbox_root / "Library" / "Application Support" / "Lacapult Doobdab" / "caol" / "tmp"
-    install_dir = sandbox_root / "Library" / "Application Support" / "Lacapult Doobdab" / "caol" / "game0"
+    tmp_dir = sandbox_root / "Library" / "Application Support" / "Catapult-Dabubu" / "caol" / "tmp"
+    install_dir = sandbox_root / "Library" / "Application Support" / "Catapult-Dabubu" / "caol" / "game0"
     tmp_dir.mkdir(parents=True, exist_ok=True)
     install_dir.parent.mkdir(parents=True, exist_ok=True)
 

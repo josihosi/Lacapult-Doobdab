@@ -53,7 +53,7 @@ var _game_process: OSExecWrapper = null
 var _launcher_should_close_after_game := false
 var _launch_preflight_status: Label = null
 
-const VERSION_CHECK_URL = "" # Lacapult public self-update is disabled until a Lacapult release repo exists.
+const VERSION_CHECK_URL = "" # Catapult-Dabubu public self-update is disabled until a Catapult-Dabubu release repo exists.
 const CAOL_NONPORTABLE_DYLIB_PREFIXES = ["/opt/local/", "/usr/local/", "/opt/homebrew/"]
 const CAOL_REPAIR_FREETYPE_SOURCE = "res://resources/caol_macos_repair/libfreetype.6.dylib"
 const CAOL_REPAIR_LIBPNG_SOURCE = "res://resources/caol_macos_repair/libpng16.16.dylib"
@@ -1261,7 +1261,7 @@ func _repair_caol_macos_launch_dependencies(preflight: Dictionary) -> Dictionary
 		"commands": []
 	}
 	if not _is_caol_macos_preflight_repairable(preflight):
-		result["error"] = "The C-AOL macOS package has a launch blocker Lacapult does not know how to repair safely."
+		result["error"] = "The C-AOL macOS package has a launch blocker Catapult-Dabubu does not know how to repair safely."
 		return result
 
 	for repair_tool in ["otool", "install_name_tool", "codesign"]:
@@ -1369,15 +1369,15 @@ func _format_launch_preflight_status(preflight: Dictionary) -> String:
 		"missing_install_dir":
 			return "Launch preflight: active C-AOL install folder is missing. Reinstall or choose another install."
 		"missing_executable":
-			return "Launch preflight: active C-AOL install exists, but Lacapult could not find a game executable inside it."
+			return "Launch preflight: active C-AOL install exists, but Catapult-Dabubu could not find a game executable inside it."
 		"preflight_unavailable":
-			return "Launch preflight: active C-AOL install exists, but otool could not inspect the launch binary. Lacapult will still try to launch it."
+			return "Launch preflight: active C-AOL install exists, but otool could not inspect the launch binary. Catapult-Dabubu will still try to launch it."
 		"blocked_missing_nonportable_dylibs":
 			if preflight.get("repair_status", "") != "":
 				return "Launch preflight: C-AOL macOS repair failed: %s" % preflight.get("repair_error", "unknown repair error")
 			if preflight.get("repairable_by_lacapult", false):
-				return "Launch preflight: %s needs bundled macOS dylibs instead of missing local paths: %s. Lacapult will repair this app bundle before launch." % [_preflight_app_label(preflight), _join_text(preflight.get("missing_nonportable_dylibs", []))]
-			return "Launch preflight: Lacapult install/copy succeeded and %s is present, but %s needs missing local dylibs: %s. This is a C-AOL macOS package portability issue." % [_preflight_app_label(preflight), preflight.get("executable", "game executable").get_file(), _join_text(preflight.get("missing_nonportable_dylibs", []))]
+				return "Launch preflight: %s needs bundled macOS dylibs instead of missing local paths: %s. Catapult-Dabubu will repair this app bundle before launch." % [_preflight_app_label(preflight), _join_text(preflight.get("missing_nonportable_dylibs", []))]
+			return "Launch preflight: Catapult-Dabubu install/copy succeeded and %s is present, but %s needs missing local dylibs: %s. This is a C-AOL macOS package portability issue." % [_preflight_app_label(preflight), preflight.get("executable", "game executable").get_file(), _join_text(preflight.get("missing_nonportable_dylibs", []))]
 		"repaired":
 			return "Launch preflight: repaired C-AOL macOS app bundle dependencies by copying bundled dylibs and rewriting load paths relative to the app."
 		"nonportable_dylibs_present_locally":
@@ -1427,14 +1427,14 @@ func _activate_easter_egg() -> void:
 func _on_BtnCheck_pressed() -> void:
 	var current_version = Settings.get_hardcoded_version()
 	if VERSION_CHECK_URL == "":
-		Status.post(tr("Lacapult self-update is disabled until public Lacapult releases exist. Current version: v%s") % current_version)
-		_btn_update.text = "Lacapult update unavailable"
-		_btn_update.hint_tooltip = "Self-update is disabled until public Lacapult releases exist."
+		Status.post(tr("Catapult-Dabubu self-update is disabled until public Catapult-Dabubu releases exist. Current version: v%s") % current_version)
+		_btn_update.text = "Catapult-Dabubu update unavailable"
+		_btn_update.hint_tooltip = "Self-update is disabled until public Catapult-Dabubu releases exist."
 		_btn_update.disabled = true
 		return
-	_btn_update.text = "Update Lacapult"
-	_btn_update.hint_tooltip = "Check the public Lacapult release page for a launcher update."
-	Status.post(tr("Checking for Lacapult updates... Current version: v%s") % current_version)
+	_btn_update.text = "Update Catapult-Dabubu"
+	_btn_update.hint_tooltip = "Check the public Catapult-Dabubu release page for a launcher update."
+	Status.post(tr("Checking for Catapult-Dabubu updates... Current version: v%s") % current_version)
 	
 	# Disable the update button while checking
 	_btn_update.disabled = true
@@ -1477,7 +1477,7 @@ func _on_version_check_completed(result, response_code, headers, body):
 		_latest_version = response["name"]
 		var current_version = Settings.get_hardcoded_version()
 		
-		Status.post(tr("Lacapult Doobdab's latest version available: v%s") % _latest_version)
+		Status.post(tr("Catapult-Dabubu's latest version available: v%s") % _latest_version)
 		
 		# Store the browser download URL from the API response
 		if "html_url" in response:
@@ -1502,11 +1502,11 @@ func _on_version_check_completed(result, response_code, headers, body):
 			_btn_update.disabled = false
 			_is_update_available = true
 		else:
-			Status.post(tr("You have Lacapult Doobdab's latest version!"), Enums.MSG_SUCCESS)
+			Status.post(tr("You have Catapult-Dabubu's latest version!"), Enums.MSG_SUCCESS)
 			_btn_update.disabled = true
 			_is_update_available = false
 	else:
-		Status.post(tr("Could not determine Lacapult Doobdab's latest version"), Enums.MSG_ERROR)
+		Status.post(tr("Could not determine Catapult-Dabubu's latest version"), Enums.MSG_ERROR)
 		_btn_update.disabled = false  # Re-enable button on error
 
 func _is_newer_version(latest: String, current: String) -> bool:
@@ -1671,7 +1671,7 @@ func _create_bash_updater(downloaded_file: String) -> void:
 	var proc_name = current_exe.get_file()
 
 	var sh_script = """#!/bin/bash
-# Lacapult Doobdab Update Script - Linux Updater
+# Catapult-Dabubu Update Script - Linux Updater
 LOG_FILE="%s"
 DOWNLOADED="%s"
 TARGET="%s"
@@ -1726,7 +1726,7 @@ fi
 
 	OS.execute("chmod", ["+x", sh_path], true)
 
-	Status.post(tr("Update ready! Lacapult Doobdab will restart to complete the update."))
+	Status.post(tr("Update ready! Catapult-Dabubu will restart to complete the update."))
 	Status.post(tr("Update logs will be saved to: %s") % log_path)
 
 	OS.execute("bash", [sh_path], false)
@@ -1739,19 +1739,19 @@ func _create_powershell_updater(downloaded_file):
 	
 	# Create a much simpler PowerShell script for updating just the executable
 	var ps_script = """
-# Lacapult Doobdab Update Script - Single Executable Updater
+# Catapult-Dabubu Update Script - Single Executable Updater
 $ErrorActionPreference = "Stop"
 
 # Log function
 function Log-Message {
 	param([string]$Message)
 	$timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-	"$timestamp - $Message" | Out-File -FilePath "$env:USERPROFILE\\AppData\\Roaming\\Godot\\app_userdata\\Lacapult Doobdab\\update_log.txt" -Append
+	"$timestamp - $Message" | Out-File -FilePath "$env:USERPROFILE\\AppData\\Roaming\\Godot\\app_userdata\\Catapult-Dabubu\\update_log.txt" -Append
 }
 
 # Clear previous log and start a new one
-if (Test-Path "$env:USERPROFILE\\AppData\\Roaming\\Godot\\app_userdata\\Lacapult Doobdab\\update_log.txt") {
-	Remove-Item -Path "$env:USERPROFILE\\AppData\\Roaming\\Godot\\app_userdata\\Lacapult Doobdab\\update_log.txt" -Force
+if (Test-Path "$env:USERPROFILE\\AppData\\Roaming\\Godot\\app_userdata\\Catapult-Dabubu\\update_log.txt") {
+	Remove-Item -Path "$env:USERPROFILE\\AppData\\Roaming\\Godot\\app_userdata\\Catapult-Dabubu\\update_log.txt" -Force
 }
 
 Log-Message "Starting update process"
@@ -1856,7 +1856,7 @@ powershell -ExecutionPolicy Bypass -WindowStyle Hidden -File "%s"
 	file.close()
 	
 	# Log
-	Status.post(tr("Update ready! Lacapult Doobdab will restart to complete the update."))
+	Status.post(tr("Update ready! Catapult-Dabubu will restart to complete the update."))
 	Status.post(tr("Update logs will be saved to: %s") % OS.get_user_data_dir().plus_file("update_log.txt"))
 	
 	# Execute the batch file and exit

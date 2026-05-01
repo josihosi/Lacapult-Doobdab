@@ -1673,8 +1673,8 @@ func apply_caol_summarizer_generated_pack(world_name := "", selected_mod_id := "
 	var modinfo = {
 		"type": "MOD_INFO",
 		"id": preview.get("companion_mod_id", ""),
-		"name": "Lacapult generated summaries for %s" % preview.get("selected_mod_name", preview.get("selected_mod_id", "")),
-		"description": "Generated C-AOL NPC/context summaries staged by Lacapult. Contains no gameplay content beyond summaries.",
+		"name": "Catapult-Dabubu generated summaries for %s" % preview.get("selected_mod_name", preview.get("selected_mod_id", "")),
+		"description": "Generated C-AOL NPC/context summaries staged by Catapult-Dabubu. Contains no gameplay content beyond summaries.",
 		"category": "content",
 		"dependencies": [preview.get("selected_mod_id", "")],
 	}
@@ -1787,7 +1787,7 @@ func _caol_generate_summary_entries(preview: Dictionary, selected: Dictionary) -
 	}
 	var d = Directory.new()
 	if d.make_dir_recursive(Paths.tmp_dir) != OK:
-		return {"ok": false, "message": "could not create Lacapult temp directory for backend bridge"}
+		return {"ok": false, "message": "could not create Catapult-Dabubu temp directory for backend bridge"}
 	var stamp = _caol_apply_timestamp()
 	var request_path = Paths.tmp_dir.plus_file("lacapult_summarizer_backend_request_%s.json" % stamp)
 	var output_path = Paths.tmp_dir.plus_file("lacapult_summarizer_backend_output_%s.json" % stamp)
@@ -1834,7 +1834,7 @@ def fixture(req):
             'type': 'npc_personality_summary',
             'selector': source_id + ':context',
             'topic': source_id + '_world_context',
-            'your_background': 'You know the important contextual details from ' + source_name + ' because Lacapult generated a C-AOL-native companion summary pack.',
+            'your_background': 'You know the important contextual details from ' + source_name + ' because Catapult-Dabubu generated a C-AOL-native companion summary pack.',
             'your_expression': 'Treat ' + source_name + ' as active world context loaded from a generated companion mod.',
             'source_tag': 'lacapult-generated:' + source_id,
         }],
@@ -1944,7 +1944,7 @@ func _caol_default_generated_summary_entry(source: Dictionary) -> Dictionary:
 		"type": "npc_personality_summary",
 		"selector": "%s:context" % source_id,
 		"topic": "%s_world_context" % source_id,
-		"your_background": "You remember the contextual details from %s; Lacapult staged this C-AOL-native summary pack after player confirmation." % source_name,
+		"your_background": "You remember the contextual details from %s; Catapult-Dabubu staged this C-AOL-native summary pack after player confirmation." % source_name,
 		"your_expression": "Treat %s as active world context loaded from a generated companion mod." % source_name,
 		"source_tag": "lacapult-generated:%s" % source_id,
 	}

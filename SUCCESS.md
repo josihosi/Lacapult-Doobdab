@@ -1,6 +1,6 @@
 # SUCCESS
 
-Success-state ledger for Lacapult Doobdab. Keep it compact; full evidence belongs in `doc/*.md` and git history.
+Success-state ledger for Catapult-Dabubu (formerly Lacapult Doobdab). Keep it compact; full evidence belongs in `doc/*.md` and git history.
 
 ## Release quarantine / identity investigation
 
@@ -46,8 +46,9 @@ Success state:
 - [x] Long-running install actions set a visible in-progress/waiting state before non-proof external commands.
 - [x] API / AnyLLM venv/package setup is split as `Create venv only` vs `Install AnyLLM packages`, with confirmation/status copy explaining the boundary.
 - [x] Ollama model selection/default, readiness lights, installer/model-pull failure separation, Windows `Ollama.Ollama` copy, and Mistral/Nemotron hardware guidance are locally proofed.
-- [ ] `Catapult-Dabubu` identity pass is reflected in the fresh test build where safe, with upstream lineage still credited and GitHub repo rename held for fresh confirmation.
-- [ ] Fresh Josef-only Windows test release is built, attached, checksumed, and verified without lifting quarantine.
+- [x] `Catapult-Dabubu` identity pass is reflected in source/package proof surfaces where safe, with upstream lineage still credited and GitHub repo rename held for fresh confirmation.
+- [x] Fresh Josef-only `Catapult-Dabubu` Windows package is built/checksumed locally without lifting quarantine.
+- [ ] Fresh Josef-only `Catapult-Dabubu` GitHub Draft/prerelease test release is attached and verified without lifting quarantine.
 
 Canonical docs:
 - `doc/lacapult-windows-retest-fix-imagination-source-2026-05-01.md`

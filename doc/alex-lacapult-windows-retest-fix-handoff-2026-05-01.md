@@ -85,4 +85,8 @@ Evidence run locally without live secrets/installs/model pulls/user-data mutatio
 - `HOME=$(mktemp -d /tmp/lacapult-ollama-workflow-home.XXXXXX) godot --path . --no-window -s tools/godot_ollama_workflow_smoke.gd`
 - `python3 tools/prove_api_setup_status_copy_boundary.py`
 
-Remaining active scope: build/package a fresh Josef-only Windows retest artifact and verify the Draft/prerelease test release. Windows visual confirmation remains separate; the local smoke is not a Windows appearance proof.
+Rename/identity checkpoint added locally after the repair slice: `Catapult-Dabubu` is now the safe user-facing/project/package proof name, while upstream Catapult/Dabdoob/C-AOL attribution and the existing `josihosi/Lacapult-Doobdab` repository URL are retained until an explicit public repo rename is confirmed.
+
+Fresh local package proof now exists: `.proof-cache/lacapult-export/packages/Catapult-Dabubu-windows-unsigned.zip` (66,565,257 bytes, SHA-256 `d001c22f2adf34b51879ae326cdd6d85334d630c30cf480b31da520608475753`) with entries `Catapult-Dabubu.exe`, `utils/7-ZIP_LICENSE`, and `utils/7za.exe`.
+
+Remaining active scope: create/update the Josef-only `Catapult-Dabubu` GitHub Draft/prerelease test release and verify it with `gh release view`. Windows visual confirmation remains separate; the local smoke is not a Windows appearance proof.

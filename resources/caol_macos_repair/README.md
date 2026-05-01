@@ -1,10 +1,10 @@
 # C-AOL macOS v0.2.0 repair libraries
 
-These universal macOS dylibs let Lacapult repair the C-AOL v0.2.0 macOS app
+These universal macOS dylibs let Catapult-Dabubu repair the C-AOL v0.2.0 macOS app
 bundle that shipped with absolute `/opt/local/lib/libfreetype.6.dylib` and
 `/opt/local/lib/libz.1.dylib` load commands.
 
-Lacapult copies `libfreetype.6.dylib` and `libpng16.16.dylib` into
+Catapult-Dabubu copies `libfreetype.6.dylib` and `libpng16.16.dylib` into
 `Cataclysm.app/Contents/Resources`, rewrites the game binary to load freetype
 through `@executable_path/libfreetype.6.dylib`, rewrites zlib to macOS' system
 `/usr/lib/libz.1.dylib`, and ad-hoc signs the modified Mach-O files.

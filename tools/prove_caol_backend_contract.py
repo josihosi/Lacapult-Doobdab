@@ -286,7 +286,7 @@ def main() -> int:
             print(f"    - {token}")
         return 1
     print("  C-AOL runner truth: API via any_llm, Ollama HTTP, OpenVINO imports, self-test/dry-run, and shared Python runner path are present")
-    print("  C-AOL runtime currently hardcodes API provider to openai in src/llm_intent.cpp; Lacapult stores provider intent but does not pretend C-AOL consumes arbitrary providers yet")
+    print("  C-AOL runtime currently hardcodes API provider to openai in src/llm_intent.cpp; Catapult-Dabubu stores provider intent but does not pretend C-AOL consumes arbitrary providers yet")
 
     if missing_in_lacapult:
         print(f"  Missing from Lacapult patch builder: {', '.join(missing_in_lacapult)}")

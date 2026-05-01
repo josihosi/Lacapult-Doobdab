@@ -4,7 +4,7 @@ extends Node
 
 
 const _DONORS = [
-	"[i]\"Thank you to the Dabdoob and Catapult developers for the launcher this project builds on.\"[/i]\n    — [color=#f5c842][b]Lacapult Doobdab[/b][/color]",
+	"[i]\"Thank you to the Dabdoob and Catapult developers for the launcher this project builds on.\"[/i]\n    — [color=#f5c842][b]Catapult-Dabubu[/b][/color]",
 ]
 
 

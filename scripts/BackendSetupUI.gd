@@ -88,7 +88,7 @@ func _build_controls() -> void:
 	_api_base_url_help = Label.new()
 	_api_base_url_help.name = "ApiBaseUrlHelp"
 	_api_base_url_help.autowrap = true
-	_api_base_url_help.text = "API base URL is the server endpoint Lacapult/C-AOL sends API requests to; leave the provider default unless you use a compatible proxy/router."
+	_api_base_url_help.text = "API base URL is the server endpoint Catapult-Dabubu/C-AOL sends API requests to; leave the provider default unless you use a compatible proxy/router."
 	add_child(_api_base_url_help)
 
 	var provider_row = HBoxContainer.new()
@@ -187,7 +187,7 @@ func _build_controls() -> void:
 	api_secret_row.add_child(_backend_api_key_secret)
 	_set_session_key_button = Button.new()
 	_set_session_key_button.text = "Use for this session"
-	_set_session_key_button.hint_tooltip = "Session only:\nSets the named environment variable for this Lacapult process.\nClears the paste field.\nNever saves the key to settings/config."
+	_set_session_key_button.hint_tooltip = "Session only:\nSets the named environment variable for this Catapult-Dabubu process.\nClears the paste field.\nNever saves the key to settings/config."
 	_set_session_key_button.connect("pressed", self, "_on_SetSessionApiKey_pressed")
 	api_secret_row.add_child(_set_session_key_button)
 
@@ -227,7 +227,7 @@ func _build_controls() -> void:
 	_confirm_dialog = ConfirmationDialog.new()
 	_confirm_dialog.name = "ConfirmExternalBackendAction"
 	_confirm_dialog.window_title = "Confirm external setup action"
-	_confirm_dialog.dialog_text = "Lacapult will ask before external package installs or model downloads. This proof build records the confirmed intent only and does not run package managers or pull models automatically."
+	_confirm_dialog.dialog_text = "Catapult-Dabubu will ask before external package installs or model downloads. This proof build records the confirmed intent only and does not run package managers or pull models automatically."
 	_confirm_dialog.dialog_autowrap = true
 	_confirm_dialog.rect_min_size = CONFIRM_DIALOG_SIZE
 	_confirm_dialog.connect("confirmed", self, "_on_ExternalBackendAction_confirmed")
@@ -317,7 +317,7 @@ func _build_ollama_hardware_recommendation_text(signals: Dictionary) -> String:
 	var memory_mb = int(signals.get("memory_mb", 0))
 	if memory_mb >= 24000:
 		return "Hardware recommendation: this machine appears to have enough memory for the larger %s path, but %s remains available. Final model choice is yours." % [OLLAMA_MODEL_NEMOTRON, OLLAMA_MODEL_MISTRAL]
-	return "Hardware recommendation: if memory/GPU capacity is unknown or modest, start with %s. Choose %s manually if you know the machine has enough headroom. Lacapult will not pull either model without confirmation." % [OLLAMA_MODEL_MISTRAL, OLLAMA_MODEL_NEMOTRON]
+	return "Hardware recommendation: if memory/GPU capacity is unknown or modest, start with %s. Choose %s manually if you know the machine has enough headroom. Catapult-Dabubu will not pull either model without confirmation." % [OLLAMA_MODEL_MISTRAL, OLLAMA_MODEL_NEMOTRON]
 
 
 func _check_current_backend_status() -> String:
@@ -536,16 +536,16 @@ func _confirmation_text_for_mode(mode: String) -> String:
 		var plan = BackendConfig.build_api_setup_plan(fields.get("api_provider", BackendConfig.DEFAULT_API_PROVIDER), fields.get("python_path", ""))
 		var proof_note = ""
 		if _api_setup_proof_only_enabled():
-			proof_note = "\n\nProof mode is enabled for this run, so Lacapult records the confirmed intent only instead of running pip."
-		return "Confirm AnyLLM package setup for %s.\n\nPlanned command after approval:\n%s\n\nThis may install or upgrade Python packages in the selected Python/venv.\nLacapult will not read API secrets or make API calls.%s" % [plan.get("provider_label", "provider"), plan.get("command", "python3 -m pip install --upgrade any_llm"), proof_note]
+			proof_note = "\n\nProof mode is enabled for this run, so Catapult-Dabubu records the confirmed intent only instead of running pip."
+		return "Confirm AnyLLM package setup for %s.\n\nPlanned command after approval:\n%s\n\nThis may install or upgrade Python packages in the selected Python/venv.\nCatapult-Dabubu will not read API secrets or make API calls.%s" % [plan.get("provider_label", "provider"), plan.get("command", "python3 -m pip install --upgrade any_llm"), proof_note]
 	if mode == "ollama":
 		var fields = _collect_current_backend_fields()
 		var plan = BackendConfig.build_ollama_setup_plan(fields.get("endpoint", BackendConfig.DEFAULT_OLLAMA_URL), fields.get("model", ""))
-		var proof_note = "\n\nProof mode is enabled for this run, so Lacapult records the confirmed intent only instead of running installers or `ollama pull`." if _external_setup_proof_only_enabled() else ""
-		return "Confirm Ollama setup for model %s.\n\nPlanned command after approval:\n%s\n\nThis may install Ollama through a platform package manager where supported, then pull the selected model.\nWindows plan: winget id Ollama.Ollama is the official Ollama package path when winget is available; Lacapult still checks CLI/server/model state separately after install.\nLacapult will not pull models before this confirmation.%s" % [plan.get("model", Settings.read("backend_ollama_model")), plan.get("command_preview", "manual install required"), proof_note]
+		var proof_note = "\n\nProof mode is enabled for this run, so Catapult-Dabubu records the confirmed intent only instead of running installers or `ollama pull`." if _external_setup_proof_only_enabled() else ""
+		return "Confirm Ollama setup for model %s.\n\nPlanned command after approval:\n%s\n\nThis may install Ollama through a platform package manager where supported, then pull the selected model.\nWindows plan: winget id Ollama.Ollama is the official Ollama package path when winget is available; Catapult-Dabubu still checks CLI/server/model state separately after install.\nCatapult-Dabubu will not pull models before this confirmation.%s" % [plan.get("model", Settings.read("backend_ollama_model")), plan.get("command_preview", "manual install required"), proof_note]
 	if mode == "python_venv":
 		var plan = BackendConfig.build_python_venv_setup_plan(_backend_python_path.text if _backend_python_path != null else "")
-		var proof_note = "\n\nProof mode is enabled for this run, so Lacapult records the venv intent only." if _external_setup_proof_only_enabled() else ""
+		var proof_note = "\n\nProof mode is enabled for this run, so Catapult-Dabubu records the venv intent only." if _external_setup_proof_only_enabled() else ""
 		var api_note = "\n\nAPI note: this creates the venv only; use Install AnyLLM packages afterward to install any_llm/provider dependencies into that selected venv." if Settings.read("backend_mode") == "api" else ""
 		return "Confirm Python venv setup.\n\nPlanned command after approval:\n%s\n\nThis creates or updates the venv path used by C-AOL runner.py.\nIt does not install AnyLLM packages or pull Ollama models.%s%s" % [plan.get("command_preview", "python3 -m venv"), api_note, proof_note]
 	return "Confirm before running an external backend setup action. This proof build records the intent only and does not run package managers or download models."
@@ -564,7 +564,7 @@ func _on_ExternalBackendAction_confirmed() -> void:
 		var fields = _collect_current_backend_fields()
 		var proof_only = _api_setup_proof_only_enabled()
 		if not proof_only:
-			_set_external_action_progress("api", "Installing AnyLLM/provider packages. Keep Lacapult open; this may take a while.")
+			_set_external_action_progress("api", "Installing AnyLLM/provider packages. Keep Catapult-Dabubu open; this may take a while.")
 			yield(get_tree(), "idle_frame")
 		var setup_result = BackendConfig.run_api_setup(fields.get("api_provider", BackendConfig.DEFAULT_API_PROVIDER), fields.get("python_path", ""), proof_only)
 		var status = setup_result.get("status", "api_setup_unknown")
@@ -583,7 +583,7 @@ func _on_ExternalBackendAction_confirmed() -> void:
 		var fields = _collect_current_backend_fields()
 		var proof_only = _external_setup_proof_only_enabled()
 		if not proof_only:
-			_set_external_action_progress("ollama", "Running Ollama installer/model command. Keep Lacapult open; install or pull can take a while.")
+			_set_external_action_progress("ollama", "Running Ollama installer/model command. Keep Catapult-Dabubu open; install or pull can take a while.")
 			yield(get_tree(), "idle_frame")
 		var setup_result = BackendConfig.run_ollama_setup(fields.get("endpoint", BackendConfig.DEFAULT_OLLAMA_URL), fields.get("model", ""), proof_only)
 		var status = setup_result.get("status", "ollama_setup_unknown")
@@ -601,7 +601,7 @@ func _on_ExternalBackendAction_confirmed() -> void:
 	elif _pending_confirm_action == "python_venv":
 		var proof_only = _external_setup_proof_only_enabled()
 		if not proof_only:
-			_set_external_action_progress(Settings.read("backend_mode"), "Creating/updating the runner.py Python venv. Keep Lacapult open; this may take a while.")
+			_set_external_action_progress(Settings.read("backend_mode"), "Creating/updating the runner.py Python venv. Keep Catapult-Dabubu open; this may take a while.")
 			yield(get_tree(), "idle_frame")
 		var setup_result = BackendConfig.run_python_venv_setup(_backend_python_path.text if _backend_python_path != null else "", proof_only)
 		var status = setup_result.get("status", "python_venv_setup_unknown")

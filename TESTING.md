@@ -1,6 +1,6 @@
 # TESTING
 
-Current validation policy and evidence index for Lacapult Doobdab.
+Current validation policy and evidence index for Catapult-Dabubu (formerly Lacapult Doobdab).
 
 ## Validation policy
 
@@ -23,7 +23,7 @@ Minimum evidence for this slice:
 - Ollama setup proof for model-choice persistence, readiness-light text, split installer/server/model-pull failure reporting, and Mistral/Nemotron hardware guidance using fixtures where possible;
 - Catapult-Dabubu naming/identity surface scan for user-facing/package/release text, with explicit note for any intentionally retained Lacapult/internal/upstream references;
 - fresh package proof from current `main` using `python3 tools/prove_lacapult_export_packaging.py`;
-- Windows package shape includes `Lacapult-Doobdab.exe` and `utils/7za.exe`;
+- Windows package shape includes `Catapult-Dabubu.exe` and `utils/7za.exe`;
 - checksums/build manifest exist for the attached assets;
 - GitHub release is Draft if feasible, or prerelease if draft asset access is awkward;
 - release notes clearly say Josef Windows validation only, not public/stable/final confidence.
@@ -36,6 +36,14 @@ Windows retest fix local repair evidence landed on 2026-05-01:
 - Ollama workflow smoke: `HOME=$(mktemp -d /tmp/lacapult-ollama-workflow-home.XXXXXX) godot --path . --no-window -s tools/godot_ollama_workflow_smoke.gd` proved one model choice, hardware guidance, readiness-light fixture states, save/check/setup proof mode, and no installer/venv/model/API/user-config mutation.
 - Static/status proof: `python3 tools/prove_api_setup_status_copy_boundary.py` still passes, and source scan confirms no stale old `Install venv` / `Install API backend` strings remain in `scripts/` or `tools/`.
 - Safety boundary: all proof stayed local/sandboxed; no live API call, API secret, package-manager install, Python venv creation, Ollama model pull, release publication, or real Application Support/user-data mutation.
+
+Catapult-Dabubu identity evidence landed on 2026-05-01:
+
+- Static/project proof: `project.godot` product name, custom titlebar, first Game-tab identity copy, disabled update copy, English about/tips text, and safe backend/setup/mod metadata now use `Catapult-Dabubu` where user-facing.
+- Package proof target: `python3 tools/prove_lacapult_export_packaging.py` now exports `Catapult-Dabubu` app/executable/package names and keeps the Windows 7-Zip sidecar shape.
+- Identity proof: `python3 tools/prove_lacapult_identity_surface.py` verifies `Catapult-Dabubu` project/titlebar/Game-tab/About/package surfaces while explicitly retaining `josihosi/Lacapult-Doobdab` as the GitHub repo URL until a public repo rename is confirmed.
+- Retained lineage boundary: upstream `Catapult`, `Dabdoob/Catapult_Dabdoob`, and C-AOL attribution remains intentional; inherited internal scene/node/script names are not part of this rename slice.
+- Packaging proof: `python3 tools/prove_lacapult_export_packaging.py` produced `.proof-cache/lacapult-export/packages/Catapult-Dabubu-windows-unsigned.zip` (66,565,257 bytes, SHA-256 `d001c22f2adf34b51879ae326cdd6d85334d630c30cf480b31da520608475753`) plus `SHA256SUMS.txt` (SHA-256 `d1ad293c441cccc05e95a67e5f395e8b3e4d174ea5470d415d098987e7d7b684`). Windows zip entries are exactly `Catapult-Dabubu.exe`, `utils/7-ZIP_LICENSE`, and `utils/7za.exe`.
 
 Josef test release evidence landed on 2026-04-27:
 

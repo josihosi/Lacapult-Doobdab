@@ -40,10 +40,10 @@ func _get_own_dir() -> String:
 		var home_dir = OS.get_environment("HOME")
 		var dabdoob_dir = ""
 		if home_dir != "":
-			dabdoob_dir = home_dir.plus_file("Library").plus_file("Application Support").plus_file("Lacapult Doobdab")
+			dabdoob_dir = home_dir.plus_file("Library").plus_file("Application Support").plus_file("Catapult-Dabubu")
 		else:
 			# Fallback if HOME environment variable is not available
-			dabdoob_dir = OS.get_user_data_dir().get_base_dir().get_base_dir().get_base_dir().get_base_dir().plus_file("Application Support").plus_file("Lacapult Doobdab")
+			dabdoob_dir = OS.get_user_data_dir().get_base_dir().get_base_dir().get_base_dir().get_base_dir().plus_file("Application Support").plus_file("Catapult-Dabubu")
 		
 		# Ensure the directory exists with proper permissions
 		var d = Directory.new()
@@ -53,9 +53,9 @@ func _get_own_dir() -> String:
 				# Set proper permissions for the newly created directory
 				var chmod_result = OS.execute("chmod", ["755", dabdoob_dir], true)
 				if chmod_result != 0:
-					print("Warning: Could not set permissions for Lacapult Doobdab directory")
+					print("Warning: Could not set permissions for Catapult-Dabubu directory")
 			else:
-				print("Error creating Lacapult Doobdab directory: ", err)
+				print("Error creating Catapult-Dabubu directory: ", err)
 		
 		return dabdoob_dir
 	else:

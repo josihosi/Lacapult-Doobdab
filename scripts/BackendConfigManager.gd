@@ -284,13 +284,13 @@ func get_supported_backends() -> Array:
 			"recommendation_rank": 1,
 			"recommendation": "Straightforward hosted path: use this when Python + AnyLLM and an API-key environment variable are already available.",
 			"setup_role": "fastest_onboarding_debug",
-			"v0_warning": "Lacapult stores provider/model/env-var metadata only; it never stores API keys or makes a live API call from this setup page.",
+			"v0_warning": "Catapult-Dabubu stores provider/model/env-var metadata only; it never stores API keys or makes a live API call from this setup page.",
 			"status": _detect_api_status(python_path, api_provider, api_model, api_key_env),
 			"guidance": get_backend_guidance(BACKEND_API),
 			"python_path": python_path,
 			"api_provider": api_provider,
 			"api_key_env": api_key_env,
-			"secrets_policy": "Do not store or log API keys in Lacapult v0. Only the env-var name is stored."
+			"secrets_policy": "Do not store or log API keys in Catapult-Dabubu v0. Only the env-var name is stored."
 		},
 		{
 			"id": BACKEND_OLLAMA,
@@ -298,7 +298,7 @@ func get_supported_backends() -> Array:
 			"recommendation_rank": 2,
 			"recommendation": "Mainstream local path: use when Ollama is installed, the local server is running, and a model is already present.",
 			"setup_role": "mainstream_local",
-			"v0_warning": "Lacapult detects command/server/model-list state on Check; Install Ollama / model is confirmation-gated before any platform installer or model pull.",
+			"v0_warning": "Catapult-Dabubu detects command/server/model-list state on Check; Install Ollama / model is confirmation-gated before any platform installer or model pull.",
 			"status": _detect_ollama_status(ollama_endpoint, ollama_model),
 			"guidance": get_backend_guidance(BACKEND_OLLAMA),
 			"endpoint": ollama_endpoint,
@@ -311,7 +311,7 @@ func get_supported_backends() -> Array:
 			"recommendation_rank": 3,
 			"recommendation": "Specialized local acceleration path: selectable for users who already have OpenVINO Python packages and a local model directory.",
 			"setup_role": "specialized_detect_only",
-			"v0_warning": "Lacapult v0 reports OpenVINO readiness only; it does not install runtimes, tokenizers, drivers, or download/convert models.",
+			"v0_warning": "Catapult-Dabubu v0 reports OpenVINO readiness only; it does not install runtimes, tokenizers, drivers, or download/convert models.",
 			"status": _detect_openvino_status(python_path, openvino_model_dir),
 			"guidance": get_backend_guidance(BACKEND_OPENVINO),
 			"python_path": python_path,
@@ -326,11 +326,11 @@ func get_backend_recommendation_summary() -> String:
 
 func get_backend_guidance(mode: String) -> String:
 	if mode == BACKEND_API:
-		return "Install Python plus the AnyLLM package/provider extra in the Python/venv selected here; set the named API-key environment variable outside Lacapult. Lacapult can check imports and env-var presence, but never reads or stores the secret."
+		return "Install Python plus the AnyLLM package/provider extra in the Python/venv selected here; set the named API-key environment variable outside Catapult-Dabubu. Catapult-Dabubu can check imports and env-var presence, but never reads or stores the secret."
 	if mode == BACKEND_OLLAMA:
 		return "Install Ollama for this OS, start the local server, and select or pull Mistral/Nemotron only after explicit confirmation. Check reads command/server/model-list state without pulling models."
 	if mode == BACKEND_OPENVINO:
-		return "Select a Python/venv with OpenVINO packages and a local model directory; Lacapult checks imports/model path but does not install runtimes or download models without confirmation."
+		return "Select a Python/venv with OpenVINO packages and a local model directory; Catapult-Dabubu checks imports/model path but does not install runtimes or download models without confirmation."
 	return "Unsupported backend."
 
 
@@ -472,9 +472,9 @@ func _status_summary(raw_status: String) -> String:
 	if raw_status.find("any_llm_missing") >= 0:
 		return "Python works, but AnyLLM is not installed in that environment."
 	if raw_status.find("api_key_env_not_set") >= 0:
-		return "API-key env-var is named but not set; Lacapult did not read a secret."
+		return "API-key env-var is named but not set; Catapult-Dabubu did not read a secret."
 	if raw_status.find("api_key_env_missing") >= 0:
-		return "Choose an API-key env-var name; Lacapult stores the name only."
+		return "Choose an API-key env-var name; Catapult-Dabubu stores the name only."
 	if raw_status.find("model_missing") >= 0:
 		return "Choose a model name before using this backend."
 	if raw_status.find("ollama_command_missing") >= 0:
@@ -492,7 +492,7 @@ func _status_summary(raw_status: String) -> String:
 	if raw_status.find("ollama_setup_command_failed") >= 0:
 		return "Ollama setup command failed; inspect the named step and then run Check again."
 	if raw_status.find("openvino") >= 0:
-		return "OpenVINO is detect-only/hidden in Lacapult v0."
+		return "OpenVINO is detect-only/hidden in Catapult-Dabubu v0."
 	return raw_status
 
 
@@ -552,12 +552,12 @@ func _normalize_api_provider(provider_id: String) -> String:
 func _build_caol_options_patch(mode: String, fields: Dictionary) -> Dictionary:
 	var patch = {
 		"format": "c-aol-options-patch-v1",
-		"source": "Lacapult Doobdab",
+		"source": "Catapult-Dabubu",
 		"apply_status": "preview_only_not_applied",
-		"notes": "These are the C-AOL option names Lacapult can set once an installed game config path is chosen. API keys are referenced by environment variable only, never stored here. LLM_INTENT_ENABLE is intentionally left for the player/game UI until Lacapult has an explicit apply step. LLM_INTENT_PYTHON is the shared Python/venv path used by C-AOL to launch tools/llm_runner/runner.py, not only OpenVINO.",
+		"notes": "These are the C-AOL option names Catapult-Dabubu can set once an installed game config path is chosen. API keys are referenced by environment variable only, never stored here. LLM_INTENT_ENABLE is intentionally left for the player/game UI until Catapult-Dabubu has an explicit apply step. LLM_INTENT_PYTHON is the shared Python/venv path used by C-AOL to launch tools/llm_runner/runner.py, not only OpenVINO.",
 		"metadata_only": {
 			"api_provider": fields.get("api_provider", DEFAULT_API_PROVIDER),
-			"api_provider_note": "C-AOL's current runtime path hardcodes openai in src/llm_intent.cpp; Lacapult stores provider intent without storing secrets."
+			"api_provider_note": "C-AOL's current runtime path hardcodes openai in src/llm_intent.cpp; Catapult-Dabubu stores provider intent without storing secrets."
 		},
 		"options": [
 			{
@@ -584,7 +584,7 @@ func _build_caol_options_patch(mode: String, fields: Dictionary) -> Dictionary:
 		patch["options"].append({
 			"name": "LLM_INTENT_API_KEY_ENV",
 			"value": fields.get("api_key_env", DEFAULT_API_KEY_ENV),
-			"reason": "C-AOL reads the API key from this environment variable; Lacapult v0 does not store the secret."
+			"reason": "C-AOL reads the API key from this environment variable; Catapult-Dabubu v0 does not store the secret."
 		})
 		if fields.get("model", "") != "":
 			patch["options"].append({
@@ -609,19 +609,19 @@ func _build_caol_options_patch(mode: String, fields: Dictionary) -> Dictionary:
 			patch["options"].append({
 				"name": "LLM_INTENT_MODEL_DIR",
 				"value": fields.get("openvino_model_dir", ""),
-				"reason": "OpenVINO model directory. Lacapult v0 detects this path but does not download models."
+				"reason": "OpenVINO model directory. Catapult-Dabubu v0 detects this path but does not download models."
 			})
 		patch["options"].append({
 			"name": "LLM_INTENT_DEVICE",
 			"value": fields.get("openvino_device", DEFAULT_OPENVINO_DEVICE),
-			"reason": "OpenVINO target device. Lacapult v0 does not install runtimes or force hardware choices."
+			"reason": "OpenVINO target device. Catapult-Dabubu v0 does not install runtimes or force hardware choices."
 		})
 
 	return patch
 
 func _backend_notes(mode: String) -> String:
 	if mode == BACKEND_API:
-		return "API setup checks the configured/default Python can import any_llm without using API secrets. Lacapult stores provider/model/env-var names only."
+		return "API setup checks the configured/default Python can import any_llm without using API secrets. Catapult-Dabubu stores provider/model/env-var names only."
 	if mode == BACKEND_OLLAMA:
 		return "Ollama setup checks command/server/model-list readiness without pulling models. Install is confirmation-gated for platform setup/model pull, and C-AOL still launches runner.py through Python."
 	if mode == BACKEND_OPENVINO:
@@ -830,7 +830,7 @@ func _apply_options_patch_to_file(options_path: String, patch: Dictionary) -> St
 			options.append({
 				"name": option_name,
 				"value": option_value,
-				"info": "Added by Lacapult sandbox backend proof from %s." % patch.get("source", "Lacapult Doobdab")
+				"info": "Added by Catapult-Dabubu sandbox backend proof from %s." % patch.get("source", "Catapult-Dabubu")
 			})
 			changed += 1
 	if not Helpers.save_to_json_file(options, options_path):
