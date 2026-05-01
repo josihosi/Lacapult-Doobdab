@@ -45,6 +45,7 @@ Canonical packet: `doc/lacapult-josef-test-release-v0-2026-04-27.md`.
 ## Josef playtest ledger
 
 - [ ] Real Windows first-launch click-through before any renewed confidence/republish claim: extract/open package, inspect first window/tab, release-row wording, and install/download impression.
+  - 2026-05-01 Josef Windows screenshot feedback: top row/titlebar area is still visually messed up; suspected fix direction is a slightly larger window and/or moving the custom-chrome/content stack downward. Treat `Lacapult window chrome investigation v0` as **not Windows-confirmed** and requiring a follow-up metrics/layout slice before any visual-fix claim.
 
 Do not schedule repeated reminders for this. It is a ledger item, not an implementation blocker.
 

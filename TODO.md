@@ -49,6 +49,7 @@ Short queue only. Remove finished items instead of turning this into a museum.
 ## Josef playtest ledger
 
 - [ ] Real Windows first-launch click-through before any renewed confidence/republish claim: extracted package, first window, first visible tab, release row wording, and install/download impression.
+  - [ ] Follow up on 2026-05-01 Windows screenshot: top row/titlebar remains visibly wrong; likely needs larger default window and/or downward content/custom-chrome offset, then a new Windows retest build.
 
 ## Greenlit implementation stack
 

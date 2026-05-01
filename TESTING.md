@@ -69,7 +69,8 @@ Before any renewed republish/confidence claim, evidence must include:
 - real Windows first-launch click-through from the extracted package;
 - first window / first visible tab identity check;
 - release-row wording and install/download impression check;
-- confirmation that the player sees Lacapult as launcher, not as a mistaken C-AOL game archive.
+- confirmation that the player sees Lacapult as launcher, not as a mistaken C-AOL game archive;
+- 2026-05-01 Windows screenshot feedback: top row/titlebar still looks visually wrong, so the chrome-fix confidence claim remains reopened; next proof should adjust default window/layout metrics and require another Windows screenshot/retest.
 
 ## Pending evidence - debug-note correction stack
 
