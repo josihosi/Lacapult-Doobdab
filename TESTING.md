@@ -15,14 +15,17 @@ Use the smallest evidence that honestly matches the change.
 
 ## Current proof target
 
-**Active validation target:** `Lacapult Josef test release v0`. Josef explicitly cleared a bounded GitHub draft/prerelease test release on 2026-04-27 so he can perform Windows validation. This is not a quarantine lift or final/public-confidence claim.
+**Active validation target:** `Lacapult Windows retest fix v0`. Josef completed a Windows test pass on 2026-05-01 and explicitly cleared packaging/reactivation plus another testing release. This is not a quarantine lift or final/public-confidence claim.
 
 Minimum evidence for this slice:
+- focused Godot UI smoke/static scans for titlebar/window metrics, popup/dialog/tooltip wrapping/bounds, and long-text wrapping/newlines;
+- API / AnyLLM setup proof for `backend_external_setup_proof_only` default/safe read, install-progress/status copy, and venv/package semantics without live secrets or unapproved pip installs;
+- Ollama setup proof for model-choice persistence, readiness-light text, split installer/server/model-pull failure reporting, and Mistral/Nemotron hardware guidance using fixtures where possible;
 - fresh package proof from current `main` using `python3 tools/prove_lacapult_export_packaging.py`;
 - Windows package shape includes `Lacapult-Doobdab.exe` and `utils/7za.exe`;
 - checksums/build manifest exist for the attached assets;
 - GitHub release is Draft if feasible, or prerelease if draft asset access is awkward;
-- release notes include Josef's checklist: first launch/top bar, first visible tab, release row wording, install/download impression.
+- release notes clearly say Josef Windows validation only, not public/stable/final confidence.
 
 Josef test release evidence landed on 2026-04-27:
 
@@ -103,6 +106,10 @@ Detailed evidence is intentionally stored in auxiliary docs instead of repeated 
 - Debug-note correction stack: `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md`.
 - Window chrome investigation packet / Windows checklist: `doc/lacapult-window-chrome-investigation-packet-2026-04-27.md`.
 - Josef test release packet: `doc/lacapult-josef-test-release-v0-2026-04-27.md`.
+- Windows retest fix packet: `doc/lacapult-windows-retest-fix-packet-v0-2026-05-01.md`.
+- Windows retest imagination source: `doc/lacapult-windows-retest-fix-imagination-source-2026-05-01.md`.
+- Windows retest raw intake: `doc/josef-windows-debug-intake-2026-05-01.md`.
+- Windows retest executor handoff: `doc/alex-lacapult-windows-retest-fix-handoff-2026-05-01.md`.
 
 Recent gate commands used for Package 5:
 - `HOME=$(mktemp -d /tmp/lacapult-window-chrome-home.XXXXXX) godot --path . --no-window -s tools/godot_window_chrome_inspection.gd`

@@ -34,6 +34,26 @@ Success state:
 - [x] Package 5 locally complete: window chrome investigation/fix root-cause class named, smallest CustomTitleBar metric seam patched/proofed, and bounded Windows confirmation checklist written.
 - [ ] Windows/Josef visual confirmation before any cross-platform chrome-fix claim.
 
+## Lacapult Windows retest fix v0
+
+Status: ACTIVE / GREENLIT / JOSEF WINDOWS FEEDBACK PACKET
+
+Success state:
+- [ ] Shared popup/dialog/tooltip layout no longer cuts off content in the Windows-reported flows.
+- [ ] Long popup/help text wraps, uses deliberate newlines/bullets, or scrolls instead of becoming one over-wide line.
+- [ ] Top row/window metrics receive a follow-up fix and remain Windows-retest-gated.
+- [ ] `backend_external_setup_proof_only` missing-setting log spam is gone.
+- [ ] Long-running install actions show visible in-progress/waiting state instead of looking crashed while work continues.
+- [ ] API / AnyLLM venv/package setup is coherent and user-facing copy makes the step impossible to misunderstand.
+- [ ] Ollama model selection persists, readiness lights are meaningful, install/server/model-pull failures are separated, and Mistral/Nemotron hardware suitability is visible or honestly bounded.
+- [ ] Fresh Josef-only Windows test release is built, attached, checksumed, and verified without lifting quarantine.
+
+Canonical docs:
+- `doc/lacapult-windows-retest-fix-imagination-source-2026-05-01.md`
+- `doc/lacapult-windows-retest-fix-packet-v0-2026-05-01.md`
+- `doc/alex-lacapult-windows-retest-fix-handoff-2026-05-01.md`
+- `doc/josef-windows-debug-intake-2026-05-01.md`
+
 ## Lacapult Josef test release v0
 
 Status: READY FOR JOSEF / TEST RELEASE ONLY / QUARANTINE STILL ACTIVE

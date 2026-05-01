@@ -18,7 +18,7 @@ If these disagree, `Plan.md` wins; repair the other file instead of inventing a 
 
 ## Current status
 
-**State:** RELEASE QUARANTINE ACTIVE / JOSEF TEST RELEASE V0 READY
+**State:** RELEASE QUARANTINE ACTIVE / WINDOWS RETEST FIX ACTIVE
 
 The 2026-04-26 Lacapult prerelease family is quarantined as Draft after Josef reported that the download looked like CAOL rather than clearly like Lacapult. No Lacapult release from that family should be republished until the quarantine/identity investigation is closed and Josef/Schani explicitly re-greenlight.
 
@@ -48,6 +48,18 @@ Canonical packet: `doc/lacapult-josef-test-release-v0-2026-04-27.md`.
   - 2026-05-01 Josef Windows screenshot feedback: top row/titlebar area is still visually messed up; suspected fix direction is a slightly larger window and/or moving the custom-chrome/content stack downward. Treat `Lacapult window chrome investigation v0` as **not Windows-confirmed** and requiring a follow-up metrics/layout slice before any visual-fix claim.
 
 Do not schedule repeated reminders for this. It is a ledger item, not an implementation blocker.
+
+## Active Windows retest fix lane
+
+**ACTIVE / GREENLIT: Lacapult Windows retest fix v0** - Josef completed the 2026-05-01 Windows test pass and explicitly asked to package the findings, reactivate the Lacapult worker, and produce another testing release. Canonical contract: `doc/lacapult-windows-retest-fix-packet-v0-2026-05-01.md`; imagination source: `doc/lacapult-windows-retest-fix-imagination-source-2026-05-01.md`; raw intake: `doc/josef-windows-debug-intake-2026-05-01.md`; executor handoff: `doc/alex-lacapult-windows-retest-fix-handoff-2026-05-01.md`.
+
+Scope order:
+1. shared popup/window layout repair: top row/window metrics, clipped dialogs/tooltips, wrapping/newlines, and popup width bounds;
+2. API / AnyLLM setup repair: missing `backend_external_setup_proof_only` default/safe read, long-running install progress, and coherent venv/package semantics;
+3. Ollama setup repair: model-choice persistence, readiness lights, installer/server/model-pull reporting, Windows installer verification, and Mistral/Nemotron hardware suitability guidance;
+4. fresh clearly labelled Josef-only Windows test release with package/checksums/build notes verified by `gh release view`.
+
+This active lane does **not** lift the release quarantine, authorize a public/final release, start C-AOL release work, or permit automated live API calls/secrets/model pulls/package installs outside explicit confirmation and proof boundaries.
 
 ## Active debug-note correction stack
 

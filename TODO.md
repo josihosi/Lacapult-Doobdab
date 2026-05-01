@@ -4,14 +4,17 @@ Short queue only. Remove finished items instead of turning this into a museum.
 
 ## Now
 
-**Active target:** Lacapult Josef test release v0.
+**Active target:** Lacapult Windows retest fix v0.
 
-- [x] Record the bounded Josef test-release lane in canon without lifting release quarantine.
-- [x] Build/package the current debug-stack-complete Lacapult state from `main`.
-- [x] Create a clearly labelled GitHub Draft test release if feasible, otherwise prerelease, with no stable/latest/final/public-confidence claim.
-- [x] Attach the Windows unsigned package and checksums/build notes.
-- [x] Include Josef's checklist: first launch/top bar, first visible tab, release row wording, install/download impression.
-- [x] Verify the remote release shape with `gh release view`.
+Canonical contract: `doc/lacapult-windows-retest-fix-packet-v0-2026-05-01.md`.
+Handoff: `doc/alex-lacapult-windows-retest-fix-handoff-2026-05-01.md`.
+
+- [ ] Fix shared popup/window layout: top row/window metrics, clipped dialogs/tooltips, long-text wrapping/newlines, and popup width bounds.
+- [ ] Fix API / AnyLLM setup: `backend_external_setup_proof_only` default/safe read, long-running install progress, and venv/package semantics.
+- [ ] Fix Ollama setup: model selection persistence, readiness lights, split installer/server/model-pull reporting, Windows installer verification, and Mistral/Nemotron hardware guidance.
+- [ ] Run focused UI/static/backend setup gates without live secrets/model pulls/user-data mutation.
+- [ ] Build/package a fresh Windows unsigned Lacapult test artifact.
+- [ ] Create or update a clearly labelled Josef-only GitHub Draft/prerelease test release with Windows asset, checksums/build notes, and `gh release view` verification.
 
 ## Completed debug-note stack
 
