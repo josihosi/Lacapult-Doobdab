@@ -46,6 +46,7 @@ Success state:
 - [x] Long-running install actions set a visible in-progress/waiting state before non-proof external commands.
 - [x] API / AnyLLM venv/package setup is split as `Create venv only` vs `Install AnyLLM packages`, with confirmation/status copy explaining the boundary.
 - [x] Ollama model selection/default, readiness lights, installer/model-pull failure separation, Windows `Ollama.Ollama` copy, and Mistral/Nemotron hardware guidance are locally proofed.
+- [ ] `Catapult-Dabubu` identity pass is reflected in the fresh test build where safe, with upstream lineage still credited and GitHub repo rename held for fresh confirmation.
 - [ ] Fresh Josef-only Windows test release is built, attached, checksumed, and verified without lifting quarantine.
 
 Canonical docs:

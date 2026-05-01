@@ -36,9 +36,16 @@ This does not lift release quarantine and does not authorize a public/final/stab
 - Verify the Windows install plan (`winget install --id Ollama.Ollama -e`) and explain whether it provides the expected CLI/server behavior.
 - Add a visible hardware suitability check or honest hardware guidance for Mistral and Nemotron.
 
+### Packet 4 — rename / identity pass
+
+- Treat `Catapult-Dabubu` as the target user-facing product/package/release name for the next test build.
+- Update visible app/window/about/release/package naming enough that the fresh artifact does not still look like `Lacapult-Doobdab` wearing a fake moustache.
+- Preserve attribution/lineage for upstream Catapult/Dabdoob and C-AOL.
+- Do **not** rename the GitHub repository or perform other public repo-operation changes without fresh explicit Schani/Josef confirmation.
+
 ### Final retest release
 
-- After fixes and gates, build/package a new Windows unsigned Lacapult test artifact.
+- After fixes and gates, build/package a new Windows unsigned test artifact using the agreed current test-build naming.
 - Create or update a clearly labelled GitHub Draft/prerelease test release for Josef only.
 - Attach Windows package, checksums, and build notes.
 - Verify remote release shape with `gh release view`.
@@ -46,6 +53,7 @@ This does not lift release quarantine and does not authorize a public/final/stab
 ## Non-goals
 
 - No public/stable/latest/final Lacapult release claim.
+- No GitHub repository rename without fresh explicit confirmation, even though `Catapult-Dabubu` is the target rename item.
 - No release quarantine lift.
 - No C-AOL `v0.3.0` or C-AOL game packaging work.
 - No live API calls, API secret reads, real user data mutation, automated package installs, or automated model pulls in proof without fresh explicit clearance.
@@ -68,6 +76,7 @@ This does not lift release quarantine and does not authorize a public/final/stab
 - Run focused Godot UI smoke(s) for popup/dialog wrapping and titlebar/default-window metrics where feasible.
 - Extend API AnyLLM smoke to cover missing setting default, venv/package semantics, and progress/status copy without running real pip unless explicitly cleared.
 - Extend Ollama smoke to cover selected model persistence, readiness-light text, hardware-check/guidance text, and split failure reporting with fixtures.
+- Add source/static checks for old/new product-name surfaces before creating the retest release.
 - Run `python3 tools/prove_lacapult_export_packaging.py` before creating the retest release.
 - Use `gh release view` to verify the release/tag/assets/checksums after publication.
 

@@ -4,7 +4,7 @@ This is the product picture for the next Windows retest repair pass. It sources 
 
 ## Finished scene
 
-Josef downloads a clearly labelled Lacapult test build, extracts it, opens `Lacapult-Doobdab.exe`, and the first window looks like a launcher instead of a cramped Godot costume. The title/top row has breathing room, the default window is large enough for the first real workflow, and the app does not hide text behind its own borders.
+Josef downloads a clearly labelled test build, extracts it, opens the launcher, and the first window looks like a launcher instead of a cramped Godot costume. The next test build should also account for Josef's requested rename target, `Catapult-Dabubu`, so the visible product/package/release identity is no longer stuck halfway between old Lacapult wording and inherited Catapult/Dabdoob lineage. The title/top row has breathing room, the default window is large enough for the first real workflow, and the app does not hide text behind its own borders.
 
 In the LLM tab, API / AnyLLM and Ollama setup behave like guided setup, not like a guessing booth:
 
@@ -20,6 +20,7 @@ After the repair, a fresh Windows test release exists only for Josef validation.
 
 - Keep Lacapult as a C-AOL launcher; do not start C-AOL release work.
 - Keep public release quarantine active; only create a clearly labelled Draft/prerelease test build for Josef.
+- Treat `Catapult-Dabubu` as the rename target for the next identity pass, but do not perform an actual GitHub repository rename without fresh explicit confirmation.
 - Do not run live API calls, read secrets, pull models, or mutate real user data in automated proof.
 - External installs/model pulls in the app must stay confirmation-gated and visibly explained.
 - Do not hide failures behind generic “may have attempted” messages when the command/result can be separated.

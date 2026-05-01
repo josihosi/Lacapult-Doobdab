@@ -57,9 +57,10 @@ Scope order:
 1. shared popup/window layout repair: top row/window metrics, clipped dialogs/tooltips, wrapping/newlines, and popup width bounds;
 2. API / AnyLLM setup repair: missing `backend_external_setup_proof_only` default/safe read, long-running install progress, and coherent venv/package semantics;
 3. Ollama setup repair: model-choice persistence, readiness lights, installer/server/model-pull reporting, Windows installer verification, and Mistral/Nemotron hardware suitability guidance;
-4. fresh clearly labelled Josef-only Windows test release with package/checksums/build notes verified by `gh release view`.
+4. rename / identity pass toward `Catapult-Dabubu` for user-facing/package/release naming, while preserving upstream attribution;
+5. fresh clearly labelled Josef-only Windows test release with package/checksums/build notes verified by `gh release view`.
 
-This active lane does **not** lift the release quarantine, authorize a public/final release, start C-AOL release work, or permit automated live API calls/secrets/model pulls/package installs outside explicit confirmation and proof boundaries.
+This active lane does **not** lift the release quarantine, authorize a public/final release, start C-AOL release work, permit automated live API calls/secrets/model pulls/package installs outside explicit confirmation and proof boundaries, or rename the GitHub repository without fresh explicit confirmation.
 
 2026-05-01 local implementation checkpoint: scope-order items 1-3 are locally patched/proofed for enlarged window metrics, bounded/wrapped setup dialogs, API venv/package semantics, safe `backend_external_setup_proof_only` default, progress-before-blocking external commands, and Ollama readiness/failure/hardware guidance. Remaining active work is the fresh Josef-only Windows test package/release plus real Windows visual confirmation; this is not a quarantine lift.
 

@@ -26,7 +26,12 @@ Raw intake: `doc/josef-windows-debug-intake-2026-05-01.md`.
    - verify Windows `winget install --id Ollama.Ollama -e` behavior;
    - add visible hardware suitability check/guidance for Mistral/Nemotron.
 
-4. Fresh Josef-only Windows retest release:
+4. Rename / identity pass:
+   - target user-facing/package/release name: `Catapult-Dabubu`;
+   - keep upstream Catapult/Dabdoob/C-AOL attribution;
+   - do not rename the GitHub repository without fresh explicit confirmation.
+
+5. Fresh Josef-only Windows retest release:
    - build/package current fixed state;
    - create/update clearly labelled GitHub Draft/prerelease test release;
    - attach Windows asset, checksums, build notes;
@@ -36,6 +41,7 @@ Raw intake: `doc/josef-windows-debug-intake-2026-05-01.md`.
 
 - No release quarantine lift.
 - No public/stable/latest/final Lacapult release.
+- No GitHub repository rename without fresh explicit confirmation.
 - No C-AOL release work.
 - No real API calls/secrets/user-data mutation in automated gates.
 - No automated package install or model pull in proof without fresh explicit clearance.
@@ -46,6 +52,7 @@ Raw intake: `doc/josef-windows-debug-intake-2026-05-01.md`.
 - API AnyLLM smoke for missing setting default, progress/status copy, venv/package semantics.
 - Ollama smoke/fixtures for model persistence, readiness lights, split failure reporting, and hardware guidance.
 - `python3 tools/prove_lacapult_export_packaging.py` before release.
+- Static/source scan proving test-build naming surfaces were updated or intentionally retained.
 - `gh release view` proof after the test release.
 
 ## Trap list

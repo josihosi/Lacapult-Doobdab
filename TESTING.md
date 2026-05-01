@@ -21,6 +21,7 @@ Minimum evidence for this slice:
 - focused Godot UI smoke/static scans for titlebar/window metrics, popup/dialog/tooltip wrapping/bounds, and long-text wrapping/newlines;
 - API / AnyLLM setup proof for `backend_external_setup_proof_only` default/safe read, install-progress/status copy, and venv/package semantics without live secrets or unapproved pip installs;
 - Ollama setup proof for model-choice persistence, readiness-light text, split installer/server/model-pull failure reporting, and Mistral/Nemotron hardware guidance using fixtures where possible;
+- Catapult-Dabubu naming/identity surface scan for user-facing/package/release text, with explicit note for any intentionally retained Lacapult/internal/upstream references;
 - fresh package proof from current `main` using `python3 tools/prove_lacapult_export_packaging.py`;
 - Windows package shape includes `Lacapult-Doobdab.exe` and `utils/7za.exe`;
 - checksums/build manifest exist for the attached assets;

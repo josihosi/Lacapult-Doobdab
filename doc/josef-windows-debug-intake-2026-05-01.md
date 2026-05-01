@@ -152,3 +152,12 @@ Follow-up candidates after batch:
 - add default + safe read fallback before any external setup confirmation;
 - prove missing setting no longer logs errors;
 - then reproduce Ollama setup to expose the real installer/model-pull result separately.
+
+
+### Debug note 10 — Rename target Catapult-Dabubu
+
+Source: Josef Discord `#allgemein`, 2026-05-01 22:01 Europe/Vienna.
+
+Josef added that the rename is also an item: target name `Catapult-Dabubu`. Earlier chat context framed this as a possible repo/product rename from `Lacapult-Doobdab`.
+
+Initial classification: naming/product-identity follow-up that should be considered before the next Josef test release if the artifact should carry the new name. Because a GitHub repository rename is an external/public repository operation, implementation should distinguish internal/product/package/release naming from an actual GitHub repo rename; the latter needs fresh explicit confirmation before execution.
