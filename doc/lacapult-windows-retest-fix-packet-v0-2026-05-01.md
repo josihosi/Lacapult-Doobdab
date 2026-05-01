@@ -1,6 +1,6 @@
 # Lacapult Windows retest fix packet v0 — 2026-05-01
 
-Status: active / greenlit from Josef Windows test feedback.
+Status: locally implemented / Josef Windows retest pending.
 
 Imagination source: `doc/lacapult-windows-retest-fix-imagination-source-2026-05-01.md`.
 
@@ -8,7 +8,7 @@ Raw intake: `doc/josef-windows-debug-intake-2026-05-01.md`.
 
 ## Summary
 
-Fix the Windows retest blockers Josef found in the Lacapult test build, then produce another clearly labelled Josef-only Windows test release. The work is one active follow-up lane with three ordered repair packets: shared popup/window layout, API / AnyLLM setup semantics/progress, and Ollama model/readiness/hardware-check behavior.
+Fix the Windows retest blockers Josef found in the Lacapult test build, then produce another clearly labelled Josef-only Windows test release. The local repair/release slice is complete: shared popup/window layout, API / AnyLLM setup semantics/progress, Ollama model/readiness/hardware-check behavior, `Catapult-Dabubu` identity surfaces, packaging, and the Josef-only Draft/prerelease retest release are implemented/proofed. Remaining closure requires Josef's real Windows retest from the fresh package.
 
 This does not lift release quarantine and does not authorize a public/final/stable Lacapult release.
 
@@ -62,13 +62,14 @@ This does not lift release quarantine and does not authorize a public/final/stab
 
 ## Success state
 
-- [ ] Popup/dialog/tooltip content wraps or scrolls and is no longer cut off by launcher bounds in the tested Windows flows.
-- [ ] Top row/window metrics receive a follow-up fix and remain explicitly Windows-retest-gated.
-- [ ] `backend_external_setup_proof_only` missing-setting log spam is gone.
-- [ ] Long-running install actions visibly show in-progress/working state and do not imply a crash while commands continue.
-- [ ] API / AnyLLM setup has coherent venv/package behavior and clear UI copy.
-- [ ] Ollama model selection persists, readiness lights are meaningful, model pull/install failures are separated, and Mistral/Nemotron hardware suitability is visible or honestly bounded.
-- [ ] Automated gates cover scene/UI smoke plus source/static checks for the repaired seams without external installs/model pulls/API calls/secrets.
+- [x] Local popup/dialog/tooltip repair is implemented/proofed with bounded/autowrapped backend confirmation dialogs and deliberate newlines in long setup copy.
+- [ ] Josef confirms on Windows that popup/dialog/tooltip content is no longer cut off by launcher bounds in the tested flows.
+- [x] Top row/window metrics received a follow-up local fix (`760x820`) and remain explicitly Windows-retest-gated.
+- [x] `backend_external_setup_proof_only` has a safe default/read path in local smoke, so the missing-setting log-spam class is locally repaired.
+- [x] Long-running install actions set visible in-progress/working state before non-proof external commands.
+- [x] API / AnyLLM setup has coherent venv/package behavior and clear UI copy (`Create venv only` vs `Install AnyLLM packages`).
+- [x] Ollama model selection persists, readiness lights are meaningful, model pull/install failures are separated, and Mistral/Nemotron hardware suitability is visible or honestly bounded in local proof.
+- [x] Automated gates cover scene/UI smoke plus source/static checks for the repaired seams without external installs/model pulls/API calls/secrets.
 - [x] A fresh Josef-only Windows test release exists with Windows asset, checksums/build notes, and verified GitHub Draft/prerelease shape.
 
 ## Testing expectations
