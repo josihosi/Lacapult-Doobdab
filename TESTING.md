@@ -15,7 +15,7 @@ Use the smallest evidence that honestly matches the change.
 
 ## Current proof target
 
-**Active validation target:** `Lacapult Windows retest fix v0`. Josef completed a Windows test pass on 2026-05-01 and explicitly cleared packaging/reactivation plus another testing release. This is not a quarantine lift or final/public-confidence claim.
+**Active validation target:** `Lacapult Windows retest fix v0` is packaged for Josef retest. Josef completed a Windows test pass on 2026-05-01 and explicitly cleared packaging/reactivation plus another testing release. The fresh Draft/prerelease test package exists; remaining validation is Josef/Windows visual confirmation. This is not a quarantine lift or final/public-confidence claim.
 
 Minimum evidence for this slice:
 - focused Godot UI smoke/static scans for titlebar/window metrics, popup/dialog/tooltip wrapping/bounds, and long-text wrapping/newlines;
@@ -27,6 +27,15 @@ Minimum evidence for this slice:
 - checksums/build manifest exist for the attached assets;
 - GitHub release is Draft if feasible, or prerelease if draft asset access is awkward;
 - release notes clearly say Josef Windows validation only, not public/stable/final confidence.
+
+Catapult-Dabubu Josef Windows retest release evidence landed on 2026-05-01:
+
+- GitHub Draft/prerelease test release: `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-cb4272b172c83b11deff`.
+- Tag/name reported by `gh release view`: `catapult-dabubu-josef-windows-retest-2026-05-01` / `Catapult-Dabubu Josef Windows retest build 2026-05-01`; target commitish `9c13fdbd9843d01a9debdaf818a7b27b68b6dde6`.
+- Attached Windows asset: `Catapult-Dabubu-windows-unsigned.zip`, 66,565,257 bytes, SHA-256 `d001c22f2adf34b51879ae326cdd6d85334d630c30cf480b31da520608475753`.
+- Attached checksums/manifest: `SHA256SUMS.txt` SHA-256 `d1ad293c441cccc05e95a67e5f395e8b3e4d174ea5470d415d098987e7d7b684`; `manifest.json` SHA-256 `dcaadfeebded7f2fcccd7dfc721519ca76ee84f636c68bb02671bd8107d33b36`.
+- Release copy says Josef-only Windows validation, not stable/latest/final/public confidence and not a C-AOL release.
+- Safety boundary: Draft/prerelease test release only; no quarantine lift, no public/final release claim, no repository rename, no package/model install, no live API call, and no real user-data mutation as proof.
 
 Windows retest fix local repair evidence landed on 2026-05-01:
 

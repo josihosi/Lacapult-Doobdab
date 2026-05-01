@@ -89,4 +89,6 @@ Rename/identity checkpoint added locally after the repair slice: `Catapult-Dabub
 
 Fresh local package proof now exists: `.proof-cache/lacapult-export/packages/Catapult-Dabubu-windows-unsigned.zip` (66,565,257 bytes, SHA-256 `d001c22f2adf34b51879ae326cdd6d85334d630c30cf480b31da520608475753`) with entries `Catapult-Dabubu.exe`, `utils/7-ZIP_LICENSE`, and `utils/7za.exe`.
 
-Remaining active scope: create/update the Josef-only `Catapult-Dabubu` GitHub Draft/prerelease test release and verify it with `gh release view`. Windows visual confirmation remains separate; the local smoke is not a Windows appearance proof.
+Release checkpoint: the Josef-only `Catapult-Dabubu` GitHub Draft/prerelease test release was created and verified with `gh release view`: `catapult-dabubu-josef-windows-retest-2026-05-01` / `Catapult-Dabubu Josef Windows retest build 2026-05-01`, URL `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-cb4272b172c83b11deff`. Assets are `Catapult-Dabubu-windows-unsigned.zip`, `SHA256SUMS.txt`, and `manifest.json`.
+
+Remaining active scope: Josef Windows retest from the fresh Draft/prerelease. Windows visual confirmation remains separate; the local smoke and package/release proof are not Windows appearance proof.

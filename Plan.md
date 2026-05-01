@@ -18,7 +18,7 @@ If these disagree, `Plan.md` wins; repair the other file instead of inventing a 
 
 ## Current status
 
-**State:** RELEASE QUARANTINE ACTIVE / WINDOWS RETEST FIX ACTIVE
+**State:** RELEASE QUARANTINE ACTIVE / JOSEF WINDOWS RETEST PACKAGE READY
 
 The 2026-04-26 Lacapult prerelease family is quarantined as Draft after Josef reported that the download looked like CAOL rather than clearly like Lacapult. No Lacapult release from that family should be republished until the quarantine/identity investigation is closed and Josef/Schani explicitly re-greenlight.
 
@@ -62,7 +62,7 @@ Scope order:
 
 This active lane does **not** lift the release quarantine, authorize a public/final release, start C-AOL release work, permit automated live API calls/secrets/model pulls/package installs outside explicit confirmation and proof boundaries, or rename the GitHub repository without fresh explicit confirmation.
 
-2026-05-01 local implementation checkpoint: scope-order items 1-4 are locally patched/proofed for enlarged window metrics, bounded/wrapped setup dialogs, API venv/package semantics, safe `backend_external_setup_proof_only` default, progress-before-blocking external commands, Ollama readiness/failure/hardware guidance, and `Catapult-Dabubu` user-facing/package naming. Remaining active work is the fresh Josef-only Windows test package/release plus real Windows visual confirmation; this is not a quarantine lift.
+2026-05-01 retest package checkpoint: scope-order items 1-4 are patched/proofed for enlarged window metrics, bounded/wrapped setup dialogs, API venv/package semantics, safe `backend_external_setup_proof_only` default, progress-before-blocking external commands, Ollama readiness/failure/hardware guidance, and `Catapult-Dabubu` user-facing/package naming. The fresh Josef-only Windows Draft/prerelease test release exists at `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-cb4272b172c83b11deff` with tag/name verified by `gh release view` as `catapult-dabubu-josef-windows-retest-2026-05-01` / `Catapult-Dabubu Josef Windows retest build 2026-05-01`. Remaining active evidence is real Josef/Windows visual confirmation; this is not a quarantine lift.
 
 ## Active debug-note correction stack
 

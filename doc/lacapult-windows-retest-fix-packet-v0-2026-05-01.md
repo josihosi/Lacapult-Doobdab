@@ -69,7 +69,7 @@ This does not lift release quarantine and does not authorize a public/final/stab
 - [ ] API / AnyLLM setup has coherent venv/package behavior and clear UI copy.
 - [ ] Ollama model selection persists, readiness lights are meaningful, model pull/install failures are separated, and Mistral/Nemotron hardware suitability is visible or honestly bounded.
 - [ ] Automated gates cover scene/UI smoke plus source/static checks for the repaired seams without external installs/model pulls/API calls/secrets.
-- [ ] A fresh Josef-only Windows test release exists with Windows asset, checksums/build notes, and verified GitHub Draft/prerelease shape.
+- [x] A fresh Josef-only Windows test release exists with Windows asset, checksums/build notes, and verified GitHub Draft/prerelease shape.
 
 ## Testing expectations
 
@@ -82,4 +82,4 @@ This does not lift release quarantine and does not authorize a public/final/stab
 
 ## Handoff caution
 
-Josef's notes are user-visible Windows evidence. Do not close this lane from macOS-only confidence. Local smoke can prove source/scene behavior, but the final status remains waiting on the new Windows retest after the fresh artifact exists.
+Josef's notes are user-visible Windows evidence. Do not close this lane from macOS-only confidence. Local smoke and the Draft/prerelease package prove source/package/release shape, but the final status remains waiting on the new Josef Windows retest.

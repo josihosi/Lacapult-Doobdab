@@ -15,7 +15,7 @@ Handoff: `doc/alex-lacapult-windows-retest-fix-handoff-2026-05-01.md`.
 - [x] Run focused UI/static/backend setup gates without live secrets/model pulls/user-data mutation.
 - [x] Apply `Catapult-Dabubu` identity pass to safe user-facing/package surfaces while retaining upstream attribution and current GitHub repo URL.
 - [x] Build/package a fresh Windows unsigned `Catapult-Dabubu` test artifact.
-- [ ] Create or update a clearly labelled Josef-only GitHub Draft/prerelease test release with `Catapult-Dabubu` Windows asset, checksums/build notes, and `gh release view` verification.
+- [x] Create or update a clearly labelled Josef-only GitHub Draft/prerelease test release with `Catapult-Dabubu` Windows asset, checksums/build notes, and `gh release view` verification.
 
 ## Completed debug-note stack
 
@@ -53,7 +53,8 @@ Handoff: `doc/alex-lacapult-windows-retest-fix-handoff-2026-05-01.md`.
 ## Josef playtest ledger
 
 - [ ] Real Windows first-launch click-through before any renewed confidence/republish claim: extracted package, first window, first visible tab, release row wording, and install/download impression.
-  - [ ] Follow up on 2026-05-01 Windows screenshot: top row/titlebar remains visibly wrong; likely needs larger default window and/or downward content/custom-chrome offset, then a new Windows retest build.
+  - [x] Follow up on 2026-05-01 Windows screenshot: top row/titlebar remains visibly wrong; likely needs larger default window and/or downward content/custom-chrome offset, then a new Windows retest build.
+  - [ ] Josef retests the fresh `Catapult-Dabubu` Windows Draft/prerelease package and reports whether the top row/popup/layout repairs hold on Windows.
 
 ## Greenlit implementation stack
 

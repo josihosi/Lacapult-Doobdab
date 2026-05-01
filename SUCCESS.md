@@ -36,7 +36,7 @@ Success state:
 
 ## Lacapult Windows retest fix v0
 
-Status: ACTIVE / GREENLIT / JOSEF WINDOWS FEEDBACK PACKET
+Status: READY FOR JOSEF WINDOWS RETEST / QUARANTINE STILL ACTIVE
 
 Success state:
 - [ ] Shared popup/dialog/tooltip layout no longer cuts off content in the Windows-reported flows after Josef/Windows retest.
@@ -48,7 +48,8 @@ Success state:
 - [x] Ollama model selection/default, readiness lights, installer/model-pull failure separation, Windows `Ollama.Ollama` copy, and Mistral/Nemotron hardware guidance are locally proofed.
 - [x] `Catapult-Dabubu` identity pass is reflected in source/package proof surfaces where safe, with upstream lineage still credited and GitHub repo rename held for fresh confirmation.
 - [x] Fresh Josef-only `Catapult-Dabubu` Windows package is built/checksumed locally without lifting quarantine.
-- [ ] Fresh Josef-only `Catapult-Dabubu` GitHub Draft/prerelease test release is attached and verified without lifting quarantine.
+- [x] Fresh Josef-only `Catapult-Dabubu` GitHub Draft/prerelease test release is attached and verified without lifting quarantine.
+- [ ] Josef completes Windows retest from the fresh Draft/prerelease and confirms the top-row/popup/layout repairs on Windows.
 
 Canonical docs:
 - `doc/lacapult-windows-retest-fix-imagination-source-2026-05-01.md`
