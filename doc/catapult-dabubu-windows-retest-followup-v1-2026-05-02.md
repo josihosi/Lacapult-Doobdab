@@ -1,6 +1,6 @@
 # Catapult-Dabubu Windows retest follow-up v1 — installer vision / status dots / text density
 
-Status: LOCAL PROOFED / TEST RELEASE PENDING / QUARANTINE STILL ACTIVE
+Status: READY FOR JOSEF WINDOWS RETEST / QUARANTINE STILL ACTIVE
 
 Imagination source: `doc/catapult-dabubu-installer-vision-retest-imagination-source-2026-05-02.md`.
 
@@ -78,7 +78,7 @@ Schani verdict: the vision is not fulfilled yet. The launcher currently still as
 - [x] Repeated identical Summarizer dry-run/status-only clicks do not spam indistinguishable duplicate log lines.
 - [x] Shared overcrowding/top-bar fix enlarges the window and restores native resizable behavior or equivalent autofit evidence.
 - [x] A fresh Josef-only Windows test build is produced after the fixes.
-- [ ] A fresh Josef-only Windows Draft/prerelease is created/updated and verified after the fixes.
+- [x] A fresh Josef-only Windows Draft/prerelease is created/updated and verified after the fixes.
 - [ ] Josef confirms on Windows that API install semantics, text density, and colored dots are acceptable.
 
 ## Testing expectations
