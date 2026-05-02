@@ -62,6 +62,8 @@ Scope order:
 6. Shared layout fix: reduce overcrowding/top-bar risk with larger native-resizable window/autofit-style proof.
 7. Fresh Josef-only Windows retest build/release after local proof.
 
+2026-05-02 test release: Draft/prerelease `catapult-dabubu-josef-windows-retest-v1-2026-05-02` / `Catapult-Dabubu Josef Windows retest build v1 2026-05-02`, source commit `655da7831c8cc1a6bd68b4b495307615106ecf9a`, URL `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-6c700e3ce1114782def5`. Attached Windows asset `Catapult-Dabubu-windows-unsigned.zip`, 66,587,417 bytes, SHA-256 `a0ae09628349df1f6840b68b6328f8ef066892f0a7a1a8dc6f5a70f8ebe3ac5d`, plus `SHA256SUMS.txt`, `manifest.json`, and build notes. This is Josef-only retest packaging, not a quarantine lift.
+
 This follow-up supersedes the prior “ready for Josef Windows retest” state for the current test build. It does **not** lift release quarantine, authorize a public/final release, permit a GitHub repo rename, start C-AOL release work, or allow automated real package installs/API calls/secrets/user-data mutation outside explicit confirmation/proof boundaries.
 
 ## Previous Windows retest fix lane

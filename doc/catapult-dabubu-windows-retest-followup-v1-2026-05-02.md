@@ -106,4 +106,4 @@ Local implementation/proof now covers the non-release v1 repair scope:
 
 Evidence classes: source/static proof, isolated-HOME Godot UI smokes, sandboxed backend/config proof. Safety boundary: no live API call, API secret readout, package-manager install, Python venv creation, Ollama model pull, release publication, or real user-data mutation.
 
-Package proof has now produced the fresh Windows unsigned test artifact. Remaining: upload/update a fresh Josef-only Windows Draft/prerelease, verify with `gh release view`, then await Josef Windows confirmation. Release quarantine remains active.
+Package proof produced the fresh Windows unsigned test artifact, and the Josef-only Draft/prerelease `catapult-dabubu-josef-windows-retest-v1-2026-05-02` is uploaded/verified at `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-6c700e3ce1114782def5` with Windows asset `Catapult-Dabubu-windows-unsigned.zip` (66,587,417 bytes, SHA-256 `a0ae09628349df1f6840b68b6328f8ef066892f0a7a1a8dc6f5a70f8ebe3ac5d`). Remaining: Josef Windows confirmation. Release quarantine remains active.

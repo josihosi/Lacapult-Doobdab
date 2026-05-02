@@ -36,7 +36,7 @@ Success state:
 
 ## Catapult-Dabubu Windows retest follow-up v1
 
-Status: LOCAL PROOFED / TEST RELEASE PENDING / QUARANTINE STILL ACTIVE
+Status: READY FOR JOSEF WINDOWS RETEST / QUARANTINE STILL ACTIVE
 
 Success state:
 - [x] API / AnyLLM setup has an obvious path that creates/uses the venv and installs required AnyLLM packages/dependencies, with status/progress for each phase.
@@ -50,8 +50,8 @@ Success state:
 - [x] Repeated identical Summarizer dry-run/status-only clicks are de-spammed or clearly marked as refreshes while remaining no-mutation.
 - [x] UI/static smoke proves colored status indicators carry explicit red/green/yellow/gray states and no old fragile light-glyph path remains in visible setup status.
 - [x] A fresh Josef-only Windows test build is produced after the fixes.
-- [ ] A fresh Josef-only Windows Draft/prerelease is created/updated and verified after the fixes.
-- [ ] Josef confirms on Windows that API install semantics, text density, and colored dots are acceptable.
+- [x] A fresh Josef-only Windows Draft/prerelease is created/updated and verified after the fixes.
+- [ ] Josef confirms on Windows that API install semantics, text density, colored dots, Ollama flow, Mods/Summarizer clarity, and resized/native window are acceptable.
 
 Canonical docs:
 - `doc/catapult-dabubu-installer-vision-retest-imagination-source-2026-05-02.md`

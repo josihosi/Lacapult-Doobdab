@@ -15,7 +15,7 @@ Use the smallest evidence that honestly matches the change.
 
 ## Current proof target
 
-**Active validation target:** `Catapult-Dabubu Windows retest follow-up v1` is active after Josef's 2026-05-02 Windows retest. The previous Draft/prerelease package exposed remaining blockers: API / LLM setup does not install AnyLLM packages with venv creation, the visible LLM/API setup page still has too much background/helper text, and Unicode readiness lights do not render acceptably on Windows. This is not a quarantine lift or final/public-confidence claim.
+**Active validation target:** `Catapult-Dabubu Windows retest follow-up v1` is ready for Josef Windows retest after local proof and Draft/prerelease publication. The previous Draft/prerelease package exposed remaining blockers: API / LLM setup does not install AnyLLM packages with venv creation, the visible LLM/API setup page still has too much background/helper text, and Unicode readiness lights do not render acceptably on Windows. This is not a quarantine lift or final/public-confidence claim.
 
 Minimum evidence for the active v1 slice:
 - source/static scan for old Unicode/emoji light glyphs and remaining long visible setup text;
@@ -33,7 +33,8 @@ Catapult-Dabubu Windows retest follow-up v1 local evidence landed on 2026-05-02:
 - Godot UI smoke: `HOME=$(mktemp -d /tmp/lacapult-v1-home.XXXXXX) godot --path . --no-window -s tools/godot_windows_retest_followup_v1_smoke.gd` proves proof-only API venv + AnyLLM package intent, explicit colored big-dot status rows for API/Ollama/hardware, fixture RAM/VRAM rendering, and no Ollama pull queued while command/server are not ready.
 - Regression UI smokes also pass with isolated HOME: `tools/godot_api_anyllm_workflow_smoke.gd`, `tools/godot_backend_setup_save_check_smoke.gd`, `tools/godot_ollama_workflow_smoke.gd`, `tools/godot_llm_tab_declutter_smoke.gd`, `tools/godot_windows_retest_fix_smoke.gd`, and `tools/godot_window_chrome_inspection.gd`.
 - Package proof: `python3 tools/prove_lacapult_export_packaging.py` exported the fresh Windows package `.proof-cache/lacapult-export/packages/Catapult-Dabubu-windows-unsigned.zip` (66,587,417 bytes, SHA-256 `a0ae09628349df1f6840b68b6328f8ef066892f0a7a1a8dc6f5a70f8ebe3ac5d`) with entries `Catapult-Dabubu.exe`, `utils/7-ZIP_LICENSE`, and `utils/7za.exe`; package `SHA256SUMS.txt` SHA-256 is `fdd2eb34f6bdd6fd5a56a6d30ff225e6c7fdadb15939064e2bba50eb778199cf`.
-- Safety boundary: no live API call, API secret readout, package-manager install, Python venv creation, Ollama model pull, release publication, or real Application Support/user-data mutation was performed.
+- GitHub Draft/prerelease verification: `gh release view catapult-dabubu-josef-windows-retest-v1-2026-05-02 --repo josihosi/Lacapult-Doobdab --json tagName,name,isDraft,isPrerelease,targetCommitish,url,assets` reported Draft=true, Prerelease=true, target `655da7831c8cc1a6bd68b4b495307615106ecf9a`, URL `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-6c700e3ce1114782def5`, and uploaded assets `Catapult-Dabubu-windows-unsigned.zip`, `SHA256SUMS.txt`, `manifest.json`, and `Catapult-Dabubu-josef-windows-retest-v1-build-notes-2026-05-02.md`.
+- Safety boundary: no live API call, API secret readout, package-manager install, Python venv creation, Ollama model pull, public/final release publication, or real Application Support/user-data mutation was performed.
 
 Previous validation target: `Lacapult Windows retest fix v0` produced the 2026-05-01 Draft/prerelease package, but Josef's 2026-05-02 retest failed the installer-vision/status-light/text-density bar. Keep its evidence below as footing, not closure.
 

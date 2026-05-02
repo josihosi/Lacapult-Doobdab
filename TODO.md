@@ -20,7 +20,7 @@ Raw intake: `doc/josef-windows-debug-intake-2026-05-02.md`.
 - [x] Suppress or distinguish repeated identical Summarizer dry-run/status-only log spam while preserving no-mutation safety.
 - [x] Run focused UI/static/backend setup gates without live secrets/model pulls/user-data mutation or uncontrolled package installs.
 - [x] Build/package a fresh Windows unsigned `Catapult-Dabubu` test artifact after fixes.
-- [ ] Create or update a clearly labelled Josef-only GitHub Draft/prerelease test release with Windows asset, checksums/build notes, and `gh release view` verification.
+- [x] Create or update a clearly labelled Josef-only GitHub Draft/prerelease test release with Windows asset, checksums/build notes, and `gh release view` verification.
 
 ## Completed debug-note stack
 
@@ -60,7 +60,7 @@ Raw intake: `doc/josef-windows-debug-intake-2026-05-02.md`.
 - [ ] Real Windows first-launch click-through before any renewed confidence/republish claim: extracted package, first window, first visible tab, release row wording, and install/download impression.
   - [x] Follow up on 2026-05-01 Windows screenshot: top row/titlebar remains visibly wrong; likely needs larger default window and/or downward content/custom-chrome offset, then a new Windows retest build.
   - [x] Josef retested the fresh `Catapult-Dabubu` Windows Draft/prerelease package on 2026-05-02 and found remaining blockers: AnyLLM packages not installed with venv creation, too much background text, and broken Unicode readiness lights.
-  - [ ] Josef retests the next v1 Windows Draft/prerelease package after the installer-vision/status-dot fixes.
+  - [ ] Josef retests the v1 Windows Draft/prerelease package `catapult-dabubu-josef-windows-retest-v1-2026-05-02` after the installer-vision/status-dot/layout fixes.
 
 ## Greenlit implementation stack
 
