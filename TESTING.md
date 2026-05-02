@@ -15,9 +15,19 @@ Use the smallest evidence that honestly matches the change.
 
 ## Current proof target
 
-**Active validation target:** `Lacapult Windows retest fix v0` is packaged for Josef retest. Josef completed a Windows test pass on 2026-05-01 and explicitly cleared packaging/reactivation plus another testing release. The fresh Draft/prerelease test package exists; remaining validation is Josef/Windows visual confirmation. This is not a quarantine lift or final/public-confidence claim.
+**Active validation target:** `Catapult-Dabubu Windows retest follow-up v1` is active after Josef's 2026-05-02 Windows retest. The previous Draft/prerelease package exposed remaining blockers: API / LLM setup does not install AnyLLM packages with venv creation, the visible LLM/API setup page still has too much background/helper text, and Unicode readiness lights do not render acceptably on Windows. This is not a quarantine lift or final/public-confidence claim.
 
-Minimum evidence for this slice:
+Minimum evidence for the active v1 slice:
+- source/static scan for old Unicode/emoji light glyphs and remaining long visible setup text;
+- Godot UI smoke for explicit colored status-dot states and reduced LLM/API setup copy density;
+- sandbox/proof-mode API AnyLLM installer test that records venv + package install plan and status phases without using secrets or mutating the real environment;
+- package proof before any new Windows test build;
+- GitHub Draft/prerelease verification if a new Josef-only package is published;
+- Josef/Windows confirmation before closing the visible UI/status-light complaint.
+
+Previous validation target: `Lacapult Windows retest fix v0` produced the 2026-05-01 Draft/prerelease package, but Josef's 2026-05-02 retest failed the installer-vision/status-light/text-density bar. Keep its evidence below as footing, not closure.
+
+Prior v0 evidence for reference:
 - focused Godot UI smoke/static scans for titlebar/window metrics, popup/dialog/tooltip wrapping/bounds, and long-text wrapping/newlines;
 - API / AnyLLM setup proof for `backend_external_setup_proof_only` default/safe read, install-progress/status copy, and venv/package semantics without live secrets or unapproved pip installs;
 - Ollama setup proof for model-choice persistence, readiness-light text, split installer/server/model-pull failure reporting, and Mistral/Nemotron hardware guidance using fixtures where possible;

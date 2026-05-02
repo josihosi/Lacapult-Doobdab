@@ -34,12 +34,31 @@ Success state:
 - [x] Package 5 locally complete: window chrome investigation/fix root-cause class named, smallest CustomTitleBar metric seam patched/proofed, and bounded Windows confirmation checklist written.
 - [ ] Windows/Josef visual confirmation before any cross-platform chrome-fix claim.
 
-## Lacapult Windows retest fix v0
+## Catapult-Dabubu Windows retest follow-up v1
 
-Status: READY FOR JOSEF WINDOWS RETEST / QUARANTINE STILL ACTIVE
+Status: ACTIVE / GREENLIT FOLLOW-UP FROM JOSEF WINDOWS RETEST / QUARANTINE STILL ACTIVE
 
 Success state:
-- [ ] Shared popup/dialog/tooltip layout no longer cuts off content in the Windows-reported flows after Josef/Windows retest.
+- [ ] API / AnyLLM setup has an obvious path that creates/uses the venv and installs required AnyLLM packages/dependencies, with status/progress for each phase.
+- [ ] Automated/sandbox proof verifies the intended AnyLLM package-install command/plan without touching real user secrets or real environment.
+- [ ] Visible LLM/API setup copy is substantially reduced; controls/status/actions are visually primary.
+- [ ] Readiness indicators are implemented as Windows-safe colored dots/labels, not fragile emoji/Unicode traffic lights.
+- [ ] UI/static smoke proves colored status indicators carry explicit red/green/yellow/gray states and no old fragile light-glyph path remains in visible setup status.
+- [ ] A fresh Josef-only Windows test build/release is produced after the fixes.
+- [ ] Josef confirms on Windows that API install semantics, text density, and colored dots are acceptable.
+
+Canonical docs:
+- `doc/catapult-dabubu-installer-vision-retest-imagination-source-2026-05-02.md`
+- `doc/catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`
+- `doc/alex-catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`
+- `doc/josef-windows-debug-intake-2026-05-02.md`
+
+## Lacapult Windows retest fix v0
+
+Status: LOCAL PATCHED / RETEST FAILED ON WINDOWS / QUARANTINE STILL ACTIVE
+
+Success state:
+- [ ] Shared popup/dialog/tooltip/layout remains Windows-retest-gated; 2026-05-02 retest found broader installer-vision/text/status-light blockers now tracked in v1.
 - [x] Long backend setup popup/help text wraps via autowrap, bounded confirmation size, and deliberate newlines in local UI smoke.
 - [x] Top row/window metrics received a follow-up local fix: default/test window is now `760x820`; Windows visual confirmation remains required.
 - [x] `backend_external_setup_proof_only` has a safe default and local smoke proves safe-read false.
@@ -49,7 +68,7 @@ Success state:
 - [x] `Catapult-Dabubu` identity pass is reflected in source/package proof surfaces where safe, with upstream lineage still credited and GitHub repo rename held for fresh confirmation.
 - [x] Fresh Josef-only `Catapult-Dabubu` Windows package is built/checksumed locally without lifting quarantine.
 - [x] Fresh Josef-only `Catapult-Dabubu` GitHub Draft/prerelease test release is attached and verified without lifting quarantine.
-- [ ] Josef completes Windows retest from the fresh Draft/prerelease and confirms the top-row/popup/layout repairs on Windows.
+- [x] Josef completed a Windows retest from the fresh Draft/prerelease and reported remaining blockers; v1 follow-up is active.
 
 Canonical docs:
 - `doc/lacapult-windows-retest-fix-imagination-source-2026-05-01.md`

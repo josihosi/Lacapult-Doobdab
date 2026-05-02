@@ -18,7 +18,7 @@ If these disagree, `Plan.md` wins; repair the other file instead of inventing a 
 
 ## Current status
 
-**State:** RELEASE QUARANTINE ACTIVE / JOSEF WINDOWS RETEST PACKAGE READY
+**State:** RELEASE QUARANTINE ACTIVE / WINDOWS RETEST FOLLOW-UP ACTIVE
 
 The 2026-04-26 Lacapult prerelease family is quarantined as Draft after Josef reported that the download looked like CAOL rather than clearly like Lacapult. No Lacapult release from that family should be republished until the quarantine/identity investigation is closed and Josef/Schani explicitly re-greenlight.
 
@@ -49,9 +49,21 @@ Canonical packet: `doc/lacapult-josef-test-release-v0-2026-04-27.md`.
 
 Do not schedule repeated reminders for this. It is a ledger item, not an implementation blocker.
 
-## Active Windows retest fix lane
+## Active Windows retest follow-up lane
 
-**ACTIVE / GREENLIT: Lacapult Windows retest fix v0** - Josef completed the 2026-05-01 Windows test pass and explicitly asked to package the findings, reactivate the Lacapult worker, and produce another testing release. Canonical contract: `doc/lacapult-windows-retest-fix-packet-v0-2026-05-01.md`; imagination source: `doc/lacapult-windows-retest-fix-imagination-source-2026-05-01.md`; raw intake: `doc/josef-windows-debug-intake-2026-05-01.md`; executor handoff: `doc/alex-lacapult-windows-retest-fix-handoff-2026-05-01.md`.
+**ACTIVE / GREENLIT: Catapult-Dabubu Windows retest follow-up v1** - Josef retested the 2026-05-01 Catapult-Dabubu Windows build and reported that the product vision is still not fulfilled: API / LLM setup does not install AnyLLM packages with venv creation, background/helper text remains too full, and Unicode readiness lights fail on Windows. Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`; imagination source: `doc/catapult-dabubu-installer-vision-retest-imagination-source-2026-05-02.md`; raw intake: `doc/josef-windows-debug-intake-2026-05-02.md`; executor handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`.
+
+Scope order:
+1. API / AnyLLM installer semantics: one obvious setup path must create/use the venv and install required AnyLLM packages/dependencies, with distinct venv/package/progress/success/failure states.
+2. Text density reduction: LLM/API setup should show controls/status/actions first and remove or move broad background helper prose.
+3. Robust Windows-safe colored status dots: replace fragile Unicode/emoji lights with explicit red/green/yellow/gray colored dots/labels.
+4. Fresh Josef-only Windows retest build/release after local proof.
+
+This follow-up supersedes the prior “ready for Josef Windows retest” state for the current test build. It does **not** lift release quarantine, authorize a public/final release, permit a GitHub repo rename, start C-AOL release work, or allow automated real package installs/API calls/secrets/user-data mutation outside explicit confirmation/proof boundaries.
+
+## Previous Windows retest fix lane
+
+**LOCAL PATCHED / RETEST FAILED ON WINDOWS: Lacapult Windows retest fix v0** - Josef completed the 2026-05-01 Windows test pass and explicitly asked to package the findings, reactivate the Lacapult worker, and produce another testing release. Canonical contract: `doc/lacapult-windows-retest-fix-packet-v0-2026-05-01.md`; imagination source: `doc/lacapult-windows-retest-fix-imagination-source-2026-05-01.md`; raw intake: `doc/josef-windows-debug-intake-2026-05-01.md`; executor handoff: `doc/alex-lacapult-windows-retest-fix-handoff-2026-05-01.md`.
 
 Scope order:
 1. shared popup/window layout repair: top row/window metrics, clipped dialogs/tooltips, wrapping/newlines, and popup width bounds;
@@ -60,9 +72,9 @@ Scope order:
 4. locally complete rename / identity pass toward `Catapult-Dabubu` for user-facing/package/release naming, while preserving upstream attribution and retaining the current GitHub repo URL until explicitly renamed;
 5. fresh clearly labelled Josef-only Windows test release with `Catapult-Dabubu` package/checksums/build notes verified by `gh release view`.
 
-This active lane does **not** lift the release quarantine, authorize a public/final release, start C-AOL release work, permit automated live API calls/secrets/model pulls/package installs outside explicit confirmation and proof boundaries, or rename the GitHub repository without fresh explicit confirmation.
+This previous v0 lane did **not** lift the release quarantine, authorize a public/final release, start C-AOL release work, permit automated live API calls/secrets/model pulls/package installs outside explicit confirmation and proof boundaries, or rename the GitHub repository without fresh explicit confirmation.
 
-2026-05-01 retest package checkpoint: scope-order items 1-4 are patched/proofed for enlarged window metrics, bounded/wrapped setup dialogs, API venv/package semantics, safe `backend_external_setup_proof_only` default, progress-before-blocking external commands, Ollama readiness/failure/hardware guidance, and `Catapult-Dabubu` user-facing/package naming. The fresh Josef-only Windows Draft/prerelease test release exists at `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-cb4272b172c83b11deff` with tag/name verified by `gh release view` as `catapult-dabubu-josef-windows-retest-2026-05-01` / `Catapult-Dabubu Josef Windows retest build 2026-05-01`. Remaining active evidence is real Josef/Windows visual confirmation; this is not a quarantine lift.
+2026-05-01 retest package checkpoint: scope-order items 1-4 were patched/proofed for enlarged window metrics, bounded/wrapped setup dialogs, API venv/package semantics, safe `backend_external_setup_proof_only` default, progress-before-blocking external commands, Ollama readiness/failure/hardware guidance, and `Catapult-Dabubu` user-facing/package naming. The fresh Josef-only Windows Draft/prerelease test release exists at `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-cb4272b172c83b11deff` with tag/name verified by `gh release view` as `catapult-dabubu-josef-windows-retest-2026-05-01` / `Catapult-Dabubu Josef Windows retest build 2026-05-01`. Josef then found remaining Windows blockers on 2026-05-02; see the active v1 follow-up above. This is not a quarantine lift.
 
 ## Active debug-note correction stack
 

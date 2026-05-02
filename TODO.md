@@ -4,18 +4,18 @@ Short queue only. Remove finished items instead of turning this into a museum.
 
 ## Now
 
-**Active target:** Lacapult Windows retest fix v0.
+**Active target:** Catapult-Dabubu Windows retest follow-up v1.
 
-Canonical contract: `doc/lacapult-windows-retest-fix-packet-v0-2026-05-01.md`.
-Handoff: `doc/alex-lacapult-windows-retest-fix-handoff-2026-05-01.md`.
+Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`.
+Handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`.
+Raw intake: `doc/josef-windows-debug-intake-2026-05-02.md`.
 
-- [x] Fix shared popup/window layout locally: default/test window enlarged, confirmation dialogs bounded/wrapped, and long setup/help copy split with deliberate newlines.
-- [x] Fix API / AnyLLM setup locally: `backend_external_setup_proof_only` default/safe read, long-running install progress, and venv/package semantics.
-- [x] Fix Ollama setup locally: model selection persistence/default, readiness lights, split installer/server/model-pull reporting, Windows installer copy/status separation, and Mistral/Nemotron hardware guidance.
-- [x] Run focused UI/static/backend setup gates without live secrets/model pulls/user-data mutation.
-- [x] Apply `Catapult-Dabubu` identity pass to safe user-facing/package surfaces while retaining upstream attribution and current GitHub repo URL.
-- [x] Build/package a fresh Windows unsigned `Catapult-Dabubu` test artifact.
-- [x] Create or update a clearly labelled Josef-only GitHub Draft/prerelease test release with `Catapult-Dabubu` Windows asset, checksums/build notes, and `gh release view` verification.
+- [ ] Fix API / AnyLLM installer semantics: one obvious path creates/uses the venv and installs required AnyLLM packages/dependencies, with clear venv/package/progress/success/failure states.
+- [ ] Reduce visible LLM/API setup background/helper text so controls/status/actions are primary.
+- [ ] Replace fragile Unicode/emoji readiness lights with Windows-safe colored dots/labels using explicit red/green/yellow/gray rendering.
+- [ ] Run focused UI/static/backend setup gates without live secrets/model pulls/user-data mutation or uncontrolled package installs.
+- [ ] Build/package a fresh Windows unsigned `Catapult-Dabubu` test artifact after fixes.
+- [ ] Create or update a clearly labelled Josef-only GitHub Draft/prerelease test release with Windows asset, checksums/build notes, and `gh release view` verification.
 
 ## Completed debug-note stack
 
@@ -54,7 +54,8 @@ Handoff: `doc/alex-lacapult-windows-retest-fix-handoff-2026-05-01.md`.
 
 - [ ] Real Windows first-launch click-through before any renewed confidence/republish claim: extracted package, first window, first visible tab, release row wording, and install/download impression.
   - [x] Follow up on 2026-05-01 Windows screenshot: top row/titlebar remains visibly wrong; likely needs larger default window and/or downward content/custom-chrome offset, then a new Windows retest build.
-  - [ ] Josef retests the fresh `Catapult-Dabubu` Windows Draft/prerelease package and reports whether the top row/popup/layout repairs hold on Windows.
+  - [x] Josef retested the fresh `Catapult-Dabubu` Windows Draft/prerelease package on 2026-05-02 and found remaining blockers: AnyLLM packages not installed with venv creation, too much background text, and broken Unicode readiness lights.
+  - [ ] Josef retests the next v1 Windows Draft/prerelease package after the installer-vision/status-dot fixes.
 
 ## Greenlit implementation stack
 
