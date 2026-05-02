@@ -4,7 +4,7 @@
 "str_installed_mods_hidden"," (%s hidden)"
 "lbl_mod_repo","Downloadable%s:"
 "str_mod_repo_hidden"," (%s hidden)"
-"cbtn_stock_mods","Show stock"
+"cbtn_stock_mods","Show built-in game mods"
 "btn_delete_mods","Delete Selected"
 "cbtn_installed_mods","Show already installed"
 "btn_add_sel_mods","Add Selected"
@@ -19,7 +19,7 @@
 "str_mod_description","Description:"
 ,
 "tooltip_mod_location","Location: %s"
-"tooltip_stock_mods","Show mods from data/mods on this list."
+"tooltip_stock_mods","Include C-AOL built-in mods from data/mods in this mod inventory and summarizer list."
 "tooltip_installed_mods","Show already installed mods on this list\nin case you want to re-install them."
 "tooltip_delete_mods","Remove selected mods from your game installation."
 "tooltip_add_sel_mods","Add selected mods to your game installation."

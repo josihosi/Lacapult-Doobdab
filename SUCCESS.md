@@ -36,14 +36,19 @@ Success state:
 
 ## Catapult-Dabubu Windows retest follow-up v1
 
-Status: ACTIVE / GREENLIT FOLLOW-UP FROM JOSEF WINDOWS RETEST / QUARANTINE STILL ACTIVE
+Status: LOCAL PROOFED / WINDOWS TEST BUILD PENDING / QUARANTINE STILL ACTIVE
 
 Success state:
-- [ ] API / AnyLLM setup has an obvious path that creates/uses the venv and installs required AnyLLM packages/dependencies, with status/progress for each phase.
-- [ ] Automated/sandbox proof verifies the intended AnyLLM package-install command/plan without touching real user secrets or real environment.
-- [ ] Visible LLM/API setup copy is substantially reduced; controls/status/actions are visually primary.
-- [ ] Readiness indicators are implemented as Windows-safe colored dots/labels, not fragile emoji/Unicode traffic lights.
-- [ ] UI/static smoke proves colored status indicators carry explicit red/green/yellow/gray states and no old fragile light-glyph path remains in visible setup status.
+- [x] API / AnyLLM setup has an obvious path that creates/uses the venv and installs required AnyLLM packages/dependencies, with status/progress for each phase.
+- [x] Automated/sandbox proof verifies the intended AnyLLM package-install command/plan without touching real user secrets or real environment.
+- [x] Visible LLM/API setup copy is substantially reduced; controls/status/actions are visually primary.
+- [x] Readiness indicators are implemented as Windows-safe big colored dots/labels on API and Ollama pages, not fragile emoji/Unicode traffic lights.
+- [x] Ollama hardware check measures RAM/VRAM and reports explicit runnability state; install/pull flow is serialized with long-wait warning.
+- [x] Mods/summarizer inventory label is plain built-in/mod inventory wording, not unclear `Show Stock`; Windows bottom cutoff remains visually checked.
+- [x] C-AOL Downloadable empty-state and Summarizer status-only/create path are discoverable.
+- [x] Window/top-bar overcrowding is addressed with larger native-resizable/autofit-style layout proof.
+- [x] Repeated identical Summarizer dry-run/status-only clicks are de-spammed or clearly marked as refreshes while remaining no-mutation.
+- [x] UI/static smoke proves colored status indicators carry explicit red/green/yellow/gray states and no old fragile light-glyph path remains in visible setup status.
 - [ ] A fresh Josef-only Windows test build/release is produced after the fixes.
 - [ ] Josef confirms on Windows that API install semantics, text density, and colored dots are acceptable.
 

@@ -30,9 +30,9 @@ func _run() -> void:
 
 	var all_text = _collect_visible_text(ui)
 	_require(all_text.find("LLM") >= 0, "LLM title did not render")
-	_require(all_text.find("Choose how C-AOL should reach an LLM backend") >= 0, "short intro did not render")
-	_require(all_text.find("Use an API provider through AnyLLM") >= 0, "API helper did not render")
-	_require(all_text.find("300-400 tokens") >= 0, "API token evidence copy did not render")
+	_require(all_text.find("Choose API or local Ollama setup.") >= 0, "compact intro did not render")
+	_require(all_text.find("API path: choose provider/model") >= 0, "compact API helper did not render")
+	_require(all_text.find("300-400 tokens") < 0, "old API token evidence copy still rendered")
 	_require(all_text.find("around 1000 tokens") < 0 and all_text.find("1000 tokens") < 0, "stale token copy rendered")
 	_require(all_text.find("OpenVINO") < 0, "OpenVINO rendered in visible LLM setup UI")
 
@@ -46,7 +46,7 @@ func _run() -> void:
 	ui._refresh_backend_setup_controls()
 	yield(self, "idle_frame")
 	all_text = _collect_visible_text(ui)
-	_require(all_text.find("Use ollama for local LLM utilization.") >= 0, "Ollama helper did not render")
+	_require(all_text.find("Ollama path: Check hardware/readiness") >= 0, "compact Ollama helper did not render")
 	_require(all_text.find("OpenVINO") < 0, "OpenVINO rendered after Ollama mode switch")
 
 	var scene = load("res://scenes/Catapult.tscn")
@@ -57,7 +57,7 @@ func _run() -> void:
 	inst.free()
 
 	print("LLM tab de-clutter UI smoke passed")
-	print("  rendered title/helper: LLM / short intro / API 300-400 token note / Ollama helper")
+	print("  rendered title/helper: LLM / compact intro / compact API and Ollama helpers")
 	print("  visible setup choices: API / AnyLLM, Ollama local")
 	print("  hidden support boundary: OpenVINO absent from visible setup UI; scene still loads")
 	_exit_code = 0
@@ -79,6 +79,8 @@ func _collect_visible_text_into(node: Node, parts: Array) -> void:
 		parts.append(node.text)
 	elif node is LineEdit:
 		parts.append(node.placeholder_text)
+	elif node is TextEdit:
+		parts.append(node.text)
 	elif node is OptionButton:
 		for i in range(node.get_item_count()):
 			parts.append(node.get_item_text(i))

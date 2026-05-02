@@ -10,10 +10,15 @@ Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v1-2026-05-02.m
 Handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`.
 Raw intake: `doc/josef-windows-debug-intake-2026-05-02.md`.
 
-- [ ] Fix API / AnyLLM installer semantics: one obvious path creates/uses the venv and installs required AnyLLM packages/dependencies, with clear venv/package/progress/success/failure states.
-- [ ] Reduce visible LLM/API setup background/helper text so controls/status/actions are primary.
-- [ ] Replace fragile Unicode/emoji readiness lights with Windows-safe colored dots/labels using explicit red/green/yellow/gray rendering.
-- [ ] Run focused UI/static/backend setup gates without live secrets/model pulls/user-data mutation or uncontrolled package installs.
+- [x] Fix API / AnyLLM installer semantics: one obvious path creates/uses the venv and installs required AnyLLM packages/dependencies, with clear venv/package/progress/success/failure states.
+- [x] Reduce visible LLM/API setup background/helper text so controls/status/actions are primary.
+- [x] Replace fragile Unicode/emoji readiness lights with Windows-safe big colored dots/labels using explicit red/green/yellow/gray rendering on API and Ollama pages.
+- [x] Replace Ollama hardware recommendation prose with measured RAM/VRAM hardware check, wait warning, and serialized install/pull behavior.
+- [x] Rename confusing Mods `Show Stock` copy to plain built-in/mod inventory wording and preserve Windows bottom-cutoff screenshot as a visual check item.
+- [x] Clarify C-AOL Downloadable empty-state and Summarizer status-only vs creation/apply path.
+- [x] Address overcrowding/top bar with larger native-resizable window/autofit-style shared layout fix.
+- [x] Suppress or distinguish repeated identical Summarizer dry-run/status-only log spam while preserving no-mutation safety.
+- [x] Run focused UI/static/backend setup gates without live secrets/model pulls/user-data mutation or uncontrolled package installs.
 - [ ] Build/package a fresh Windows unsigned `Catapult-Dabubu` test artifact after fixes.
 - [ ] Create or update a clearly labelled Josef-only GitHub Draft/prerelease test release with Windows asset, checksums/build notes, and `gh release view` verification.
 

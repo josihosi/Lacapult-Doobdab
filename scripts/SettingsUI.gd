@@ -17,6 +17,7 @@ var _caol_summarizer_world_select: OptionButton = null
 var _caol_summarizer_world_names := []
 var _caol_summarizer_mod_select: OptionButton = null
 var _caol_summarizer_selected_mod_ids := []
+var _last_caol_dry_run_status_message := ""
 
 onready var _root = $"/root/Catapult"
 onready var _tabs = $"/root/Catapult/Main/Tabs"
@@ -79,7 +80,7 @@ func _add_caol_mod_bridge_status_controls() -> void:
 	add_child(section)
 
 	var title = Label.new()
-	title.text = "C-AOL packaged mod compatibility"
+	title.text = "C-AOL packaged mod compatibility / Summary creation"
 	section.add_child(title)
 
 	_caol_mod_bridge_status = Label.new()
@@ -229,8 +230,13 @@ func _on_CaolSummarizerDryRun_pressed() -> void:
 		_caol_mod_bridge_status.text = "Summarizer dry-run unavailable: Mods autoload is not ready."
 		return
 	var dry_run = mods.get_caol_summarizer_dry_run(_selected_caol_summarizer_world_name())
-	_caol_mod_bridge_status.text = dry_run.get("message", "Summarizer dry-run unavailable.")
-	Status.post("C-AOL Summarizer dry-run/status-only check complete; no backend call, pack apply, or save mutation was attempted.")
+	var message = dry_run.get("message", "Summarizer dry-run unavailable.")
+	_caol_mod_bridge_status.text = message
+	if message != _last_caol_dry_run_status_message:
+		Status.post("C-AOL Summarizer dry-run/status-only check complete; no backend call, pack apply, or save mutation was attempted.")
+	else:
+		Status.post("C-AOL Summarizer dry-run/status-only result refreshed; same no-mutation status as previous check.")
+	_last_caol_dry_run_status_message = message
 
 
 func _on_CaolSummarizerApplyPreview_pressed() -> void:

@@ -21,6 +21,7 @@ var _caol_status_by_id := {}
 var _caol_summarizer_overview := {}
 var _caol_status_label: Label = null
 var _caol_dry_run_button: Button = null
+var _last_caol_dry_run_status_message := ""
 
 var _mods_to_delete := []
 var _mods_to_install := []
@@ -56,8 +57,8 @@ func _add_caol_summarizer_status_controls() -> void:
 	_caol_status_label.size_flags_horizontal = SIZE_EXPAND_FILL
 	section.add_child(_caol_status_label)
 	_caol_dry_run_button = Button.new()
-	_caol_dry_run_button.text = "Summarizer dry-run"
-	_caol_dry_run_button.hint_tooltip = "Show what would be summarized later. Status-only: no backend call, no generated pack, no apply."
+	_caol_dry_run_button.text = "Summarizer status (no create here)"
+	_caol_dry_run_button.hint_tooltip = "Status-only on this Mods page: no backend call, no generated pack, no apply. Use Settings > C-AOL packaged mod compatibility to preview/apply summary packs."
 	_caol_dry_run_button.connect("pressed", self, "_on_CaolSummarizerDryRun_pressed")
 	section.add_child(_caol_dry_run_button)
 	# Keep the status prompt next to the mod action buttons, above the verbose info box.
@@ -131,22 +132,27 @@ func _append_caol_status_to_mod_info(text: String, id: String) -> String:
 	var record = _caol_status_by_id[id]
 	var result = text
 	result += "\n\n[b][u]C-AOL Summarizer status:[/u][/b] %s / %s / %s" % [record.get("enabled_status", "unknown"), record.get("dependency_status", "unknown"), record.get("summary_status", "summary-unknown")]
-	result += "\nRead-only in Slice 2. Use the Summarizer dry-run button to see what would be summarized later; no backend call, generated pack, apply, enable, or save mutation happens here."
+	result += "\nMods page is status-only: no backend call, generated pack, apply, enable, or save mutation happens here. To create/apply summaries, use Settings > C-AOL packaged mod compatibility > Preview/Confirm Summary pack."
 	return result
 
 
 func _on_CaolSummarizerDryRun_pressed() -> void:
 	var dry_run = _mods.get_caol_summarizer_dry_run()
+	var message = dry_run.get("message", "Summarizer dry-run unavailable.")
 	if _caol_status_label != null:
-		_caol_status_label.text = dry_run.get("message", "Summarizer dry-run unavailable.")
-	Status.post("C-AOL Summarizer dry-run/status-only check complete; no backend call, pack apply, or save mutation was attempted.")
+		_caol_status_label.text = message
+	if message != _last_caol_dry_run_status_message:
+		Status.post("C-AOL Summarizer dry-run/status-only check complete; no backend call, pack apply, or save mutation was attempted.")
+	else:
+		Status.post("C-AOL Summarizer dry-run/status-only result refreshed; same no-mutation status as previous check.")
+	_last_caol_dry_run_status_message = message
 
 
 func _post_install_summarizer_prompt_if_needed() -> void:
 	_refresh_caol_summarizer_status()
 	var count = _caol_summarizer_overview.get("summarizer_candidate_count", 0)
 	if count > 0:
-		Status.post("C-AOL Summarizer prompt: %s enabled contextual mod(s) lack complete summaries. Use Summarizer dry-run for status only; generation/apply is a later slice." % count, Enums.MSG_WARN)
+		Status.post("C-AOL Summarizer prompt: %s enabled contextual mod(s) lack complete summaries. Mods tab is status-only; use Settings > C-AOL packaged mod compatibility to preview/confirm summary pack generation/apply." % count, Enums.MSG_WARN)
 
 
 func reload_installed() -> void:
@@ -290,10 +296,17 @@ func reload_available() -> void:
 	var hidden_str = ""
 	if hidden_mods > 0:
 		hidden_str = tr("str_mod_repo_hidden") % hidden_mods
-	_lbl_repo.text = tr("lbl_mod_repo") % hidden_str
+	if game == "caol":
+		_lbl_repo.text = "Downloadable add-on mods%s:" % hidden_str
+	else:
+		_lbl_repo.text = tr("lbl_mod_repo") % hidden_str
 	_btn_add.disabled = true
 	
 	_populate_list_with_mods(_available_mods_view, _available_list)
+	if game == "caol" and _available_mods_view.size() == 0:
+		_available_list.add_item("No downloadable add-on catalog entries. Built-in C-AOL mods from data/mods and installed user mods are in the Installed / inventory list; Summarizer creation/apply lives in Settings.")
+		_available_list.set_item_disabled(0, true)
+		_available_list.set_item_custom_fg_color(0, Color(0.7, 0.7, 0.7))
 	
 	for i in len(_available_mods_view):
 		var id = _available_mods_view[i]["id"]

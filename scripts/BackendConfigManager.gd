@@ -12,6 +12,8 @@ const C_AOL_OPTIONS_PATCH_FILENAME = "caol_llm_options_patch.json"
 const API_SETUP_INTENT_FILENAME = "caol_api_setup_intent.json"
 const OLLAMA_SETUP_INTENT_FILENAME = "caol_ollama_setup_intent.json"
 const PYTHON_VENV_SETUP_INTENT_FILENAME = "caol_python_venv_setup_intent.json"
+const DEFAULT_HARDWARE_RAM_WARN_MB = 16000
+const DEFAULT_HARDWARE_VRAM_WARN_MB = 6000
 
 const DEFAULT_API_PROVIDER = "openai"
 const DEFAULT_API_KEY_ENV = "CATA_API_KEY"
@@ -85,23 +87,46 @@ func build_api_setup_plan(provider_id: String, python_path: String = "") -> Dict
 	var install_extra = choice.get("install_extra", "")
 	if install_extra != "":
 		package_spec = "any_llm[%s]" % install_extra
-	var py = _resolve_python(python_path)
-	var python_command = py.get("command", "python3") if py.get("ok", false) else (python_path.strip_edges() if python_path.strip_edges() != "" else "python3")
+	var venv_plan = build_python_venv_setup_plan(python_path)
+	var target_path = venv_plan.get("target_path", "")
+	var venv_python_command = _venv_python_command(target_path)
+	var commands = [
+		{
+			"phase": "create_or_update_venv",
+			"command": venv_plan.get("python_command", "python3"),
+			"args": ["-m", "venv", target_path],
+			"preview": venv_plan.get("command_preview", "python3 -m venv"),
+			"purpose": "Create or update the Python venv used by C-AOL runner.py."
+		},
+		{
+			"phase": "install_anyllm_packages",
+			"command": venv_python_command,
+			"args": ["-m", "pip", "install", "--upgrade", package_spec],
+			"preview": "%s -m pip install --upgrade %s" % [venv_python_command, package_spec],
+			"purpose": "Install AnyLLM/provider packages into that venv."
+		}
+	]
+	var preview = []
+	for i in range(commands.size()):
+		preview.append("Step %s: %s" % [str(i + 1), commands[i].get("preview", "")])
 	return {
 		"provider": choice.get("id", DEFAULT_API_PROVIDER),
 		"provider_label": choice.get("label", "OpenAI"),
-		"python_command": python_command,
+		"target_venv_path": target_path,
+		"python_command": venv_python_command,
 		"package_spec": package_spec,
-		"command": "%s -m pip install --upgrade %s" % [python_command, package_spec],
+		"commands": commands,
+		"command": PoolStringArray(preview).join("\n"),
 		"requires_confirmation": true,
-		"automated_proof_policy": "plan_only_no_pip_no_secret_no_api_call"
+		"phase_order": ["create_or_update_venv", "install_anyllm_packages", "check_readiness_next"],
+		"automated_proof_policy": "plan_only_no_venv_no_pip_no_secret_no_api_call"
 	}
 
 
 func run_api_setup(provider_id: String, python_path: String = "", proof_only: bool = false) -> Dictionary:
 	var plan = build_api_setup_plan(provider_id, python_path)
 	if proof_only:
-		var proof_result = write_api_setup_intent(provider_id, python_path, false, -1, "proof_only_no_pip_no_secret_no_api_call")
+		var proof_result = write_api_setup_intent(provider_id, python_path, false, -1, "proof_only_no_venv_no_pip_no_secret_no_api_call", [])
 		return {
 			"status": proof_result,
 			"plan": plan,
@@ -110,11 +135,21 @@ func run_api_setup(provider_id: String, python_path: String = "", proof_only: bo
 			"proof_only": true
 		}
 
-	var output = []
-	var exit_code = OS.execute(plan.get("python_command", "python3"), ["-m", "pip", "install", "--upgrade", plan.get("package_spec", "any_llm")], true, output, true)
-	var summary = "pip_install_ok" if exit_code == 0 else "pip_install_failed"
-	var write_result = write_api_setup_intent(provider_id, python_path, true, exit_code, summary)
-	var status = "api_setup_install_ok" if exit_code == 0 else "api_setup_install_failed_%s" % exit_code
+	var results = []
+	var failed = false
+	var exit_code = 0
+	for step in plan.get("commands", []):
+		var output = []
+		exit_code = OS.execute(step.get("command", ""), step.get("args", []), true, output, true)
+		var result = {"phase": step.get("phase", ""), "command": step.get("command", ""), "args": step.get("args", []), "purpose": step.get("purpose", ""), "exit_code": exit_code, "output_line_count": output.size()}
+		results.append(result)
+		if exit_code != 0:
+			failed = true
+			break
+	var failed_phase = results[results.size() - 1].get("phase", "api_setup") if results.size() > 0 else "api_setup"
+	var summary = "api_venv_and_anyllm_install_ok" if not failed else "%s_failed" % failed_phase
+	var write_result = write_api_setup_intent(provider_id, python_path, true, exit_code, summary, results)
+	var status = "api_setup_install_ok" if not failed else "api_setup_%s_failed_%s" % [failed_phase, exit_code]
 	if write_result != "ok":
 		status = write_result
 	return {
@@ -123,7 +158,7 @@ func run_api_setup(provider_id: String, python_path: String = "", proof_only: bo
 		"performed_external_install": true,
 		"exit_code": exit_code,
 		"proof_only": false,
-		"output_line_count": output.size()
+		"results": results
 	}
 
 
@@ -135,32 +170,63 @@ func get_ollama_model_choices() -> Array:
 func get_ollama_readiness(endpoint: String = DEFAULT_OLLAMA_URL, python_path: String = "") -> Dictionary:
 	var inventory = _ollama_inventory(endpoint)
 	var py = _resolve_python(python_path)
-	var command_light = "🔴"
-	var server_light = "🔴"
+	var command_state = "red"
+	var server_state = "red"
 	if inventory.get("command", "missing") == "present":
-		command_light = "🟢"
+		command_state = "green"
 	if inventory.get("server", "unreachable") == "running":
-		server_light = "🟢"
+		server_state = "green"
 	elif inventory.get("command", "missing") == "present":
-		server_light = "🟡"
-	var model_lights = {}
+		server_state = "yellow"
+	var model_states = {}
 	for model_name in get_ollama_model_choices():
-		var model_light = "🔴"
+		var model_state = "red"
 		if inventory.get("server", "unreachable") == "running":
-			model_light = "🟢" if _ollama_model_list_has(inventory.get("models", []), model_name) else "🟡"
-		model_lights[model_name] = model_light
+			model_state = "green" if _ollama_model_list_has(inventory.get("models", []), model_name) else "yellow"
+		model_states[model_name] = model_state
 	return {
 		"command": inventory.get("command", "missing"),
 		"server": inventory.get("server", "unreachable"),
 		"models": inventory.get("models", []),
-		"command_light": command_light,
-		"server_light": server_light,
-		"model_lights": model_lights,
-		"python_light": "🟢" if py.get("ok", false) else "🔴",
+		"command_light": command_state,
+		"server_light": server_state,
+		"command_state": command_state,
+		"server_state": server_state,
+		"model_lights": model_states,
+		"model_states": model_states,
+		"python_light": "green" if py.get("ok", false) else "red",
+		"python_state": "green" if py.get("ok", false) else "red",
 		"python_command": py.get("command", ""),
-		"options_light": "🟢",
+		"options_light": "green",
+		"options_state": "green",
 		"proof_policy": "detect_only_no_pull_no_install"
 	}
+
+
+func get_ollama_hardware_check() -> Dictionary:
+	var fixture = OS.get_environment("LACAPULT_HARDWARE_FIXTURE")
+	if fixture != "":
+		return _ollama_hardware_fixture(fixture)
+	var ram_mb = 0
+	var vram_mb = 0
+	var source = "unavailable"
+	if OS.get_name() == "Windows":
+		source = "windows_powershell_cim"
+		ram_mb = _windows_total_ram_mb()
+		vram_mb = _windows_max_vram_mb()
+	var conclusion = "Hardware check unavailable on this platform. On Windows, Check reads RAM/VRAM and marks local model runnability."
+	var state = "gray"
+	if ram_mb > 0 or vram_mb > 0:
+		if ram_mb >= DEFAULT_HARDWARE_RAM_WARN_MB and vram_mb >= DEFAULT_HARDWARE_VRAM_WARN_MB:
+			state = "green"
+			conclusion = "Measured RAM/VRAM look suitable for the larger local-model path."
+		elif ram_mb >= 8000 and vram_mb >= 3000:
+			state = "yellow"
+			conclusion = "Measured hardware is borderline; start with the smaller local model and expect slower downloads/startup."
+		else:
+			state = "red"
+			conclusion = "Measured RAM/VRAM are low for local LLMs; use API setup or the smallest local model first."
+	return {"ram_mb": ram_mb, "vram_mb": vram_mb, "state": state, "conclusion": conclusion, "source": source, "proof_policy": "hardware_detect_only_no_install_no_pull"}
 
 
 func build_ollama_setup_plan(endpoint: String = DEFAULT_OLLAMA_URL, model: String = "") -> Dictionary:
@@ -180,11 +246,11 @@ func build_ollama_setup_plan(endpoint: String = DEFAULT_OLLAMA_URL, model: Strin
 			commands.append({"command": "winget", "args": ["install", "--id", "Ollama.Ollama", "-e"], "purpose": "Install the official Ollama Windows package through winget id Ollama.Ollama."})
 		else:
 			installer = "manual_required"
-	if selected_model != "":
+	if inventory.get("command", "missing") == "present" and inventory.get("server", "unreachable") == "running" and selected_model != "":
 		commands.append({"command": "ollama", "args": ["pull", selected_model], "purpose": "Pull the selected model after confirmation."})
 	var preview = []
 	for step in commands:
-		preview.append("%s %s" % [step.get("command", ""), " ".join(step.get("args", []))])
+		preview.append("Step %s: %s %s" % [str(preview.size() + 1), step.get("command", ""), " ".join(step.get("args", []))])
 	return {
 		"action": "install_ollama_and_pull_model",
 		"endpoint": endpoint.strip_edges() if endpoint.strip_edges() != "" else DEFAULT_OLLAMA_URL,
@@ -192,7 +258,10 @@ func build_ollama_setup_plan(endpoint: String = DEFAULT_OLLAMA_URL, model: Strin
 		"platform": os_name,
 		"installer": installer,
 		"commands": commands,
-		"command_preview": " && ".join(preview) if preview.size() > 0 else "Manual Ollama install required; no safe platform installer found.",
+		"command_preview": "\n".join(preview) if preview.size() > 0 else "Manual Ollama install/startup required before model pull; no safe one-step command is queued.",
+		"sequencing": "serialized_steps_not_shell_chained",
+		"timeout_note": "Ollama install/model download can take several minutes; the launcher may appear to wait while the installer opens or a model download continues.",
+		"next_step": "Run Check after an Ollama install/startup step, then use Install Ollama / model again for model pull if needed.",
 		"requires_confirmation": true,
 		"automated_proof_policy": "plan_only_no_installer_no_model_pull"
 	}
@@ -343,16 +412,16 @@ func check_backend_status(mode: String, endpoint: String = "", model: String = "
 
 func get_status_light(raw_status: String) -> Dictionary:
 	if raw_status == "ok":
-		return {"icon": "🟢", "state": "Ready", "summary": "Options saved."}
+		return {"color": "green", "state": "Ready", "summary": "Options saved."}
 	if raw_status.find("unsupported") >= 0 or raw_status.find("write_error") >= 0 or raw_status.find("config_dir_error") >= 0:
-		return {"icon": "🔴", "state": "Error", "summary": "Save/check failed."}
+		return {"color": "red", "state": "Error", "summary": "Save/check failed."}
 	if raw_status.find("api_python_missing") >= 0 or raw_status.find("ollama_command_missing") >= 0 or raw_status.find("openvino_python_missing") >= 0:
-		return {"icon": "🔴", "state": "Missing", "summary": _status_summary(raw_status)}
+		return {"color": "red", "state": "Missing", "summary": _status_summary(raw_status)}
 	if raw_status.find("api_python_ready_any_llm_import_ok") >= 0 and raw_status.find("model_configured") >= 0 and raw_status.find("api_key_env_present_secret_not_read") >= 0:
-		return {"icon": "🟢", "state": "Ready", "summary": "Python, AnyLLM, model, and API-key env-var are present."}
+		return {"color": "green", "state": "Ready", "summary": "Python, AnyLLM, model, and API-key env-var are present."}
 	if raw_status.find("ollama_command_present_server_running_model_present") >= 0:
-		return {"icon": "🟢", "state": "Ready", "summary": "Ollama server and selected model are present."}
-	return {"icon": "🟡", "state": "Needs action", "summary": _status_summary(raw_status)}
+		return {"color": "green", "state": "Ready", "summary": "Ollama server and selected model are present."}
+	return {"color": "yellow", "state": "Needs action", "summary": _status_summary(raw_status)}
 
 
 func write_launcher_backend_config(mode: String, endpoint: String = "", model: String = "", python_path: String = "", api_provider: String = DEFAULT_API_PROVIDER, api_key_env: String = DEFAULT_API_KEY_ENV, openvino_model_dir: String = "", openvino_device: String = DEFAULT_OPENVINO_DEVICE) -> String:
@@ -391,7 +460,7 @@ func write_launcher_backend_config(mode: String, endpoint: String = "", model: S
 	return "ok"
 
 
-func write_api_setup_intent(provider_id: String, python_path: String = "", performed_external_install: bool = false, exit_code: int = -1, result_summary: String = "plan_only_no_pip_no_secret_no_api_call") -> String:
+func write_api_setup_intent(provider_id: String, python_path: String = "", performed_external_install: bool = false, exit_code: int = -1, result_summary: String = "plan_only_no_venv_no_pip_no_secret_no_api_call", command_results: Array = []) -> String:
 	var d = Directory.new()
 	if not d.dir_exists(Paths.config):
 		var err = d.make_dir_recursive(Paths.config)
@@ -402,12 +471,16 @@ func write_api_setup_intent(provider_id: String, python_path: String = "", perfo
 		"action": "install_api_backend",
 		"provider": plan.get("provider", DEFAULT_API_PROVIDER),
 		"provider_label": plan.get("provider_label", "OpenAI"),
+		"target_venv_path": plan.get("target_venv_path", ""),
 		"python_command": plan.get("python_command", "python3"),
 		"package_spec": plan.get("package_spec", "any_llm"),
 		"command_preview": plan.get("command", "python3 -m pip install --upgrade any_llm"),
+		"commands": plan.get("commands", []),
+		"phase_order": plan.get("phase_order", []),
 		"confirmed": true,
 		"performed_external_install": performed_external_install,
 		"exit_code": exit_code,
+		"command_results": command_results,
 		"result_summary": result_summary,
 		"proof_policy": plan.get("automated_proof_policy", "plan_only_no_pip_no_secret_no_api_call"),
 		"secret_policy": "No API key is stored or displayed; only the env-var name belongs in backend config.",
@@ -757,6 +830,54 @@ func _command_exists(command: String) -> bool:
 	var output = []
 	var command_lookup = "where" if OS.get_name() == "Windows" else "which"
 	return OS.execute(command_lookup, [command], true, output, true) == 0
+
+
+func _venv_python_command(target_path: String) -> String:
+	if target_path.strip_edges() == "":
+		return "python3"
+	if OS.get_name() == "Windows":
+		return target_path.plus_file("Scripts").plus_file("python.exe")
+	return target_path.plus_file("bin").plus_file("python")
+
+
+func _windows_total_ram_mb() -> int:
+	var output = []
+	var code = "$m=(Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory; [math]::Round($m/1MB)"
+	var exit_code = OS.execute("powershell", ["-NoProfile", "-Command", code], true, output, true)
+	if exit_code != 0:
+		return 0
+	return int("\n".join(output).strip_edges())
+
+
+func _windows_max_vram_mb() -> int:
+	var output = []
+	var code = "$m=(Get-CimInstance Win32_VideoController | Measure-Object AdapterRAM -Maximum).Maximum; if ($m) { [math]::Round($m/1MB) } else { 0 }"
+	var exit_code = OS.execute("powershell", ["-NoProfile", "-Command", code], true, output, true)
+	if exit_code != 0:
+		return 0
+	return int("\n".join(output).strip_edges())
+
+
+func _ollama_hardware_fixture(fixture: String) -> Dictionary:
+	var ram_mb = 0
+	var vram_mb = 0
+	for part in fixture.split(","):
+		var bits = part.split(":")
+		if bits.size() != 2:
+			continue
+		if bits[0] == "ram":
+			ram_mb = int(bits[1])
+		elif bits[0] == "vram":
+			vram_mb = int(bits[1])
+	var state = "red"
+	var conclusion = "Measured RAM/VRAM are low for local LLMs; use API setup or the smallest local model first."
+	if ram_mb >= DEFAULT_HARDWARE_RAM_WARN_MB and vram_mb >= DEFAULT_HARDWARE_VRAM_WARN_MB:
+		state = "green"
+		conclusion = "Measured RAM/VRAM look suitable for the larger local-model path."
+	elif ram_mb >= 8000 and vram_mb >= 3000:
+		state = "yellow"
+		conclusion = "Measured hardware is borderline; start with the smaller local model and expect slower downloads/startup."
+	return {"ram_mb": ram_mb, "vram_mb": vram_mb, "state": state, "conclusion": conclusion, "source": "fixture", "proof_policy": "hardware_detect_only_no_install_no_pull"}
 
 
 func _looks_like_python_executable_path(path: String) -> bool:

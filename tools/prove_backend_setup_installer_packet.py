@@ -50,9 +50,9 @@ def main() -> None:
 
     for token in [
         "title.text = \"LLM\"",
-        "Choose how C-AOL should reach an LLM backend",
-        "Use an API provider through AnyLLM. Recent C-AOL logs show many calls around 300-400 tokens",
-        "Use ollama for local LLM utilization.",
+        "Choose API or local Ollama setup.",
+        "API path: choose provider/model, set env-var name, then run setup.",
+        "Ollama path: Check hardware/readiness, then install or pull one step at a time.",
         "API / AnyLLM",
         "Ollama local",
         MODEL_MISTRAL,

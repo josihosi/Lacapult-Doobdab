@@ -2,8 +2,9 @@
 """Static proof for API setup status-copy boundary.
 
 The API setup confirmation path has two very different modes:
-- proof mode records intent only and must say no external install happened;
-- real mode can run pip and must not claim no external install/download happened.
+- proof mode records intent only and must say no venv/pip mutation happened;
+- real mode can create/update the venv and run pip, and must not claim no
+  external install/download happened.
 
 This proof intentionally does not run Godot, pip, or any API call.
 """
@@ -17,8 +18,8 @@ block = text[start:]
 
 required = [
     'post_message = "C-AOL API backend setup intent recorded in proof mode; no external install/download was performed."',
-    'post_message = "C-AOL API backend setup command finished; pip may have installed/upgraded packages in the selected Python. No API call or API-secret read was performed."',
-    'post_message = "C-AOL API backend setup command failed; pip may have been attempted in the selected Python. No API call or API-secret read was performed." if not proof_only else',
+    'post_message = "C-AOL API backend setup command finished; venv and AnyLLM/provider packages were handled after confirmation. No API call or API-secret read was performed."',
+    'post_message = "C-AOL API backend setup command failed during venv/package setup. No API call or API-secret read was performed." if not proof_only else',
     'Status.post(post_message)',
 ]
 missing = [needle for needle in required if needle not in block]
@@ -36,6 +37,6 @@ else:
 
 print("API setup status-copy boundary proof passed")
 print("  proof mode status says no external install/download")
-print("  real pip path status says pip may have installed/upgraded packages")
-print("  failure path says pip may have been attempted")
+print("  real setup path status says venv and AnyLLM packages were handled")
+print("  failure path says venv/package setup failed without API/secret use")
 print("  no unconditional final no-external-install Status.post remains in the API confirmation block")

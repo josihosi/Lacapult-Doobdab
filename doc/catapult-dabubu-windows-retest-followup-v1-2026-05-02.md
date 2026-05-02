@@ -14,7 +14,9 @@ Josef retested the `Catapult-Dabubu` launcher and found three remaining product 
 
 1. API / LLM setup does not install AnyLLM packages with venv creation, so the installer does not actually install the software needed for the backend path.
 2. The visible setup screen still has too much background/helper text and feels too full.
-3. Readiness/status lights do not render correctly on Windows; likely Unicode/emoji glyph support. Replace them with reliable colored dots/labels using font/theme color.
+3. Readiness/status lights do not render correctly on Windows; likely Unicode/emoji glyph support. Replace them with reliable big colored dots/labels using font/theme color.
+4. Ollama setup needs real RAM/VRAM hardware checks, explicit long install/download wait warnings, and serialized install/pull behavior instead of unsafe chaining.
+5. Mods/summarizer inventory labeling must stop saying unclear `Show Stock`; built-in/mod inventory wording should be plain.
 
 Schani verdict: the vision is not fulfilled yet. The launcher currently still asks too much of the user and does not provide a trustworthy install/status surface.
 
@@ -36,10 +38,22 @@ Schani verdict: the vision is not fulfilled yet. The launcher currently still as
 
 ### 3. Robust colored status dots
 
-- Replace fragile Unicode/emoji readiness lights with a Windows-safe colored indicator implementation.
-- Preferred shape: small dot/bullet/circle rendered with font color/theme color red/green/yellow/gray, plus text label for accessibility.
+- Replace fragile Unicode/emoji readiness lights with a Windows-safe colored indicator implementation on both API and Ollama pages.
+- Preferred shape: big dot/bullet/circle rendered with font color/theme color red/green/yellow/gray, plus text label for accessibility.
 - Do not depend on emoji color rendering or special glyph support.
 - Add a local/static/UI proof that status indicator nodes carry explicit colors/states rather than relying on Unicode traffic-light symbols.
+
+### 4. Ollama hardware check / install sequencing
+
+- Replace hardware recommendation prose with a real hardware check: measure RAM and VRAM where available, then show green/yellow/red runnability status from those values.
+- Show Ollama command previews as CLI-input-style text, not loose prose.
+- Warn that Ollama install/model download can take several minutes and may appear to wait while external work continues.
+- Do not unsafe-chain install + model pull. If Ollama was just installed or is not running yet, stop after the install/startup step and tell the user to Check before pulling the model.
+
+### 5. Mods/summarizer inventory labeling
+
+- Rename unclear `Show Stock` English mod-inventory copy to plain built-in/mod inventory wording.
+- Preserve bottom cutoff/button visibility as a Windows visual check item from screenshot `/Users/josefhorvath/.openclaw/media/inbound/4e8d8209-6430-4ee4-a482-aa4cae3953d2.png` if local image inspection is unavailable.
 
 ## Non-goals
 
@@ -51,11 +65,18 @@ Schani verdict: the vision is not fulfilled yet. The launcher currently still as
 
 ## Success state
 
-- [ ] API / AnyLLM setup has an obvious path that creates/uses the venv and installs required AnyLLM packages/dependencies, with status/progress for each phase.
-- [ ] Automated/sandbox proof verifies the intended AnyLLM package-install command/plan without touching real user secrets or real environment.
-- [ ] Visible LLM/API setup copy is substantially reduced; controls/status/actions are visually primary.
-- [ ] Readiness indicators are implemented as Windows-safe colored dots/labels, not fragile emoji/Unicode traffic lights.
-- [ ] UI/static smoke proves colored status indicators carry explicit red/green/yellow/gray states and no old fragile light glyph path remains in visible setup status.
+- [x] API / AnyLLM setup has an obvious path that creates/uses the venv and installs required AnyLLM packages/dependencies, with status/progress for each phase.
+- [x] Automated/sandbox proof verifies the intended AnyLLM package-install command/plan without touching real user secrets or real environment.
+- [x] Visible LLM/API setup copy is substantially reduced; controls/status/actions are visually primary.
+- [x] Readiness indicators are implemented as Windows-safe big colored dots/labels on API and Ollama pages, not fragile emoji/Unicode traffic lights.
+- [x] UI/static smoke proves colored status indicators carry explicit red/green/yellow/gray states and no old fragile light glyph path remains in visible setup status.
+- [x] Ollama hardware check measures RAM/VRAM where available and shows explicit green/yellow/red runnability state.
+- [x] Ollama setup preview/warnings make long install/download waits clear and avoid unsafe install+pull chaining when Ollama is not ready.
+- [x] Mods/summarizer inventory label is plain (`built-in game mods`/inventory wording), not `Show Stock`; Windows bottom-cutoff visual check remains tracked.
+- [ ] C-AOL `Downloadable` mod catalog empty-state explains it is optional add-on catalog, not the main built-in/user/world mod inventory or Summarizer source.
+- [ ] Mods page clearly says Summarizer is status-only/no-create-here and points to the Settings Summary creation/apply path if available.
+- [x] Repeated identical Summarizer dry-run/status-only clicks do not spam indistinguishable duplicate log lines.
+- [ ] Shared overcrowding/top-bar fix enlarges the window and restores native resizable behavior or equivalent autofit evidence.
 - [ ] A fresh Josef-only Windows test build/release is produced after the fixes.
 - [ ] Josef confirms on Windows that API install semantics, text density, and colored dots are acceptable.
 
@@ -70,3 +91,18 @@ Schani verdict: the vision is not fulfilled yet. The launcher currently still as
 ## Handoff caution
 
 Do not close from macOS-only screenshots. The complaint is Windows-visible and user-facing. Local tests can prove structure; final acceptance needs Josef Windows confirmation.
+
+## Local proof boundary — 2026-05-02
+
+Local implementation/proof now covers the non-release v1 repair scope:
+
+- API setup has one obvious `Set up API / AnyLLM` path that creates/updates the venv and installs AnyLLM/provider packages after confirmation; automated proof records intent only.
+- LLM setup copy is compact, with controls/status/actions visually primary.
+- API/Ollama readiness uses explicit big colored dot rows with state metadata instead of emoji traffic-light glyphs.
+- Ollama shows RAM/VRAM hardware check results, serialized CLI previews, long-wait warning, and does not queue model pull before command/server readiness.
+- Mods wording now says built-in game mods/inventory; C-AOL Downloadable empty-state and Summarizer status-only vs Settings creation/apply path are explicit.
+- Shared window layout is larger/native-resizable and hides the custom titlebar compatibility node locally.
+
+Evidence classes: source/static proof, isolated-HOME Godot UI smokes, sandboxed backend/config proof. Safety boundary: no live API call, API secret readout, package-manager install, Python venv creation, Ollama model pull, release publication, or real user-data mutation.
+
+Remaining: run package proof, build/upload a fresh Josef-only Windows Draft/prerelease, verify with `gh release view`, then await Josef Windows confirmation. Release quarantine remains active.

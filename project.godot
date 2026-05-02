@@ -76,11 +76,12 @@ DOTD="*res://scripts/dotd.gd"
 
 [display]
 
-window/size/width=760
-window/size/height=820
-window/size/borderless=true
-window/size/test_width=760
-window/size/test_height=820
+window/size/width=1040
+window/size/height=900
+window/size/resizable=true
+window/size/borderless=false
+window/size/test_width=1040
+window/size/test_height=900
 window/dpi/allow_hidpi=true
 window/energy_saving/keep_screen_on=false
 

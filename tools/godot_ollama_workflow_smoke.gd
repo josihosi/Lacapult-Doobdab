@@ -31,15 +31,24 @@ func _run() -> void:
 	OS.set_environment("LACAPULT_OLLAMA_FIXTURE", "models:mistral-v0.3")
 
 	var missing = backend_config.get_ollama_readiness(backend_config.DEFAULT_OLLAMA_URL, "python3")
-	_require(missing.get("model_lights", {}).get("mistral-v0.3", "") == "🟢", "fixture model-present state did not mark Mistral ready")
-	_require(missing.get("model_lights", {}).get("nemotron-9b", "") == "🟡", "fixture model-missing state did not mark Nemotron pull-needed")
+	_require(missing.get("model_states", {}).get("mistral-v0.3", "") == "green", "fixture model-present state did not mark Mistral ready")
+	_require(missing.get("model_states", {}).get("nemotron-9b", "") == "yellow", "fixture model-missing state did not mark Nemotron pull-needed")
 	OS.set_environment("LACAPULT_OLLAMA_FIXTURE", "server_unreachable")
 	var unreachable = backend_config.get_ollama_readiness(backend_config.DEFAULT_OLLAMA_URL, "python3")
-	_require(unreachable.get("command_light", "") == "🟢" and unreachable.get("server_light", "") == "🟡", "fixture server-unreachable state did not mark command/server lights correctly")
+	_require(unreachable.get("command_state", "") == "green" and unreachable.get("server_state", "") == "yellow", "fixture server-unreachable state did not mark command/server lights correctly")
 	OS.set_environment("LACAPULT_OLLAMA_FIXTURE", "command_missing")
 	var no_command = backend_config.get_ollama_readiness(backend_config.DEFAULT_OLLAMA_URL, "python3")
-	_require(no_command.get("command_light", "") == "🔴", "fixture command-missing state did not mark command red")
+	_require(no_command.get("command_state", "") == "red", "fixture command-missing state did not mark command red")
 	OS.set_environment("LACAPULT_OLLAMA_FIXTURE", "models:mistral-v0.3")
+
+	var config_path = paths.config.plus_file(backend_config.BACKEND_CONFIG_FILENAME)
+	var patch_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_PATCH_FILENAME)
+	var ollama_intent_path = paths.config.plus_file(backend_config.OLLAMA_SETUP_INTENT_FILENAME)
+	var venv_intent_path = paths.config.plus_file(backend_config.PYTHON_VENV_SETUP_INTENT_FILENAME)
+	_remove_if_exists(config_path)
+	_remove_if_exists(patch_path)
+	_remove_if_exists(ollama_intent_path)
+	_remove_if_exists(venv_intent_path)
 
 	var ui_script = load("res://scripts/BackendSetupUI.gd")
 	var ui = VBoxContainer.new()
@@ -47,26 +56,22 @@ func _run() -> void:
 	root.add_child(ui)
 	yield(self, "idle_frame")
 
-	var config_path = paths.config.plus_file(backend_config.BACKEND_CONFIG_FILENAME)
-	var patch_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_PATCH_FILENAME)
-	var ollama_intent_path = paths.config.plus_file(backend_config.OLLAMA_SETUP_INTENT_FILENAME)
-	var venv_intent_path = paths.config.plus_file(backend_config.PYTHON_VENV_SETUP_INTENT_FILENAME)
 	var all_text = _collect_visible_text(ui)
 	_require(all_text.find("Ollama model choice") >= 0, "Ollama model choice control did not render")
 	_require(_visible_text_count(all_text, "Ollama model choice") == 1, "Ollama model choice rendered more than once")
 	_require(all_text.find("Ollama model tag") < 0, "duplicate freeform Ollama model field is still visible")
 	_require(_option_has_item(ui._ollama_model_choice, "mistral-v0.3") and _option_has_item(ui._ollama_model_choice, "nemotron-9b"), "supported Ollama model choices did not render")
-	_require(all_text.find("Ollama cmd") >= 0 and all_text.find("Mistral") >= 0 and all_text.find("Nemotron") >= 0 and all_text.find("Python/venv") >= 0, "Ollama status lights did not render")
+	_require(all_text.find("Ollama command") >= 0 and all_text.find("Mistral") >= 0 and all_text.find("Nemotron") >= 0 and all_text.find("Python/venv") >= 0, "Ollama status rows did not render")
 	_require(all_text.find("Save options") >= 0 and all_text.find("Check") >= 0 and all_text.find("Install Ollama / model") >= 0 and all_text.find("Create venv only") >= 0, "Ollama action row did not render Save/Check/Install/venv actions")
 	_require(all_text.find("API key") < 0 and all_text.find("Provider") < 0, "Ollama mode leaked API-only controls")
-	_require(all_text.find("Hardware recommendation") >= 0 and all_text.find("Mistral") >= 0 and all_text.find("Nemotron") >= 0, "Ollama hardware recommendation did not render")
+	_require(all_text.find("Hardware check") >= 0, "Ollama hardware check did not render")
 
 	var check_button = _find_button(ui, "Check")
 	_require(check_button != null, "Check button lookup failed")
 	check_button.emit_signal("pressed")
 	yield(self, "idle_frame")
 	_require(not File.new().file_exists(config_path), "Check wrote backend config; it should be detection-only")
-	_require(ui._ollama_status_lights.text.find("Mistral 🟢") >= 0 and ui._ollama_status_lights.text.find("Nemotron 🟡") >= 0, "fixture model readiness lights did not render expected present/missing state")
+	_require(_find_status_row(ui._ollama_status_lights, "MistralmodelStatusRow", "green") and _find_status_row(ui._ollama_status_lights, "NemotronmodelStatusRow", "yellow"), "fixture model readiness rows did not render expected present/missing state")
 
 	var save_button = _find_button(ui, "Save options")
 	_require(save_button != null, "Save options button lookup failed")
@@ -110,12 +115,18 @@ func _run() -> void:
 	_require(ui._backend_python_path.text.find("caol-llm-python-venv") >= 0, "Python venv proof did not fill the intended path field")
 
 	print("Ollama workflow UI smoke passed")
-	print("  UI proof: one Ollama model-choice control, Mistral/Nemotron/Python/options lights, hardware guidance, Check, Save, Install Ollama / model, and Create venv only rendered")
+	print("  UI proof: one Ollama model-choice control, Mistral/Nemotron/Python/options colored rows, hardware check, Check, Save, Install Ollama / model, and Create venv only rendered")
 	print("  Fixture proof: command-missing, server-unreachable, model-present, and model-missing states are distinguishable without real pulls")
 	print("  Check proof: readiness-only; no backend config write")
 	print("  Save proof: Ollama endpoint/model/Python metadata round-tripped into sandbox launcher config/options patch")
 	print("  Install proof: confirmation-gated Ollama/model and Python venv intents recorded in proof mode; no installer, venv creation, model pull, API call, or real user config mutation")
 	quit(0)
+
+
+func _remove_if_exists(path: String) -> void:
+	var f := File.new()
+	if f.file_exists(path):
+		Directory.new().remove(path)
 
 
 func _collect_visible_text(node: Node) -> String:
@@ -133,6 +144,8 @@ func _collect_visible_text_into(node: Node, parts: Array) -> void:
 		parts.append(node.text)
 	elif node is LineEdit:
 		parts.append(node.placeholder_text)
+	elif node is TextEdit:
+		parts.append(node.text)
 	elif node is OptionButton:
 		for i in range(node.get_item_count()):
 			parts.append(node.get_item_text(i))
@@ -143,6 +156,27 @@ func _collect_visible_text_into(node: Node, parts: Array) -> void:
 func _option_has_item(option: OptionButton, text: String) -> bool:
 	for i in range(option.get_item_count()):
 		if option.get_item_text(i) == text:
+			return true
+	return false
+
+
+func _status_container_has_states(container: Node, states: Array) -> bool:
+	for wanted in states:
+		var found = false
+		for child in container.get_children():
+			if child.has_meta("status_state") and child.get_meta("status_state") == wanted:
+				found = true
+			for grand in child.get_children():
+				if grand.has_meta("status_state") and grand.get_meta("status_state") == wanted:
+					found = true
+		if not found:
+			return false
+	return true
+
+
+func _find_status_row(container: Node, row_name: String, state: String) -> bool:
+	for child in container.get_children():
+		if child.name == row_name and child.has_meta("status_state") and child.get_meta("status_state") == state:
 			return true
 	return false
 

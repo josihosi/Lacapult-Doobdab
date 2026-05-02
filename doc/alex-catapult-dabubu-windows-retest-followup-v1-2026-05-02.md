@@ -1,6 +1,6 @@
 # Alex handoff — Catapult-Dabubu Windows retest follow-up v1
 
-Classification: active / greenlit follow-up from Josef Windows retest.
+Classification: local proofed / Windows test build pending follow-up from Josef Windows retest.
 
 Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`.
 Imagination source: `doc/catapult-dabubu-installer-vision-retest-imagination-source-2026-05-02.md`.
@@ -24,7 +24,22 @@ Screenshot: `/Users/josefhorvath/.openclaw/media/inbound/2fc7eceb-c09c-4588-ae3b
    - red/green/yellow/gray states must be Windows-safe;
    - prove via static/UI smoke that visible status no longer depends on traffic-light glyph rendering.
 
-4. Fresh Josef-only Windows retest build/release after fixes.
+4. Ollama retest fixes:
+   - measured RAM/VRAM hardware check where available;
+   - CLI-style serialized command previews;
+   - explicit long install/download wait warning;
+   - no unsafe install + pull chaining when Ollama is not ready.
+
+5. Mods/summarizer and C-AOL Downloadable clarity:
+   - replace unclear `Show Stock` wording with built-in/mod inventory wording;
+   - make Mods page status-only vs Settings summary creation/apply path discoverable;
+   - explain an empty C-AOL Downloadable add-on catalog.
+
+6. Shared layout:
+   - larger native-resizable default window;
+   - hide the custom titlebar compatibility node and reclaim top space.
+
+7. Fresh Josef-only Windows retest build/release after local proof.
 
 ## Non-goals
 
@@ -36,4 +51,4 @@ Screenshot: `/Users/josefhorvath/.openclaw/media/inbound/2fc7eceb-c09c-4588-ae3b
 
 ## Success bar
 
-Sandbox proof for installer plan/status, UI/static proof for text reduction and colored dots, package proof, then Josef Windows confirmation.
+Local implementation/static/UI proof for installer plan/status, text reduction, colored dots, Ollama hardware/serialized setup, Mods/Downloadable/Summarizer clarity, and native-resizable window layout is now the immediate boundary. Next boundary is package proof + fresh Josef-only Windows Draft/prerelease, then Josef Windows confirmation.

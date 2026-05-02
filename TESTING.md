@@ -19,11 +19,20 @@ Use the smallest evidence that honestly matches the change.
 
 Minimum evidence for the active v1 slice:
 - source/static scan for old Unicode/emoji light glyphs and remaining long visible setup text;
-- Godot UI smoke for explicit colored status-dot states and reduced LLM/API setup copy density;
+- Godot UI smoke for explicit colored big-dot status states, reduced LLM/API setup copy density, Ollama hardware check fixture, serialized command preview, and mod-label copy, and duplicate dry-run status handling, C-AOL Downloadable/Summarizer discoverability, and larger native-resizable window metrics;
 - sandbox/proof-mode API AnyLLM installer test that records venv + package install plan and status phases without using secrets or mutating the real environment;
 - package proof before any new Windows test build;
 - GitHub Draft/prerelease verification if a new Josef-only package is published;
 - Josef/Windows confirmation before closing the visible UI/status-light complaint.
+
+Catapult-Dabubu Windows retest follow-up v1 local evidence landed on 2026-05-02:
+
+- Static/source proof: `python3 tools/prove_windows_retest_followup_v1_static.py` verifies no backend emoji traffic-light source remains, API setup has venv + AnyLLM phases, Ollama has RAM/VRAM hardware check + serialized setup/wait warning, Mods label says built-in game mods, native-resizable window metrics are present, and C-AOL Downloadable/Summarizer clarity copy exists.
+- API status boundary proof: `python3 tools/prove_api_setup_status_copy_boundary.py` verifies proof mode records no external install/download, real setup status says venv + AnyLLM/provider packages were handled, and failure copy stays secret/API-call safe.
+- Backend contract proof: `python3 tools/prove_caol_backend_contract.py` verifies Lacapult still maps C-AOL backend option/readiness tokens without secret-bearing fields and performs no API call/model pull/user config mutation.
+- Godot UI smoke: `HOME=$(mktemp -d /tmp/lacapult-v1-home.XXXXXX) godot --path . --no-window -s tools/godot_windows_retest_followup_v1_smoke.gd` proves proof-only API venv + AnyLLM package intent, explicit colored big-dot status rows for API/Ollama/hardware, fixture RAM/VRAM rendering, and no Ollama pull queued while command/server are not ready.
+- Regression UI smokes also pass with isolated HOME: `tools/godot_api_anyllm_workflow_smoke.gd`, `tools/godot_backend_setup_save_check_smoke.gd`, `tools/godot_ollama_workflow_smoke.gd`, `tools/godot_llm_tab_declutter_smoke.gd`, `tools/godot_windows_retest_fix_smoke.gd`, and `tools/godot_window_chrome_inspection.gd`.
+- Safety boundary: no live API call, API secret readout, package-manager install, Python venv creation, Ollama model pull, release publication, or real Application Support/user-data mutation was performed.
 
 Previous validation target: `Lacapult Windows retest fix v0` produced the 2026-05-01 Draft/prerelease package, but Josef's 2026-05-02 retest failed the installer-vision/status-light/text-density bar. Keep its evidence below as footing, not closure.
 

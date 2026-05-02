@@ -37,21 +37,24 @@ func _run() -> void:
 	settings.store("backend_external_setup_proof_only", true)
 	OS.set_environment("LACAPULT_OLLAMA_FIXTURE", "models:mistral-v0.3")
 
+	var config_path = paths.config.plus_file(backend_config.BACKEND_CONFIG_FILENAME)
+	var patch_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_PATCH_FILENAME)
+	_remove_if_exists(config_path)
+	_remove_if_exists(patch_path)
+
 	var ui_script = load("res://scripts/BackendSetupUI.gd")
 	var ui = VBoxContainer.new()
 	ui.set_script(ui_script)
 	root.add_child(ui)
 	yield(self, "idle_frame")
 
-	var config_path = paths.config.plus_file(backend_config.BACKEND_CONFIG_FILENAME)
-	var patch_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_PATCH_FILENAME)
 	var all_text = _collect_visible_text(ui)
 	_require(all_text.find("Save options") >= 0, "Save options button did not render")
 	_require(all_text.find("Check") >= 0, "Check button did not render")
-	_require(all_text.find("Install AnyLLM packages") >= 0, "API AnyLLM install button did not render")
+	_require(all_text.find("Set up API / AnyLLM") >= 0, "API / AnyLLM setup button did not render")
 	_require(all_text.find("Confirm guided install step") < 0, "old install button copy still rendered")
 	_require(all_text.find("Backend setup save result") < 0, "old long save status copy rendered")
-	_require(all_text.find("🟡") >= 0 or all_text.find("🔴") >= 0 or all_text.find("🟢") >= 0, "status light did not render")
+	_require(_status_container_has_states(ui._api_status_lights, ["yellow"]), "explicit status row did not render")
 	_require(not File.new().file_exists(config_path), "backend config existed before Save/Install")
 
 	var check_button = _find_button(ui, "Check")
@@ -96,11 +99,17 @@ func _run() -> void:
 	_require(ui._confirm_dialog.dialog_text.find("Proof mode") >= 0 and ui._confirm_dialog.dialog_text.find("instead of running installers") >= 0, "Install action lost confirmation/proof no-download boundary")
 
 	print("backend setup Save/Check UI smoke passed")
-	print("  rendered actions: Save options / Check / Install AnyLLM packages / Install Ollama / model")
+	print("  rendered actions: Save options / Check / Set up API / AnyLLM / Install Ollama / model")
 	print("  Check proof: detection-only status refresh; no backend config write")
 	print("  Save proof: API fields persisted to sandboxed launcher config/options patch")
 	print("  Install proof: Ollama fields saved before confirm-gated setup intent; proof mode does no pull/install/API call")
 	quit(0)
+
+
+func _remove_if_exists(path: String) -> void:
+	var f := File.new()
+	if f.file_exists(path):
+		Directory.new().remove(path)
 
 
 func _collect_visible_text(node: Node) -> String:
@@ -118,11 +127,27 @@ func _collect_visible_text_into(node: Node, parts: Array) -> void:
 		parts.append(node.text)
 	elif node is LineEdit:
 		parts.append(node.placeholder_text)
+	elif node is TextEdit:
+		parts.append(node.text)
 	elif node is OptionButton:
 		for i in range(node.get_item_count()):
 			parts.append(node.get_item_text(i))
 	for child in node.get_children():
 		_collect_visible_text_into(child, parts)
+
+
+func _status_container_has_states(container: Node, states: Array) -> bool:
+	for wanted in states:
+		var found = false
+		for child in container.get_children():
+			if child.has_meta("status_state") and child.get_meta("status_state") == wanted:
+				found = true
+			for grand in child.get_children():
+				if grand.has_meta("status_state") and grand.get_meta("status_state") == wanted:
+					found = true
+		if not found:
+			return false
+	return true
 
 
 func _find_button(node: Node, text: String):

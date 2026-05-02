@@ -61,13 +61,13 @@ REQUIRED_BACKEND_TOKENS = {
 }
 REQUIRED_UI_TOKENS = {
     "title.text = \"LLM\"",
-    "Choose how C-AOL should reach an LLM backend",
+    "Choose API or local Ollama setup.",
     "Python / venv",
     "API key env var",
     "mistral-v0.3",
     "nemotron-9b",
     "ConfirmExternalBackendAction",
-    "does not download models",
+    "Catapult-Dabubu will not pull models before this confirmation",
 }
 
 

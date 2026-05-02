@@ -2,8 +2,8 @@ extends SceneTree
 
 # Headless UI smoke for Package 3: API / AnyLLM setup workflow.
 # Proves provider/base URL/model/env-var/session-key controls render and round-trip
-# safely, Check is non-mutating/no-call, and Install AnyLLM packages records only a
-# confirmation-gated setup intent. It does not run pip, call APIs, install packages,
+# safely, Check is non-mutating/no-call, and Set up API / AnyLLM records a
+# confirmation-gated venv + package setup intent. It does not run pip, call APIs, install packages,
 # read a real secret, or mutate real Application Support data.
 
 const FAKE_SECRET = "sk-package3-secret-do-not-save"
@@ -33,15 +33,19 @@ func _run() -> void:
 	settings.store("backend_python_path", "python3")
 	settings.store("backend_api_setup_proof_only", true)
 
+	var config_path = paths.config.plus_file(backend_config.BACKEND_CONFIG_FILENAME)
+	var patch_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_PATCH_FILENAME)
+	var intent_path = paths.config.plus_file(backend_config.API_SETUP_INTENT_FILENAME)
+	_remove_if_exists(config_path)
+	_remove_if_exists(patch_path)
+	_remove_if_exists(intent_path)
+
 	var ui_script = load("res://scripts/BackendSetupUI.gd")
 	var ui = VBoxContainer.new()
 	ui.set_script(ui_script)
 	root.add_child(ui)
 	yield(self, "idle_frame")
 
-	var config_path = paths.config.plus_file(backend_config.BACKEND_CONFIG_FILENAME)
-	var patch_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_PATCH_FILENAME)
-	var intent_path = paths.config.plus_file(backend_config.API_SETUP_INTENT_FILENAME)
 	var all_text = _collect_visible_text(ui)
 	_require(all_text.find("API base URL") >= 0, "API base URL field did not render")
 	_require(all_text.find("Provider") >= 0, "Provider field did not render")
@@ -50,9 +54,9 @@ func _run() -> void:
 	_require(all_text.find("API key (session only)") >= 0, "session-only API key control did not render")
 	_require(all_text.find("Use for this session") >= 0, "session API key action did not render")
 	_require(_option_has_item(ui._backend_provider_button, "OpenAI") and _option_has_item(ui._backend_provider_button, "OpenRouter") and _option_has_item(ui._backend_provider_button, "AnyLLM custom provider"), "provider choices did not render")
-	_require(all_text.find("server endpoint") >= 0 and all_text.find("proxy/router") >= 0, "API base URL help did not render")
-	_require(all_text.find("Python") >= 0 and all_text.find("AnyLLM") >= 0 and all_text.find("API-key env var") >= 0 and all_text.find("API setup") >= 0, "API status lights did not render")
-	_require(all_text.find("Install AnyLLM packages") >= 0 and all_text.find("Create venv only") >= 0, "API AnyLLM package/venv actions did not render")
+	_require(all_text.find("provider default") >= 0 and all_text.find("proxy/router") >= 0, "API base URL help did not render")
+	_require(_status_container_has_states(ui._api_status_lights, ["green", "yellow"]), "API status rows did not expose explicit colored states")
+	_require(all_text.find("Set up API / AnyLLM") >= 0 and all_text.find("Create venv only") >= 0, "API setup/venv actions did not render")
 	_require(all_text.find("hardware") < 0 and all_text.find("Ollama URL") < 0, "API mode leaked Ollama/hardware copy")
 
 	var check_button = _find_button(ui, "Check")
@@ -73,7 +77,7 @@ func _run() -> void:
 	yield(self, "idle_frame")
 	_require(ui._backend_api_key_secret.text == "", "session key field was not cleared after use")
 	_require(OS.get_environment("LACAPULT_PACKAGE3_KEY") == FAKE_SECRET, "session key was not set in process environment")
-	_require(ui._api_status_lights.text.find("API-key env var 🟢") >= 0, "API-key env-var light did not show session-set state")
+	_require(_find_status_row(ui._api_status_lights, "API-keyenvvarStatusRow", "green"), "API-key env-var row did not show session-set state")
 
 	var save_button = _find_button(ui, "Save options")
 	_require(save_button != null, "Save options button lookup failed")
@@ -94,14 +98,14 @@ func _run() -> void:
 	_require(patch_text.find("LLM_INTENT_API_PROVIDER") >= 0 and patch_text.find("openrouter") >= 0, "options patch did not carry provider metadata")
 	_require(patch_text.find(FAKE_SECRET) < 0, "options patch leaked API secret")
 
-	var install_button = _find_button(ui, "Install AnyLLM packages")
-	_require(install_button != null, "Install AnyLLM packages button lookup failed")
+	var install_button = _find_button(ui, "Set up API / AnyLLM")
+	_require(install_button != null, "Set up API / AnyLLM button lookup failed")
 	install_button.emit_signal("pressed")
 	yield(self, "idle_frame")
-	_require(ui._confirm_dialog.dialog_text.find("python3 -m pip install --upgrade") >= 0, "confirmation did not show planned AnyLLM setup command")
-	_require(ui._confirm_dialog.dialog_text.find("may install or upgrade Python packages") >= 0, "confirmation did not explain real install boundary")
+	_require(ui._confirm_dialog.dialog_text.find("-m venv") >= 0 and ui._confirm_dialog.dialog_text.find("pip install --upgrade") >= 0, "confirmation did not show planned venv + AnyLLM setup phases")
+	_require(ui._confirm_dialog.dialog_text.find("creates/updates") >= 0 and ui._confirm_dialog.dialog_text.find("installs AnyLLM") >= 0, "confirmation did not explain real venv/package install boundary")
 	_require(ui._confirm_dialog.dialog_text.find("\n") >= 0 and ui._confirm_dialog.dialog_autowrap == true, "confirmation dialog did not use wrapped/newline layout")
-	_require(ui._confirm_dialog.dialog_text.find("Proof mode") >= 0 and ui._confirm_dialog.dialog_text.find("instead of running pip") >= 0, "confirmation lost proof-mode no-pip boundary")
+	_require(ui._confirm_dialog.dialog_text.find("Proof mode") >= 0 and ui._confirm_dialog.dialog_text.find("instead of creating a venv or running pip") >= 0, "confirmation lost proof-mode no-pip boundary")
 	_require(ui._confirm_dialog.dialog_text.find(FAKE_SECRET) < 0, "confirmation leaked API secret")
 	ui._on_ExternalBackendAction_confirmed()
 	yield(self, "idle_frame")
@@ -109,16 +113,24 @@ func _run() -> void:
 	var intent = helpers.load_json_file(intent_path)
 	var intent_text = JSON.print(intent)
 	_require(intent.get("action", "") == "install_api_backend", "setup intent action mismatch")
+	_require(intent.get("phase_order", []).has("create_or_update_venv") and intent.get("phase_order", []).has("install_anyllm_packages"), "setup intent missing venv/package phases")
 	_require(intent.get("provider", "") == "openrouter", "setup intent provider mismatch")
 	_require(intent.get("performed_external_install", true) == false, "setup intent claimed an external install ran")
+	_require(intent.get("phase_order", []).has("create_or_update_venv") and intent.get("phase_order", []).has("install_anyllm_packages"), "setup intent did not record venv/package phases")
 	_require(intent_text.find(FAKE_SECRET) < 0, "setup intent leaked API secret")
 
 	print("API / AnyLLM workflow UI smoke passed")
-	print("  UI proof: API base URL/provider/model/env-var/session-key controls, status lights, Create venv only, and Install AnyLLM packages rendered")
+	print("  UI proof: API base URL/provider/model/env-var/session-key controls, colored status rows, Create venv only, and Set up API / AnyLLM rendered")
 	print("  Check proof: readiness-only; no backend config write and no API call")
 	print("  Save proof: provider/base URL/model/env-var name round-tripped without storing secret")
-	print("  Install proof: confirmation-gated AnyLLM setup command staged in proof mode; no pip/API call/secret read")
+	print("  Install proof: confirmation-gated venv + AnyLLM setup command staged in proof mode; no venv/pip/API call/secret read")
 	quit(0)
+
+
+func _remove_if_exists(path: String) -> void:
+	var f := File.new()
+	if f.file_exists(path):
+		Directory.new().remove(path)
 
 
 func _collect_visible_text(node: Node) -> String:
@@ -136,6 +148,8 @@ func _collect_visible_text_into(node: Node, parts: Array) -> void:
 		parts.append(node.text)
 	elif node is LineEdit:
 		parts.append(node.placeholder_text)
+	elif node is TextEdit:
+		parts.append(node.text)
 	elif node is OptionButton:
 		for i in range(node.get_item_count()):
 			parts.append(node.get_item_text(i))
@@ -146,6 +160,27 @@ func _collect_visible_text_into(node: Node, parts: Array) -> void:
 func _option_has_item(option: OptionButton, text: String) -> bool:
 	for i in range(option.get_item_count()):
 		if option.get_item_text(i) == text:
+			return true
+	return false
+
+
+func _status_container_has_states(container: Node, states: Array) -> bool:
+	for wanted in states:
+		var found = false
+		for child in container.get_children():
+			if child.has_meta("status_state") and child.get_meta("status_state") == wanted:
+				found = true
+			for grand in child.get_children():
+				if grand.has_meta("status_state") and grand.get_meta("status_state") == wanted:
+					found = true
+		if not found:
+			return false
+	return true
+
+
+func _find_status_row(container: Node, row_name: String, state: String) -> bool:
+	for child in container.get_children():
+		if child.name == row_name and child.has_meta("status_state") and child.get_meta("status_state") == state:
 			return true
 	return false
 

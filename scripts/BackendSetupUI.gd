@@ -26,9 +26,10 @@ var _backend_api_key_env: LineEdit = null
 var _backend_api_key_secret: LineEdit = null
 var _set_session_key_button: Button = null
 var _install_python_button: Button = null
-var _api_status_lights: Label = null
-var _ollama_status_lights: Label = null
+var _api_status_lights: VBoxContainer = null
+var _ollama_status_lights: VBoxContainer = null
 var _backend_status: Label = null
+var _command_preview_box: TextEdit = null
 var _save_button: Button = null
 var _check_button: Button = null
 var _install_button: Button = null
@@ -50,7 +51,7 @@ func _build_controls() -> void:
 
 	_intro = Label.new()
 	_intro.autowrap = true
-	_intro.text = "Choose how C-AOL should reach an LLM backend"
+	_intro.text = "Choose API or local Ollama setup."
 	add_child(_intro)
 
 	var mode_row = HBoxContainer.new()
@@ -88,7 +89,7 @@ func _build_controls() -> void:
 	_api_base_url_help = Label.new()
 	_api_base_url_help.name = "ApiBaseUrlHelp"
 	_api_base_url_help.autowrap = true
-	_api_base_url_help.text = "API base URL is the server endpoint Catapult-Dabubu/C-AOL sends API requests to; leave the provider default unless you use a compatible proxy/router."
+	_api_base_url_help.text = "Leave the provider default unless you use a proxy/router."
 	add_child(_api_base_url_help)
 
 	var provider_row = HBoxContainer.new()
@@ -191,14 +192,12 @@ func _build_controls() -> void:
 	_set_session_key_button.connect("pressed", self, "_on_SetSessionApiKey_pressed")
 	api_secret_row.add_child(_set_session_key_button)
 
-	_api_status_lights = Label.new()
+	_api_status_lights = VBoxContainer.new()
 	_api_status_lights.name = "ApiStatusLights"
-	_api_status_lights.autowrap = true
 	add_child(_api_status_lights)
 
-	_ollama_status_lights = Label.new()
+	_ollama_status_lights = VBoxContainer.new()
 	_ollama_status_lights.name = "OllamaStatusLights"
-	_ollama_status_lights.autowrap = true
 	add_child(_ollama_status_lights)
 
 	_backend_status = Label.new()
@@ -223,6 +222,13 @@ func _build_controls() -> void:
 	_install_button.hint_tooltip = "Saves current options first, then opens a confirmation prompt; automated tests do not install packages or pull models."
 	_install_button.connect("pressed", self, "_on_ConfirmGuidedInstall_pressed")
 	button_row.add_child(_install_button)
+
+	_command_preview_box = TextEdit.new()
+	_command_preview_box.name = "BackendCommandPreview"
+	_command_preview_box.readonly = true
+	_command_preview_box.rect_min_size = Vector2(0, 68)
+	_command_preview_box.size_flags_horizontal = SIZE_EXPAND_FILL
+	add_child(_command_preview_box)
 
 	_confirm_dialog = ConfirmationDialog.new()
 	_confirm_dialog.name = "ConfirmExternalBackendAction"
@@ -270,10 +276,10 @@ func _refresh_backend_setup_controls() -> void:
 		choice_row.visible = false
 		model_row.visible = true
 		_install_python_button.text = "Create venv only"
-		_install_python_button.hint_tooltip = "Creates or updates the runner.py Python venv only.\nIt does not install AnyLLM packages.\nUse Install AnyLLM packages after selecting that venv."
-		_install_button.text = "Install AnyLLM packages"
-		_install_button.hint_tooltip = "Saves options, then asks before installing AnyLLM/provider packages into the selected Python or venv.\nNo API call or API-secret read is performed."
-		_guidance.text = "Use an API provider through AnyLLM. Recent C-AOL logs show many calls around 300-400 tokens, with variation by prompt/provider/model."
+		_install_python_button.hint_tooltip = "Advanced: creates/updates only the runner.py venv. The main API setup action also installs AnyLLM packages."
+		_install_button.text = "Set up API / AnyLLM"
+		_install_button.hint_tooltip = "Saves options, then asks before creating/updating the venv and installing AnyLLM/provider packages into it.\nNo API call or API-secret read is performed."
+		_guidance.text = "API path: choose provider/model, set env-var name, then run setup."
 	elif mode == "ollama":
 		_backend_endpoint_label.text = "Ollama URL"
 		_backend_model_label.text = "Ollama model tag"
@@ -296,28 +302,15 @@ func _refresh_backend_setup_controls() -> void:
 		_install_button.text = "Install Ollama / model"
 		_install_button.hint_tooltip = "Saves options, then asks before installing Ollama or pulling the selected model.\nAutomated proof records intent only."
 		_select_ollama_choice(Settings.read("backend_ollama_model"))
-		_guidance.text = "Use ollama for local LLM utilization."
+		_guidance.text = "Ollama path: Check hardware/readiness, then install or pull one step at a time."
 
 	_backend_python_path.text = Settings.read("backend_python_path")
 	_backend_api_key_env.text = Settings.read("backend_api_key_env")
-	_hardware_hint.text = _build_ollama_hardware_recommendation_text(_read_safe_hardware_signals()) if mode == "ollama" else ""
+	_hardware_hint.text = ""
+	_update_command_preview_box(mode)
 
 	var raw_status = _check_current_backend_status()
 	_set_backend_status(mode, raw_status)
-
-
-func _read_safe_hardware_signals() -> Dictionary:
-	var signals = {"memory_mb": 0, "processor_count": OS.get_processor_count()}
-	if OS.has_method("get_static_memory_usage"):
-		signals["memory_note"] = "Runtime memory signal only; exact system RAM may be unavailable in Godot."
-	return signals
-
-
-func _build_ollama_hardware_recommendation_text(signals: Dictionary) -> String:
-	var memory_mb = int(signals.get("memory_mb", 0))
-	if memory_mb >= 24000:
-		return "Hardware recommendation: this machine appears to have enough memory for the larger %s path, but %s remains available. Final model choice is yours." % [OLLAMA_MODEL_NEMOTRON, OLLAMA_MODEL_MISTRAL]
-	return "Hardware recommendation: if memory/GPU capacity is unknown or modest, start with %s. Choose %s manually if you know the machine has enough headroom. Catapult-Dabubu will not pull either model without confirmation." % [OLLAMA_MODEL_MISTRAL, OLLAMA_MODEL_NEMOTRON]
 
 
 func _check_current_backend_status() -> String:
@@ -328,42 +321,101 @@ func _check_current_backend_status() -> String:
 func _set_backend_status(mode: String, raw_status: String, prefix: String = "") -> void:
 	var light = BackendConfig.get_status_light(raw_status)
 	var lines = []
-	var lead = "%s %s" % [light.get("icon", "🟡"), light.get("state", "Needs action")]
+	var lead = "%s" % light.get("state", "Needs action")
 	if prefix != "":
 		lead = "%s — %s" % [prefix, lead]
 	lines.append("%s: %s" % [lead, light.get("summary", raw_status)])
 	if mode == "api":
 		if _api_status_lights != null:
-			_api_status_lights.text = _api_status_light_text(raw_status)
-		lines.append("Secret policy: env-var name only; optional pasted key is process-session only, cleared after use, and no API call comes from Check.")
-		lines.append("Venv/package split: Create venv only makes the runner.py venv; Install AnyLLM packages installs provider deps into the selected Python/venv after confirmation.")
+			_set_status_rows(_api_status_lights, _api_status_rows(raw_status))
+		lines.append("Secret policy: env-var name only; pasted keys are session-only and cleared after use. Check makes no API call.")
+		lines.append("Setup path: creates/updates the venv, installs AnyLLM/provider packages, then use Check.")
 	elif mode == "ollama":
 		if _ollama_status_lights != null:
-			_ollama_status_lights.text = _ollama_status_light_text()
-		lines.append("Python note: C-AOL launches tools/llm_runner/runner.py through Python for Ollama too; Create venv only is confirmation-gated and does not pull models.")
-		lines.append("Install policy: no Ollama install or model pull until confirmed.")
+			_set_status_rows(_ollama_status_lights, _ollama_status_rows())
+		lines.append("Install policy: serialized confirmed steps only; no chained install+pull when Ollama is not ready.")
+		lines.append("Long install/download warning: the launcher may appear to wait while Ollama opens or a model download continues.")
 	_backend_status.text = "\n".join(lines)
+	_update_command_preview_box(mode)
 
 
-
-func _ollama_status_light_text() -> String:
+func _ollama_status_rows() -> Array:
 	var endpoint = _backend_endpoint.text if _backend_endpoint != null else BackendConfig.DEFAULT_OLLAMA_URL
 	var python_path = _backend_python_path.text if _backend_python_path != null else ""
 	var readiness = BackendConfig.get_ollama_readiness(endpoint, python_path)
-	var model_lights = readiness.get("model_lights", {})
-	return "Ollama cmd %s · Server %s · Mistral %s · Nemotron %s · Python/venv %s · Options %s" % [readiness.get("command_light", "🔴"), readiness.get("server_light", "🔴"), model_lights.get(OLLAMA_MODEL_MISTRAL, "🔴"), model_lights.get(OLLAMA_MODEL_NEMOTRON, "🔴"), readiness.get("python_light", "🔴"), readiness.get("options_light", "🟢")]
+	var model_states = readiness.get("model_states", readiness.get("model_lights", {}))
+	var hardware = BackendConfig.get_ollama_hardware_check()
+	_hardware_hint.text = "Hardware check: RAM %s MB / VRAM %s MB — %s" % [str(hardware.get("ram_mb", 0)), str(hardware.get("vram_mb", 0)), hardware.get("conclusion", "not checked")]
+	return [
+		{"label": "Ollama command", "state": readiness.get("command_state", readiness.get("command_light", "red"))},
+		{"label": "Ollama server", "state": readiness.get("server_state", readiness.get("server_light", "red"))},
+		{"label": "Mistral model", "state": model_states.get(OLLAMA_MODEL_MISTRAL, "red")},
+		{"label": "Nemotron model", "state": model_states.get(OLLAMA_MODEL_NEMOTRON, "red")},
+		{"label": "Python/venv", "state": readiness.get("python_state", readiness.get("python_light", "red"))},
+		{"label": "Hardware check", "state": hardware.get("state", "gray")},
+		{"label": "Options", "state": readiness.get("options_state", readiness.get("options_light", "green"))}
+	]
 
 
-func _api_status_light_text(raw_status: String) -> String:
-	var python_light = "🔴" if raw_status.find("api_python_missing") >= 0 else "🟢"
-	var import_light = "🟢" if raw_status.find("any_llm_import_ok") >= 0 else "🟡"
+func _api_status_rows(raw_status: String) -> Array:
+	var python_state = "red" if raw_status.find("api_python_missing") >= 0 else "green"
+	var import_state = "green" if raw_status.find("any_llm_import_ok") >= 0 else "yellow"
 	if raw_status.find("any_llm_missing") >= 0:
-		import_light = "🟡"
-	var env_light = "🟢" if raw_status.find("api_key_env_present_secret_not_read") >= 0 else "🟡"
+		import_state = "yellow"
+	var env_state = "green" if raw_status.find("api_key_env_present_secret_not_read") >= 0 else "yellow"
 	if raw_status.find("api_key_env_missing") >= 0:
-		env_light = "🔴"
-	var ready_light = "🟢" if raw_status.find("any_llm_import_ok") >= 0 and raw_status.find("model_configured") >= 0 and raw_status.find("api_key_env_present_secret_not_read") >= 0 else "🟡"
-	return "Python %s · AnyLLM %s · API-key env var %s · API setup %s" % [python_light, import_light, env_light, ready_light]
+		env_state = "red"
+	var ready_state = "green" if raw_status.find("any_llm_import_ok") >= 0 and raw_status.find("model_configured") >= 0 and raw_status.find("api_key_env_present_secret_not_read") >= 0 else "yellow"
+	return [
+		{"label": "Python / venv", "state": python_state},
+		{"label": "AnyLLM packages", "state": import_state},
+		{"label": "API-key env var", "state": env_state},
+		{"label": "API setup", "state": ready_state}
+	]
+
+
+func _set_status_rows(container: VBoxContainer, rows: Array) -> void:
+	for child in container.get_children():
+		container.remove_child(child)
+		child.queue_free()
+	for row in rows:
+		var h = HBoxContainer.new()
+		h.name = "%sStatusRow" % str(row.get("label", "State")).replace(" ", "")
+		h.set_meta("status_state", row.get("state", "gray"))
+		var dot = Label.new()
+		dot.name = "BigStatusDot"
+		dot.text = "●"
+		dot.rect_min_size = Vector2(24, 20)
+		dot.align = Label.ALIGN_CENTER
+		dot.add_color_override("font_color", _status_color(row.get("state", "gray")))
+		dot.set_meta("status_state", row.get("state", "gray"))
+		h.add_child(dot)
+		var label = Label.new()
+		label.name = "StatusLabel"
+		label.text = "%s: %s" % [row.get("label", "State"), _status_label(row.get("state", "gray"))]
+		label.size_flags_horizontal = SIZE_EXPAND_FILL
+		h.add_child(label)
+		container.add_child(h)
+
+
+func _status_color(state: String) -> Color:
+	if state == "green":
+		return Color(0.1, 0.75, 0.2)
+	if state == "yellow":
+		return Color(0.95, 0.72, 0.1)
+	if state == "red":
+		return Color(0.9, 0.15, 0.12)
+	return Color(0.45, 0.45, 0.45)
+
+
+func _status_label(state: String) -> String:
+	if state == "green":
+		return "ready"
+	if state == "yellow":
+		return "needs action"
+	if state == "red":
+		return "missing"
+	return "unknown"
 
 
 func _select_api_provider(provider_id: String) -> String:
@@ -530,23 +582,38 @@ func _on_ConfirmGuidedInstall_pressed() -> void:
 	_confirm_dialog.popup_centered(CONFIRM_DIALOG_SIZE)
 
 
+func _update_command_preview_box(mode: String) -> void:
+	if _command_preview_box == null:
+		return
+	if mode == "api":
+		var fields = _collect_current_backend_fields()
+		var plan = BackendConfig.build_api_setup_plan(fields.get("api_provider", BackendConfig.DEFAULT_API_PROVIDER), fields.get("python_path", ""))
+		_command_preview_box.text = "CLI input preview (runs only after confirmation):\n%s" % plan.get("command", "")
+	elif mode == "ollama":
+		var fields = _collect_current_backend_fields()
+		var plan = BackendConfig.build_ollama_setup_plan(fields.get("endpoint", BackendConfig.DEFAULT_OLLAMA_URL), fields.get("model", ""))
+		_command_preview_box.text = "CLI input preview (serialized; no shell chain):\n%s\n%s" % [plan.get("command_preview", "manual install/startup required"), plan.get("next_step", "Run Check after each long step.")]
+	else:
+		_command_preview_box.text = ""
+
+
 func _confirmation_text_for_mode(mode: String) -> String:
 	if mode == "api":
 		var fields = _collect_current_backend_fields()
 		var plan = BackendConfig.build_api_setup_plan(fields.get("api_provider", BackendConfig.DEFAULT_API_PROVIDER), fields.get("python_path", ""))
 		var proof_note = ""
 		if _api_setup_proof_only_enabled():
-			proof_note = "\n\nProof mode is enabled for this run, so Catapult-Dabubu records the confirmed intent only instead of running pip."
-		return "Confirm AnyLLM package setup for %s.\n\nPlanned command after approval:\n%s\n\nThis may install or upgrade Python packages in the selected Python/venv.\nCatapult-Dabubu will not read API secrets or make API calls.%s" % [plan.get("provider_label", "provider"), plan.get("command", "python3 -m pip install --upgrade any_llm"), proof_note]
+			proof_note = "\n\nProof mode is enabled for this run, so Catapult-Dabubu records the confirmed intent only instead of creating a venv or running pip."
+		return "Confirm API / AnyLLM setup for %s.\n\nCLI input (serialized, not shell-chained):\n%s\n\nThis creates/updates the selected venv, then installs AnyLLM/provider packages into it.\nCatapult-Dabubu will not read API secrets or make API calls.%s" % [plan.get("provider_label", "provider"), plan.get("command", "python3 -m pip install --upgrade any_llm"), proof_note]
 	if mode == "ollama":
 		var fields = _collect_current_backend_fields()
 		var plan = BackendConfig.build_ollama_setup_plan(fields.get("endpoint", BackendConfig.DEFAULT_OLLAMA_URL), fields.get("model", ""))
 		var proof_note = "\n\nProof mode is enabled for this run, so Catapult-Dabubu records the confirmed intent only instead of running installers or `ollama pull`." if _external_setup_proof_only_enabled() else ""
-		return "Confirm Ollama setup for model %s.\n\nPlanned command after approval:\n%s\n\nThis may install Ollama through a platform package manager where supported, then pull the selected model.\nWindows plan: winget id Ollama.Ollama is the official Ollama package path when winget is available; Catapult-Dabubu still checks CLI/server/model state separately after install.\nCatapult-Dabubu will not pull models before this confirmation.%s" % [plan.get("model", Settings.read("backend_ollama_model")), plan.get("command_preview", "manual install required"), proof_note]
+		return "Confirm Ollama setup for model %s.\n\nCLI input (serialized, not shell-chained):\n%s\n\nThis may install Ollama or pull a model only after the matching readiness step is available. If Ollama was just installed or is still opening, run Check before pulling the model.\nWarning: install/model download can take several minutes; the launcher may appear to wait while work continues.\nCatapult-Dabubu will not pull models before this confirmation.%s" % [plan.get("model", Settings.read("backend_ollama_model")), plan.get("command_preview", "manual install required"), proof_note]
 	if mode == "python_venv":
 		var plan = BackendConfig.build_python_venv_setup_plan(_backend_python_path.text if _backend_python_path != null else "")
 		var proof_note = "\n\nProof mode is enabled for this run, so Catapult-Dabubu records the venv intent only." if _external_setup_proof_only_enabled() else ""
-		var api_note = "\n\nAPI note: this creates the venv only; use Install AnyLLM packages afterward to install any_llm/provider dependencies into that selected venv." if Settings.read("backend_mode") == "api" else ""
+		var api_note = "\n\nAPI note: this creates the venv only; the main API setup also installs AnyLLM packages; use this only for venv repair to install any_llm/provider dependencies into that selected venv." if Settings.read("backend_mode") == "api" else ""
 		return "Confirm Python venv setup.\n\nPlanned command after approval:\n%s\n\nThis creates or updates the venv path used by C-AOL runner.py.\nIt does not install AnyLLM packages or pull Ollama models.%s%s" % [plan.get("command_preview", "python3 -m venv"), api_note, proof_note]
 	return "Confirm before running an external backend setup action. This proof build records the intent only and does not run package managers or download models."
 
@@ -564,21 +631,25 @@ func _on_ExternalBackendAction_confirmed() -> void:
 		var fields = _collect_current_backend_fields()
 		var proof_only = _api_setup_proof_only_enabled()
 		if not proof_only:
-			_set_external_action_progress("api", "Installing AnyLLM/provider packages. Keep Catapult-Dabubu open; this may take a while.")
+			_set_external_action_progress("api", "Creating/updating venv, then installing AnyLLM/provider packages. Keep Catapult-Dabubu open; this may take a while.")
 			yield(get_tree(), "idle_frame")
 		var setup_result = BackendConfig.run_api_setup(fields.get("api_provider", BackendConfig.DEFAULT_API_PROVIDER), fields.get("python_path", ""), proof_only)
 		var status = setup_result.get("status", "api_setup_unknown")
 		if status != "ok" and status != "api_setup_install_ok":
 			_set_backend_status("api", status, "API setup command failed" if not proof_only else "API setup intent failed")
-			post_message = "C-AOL API backend setup command failed; pip may have been attempted in the selected Python. No API call or API-secret read was performed." if not proof_only else "C-AOL API backend setup proof intent failed; no external install/download was performed."
+			post_message = "C-AOL API backend setup command failed during venv/package setup. No API call or API-secret read was performed." if not proof_only else "C-AOL API backend setup proof intent failed; no external install/download was performed."
 			Status.post(post_message)
 			return
+		var target_path = setup_result.get("plan", {}).get("target_venv_path", "")
+		if target_path != "":
+			_backend_python_path.text = target_path
+			Settings.store("backend_python_path", target_path)
 		if setup_result.get("proof_only", false):
-			_backend_status.text = "Confirmed API backend setup intent was recorded. Proof mode performed no pip install, API call, secret read, or real machine mutation.\n%s" % _backend_status.text
+			_backend_status.text = "Confirmed API backend setup intent was recorded. Proof mode performed no venv creation, pip install, API call, secret read, or real machine mutation.\n%s" % _backend_status.text
 			post_message = "C-AOL API backend setup intent recorded in proof mode; no external install/download was performed."
 		else:
 			_set_backend_status("api", _check_current_backend_status(), "API setup command finished")
-			post_message = "C-AOL API backend setup command finished; pip may have installed/upgraded packages in the selected Python. No API call or API-secret read was performed."
+			post_message = "C-AOL API backend setup command finished; venv and AnyLLM/provider packages were handled after confirmation. No API call or API-secret read was performed."
 	elif _pending_confirm_action == "ollama":
 		var fields = _collect_current_backend_fields()
 		var proof_only = _external_setup_proof_only_enabled()
@@ -619,7 +690,7 @@ func _on_ExternalBackendAction_confirmed() -> void:
 			post_message = "Python venv setup intent recorded in proof mode; no venv was created."
 		else:
 			_set_backend_status(Settings.read("backend_mode"), _check_current_backend_status(), "Python venv setup finished")
-			post_message = "Python venv setup command finished after confirmation; it created/updated the runner.py venv only. Install AnyLLM packages separately when using API mode."
+			post_message = "Python venv setup command finished after confirmation; it created/updated the runner.py venv only. run the main API setup if AnyLLM packages still need repair."
 	else:
 		_backend_status.text = "Confirmed guided setup intent for %s. No external package install, model pull, API call, or real machine mutation was performed by this action.\n%s" % [_pending_confirm_action, _backend_status.text]
 	Status.post(post_message)
@@ -628,9 +699,14 @@ func _on_ExternalBackendAction_confirmed() -> void:
 func _set_external_action_progress(mode: String, message: String) -> void:
 	_backend_status.text = "Working: %s\nNo API secrets are read. No model pull or package install started before your confirmation." % message
 	if mode == "api" and _api_status_lights != null:
-		_api_status_lights.text = "Python 🟡 · AnyLLM 🟡 · API-key env var 🟡 · API setup 🟡 (running)"
+		_set_status_rows(_api_status_lights, [
+			{"label": "Python / venv", "state": "yellow"},
+			{"label": "AnyLLM packages", "state": "yellow"},
+			{"label": "API-key env var", "state": "yellow"},
+			{"label": "API setup", "state": "yellow"}
+		])
 	elif mode == "ollama" and _ollama_status_lights != null:
-		_ollama_status_lights.text = "%s · Ollama setup 🟡 (running)" % _ollama_status_light_text()
+		_set_status_rows(_ollama_status_lights, _ollama_status_rows() + [{"label": "Ollama setup", "state": "yellow"}])
 
 
 func _ollama_setup_failure_message(setup_result: Dictionary, proof_only: bool) -> String:
