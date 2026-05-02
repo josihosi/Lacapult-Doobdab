@@ -1,6 +1,6 @@
 # Alex handoff — Catapult-Dabubu Windows retest follow-up v1
 
-Classification: local proofed / Windows test build pending follow-up from Josef Windows retest.
+Classification: READY FOR JOSEF WINDOWS RETEST / quarantine still active.
 
 Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`.
 Imagination source: `doc/catapult-dabubu-installer-vision-retest-imagination-source-2026-05-02.md`.
@@ -51,4 +51,8 @@ Screenshot: `/Users/josefhorvath/.openclaw/media/inbound/2fc7eceb-c09c-4588-ae3b
 
 ## Success bar
 
-Local implementation/static/UI proof for installer plan/status, text reduction, colored dots, Ollama hardware/serialized setup, Mods/Downloadable/Summarizer clarity, and native-resizable window layout is now the immediate boundary. Next boundary is package proof + fresh Josef-only Windows Draft/prerelease, then Josef Windows confirmation.
+Local implementation/static/UI proof for installer plan/status, text reduction, colored dots, Ollama hardware/serialized setup, Mods/Downloadable/Summarizer clarity, and native-resizable window layout is complete. Package proof and a fresh Josef-only Windows Draft/prerelease are also complete.
+
+Verified retest build: `catapult-dabubu-josef-windows-retest-v1-2026-05-02` / `Catapult-Dabubu Josef Windows retest build v1 2026-05-02`, URL `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-6c700e3ce1114782def5`, Windows asset `Catapult-Dabubu-windows-unsigned.zip`, SHA-256 `a0ae09628349df1f6840b68b6328f8ef066892f0a7a1a8dc6f5a70f8ebe3ac5d`.
+
+Remaining boundary: Josef Windows confirmation that API install semantics, text density, colored dots, Ollama flow, Mods/Summarizer clarity, and resized/native window are acceptable. Do not treat this as a quarantine lift or public/final release claim.
