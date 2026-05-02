@@ -19,7 +19,7 @@ Raw intake: `doc/josef-windows-debug-intake-2026-05-02.md`.
 - [x] Address overcrowding/top bar with larger native-resizable window/autofit-style shared layout fix.
 - [x] Suppress or distinguish repeated identical Summarizer dry-run/status-only log spam while preserving no-mutation safety.
 - [x] Run focused UI/static/backend setup gates without live secrets/model pulls/user-data mutation or uncontrolled package installs.
-- [ ] Build/package a fresh Windows unsigned `Catapult-Dabubu` test artifact after fixes.
+- [x] Build/package a fresh Windows unsigned `Catapult-Dabubu` test artifact after fixes.
 - [ ] Create or update a clearly labelled Josef-only GitHub Draft/prerelease test release with Windows asset, checksums/build notes, and `gh release view` verification.
 
 ## Completed debug-note stack

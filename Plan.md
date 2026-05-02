@@ -18,7 +18,7 @@ If these disagree, `Plan.md` wins; repair the other file instead of inventing a 
 
 ## Current status
 
-**State:** RELEASE QUARANTINE ACTIVE / WINDOWS RETEST FOLLOW-UP LOCAL PROOFED / WINDOWS TEST BUILD PENDING
+**State:** RELEASE QUARANTINE ACTIVE / WINDOWS RETEST FOLLOW-UP LOCAL PROOFED / TEST RELEASE PENDING
 
 The 2026-04-26 Lacapult prerelease family is quarantined as Draft after Josef reported that the download looked like CAOL rather than clearly like Lacapult. No Lacapult release from that family should be republished until the quarantine/identity investigation is closed and Josef/Schani explicitly re-greenlight.
 
@@ -51,7 +51,7 @@ Do not schedule repeated reminders for this. It is a ledger item, not an impleme
 
 ## Active Windows retest follow-up lane
 
-**LOCAL PROOFED / BUILD NEXT: Catapult-Dabubu Windows retest follow-up v1** - Josef retested the 2026-05-01 Catapult-Dabubu Windows build and reported that the product vision is still not fulfilled: API / LLM setup does not install AnyLLM packages with venv creation, background/helper text remains too full, and Unicode readiness lights fail on Windows. Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`; imagination source: `doc/catapult-dabubu-installer-vision-retest-imagination-source-2026-05-02.md`; raw intake: `doc/josef-windows-debug-intake-2026-05-02.md`; executor handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`.
+**LOCAL PROOFED / TEST RELEASE NEXT: Catapult-Dabubu Windows retest follow-up v1** - Josef retested the 2026-05-01 Catapult-Dabubu Windows build and reported that the product vision is still not fulfilled: API / LLM setup does not install AnyLLM packages with venv creation, background/helper text remains too full, and Unicode readiness lights fail on Windows. Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`; imagination source: `doc/catapult-dabubu-installer-vision-retest-imagination-source-2026-05-02.md`; raw intake: `doc/josef-windows-debug-intake-2026-05-02.md`; executor handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`.
 
 Scope order:
 1. API / AnyLLM installer semantics: one obvious setup path must create/use the venv and install required AnyLLM packages/dependencies, with distinct venv/package/progress/success/failure states.

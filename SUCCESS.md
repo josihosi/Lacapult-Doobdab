@@ -36,7 +36,7 @@ Success state:
 
 ## Catapult-Dabubu Windows retest follow-up v1
 
-Status: LOCAL PROOFED / WINDOWS TEST BUILD PENDING / QUARANTINE STILL ACTIVE
+Status: LOCAL PROOFED / TEST RELEASE PENDING / QUARANTINE STILL ACTIVE
 
 Success state:
 - [x] API / AnyLLM setup has an obvious path that creates/uses the venv and installs required AnyLLM packages/dependencies, with status/progress for each phase.
@@ -49,7 +49,8 @@ Success state:
 - [x] Window/top-bar overcrowding is addressed with larger native-resizable/autofit-style layout proof.
 - [x] Repeated identical Summarizer dry-run/status-only clicks are de-spammed or clearly marked as refreshes while remaining no-mutation.
 - [x] UI/static smoke proves colored status indicators carry explicit red/green/yellow/gray states and no old fragile light-glyph path remains in visible setup status.
-- [ ] A fresh Josef-only Windows test build/release is produced after the fixes.
+- [x] A fresh Josef-only Windows test build is produced after the fixes.
+- [ ] A fresh Josef-only Windows Draft/prerelease is created/updated and verified after the fixes.
 - [ ] Josef confirms on Windows that API install semantics, text density, and colored dots are acceptable.
 
 Canonical docs:

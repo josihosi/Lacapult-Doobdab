@@ -1,6 +1,6 @@
 # Catapult-Dabubu Windows retest follow-up v1 — installer vision / status dots / text density
 
-Status: ACTIVE / GREENLIT FOLLOW-UP FROM JOSEF WINDOWS RETEST
+Status: LOCAL PROOFED / TEST RELEASE PENDING / QUARANTINE STILL ACTIVE
 
 Imagination source: `doc/catapult-dabubu-installer-vision-retest-imagination-source-2026-05-02.md`.
 
@@ -73,11 +73,12 @@ Schani verdict: the vision is not fulfilled yet. The launcher currently still as
 - [x] Ollama hardware check measures RAM/VRAM where available and shows explicit green/yellow/red runnability state.
 - [x] Ollama setup preview/warnings make long install/download waits clear and avoid unsafe install+pull chaining when Ollama is not ready.
 - [x] Mods/summarizer inventory label is plain (`built-in game mods`/inventory wording), not `Show Stock`; Windows bottom-cutoff visual check remains tracked.
-- [ ] C-AOL `Downloadable` mod catalog empty-state explains it is optional add-on catalog, not the main built-in/user/world mod inventory or Summarizer source.
-- [ ] Mods page clearly says Summarizer is status-only/no-create-here and points to the Settings Summary creation/apply path if available.
+- [x] C-AOL `Downloadable` mod catalog empty-state explains it is optional add-on catalog, not the main built-in/user/world mod inventory or Summarizer source.
+- [x] Mods page clearly says Summarizer is status-only/no-create-here and points to the Settings Summary creation/apply path if available.
 - [x] Repeated identical Summarizer dry-run/status-only clicks do not spam indistinguishable duplicate log lines.
-- [ ] Shared overcrowding/top-bar fix enlarges the window and restores native resizable behavior or equivalent autofit evidence.
-- [ ] A fresh Josef-only Windows test build/release is produced after the fixes.
+- [x] Shared overcrowding/top-bar fix enlarges the window and restores native resizable behavior or equivalent autofit evidence.
+- [x] A fresh Josef-only Windows test build is produced after the fixes.
+- [ ] A fresh Josef-only Windows Draft/prerelease is created/updated and verified after the fixes.
 - [ ] Josef confirms on Windows that API install semantics, text density, and colored dots are acceptable.
 
 ## Testing expectations
@@ -105,4 +106,4 @@ Local implementation/proof now covers the non-release v1 repair scope:
 
 Evidence classes: source/static proof, isolated-HOME Godot UI smokes, sandboxed backend/config proof. Safety boundary: no live API call, API secret readout, package-manager install, Python venv creation, Ollama model pull, release publication, or real user-data mutation.
 
-Remaining: run package proof, build/upload a fresh Josef-only Windows Draft/prerelease, verify with `gh release view`, then await Josef Windows confirmation. Release quarantine remains active.
+Package proof has now produced the fresh Windows unsigned test artifact. Remaining: upload/update a fresh Josef-only Windows Draft/prerelease, verify with `gh release view`, then await Josef Windows confirmation. Release quarantine remains active.
