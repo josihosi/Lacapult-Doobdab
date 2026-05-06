@@ -18,7 +18,7 @@ If these disagree, `Plan.md` wins; repair the other file instead of inventing a 
 
 ## Current status
 
-**State:** RELEASE QUARANTINE ACTIVE / V2 DEBUG-NOTE REPAIR ACTIVE
+**State:** RELEASE QUARANTINE ACTIVE / V2 READY FOR JOSEF WINDOWS RETEST
 
 The 2026-04-26 Lacapult prerelease family is quarantined as Draft after Josef reported that the download looked like CAOL rather than clearly like Lacapult. No Lacapult release from that family should be republished until the quarantine/identity investigation is closed and Josef/Schani explicitly re-greenlight.
 
@@ -69,7 +69,9 @@ This v2 lane supersedes the v1 ready-for-retest state after Josef's new Windows 
 
 2026-05-06 local runner-test slice checkpoint: API and Ollama setup pages now expose confirmation-gated runner test buttons. Proof mode invokes the active C-AOL `tools/llm_runner/runner.py` route with `--dry-run`, records `caol_runner_test_intent.json`, and does not call APIs, read secrets, send Ollama requests, install packages, or pull models.
 
-2026-05-07 local JSON-mod catalog/summarizer footing checkpoint: C-AOL Mods catalog now seeds Magiclysm and DinoMod from the active stock/user/mod_repo roots when present, marks them as JSON/Summarizer catalog entries instead of fake downloads, and the C-AOL status model reports explicit `json_catalog_targets` with precise unavailable reasons if they are absent. Focused backend/API/Ollama/mod smokes passed without live secrets, package installs, model pulls, or real user-data mutation. Remaining v2 target is fresh Josef-only Windows v2 package/release verification after local proof.
+2026-05-07 local JSON-mod catalog/summarizer footing checkpoint: C-AOL Mods catalog now seeds Magiclysm and DinoMod from the active stock/user/mod_repo roots when present, marks them as JSON/Summarizer catalog entries instead of fake downloads, and the C-AOL status model reports explicit `json_catalog_targets` with precise unavailable reasons if they are absent. Focused backend/API/Ollama/mod smokes passed without live secrets, package installs, model pulls, or real user-data mutation.
+
+2026-05-07 v2 Josef-only test release: Draft/prerelease `catapult-dabubu-josef-windows-retest-v2-2026-05-07` / `Catapult-Dabubu Josef Windows retest build v2 2026-05-07`, source commit `dfae55db0bedd458360e5dbf201bee0e1ae61bc8`, URL `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-d5b5f0671b6676dfc344`. Attached Windows asset `Catapult-Dabubu-windows-unsigned.zip`, 66,616,377 bytes, SHA-256 `492d63fbfeebdc44874d61093020dcba0f036ef61ac2859f79559caed96a0849`, plus `SHA256SUMS.txt`, `manifest.json`, and build notes. This is Josef-only retest packaging, not a quarantine lift. Remaining v2 target is Josef Windows confirmation.
 
 ## Previous Windows retest follow-up lane v1
 

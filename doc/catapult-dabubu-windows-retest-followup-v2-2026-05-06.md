@@ -76,7 +76,7 @@ This is a Josef-only retest repair lane. It does not lift quarantine, authorize 
 - [x] Ollama install/model confirmation uses the exact short timeout/commencement warning.
 - [x] Mods catalog no longer stays empty for supported JSON mod discovery; Magiclysm and DinoMod are attempted or clearly reported unavailable.
 - [x] Focused static/Godot smoke tests cover the repaired seams without live secrets, unapproved package installs, model pulls, or real user-data mutation.
-- [ ] A fresh Josef-only Windows Draft/prerelease package is produced/uploaded only after local proof, with release notes saying this is v2 retest only.
+- [x] A fresh Josef-only Windows Draft/prerelease package is produced/uploaded only after local proof, with release notes saying this is v2 retest only.
 - [ ] Josef retests the v2 Windows package.
 
 ## Testing and evidence expectations

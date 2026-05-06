@@ -50,7 +50,7 @@ Success state:
 - [x] Ollama install/model confirmation uses the short timeout/commencement warning.
 - [x] Mods catalog/summarizer footing handles Magiclysm/DinoMod when present/available, or reports unavailability precisely.
 - [x] Focused static/Godot/backend/mod proof passes without live secrets, unapproved package installs, model pulls, or real user-data mutation.
-- [ ] Fresh Josef-only Windows v2 Draft/prerelease is produced and verified after local proof.
+- [x] Fresh Josef-only Windows v2 Draft/prerelease is produced and verified after local proof.
 - [ ] Josef confirms the v2 Windows package.
 
 Canonical docs:

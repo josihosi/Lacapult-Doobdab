@@ -153,3 +153,28 @@ Still open:
 - Josef Windows retest of the v2 package.
 
 Hollow-rock suspicion: this proves catalog seeding/status adapter behavior with fixtures and active install roots; it does not prove Josef's packaged Windows install actually has Magiclysm/DinoMod present until the v2 package is built and clicked on Windows.
+
+## Alex release checkpoint — 2026-05-07 Josef-only Windows v2 Draft/prerelease
+
+Packaged/uploaded after local proof:
+
+- GitHub Draft/prerelease tag: `catapult-dabubu-josef-windows-retest-v2-2026-05-07`
+- Release name: `Catapult-Dabubu Josef Windows retest build v2 2026-05-07`
+- URL: `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-d5b5f0671b6676dfc344`
+- Source commit: `dfae55db0bedd458360e5dbf201bee0e1ae61bc8`
+- Windows asset: `Catapult-Dabubu-windows-unsigned.zip`
+- Windows asset size/SHA-256: 66,616,377 bytes / `492d63fbfeebdc44874d61093020dcba0f036ef61ac2859f79559caed96a0849`
+- Expected Windows zip entries: `Catapult-Dabubu.exe`, `utils/7-ZIP_LICENSE`, `utils/7za.exe`
+- Uploaded support assets: `SHA256SUMS.txt`, `manifest.json`, `Catapult-Dabubu-josef-windows-retest-v2-build-notes-2026-05-07.md`
+
+Verification:
+
+- `python3 tools/prove_lacapult_export_packaging.py`
+- `gh release view catapult-dabubu-josef-windows-retest-v2-2026-05-07 --repo josihosi/Lacapult-Doobdab --json tagName,name,isDraft,isPrerelease,targetCommitish,url,assets`
+- `gh release view` reported Draft=true and Prerelease=true, target `dfae55db0bedd458360e5dbf201bee0e1ae61bc8`, with the four expected assets uploaded.
+
+Remaining:
+
+- Josef Windows retest of the v2 package.
+
+Hollow-rock suspicion: package shape and release metadata are verified, but all repaired UI/runtime behavior remains Mac-side/Godot-smoke/fixture proof until Josef opens this exact v2 Windows zip and clicks through it.

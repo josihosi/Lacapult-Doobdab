@@ -58,7 +58,14 @@ Catapult-Dabubu Windows retest follow-up v2 JSON-mod catalog/summarizer footing 
 - Regression proof also passed in the same gate: `python3 tools/prove_windows_retest_followup_v2_backend_static.py`, `python3 tools/prove_api_setup_status_copy_boundary.py`, `tools/godot_api_anyllm_workflow_smoke.gd`, `tools/godot_ollama_workflow_smoke.gd`, `tools/godot_backend_setup_save_check_smoke.gd`, `tools/godot_windows_retest_followup_v1_smoke.gd`, and `git diff --check`.
 - Safety boundary: no live API call, API secret readout, package-manager install, Python venv creation, Ollama request/model pull, public release action, or real Application Support/user-data mutation was performed.
 
-Open for v2 after this slice: fresh Josef-only Windows v2 Draft/prerelease packaging/release verification, then Josef Windows retest.
+Catapult-Dabubu Windows retest follow-up v2 packaging/release evidence landed on 2026-05-07:
+
+- Package proof: `python3 tools/prove_lacapult_export_packaging.py` exported the fresh Windows package `.proof-cache/lacapult-export/packages/Catapult-Dabubu-windows-unsigned.zip` (66,616,377 bytes, SHA-256 `492d63fbfeebdc44874d61093020dcba0f036ef61ac2859f79559caed96a0849`) with entries `Catapult-Dabubu.exe`, `utils/7-ZIP_LICENSE`, and `utils/7za.exe`; package `SHA256SUMS.txt` SHA-256 is `f866e2e9ff30d768bc15a66bbef8f9da75b88d4326b604fdb1ecf933d5e163fa`, and uploaded `manifest.json` SHA-256 is `4057e7ceed26c72b56d708112e95b5d61720f01e2d0619eb0ba0ea9b08909d16`.
+- GitHub Draft/prerelease verification: `gh release view catapult-dabubu-josef-windows-retest-v2-2026-05-07 --repo josihosi/Lacapult-Doobdab --json tagName,name,isDraft,isPrerelease,targetCommitish,url,assets` reported Draft=true, Prerelease=true, target `dfae55db0bedd458360e5dbf201bee0e1ae61bc8`, URL `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-d5b5f0671b6676dfc344`, and uploaded assets `Catapult-Dabubu-windows-unsigned.zip`, `SHA256SUMS.txt`, `manifest.json`, and `Catapult-Dabubu-josef-windows-retest-v2-build-notes-2026-05-07.md`.
+- Release copy says Josef-only Windows validation for v2, not stable/latest/final/public confidence and not a C-AOL release.
+- Safety boundary: Draft/prerelease test release only; no quarantine lift, no public/final release claim, no repository rename, no package/model install, no live API call, and no real user-data mutation as proof.
+
+Open for v2 after this slice: Josef Windows retest.
 
 
 Catapult-Dabubu Windows retest follow-up v1 local evidence landed on 2026-05-02:
