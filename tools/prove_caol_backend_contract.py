@@ -64,8 +64,8 @@ REQUIRED_UI_TOKENS = {
     "Choose API or local Ollama setup.",
     "Python / venv",
     "API key env var",
-    "mistral-v0.3",
-    "nemotron-9b",
+    "mistral:v0.3",
+    "mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest",
     "ConfirmExternalBackendAction",
     "Catapult-Dabubu will not pull models before this confirmation",
 }

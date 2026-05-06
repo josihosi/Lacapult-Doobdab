@@ -4,23 +4,25 @@ Short queue only. Remove finished items instead of turning this into a museum.
 
 ## Now
 
-**Active target:** Catapult-Dabubu Windows retest follow-up v1.
+**Active target:** Catapult-Dabubu Windows retest follow-up v2.
 
-Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`.
-Handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`.
-Raw intake: `doc/josef-windows-debug-intake-2026-05-02.md`.
+Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`.
+Imagination source: `doc/catapult-dabubu-windows-retest-followup-v2-imagination-source-2026-05-06.md`.
+Handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`.
+Raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-06.md`.
 
-- [x] Fix API / AnyLLM installer semantics: one obvious path creates/uses the venv and installs required AnyLLM packages/dependencies, with clear venv/package/progress/success/failure states.
-- [x] Reduce visible LLM/API setup background/helper text so controls/status/actions are primary.
-- [x] Replace fragile Unicode/emoji readiness lights with Windows-safe big colored dots/labels using explicit red/green/yellow/gray rendering on API and Ollama pages.
-- [x] Replace Ollama hardware recommendation prose with measured RAM/VRAM hardware check, wait warning, and serialized install/pull behavior.
-- [x] Rename confusing Mods `Show Stock` copy to plain built-in/mod inventory wording and preserve Windows bottom-cutoff screenshot as a visual check item.
-- [x] Clarify C-AOL Downloadable empty-state and Summarizer status-only vs creation/apply path.
-- [x] Address overcrowding/top bar with larger native-resizable window/autofit-style shared layout fix.
-- [x] Suppress or distinguish repeated identical Summarizer dry-run/status-only log spam while preserving no-mutation safety.
-- [x] Run focused UI/static/backend setup gates without live secrets/model pulls/user-data mutation or uncontrolled package installs.
-- [x] Build/package a fresh Windows unsigned `Catapult-Dabubu` test artifact after fixes.
-- [x] Create or update a clearly labelled Josef-only GitHub Draft/prerelease test release with Windows asset, checksums/build notes, and `gh release view` verification.
+- [x] Fix API package setup to install Mozilla `any-llm` as `any-llm-sdk[...]` provider extras while preserving `from any_llm import completion`.
+- [x] Hide API base URL from normal provider setup; keep it only as advanced/custom endpoint override.
+- [x] Improve API package setup failure output so it shows useful non-secret package/pip failure detail and does not imply base/model/key/API-call failure.
+- [x] Fix Ollama model tags: `mistral:v0.3` for Mistral and `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest` for Nemotron.
+- [x] Keep GUI model selector labels short, especially Nemotron, while mapping internally to the full runtime tag.
+- [x] Replace Ollama hardware advisory prose/status row with RAM/VRAM in GiB plus red/yellow/green estimated performance lights for Mistral and Nemotron.
+- [x] Ensure measured low hardware is not displayed as `Hardware check: missing`.
+- [ ] Add runner test buttons for API and Ollama routes that exercise the actual C-AOL runner path under safe/no-surprise-spend proof boundaries.
+- [x] Change Ollama install/model wait note to: `The launcher may appear to time out. Wait for Ollama installation to commence.`
+- [ ] Start JSON-mod catalog/summarizer footing so Magiclysm and DinoMod are cataloged/summarized when present/available, or precisely reported unavailable.
+- [ ] Run focused static/Godot/backend/mod proof without live secrets, unapproved package installs, model pulls, or real user-data mutation.
+- [ ] Build/package/upload a fresh Josef-only Windows v2 Draft/prerelease only after local proof.
 
 ## Completed debug-note stack
 
@@ -60,7 +62,8 @@ Raw intake: `doc/josef-windows-debug-intake-2026-05-02.md`.
 - [ ] Real Windows first-launch click-through before any renewed confidence/republish claim: extracted package, first window, first visible tab, release row wording, and install/download impression.
   - [x] Follow up on 2026-05-01 Windows screenshot: top row/titlebar remains visibly wrong; likely needs larger default window and/or downward content/custom-chrome offset, then a new Windows retest build.
   - [x] Josef retested the fresh `Catapult-Dabubu` Windows Draft/prerelease package on 2026-05-02 and found remaining blockers: AnyLLM packages not installed with venv creation, too much background text, and broken Unicode readiness lights.
-  - [ ] Josef retests the v1 Windows Draft/prerelease package `catapult-dabubu-josef-windows-retest-v1-2026-05-02` after the installer-vision/status-dot/layout fixes.
+  - [x] Josef retested the v1 Windows Draft/prerelease package `catapult-dabubu-josef-windows-retest-v1-2026-05-02` and reported the 2026-05-06 v2 debug-note batch.
+  - [ ] Josef retests the next v2 Windows Draft/prerelease after the new repair pass.
 
 ## Greenlit implementation stack
 

@@ -32,7 +32,7 @@ def main() -> None:
     require("get_ollama_hardware_check" in backend_config and "Win32_VideoController" in backend_config and "Win32_ComputerSystem" in backend_config, "Ollama hardware check does not inspect Windows RAM/VRAM")
     require("serialized_steps_not_shell_chained" in backend_config, "Ollama plan does not declare serialized sequencing")
     require('"pull"' in backend_config and 'inventory.get("server", "unreachable") == "running"' in backend_config, "Ollama pull is not gated on server readiness")
-    require("launcher may appear to wait" in backend_ui and "model download can take several minutes" in backend_config, "Ollama timeout/wait warning missing")
+    require("The launcher may appear to time out. Wait for Ollama installation to commence." in backend_ui and "The launcher may appear to time out. Wait for Ollama installation to commence." in backend_config, "Ollama timeout/wait warning missing")
     require("Show built-in game mods" in mods_en, "Mods checkbox still uses unclear Show Stock label")
     require("mod inventory and summarizer list" in mods_en, "Mods stock tooltip does not mention inventory/summarizer plainly")
     project = (ROOT / "project.godot").read_text(encoding="utf-8")

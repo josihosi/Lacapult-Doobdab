@@ -19,7 +19,8 @@ block = text[start:]
 required = [
     'post_message = "C-AOL API backend setup intent recorded in proof mode; no external install/download was performed."',
     'post_message = "C-AOL API backend setup command finished; venv and AnyLLM/provider packages were handled after confirmation. No API call or API-secret read was performed."',
-    'post_message = "C-AOL API backend setup command failed during venv/package setup. No API call or API-secret read was performed." if not proof_only else',
+    'post_message = _api_setup_failure_message(setup_result, proof_only)',
+    'Package setup output:',
     'Status.post(post_message)',
 ]
 missing = [needle for needle in required if needle not in block]
@@ -38,5 +39,5 @@ else:
 print("API setup status-copy boundary proof passed")
 print("  proof mode status says no external install/download")
 print("  real setup path status says venv and AnyLLM packages were handled")
-print("  failure path says venv/package setup failed without API/secret use")
+print("  failure path says venv/package setup failed without API/secret use and surfaces captured package output")
 print("  no unconditional final no-external-install Status.post remains in the API confirmation block")

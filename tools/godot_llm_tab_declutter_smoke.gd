@@ -20,7 +20,7 @@ func _run() -> void:
 	settings.store("backend_api_provider", "openai")
 	settings.store("backend_python_path", "")
 	settings.store("backend_ollama_endpoint", "http://127.0.0.1:11434")
-	settings.store("backend_ollama_model", "mistral-v0.3")
+	settings.store("backend_ollama_model", "mistral:v0.3")
 
 	var ui_script = load("res://scripts/BackendSetupUI.gd")
 	var ui = VBoxContainer.new()

@@ -19,8 +19,9 @@ const DEFAULT_API_PROVIDER = "openai"
 const DEFAULT_API_KEY_ENV = "CATA_API_KEY"
 const DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
 const DEFAULT_OPENVINO_DEVICE = "AUTO"
-const OLLAMA_MODEL_MISTRAL = "mistral-v0.3"
-const OLLAMA_MODEL_NEMOTRON = "nemotron-9b"
+const ANY_LLM_PIP_PACKAGE = "any-llm-sdk"
+const OLLAMA_MODEL_MISTRAL = "mistral:v0.3"
+const OLLAMA_MODEL_NEMOTRON = "mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest"
 
 const API_PROVIDER_CHOICES = [
 	{
@@ -83,10 +84,10 @@ func get_api_provider_default_model(provider_id: String) -> String:
 
 func build_api_setup_plan(provider_id: String, python_path: String = "") -> Dictionary:
 	var choice = get_api_provider_choice(provider_id)
-	var package_spec = "any_llm"
+	var package_spec = ANY_LLM_PIP_PACKAGE
 	var install_extra = choice.get("install_extra", "")
 	if install_extra != "":
-		package_spec = "any_llm[%s]" % install_extra
+		package_spec = "%s[%s]" % [ANY_LLM_PIP_PACKAGE, install_extra]
 	var venv_plan = build_python_venv_setup_plan(python_path)
 	var target_path = venv_plan.get("target_path", "")
 	var venv_python_command = _venv_python_command(target_path)
@@ -141,7 +142,7 @@ func run_api_setup(provider_id: String, python_path: String = "", proof_only: bo
 	for step in plan.get("commands", []):
 		var output = []
 		exit_code = OS.execute(step.get("command", ""), step.get("args", []), true, output, true)
-		var result = {"phase": step.get("phase", ""), "command": step.get("command", ""), "args": step.get("args", []), "purpose": step.get("purpose", ""), "exit_code": exit_code, "output_line_count": output.size()}
+		var result = {"phase": step.get("phase", ""), "command": step.get("command", ""), "args": step.get("args", []), "purpose": step.get("purpose", ""), "exit_code": exit_code, "output_line_count": output.size(), "output_summary": _safe_command_output_summary(output)}
 		results.append(result)
 		if exit_code != 0:
 			failed = true
@@ -214,19 +215,7 @@ func get_ollama_hardware_check() -> Dictionary:
 		source = "windows_powershell_cim"
 		ram_mb = _windows_total_ram_mb()
 		vram_mb = _windows_max_vram_mb()
-	var conclusion = "Hardware check unavailable on this platform. On Windows, Check reads RAM/VRAM and marks local model runnability."
-	var state = "gray"
-	if ram_mb > 0 or vram_mb > 0:
-		if ram_mb >= DEFAULT_HARDWARE_RAM_WARN_MB and vram_mb >= DEFAULT_HARDWARE_VRAM_WARN_MB:
-			state = "green"
-			conclusion = "Measured RAM/VRAM look suitable for the larger local-model path."
-		elif ram_mb >= 8000 and vram_mb >= 3000:
-			state = "yellow"
-			conclusion = "Measured hardware is borderline; start with the smaller local model and expect slower downloads/startup."
-		else:
-			state = "red"
-			conclusion = "Measured RAM/VRAM are low for local LLMs; use API setup or the smallest local model first."
-	return {"ram_mb": ram_mb, "vram_mb": vram_mb, "state": state, "conclusion": conclusion, "source": source, "proof_policy": "hardware_detect_only_no_install_no_pull"}
+	return _build_ollama_hardware_check(ram_mb, vram_mb, source)
 
 
 func build_ollama_setup_plan(endpoint: String = DEFAULT_OLLAMA_URL, model: String = "") -> Dictionary:
@@ -260,7 +249,7 @@ func build_ollama_setup_plan(endpoint: String = DEFAULT_OLLAMA_URL, model: Strin
 		"commands": commands,
 		"command_preview": "\n".join(preview) if preview.size() > 0 else "Manual Ollama install/startup required before model pull; no safe one-step command is queued.",
 		"sequencing": "serialized_steps_not_shell_chained",
-		"timeout_note": "Ollama install/model download can take several minutes; the launcher may appear to wait while the installer opens or a model download continues.",
+		"timeout_note": "The launcher may appear to time out. Wait for Ollama installation to commence.",
 		"next_step": "Run Check after an Ollama install/startup step, then use Install Ollama / model again for model pull if needed.",
 		"requires_confirmation": true,
 		"automated_proof_policy": "plan_only_no_installer_no_model_pull"
@@ -283,7 +272,7 @@ func run_ollama_setup(endpoint: String = DEFAULT_OLLAMA_URL, model: String = "",
 	for step in plan.get("commands", []):
 		var output = []
 		var exit_code = OS.execute(step.get("command", ""), step.get("args", []), true, output, true)
-		var result = {"command": step.get("command", ""), "args": step.get("args", []), "purpose": step.get("purpose", "Ollama setup command."), "exit_code": exit_code, "output_line_count": output.size()}
+		var result = {"command": step.get("command", ""), "args": step.get("args", []), "purpose": step.get("purpose", "Ollama setup command."), "exit_code": exit_code, "output_line_count": output.size(), "output_summary": _safe_command_output_summary(output)}
 		results.append(result)
 		if exit_code != 0:
 			failed = true
@@ -473,8 +462,8 @@ func write_api_setup_intent(provider_id: String, python_path: String = "", perfo
 		"provider_label": plan.get("provider_label", "OpenAI"),
 		"target_venv_path": plan.get("target_venv_path", ""),
 		"python_command": plan.get("python_command", "python3"),
-		"package_spec": plan.get("package_spec", "any_llm"),
-		"command_preview": plan.get("command", "python3 -m pip install --upgrade any_llm"),
+		"package_spec": plan.get("package_spec", ANY_LLM_PIP_PACKAGE),
+		"command_preview": plan.get("command", "python3 -m pip install --upgrade %s" % ANY_LLM_PIP_PACKAGE),
 		"commands": plan.get("commands", []),
 		"phase_order": plan.get("phase_order", []),
 		"confirmed": true,
@@ -869,15 +858,46 @@ func _ollama_hardware_fixture(fixture: String) -> Dictionary:
 			ram_mb = int(bits[1])
 		elif bits[0] == "vram":
 			vram_mb = int(bits[1])
-	var state = "red"
-	var conclusion = "Measured RAM/VRAM are low for local LLMs; use API setup or the smallest local model first."
-	if ram_mb >= DEFAULT_HARDWARE_RAM_WARN_MB and vram_mb >= DEFAULT_HARDWARE_VRAM_WARN_MB:
+	return _build_ollama_hardware_check(ram_mb, vram_mb, "fixture")
+
+
+func _build_ollama_hardware_check(ram_mb: int, vram_mb: int, source: String) -> Dictionary:
+	var ram_gib = float(ram_mb) / 1024.0 if ram_mb > 0 else 0.0
+	var vram_gib = float(vram_mb) / 1024.0 if vram_mb > 0 else 0.0
+	var state = "gray"
+	if ram_mb > 0 or vram_mb > 0:
 		state = "green"
-		conclusion = "Measured RAM/VRAM look suitable for the larger local-model path."
-	elif ram_mb >= 8000 and vram_mb >= 3000:
-		state = "yellow"
-		conclusion = "Measured hardware is borderline; start with the smaller local model and expect slower downloads/startup."
-	return {"ram_mb": ram_mb, "vram_mb": vram_mb, "state": state, "conclusion": conclusion, "source": "fixture", "proof_policy": "hardware_detect_only_no_install_no_pull"}
+		var mistral_state = _ollama_performance_state(ram_mb, vram_mb, 16000, 4000, 8000, 1000)
+		var nemotron_state = _ollama_performance_state(ram_mb, vram_mb, 32000, 8000, 16000, 2000)
+		if mistral_state == "red" or nemotron_state == "red":
+			state = "red"
+		elif mistral_state == "yellow" or nemotron_state == "yellow":
+			state = "yellow"
+		return {"ram_mb": ram_mb, "vram_mb": vram_mb, "ram_gib": ram_gib, "vram_gib": vram_gib, "state": state, "performance_lights": {OLLAMA_MODEL_MISTRAL: mistral_state, OLLAMA_MODEL_NEMOTRON: nemotron_state}, "source": source, "proof_policy": "hardware_detect_only_no_install_no_pull"}
+	return {"ram_mb": ram_mb, "vram_mb": vram_mb, "ram_gib": ram_gib, "vram_gib": vram_gib, "state": state, "performance_lights": {OLLAMA_MODEL_MISTRAL: "gray", OLLAMA_MODEL_NEMOTRON: "gray"}, "source": source, "proof_policy": "hardware_detect_only_no_install_no_pull"}
+
+
+func _ollama_performance_state(ram_mb: int, vram_mb: int, green_ram_mb: int, green_vram_mb: int, yellow_ram_mb: int, yellow_vram_mb: int) -> String:
+	if ram_mb >= green_ram_mb and vram_mb >= green_vram_mb:
+		return "green"
+	if ram_mb >= yellow_ram_mb and vram_mb >= yellow_vram_mb:
+		return "yellow"
+	return "red"
+
+
+func _safe_command_output_summary(output: Array, max_lines: int = 8, max_chars: int = 1200) -> String:
+	var lines = []
+	for raw in output:
+		var line = str(raw).strip_edges()
+		if line == "":
+			continue
+		lines.append(line)
+		if lines.size() >= max_lines:
+			break
+	var summary = PoolStringArray(lines).join("\n")
+	if summary.length() > max_chars:
+		summary = summary.substr(0, max_chars) + "... [truncated]"
+	return summary
 
 
 func _looks_like_python_executable_path(path: String) -> bool:

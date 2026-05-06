@@ -15,15 +15,33 @@ Use the smallest evidence that honestly matches the change.
 
 ## Current proof target
 
-**Active validation target:** `Catapult-Dabubu Windows retest follow-up v1` is ready for Josef Windows retest after local proof and Draft/prerelease publication. The previous Draft/prerelease package exposed remaining blockers: API / LLM setup does not install AnyLLM packages with venv creation, the visible LLM/API setup page still has too much background/helper text, and Unicode readiness lights do not render acceptably on Windows. This is not a quarantine lift or final/public-confidence claim.
+**Active validation target:** `Catapult-Dabubu Windows retest follow-up v2` is active after Josef's 2026-05-06 v1 Windows retest notes. The v1 Draft/prerelease exposed fresh blockers: wrong any-llm package install target, redundant normal API base URL field, wrong Ollama model tags, misleading hardware status/prose, missing runner-test buttons, Ollama wait wording, and empty Mods catalog behavior. This is not a quarantine lift or final/public-confidence claim.
 
-Minimum evidence for the active v1 slice:
-- source/static scan for old Unicode/emoji light glyphs and remaining long visible setup text;
-- Godot UI smoke for explicit colored big-dot status states, reduced LLM/API setup copy density, Ollama hardware check fixture, serialized command preview, and mod-label copy, and duplicate dry-run status handling, C-AOL Downloadable/Summarizer discoverability, and larger native-resizable window metrics;
-- sandbox/proof-mode API AnyLLM installer test that records venv + package install plan and status phases without using secrets or mutating the real environment;
-- package proof before any new Windows test build;
-- GitHub Draft/prerelease verification if a new Josef-only package is published;
-- Josef/Windows confirmation before closing the visible UI/status-light complaint.
+Minimum evidence for the active v2 slice:
+- source/static scan that API setup installs Mozilla `any-llm` as `any-llm-sdk[...]` provider extras and no stale `any_llm[` install target remains;
+- provider/default proof that API base URL is hidden from normal UI and retained only as advanced/custom override;
+- Godot API UI smoke for provider/model/key/setup/check/runner-test controls without normal base-url clutter;
+- Ollama model selector/readiness proof showing short labels but exact runtime tags `mistral:v0.3` and `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest`;
+- hardware fixture proof for RAM/VRAM in GiB plus Mistral/Nemotron red/yellow/green estimated performance lights, including measured-low hardware not rendering as `missing`;
+- safe runner-test proof for API and Ollama routes that exercises the C-AOL runner path without live secrets, surprise spend, model pulls, or installs in automated gates;
+- Mods catalog/summarizer proof for JSON mod footing, at least Magiclysm/DinoMod when present/available or precise unavailable status;
+- focused regression smokes for backend setup, Ollama workflow, Windows retest UI, and package proof;
+- GitHub Draft/prerelease verification only if a fresh Josef-only Windows v2 package is published;
+- Josef/Windows confirmation before closing the v2 visible UI/setup/model complaint.
+
+Previous v1 evidence remains below as footing, not closure for the new v2 notes.
+
+Catapult-Dabubu Windows retest follow-up v2 backend/setup slice local evidence landed on 2026-05-06:
+
+- Static/source proof: `python3 tools/prove_windows_retest_followup_v2_backend_static.py` verifies API setup uses `any-llm-sdk[...]` provider extras while preserving `any_llm` import checks; normal API base URL is hidden except custom/advanced override; Ollama labels map to runtime tags `mistral:v0.3` and `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest`; hardware display uses GiB plus model-specific performance lights; and API package failures capture/surface non-secret command output summaries.
+- API failure/status boundary proof: `python3 tools/prove_api_setup_status_copy_boundary.py` verifies proof-mode vs real setup status copy and package-output failure surfacing without API calls or secret reads.
+- Godot API UI smoke: `HOME=$(mktemp -d /tmp/lacapult-v2-api-home.XXXXXX) godot --path . --no-window -s tools/godot_api_anyllm_workflow_smoke.gd` proves provider/model/env-var/session-key controls render with normal base URL hidden, OpenRouter default base URL is derived on save, `any-llm-sdk[openrouter]` is staged in proof mode, and no secret/pip/API call occurs.
+- Godot Ollama UI smoke: `HOME=$(mktemp -d /tmp/lacapult-v2-ollama-home.XXXXXX) godot --path . --no-window -s tools/godot_ollama_workflow_smoke.gd` proves short labels, exact runtime tags, GiB RAM/VRAM fixture display, Mistral/Nemotron performance lights, short timeout wording, proof-only setup intent, and no installer/model pull/API/user-data mutation.
+- Regression smokes: `HOME=$(mktemp -d /tmp/lacapult-v2-save-home.XXXXXX) godot --path . --no-window -s tools/godot_backend_setup_save_check_smoke.gd` and `HOME=$(mktemp -d /tmp/lacapult-v2-win-v1-home.XXXXXX) godot --path . --no-window -s tools/godot_windows_retest_followup_v1_smoke.gd` pass after updating the prior v1 expectations to the v2 GiB/performance-light shape.
+- Safety boundary: no live API call, API secret readout, package-manager install, Python venv creation, Ollama model pull, public release action, or real Application Support/user-data mutation was performed.
+
+Open for v2 after this slice: runner test buttons, JSON mod catalog/summarizer footing, broader focused regression/package proof, and fresh Josef-only Windows v2 Draft/prerelease after local proof.
+
 
 Catapult-Dabubu Windows retest follow-up v1 local evidence landed on 2026-05-02:
 

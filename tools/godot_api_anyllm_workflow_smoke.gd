@@ -1,7 +1,7 @@
 extends SceneTree
 
 # Headless UI smoke for Package 3: API / AnyLLM setup workflow.
-# Proves provider/base URL/model/env-var/session-key controls render and round-trip
+# Proves provider/model/env-var/session-key controls render, normal base URL stays hidden, and settings round-trip
 # safely, Check is non-mutating/no-call, and Set up API / AnyLLM records a
 # confirmation-gated venv + package setup intent. It does not run pip, call APIs, install packages,
 # read a real secret, or mutate real Application Support data.
@@ -47,14 +47,13 @@ func _run() -> void:
 	yield(self, "idle_frame")
 
 	var all_text = _collect_visible_text(ui)
-	_require(all_text.find("API base URL") >= 0, "API base URL field did not render")
+	_require(all_text.find("API base URL") < 0 and all_text.find("Advanced/custom base URL") < 0, "normal API mode should hide base URL controls")
 	_require(all_text.find("Provider") >= 0, "Provider field did not render")
 	_require(all_text.find("API model") >= 0, "API model field did not render")
 	_require(all_text.find("API key env var") >= 0, "API key env-var field did not render")
 	_require(all_text.find("API key (session only)") >= 0, "session-only API key control did not render")
 	_require(all_text.find("Use for this session") >= 0, "session API key action did not render")
 	_require(_option_has_item(ui._backend_provider_button, "OpenAI") and _option_has_item(ui._backend_provider_button, "OpenRouter") and _option_has_item(ui._backend_provider_button, "AnyLLM custom provider"), "provider choices did not render")
-	_require(all_text.find("provider default") >= 0 and all_text.find("proxy/router") >= 0, "API base URL help did not render")
 	_require(_status_container_has_states(ui._api_status_lights, ["green", "yellow"]), "API status rows did not expose explicit colored states")
 	_require(all_text.find("Set up API / AnyLLM") >= 0 and all_text.find("Create venv only") >= 0, "API setup/venv actions did not render")
 	_require(all_text.find("hardware") < 0 and all_text.find("Ollama URL") < 0, "API mode leaked Ollama/hardware copy")
@@ -66,7 +65,6 @@ func _run() -> void:
 	_require(not File.new().file_exists(config_path), "Check wrote backend config; it should be detection-only")
 	_require(ui._backend_status.text.find("no API call") >= 0, "Check lost no-API-call boundary")
 
-	ui._backend_endpoint.text = "https://openrouter.ai/api/v1"
 	ui._backend_model.text = "openai/gpt-4.1-mini"
 	ui._backend_api_key_env.text = "LACAPULT_PACKAGE3_KEY"
 	ui._backend_python_path.text = "python3"
@@ -88,7 +86,7 @@ func _run() -> void:
 	var api_config = helpers.load_json_file(config_path)
 	_require(api_config.get("backend", "") == "api", "backend config did not persist API mode")
 	_require(api_config.get("api_provider", "") == "openrouter", "backend config did not persist provider")
-	_require(api_config.get("endpoint", "") == "https://openrouter.ai/api/v1", "backend config did not persist base URL")
+	_require(api_config.get("endpoint", "") == "https://openrouter.ai/api/v1", "backend config did not derive provider default base URL")
 	_require(api_config.get("model", "") == "openai/gpt-4.1-mini", "backend config did not persist model")
 	_require(api_config.get("api_key_env", "") == "LACAPULT_PACKAGE3_KEY", "backend config did not persist env-var name")
 	var config_text = JSON.print(api_config)
@@ -102,7 +100,7 @@ func _run() -> void:
 	_require(install_button != null, "Set up API / AnyLLM button lookup failed")
 	install_button.emit_signal("pressed")
 	yield(self, "idle_frame")
-	_require(ui._confirm_dialog.dialog_text.find("-m venv") >= 0 and ui._confirm_dialog.dialog_text.find("pip install --upgrade") >= 0, "confirmation did not show planned venv + AnyLLM setup phases")
+	_require(ui._confirm_dialog.dialog_text.find("-m venv") >= 0 and ui._confirm_dialog.dialog_text.find("pip install --upgrade any-llm-sdk[openrouter]") >= 0, "confirmation did not show planned venv + any-llm-sdk setup phases")
 	_require(ui._confirm_dialog.dialog_text.find("creates/updates") >= 0 and ui._confirm_dialog.dialog_text.find("installs AnyLLM") >= 0, "confirmation did not explain real venv/package install boundary")
 	_require(ui._confirm_dialog.dialog_text.find("\n") >= 0 and ui._confirm_dialog.dialog_autowrap == true, "confirmation dialog did not use wrapped/newline layout")
 	_require(ui._confirm_dialog.dialog_text.find("Proof mode") >= 0 and ui._confirm_dialog.dialog_text.find("instead of creating a venv or running pip") >= 0, "confirmation lost proof-mode no-pip boundary")
@@ -115,14 +113,15 @@ func _run() -> void:
 	_require(intent.get("action", "") == "install_api_backend", "setup intent action mismatch")
 	_require(intent.get("phase_order", []).has("create_or_update_venv") and intent.get("phase_order", []).has("install_anyllm_packages"), "setup intent missing venv/package phases")
 	_require(intent.get("provider", "") == "openrouter", "setup intent provider mismatch")
+	_require(intent.get("package_spec", "") == "any-llm-sdk[openrouter]", "setup intent did not use Mozilla any-llm PyPI package shape")
 	_require(intent.get("performed_external_install", true) == false, "setup intent claimed an external install ran")
 	_require(intent.get("phase_order", []).has("create_or_update_venv") and intent.get("phase_order", []).has("install_anyllm_packages"), "setup intent did not record venv/package phases")
 	_require(intent_text.find(FAKE_SECRET) < 0, "setup intent leaked API secret")
 
 	print("API / AnyLLM workflow UI smoke passed")
-	print("  UI proof: API base URL/provider/model/env-var/session-key controls, colored status rows, Create venv only, and Set up API / AnyLLM rendered")
+	print("  UI proof: API provider/model/env-var/session-key controls with normal base URL hidden, colored status rows, Create venv only, and Set up API / AnyLLM rendered")
 	print("  Check proof: readiness-only; no backend config write and no API call")
-	print("  Save proof: provider/base URL/model/env-var name round-tripped without storing secret")
+	print("  Save proof: provider/default base URL/model/env-var name round-tripped without storing secret")
 	print("  Install proof: confirmation-gated venv + AnyLLM setup command staged in proof mode; no venv/pip/API call/secret read")
 	quit(0)
 

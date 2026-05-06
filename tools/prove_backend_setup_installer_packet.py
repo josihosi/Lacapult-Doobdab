@@ -17,8 +17,8 @@ BACKEND_CONFIG = REPO / "scripts" / "BackendConfigManager.gd"
 SETTINGS_UI = REPO / "scripts" / "SettingsUI.gd"
 EN_TEXT = REPO / "text" / "en" / "general.csv"
 
-MODEL_MISTRAL = "mistral-v0.3"
-MODEL_NEMOTRON = "nemotron-9b"
+MODEL_MISTRAL = "mistral:v0.3"
+MODEL_NEMOTRON = "mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest"
 
 
 def read(path: Path) -> str:

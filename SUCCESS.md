@@ -34,9 +34,34 @@ Success state:
 - [x] Package 5 locally complete: window chrome investigation/fix root-cause class named, smallest CustomTitleBar metric seam patched/proofed, and bounded Windows confirmation checklist written.
 - [ ] Windows/Josef visual confirmation before any cross-platform chrome-fix claim.
 
+## Catapult-Dabubu Windows retest follow-up v2
+
+Status: ACTIVE / PACKAGED FOR ALEX
+
+Success state:
+- [x] API setup uses `any-llm-sdk[...]` provider extras while preserving the `from any_llm import completion` runtime seam.
+- [x] Normal API setup hides API base URL; base URL remains available only as advanced/custom override.
+- [x] Package setup failures surface useful non-secret package/pip error detail and do not imply base/model/key/API-call failure.
+- [x] Mistral uses `mistral:v0.3` for pull/readiness/runner paths.
+- [x] Nemotron uses `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest` internally while the selector shows a short label.
+- [x] Ollama hardware display shows RAM/VRAM in GiB plus red/yellow/green estimated performance lights for Mistral and Nemotron.
+- [x] Measured low hardware is not displayed as `missing`.
+- [ ] API and Ollama routes each expose a safe runner test button that exercises the actual C-AOL runner route.
+- [x] Ollama install/model confirmation uses the short timeout/commencement warning.
+- [ ] Mods catalog/summarizer footing handles Magiclysm/DinoMod when present/available, or reports unavailability precisely.
+- [ ] Focused static/Godot/backend/mod proof passes without live secrets, unapproved package installs, model pulls, or real user-data mutation.
+- [ ] Fresh Josef-only Windows v2 Draft/prerelease is produced and verified after local proof.
+- [ ] Josef confirms the v2 Windows package.
+
+Canonical docs:
+- `doc/catapult-dabubu-windows-retest-followup-v2-imagination-source-2026-05-06.md`
+- `doc/catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`
+- `doc/alex-catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`
+- `doc/josef-catapult-dabubu-debug-intake-2026-05-06.md`
+
 ## Catapult-Dabubu Windows retest follow-up v1
 
-Status: READY FOR JOSEF WINDOWS RETEST / QUARANTINE STILL ACTIVE
+Status: WINDOWS RETESTED / SUPERSEDED BY V2 / QUARANTINE STILL ACTIVE
 
 Success state:
 - [x] API / AnyLLM setup has an obvious path that creates/uses the venv and installs required AnyLLM packages/dependencies, with status/progress for each phase.
@@ -51,7 +76,8 @@ Success state:
 - [x] UI/static smoke proves colored status indicators carry explicit red/green/yellow/gray states and no old fragile light-glyph path remains in visible setup status.
 - [x] A fresh Josef-only Windows test build is produced after the fixes.
 - [x] A fresh Josef-only Windows Draft/prerelease is created/updated and verified after the fixes.
-- [ ] Josef confirms on Windows that API install semantics, text density, colored dots, Ollama flow, Mods/Summarizer clarity, and resized/native window are acceptable.
+- [x] Josef retested v1 on Windows and reported the 2026-05-06 v2 debug-note batch.
+- [ ] Josef confirms the next v2 Windows package after the new repair pass.
 
 Canonical docs:
 - `doc/catapult-dabubu-installer-vision-retest-imagination-source-2026-05-02.md`

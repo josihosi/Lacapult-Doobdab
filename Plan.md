@@ -18,7 +18,7 @@ If these disagree, `Plan.md` wins; repair the other file instead of inventing a 
 
 ## Current status
 
-**State:** RELEASE QUARANTINE ACTIVE / V1 JOSEF WINDOWS TEST RELEASE READY
+**State:** RELEASE QUARANTINE ACTIVE / V2 DEBUG-NOTE REPAIR ACTIVE
 
 The 2026-04-26 Lacapult prerelease family is quarantined as Draft after Josef reported that the download looked like CAOL rather than clearly like Lacapult. No Lacapult release from that family should be republished until the quarantine/identity investigation is closed and Josef/Schani explicitly re-greenlight.
 
@@ -49,9 +49,27 @@ Canonical packet: `doc/lacapult-josef-test-release-v0-2026-04-27.md`.
 
 Do not schedule repeated reminders for this. It is a ledger item, not an implementation blocker.
 
-## Active Windows retest follow-up lane
+## Active Windows retest follow-up v2 lane
 
-**READY FOR JOSEF: Catapult-Dabubu Windows retest follow-up v1** - Josef retested the 2026-05-01 Catapult-Dabubu Windows build and reported installer-vision blockers: API / LLM setup did not install AnyLLM packages with venv creation, background/helper text remained too full, and Unicode readiness lights failed on Windows. The local v1 repair is now proofed, packaged, and uploaded as a Josef-only Draft/prerelease for Windows retest. Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`; imagination source: `doc/catapult-dabubu-installer-vision-retest-imagination-source-2026-05-02.md`; raw intake: `doc/josef-windows-debug-intake-2026-05-02.md`; executor handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`.
+**ACTIVE: Catapult-Dabubu Windows retest follow-up v2** - Josef completed the 2026-05-06 v1 Windows retest debug-note batch and explicitly asked to package and activate a cook. Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`; imagination source: `doc/catapult-dabubu-windows-retest-followup-v2-imagination-source-2026-05-06.md`; raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-06.md`; executor handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`.
+
+Scope order:
+1. API / any-llm package setup repair: install Mozilla `any-llm` via PyPI `any-llm-sdk[...]` provider extras while preserving the `from any_llm import completion` runtime seam, and surface non-secret pip/package failure details.
+2. API setup UI simplification: hide API base URL from normal provider setup; keep it only as advanced/custom endpoint override.
+3. Ollama model tag/label repair: use real command/runtime tags `mistral:v0.3` and `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest`, while keeping the Nemotron selector label short.
+4. Ollama hardware/performance display repair: show RAM/VRAM in GiB and model-specific red/yellow/green estimated performance lights, not advisory prose or a misleading `missing` row.
+5. Add explicit runner test buttons for both API and Ollama routes, exercising the actual C-AOL runner path under safe proof boundaries.
+6. Update Ollama install/model wait wording to: `The launcher may appear to time out. Wait for Ollama installation to commence.`
+7. Start useful JSON-mod catalog/summarizer footing so the catalog is not empty for Magiclysm/DinoMod when those mods are present/available.
+8. Fresh Josef-only Windows v2 retest package/release after local proof.
+
+This v2 lane supersedes the v1 ready-for-retest state after Josef's new Windows findings. It does **not** lift release quarantine, authorize a public/final release, permit surprise live API calls/secrets/package installs/model pulls in automated proof, rename the GitHub repo, or start C-AOL release work.
+
+2026-05-06 local backend/setup slice checkpoint: API package identity, normal base-URL hiding, package failure output, Ollama runtime tags/short labels, GiB hardware/performance lights, measured-low-not-missing behavior, and the short Ollama timeout wording are patched and locally proofed. Remaining v2 implementation targets are runner test buttons, JSON mod catalog/summarizer footing, broader proof/package work, and fresh Josef-only Windows v2 release packaging after local proof.
+
+## Previous Windows retest follow-up lane v1
+
+**WINDOWS RETESTED / SUPERSEDED BY V2: Catapult-Dabubu Windows retest follow-up v1** - Josef retested the 2026-05-01 Catapult-Dabubu Windows build and reported installer-vision blockers: API / LLM setup did not install AnyLLM packages with venv creation, background/helper text remained too full, and Unicode readiness lights failed on Windows. The local v1 repair is now proofed, packaged, and uploaded as a Josef-only Draft/prerelease for Windows retest. Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`; imagination source: `doc/catapult-dabubu-installer-vision-retest-imagination-source-2026-05-02.md`; raw intake: `doc/josef-windows-debug-intake-2026-05-02.md`; executor handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v1-2026-05-02.md`.
 
 Scope order:
 1. API / AnyLLM installer semantics: one obvious setup path must create/use the venv and install required AnyLLM packages/dependencies, with distinct venv/package/progress/success/failure states.
@@ -64,7 +82,7 @@ Scope order:
 
 2026-05-02 test release: Draft/prerelease `catapult-dabubu-josef-windows-retest-v1-2026-05-02` / `Catapult-Dabubu Josef Windows retest build v1 2026-05-02`, source commit `655da7831c8cc1a6bd68b4b495307615106ecf9a`, URL `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-6c700e3ce1114782def5`. Attached Windows asset `Catapult-Dabubu-windows-unsigned.zip`, 66,587,417 bytes, SHA-256 `a0ae09628349df1f6840b68b6328f8ef066892f0a7a1a8dc6f5a70f8ebe3ac5d`, plus `SHA256SUMS.txt`, `manifest.json`, and build notes. This is Josef-only retest packaging, not a quarantine lift.
 
-This follow-up supersedes the prior “ready for Josef Windows retest” state for the current test build. It does **not** lift release quarantine, authorize a public/final release, permit a GitHub repo rename, start C-AOL release work, or allow automated real package installs/API calls/secrets/user-data mutation outside explicit confirmation/proof boundaries.
+This v1 follow-up is superseded by the 2026-05-06 v2 debug-note repair lane after Josef retested the v1 build. It does **not** lift release quarantine, authorize a public/final release, permit a GitHub repo rename, start C-AOL release work, or allow automated real package installs/API calls/secrets/user-data mutation outside explicit confirmation/proof boundaries.
 
 ## Previous Windows retest fix lane
 

@@ -118,7 +118,7 @@ func _assert_settings_ui_recommendation_copy() -> bool:
 		return false
 	var text := f.get_as_text()
 	f.close()
-	for token in ["title.text = \"LLM\"", "Choose API or local Ollama setup.", "API / AnyLLM", "Ollama local", "mistral-v0.3", "nemotron-9b", "ConfirmExternalBackendAction", "Catapult-Dabubu will not pull models before this confirmation"]:
+	for token in ["title.text = \"LLM\"", "Choose API or local Ollama setup.", "API / AnyLLM", "Ollama local", "mistral:v0.3", "mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest", "ConfirmExternalBackendAction", "Catapult-Dabubu will not pull models before this confirmation"]:
 		if text.find(token) < 0:
 			_fail("backend setup UI token missing: %s" % token)
 			return false

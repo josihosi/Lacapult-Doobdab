@@ -35,7 +35,7 @@ func _run() -> void:
 	settings.store("backend_ollama_endpoint", backend_config.DEFAULT_OLLAMA_URL)
 	settings.store("backend_ollama_model", "")
 	settings.store("backend_external_setup_proof_only", true)
-	OS.set_environment("LACAPULT_OLLAMA_FIXTURE", "models:mistral-v0.3")
+	OS.set_environment("LACAPULT_OLLAMA_FIXTURE", "models:mistral:v0.3")
 
 	var config_path = paths.config.plus_file(backend_config.BACKEND_CONFIG_FILENAME)
 	var patch_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_PATCH_FILENAME)
@@ -94,7 +94,7 @@ func _run() -> void:
 	var ollama_config = helpers.load_json_file(config_path)
 	_require(ollama_config.get("backend", "") == "ollama", "Install action did not save Ollama backend before confirm")
 	_require(ollama_config.get("endpoint", "") == "http://127.0.0.1:11434", "Install action did not save current Ollama endpoint")
-	_require(ollama_config.get("model", "") == "mistral-v0.3", "Install action did not save current Ollama model")
+	_require(ollama_config.get("model", "") == "mistral:v0.3", "Install action did not save current Ollama model")
 	_require(ui._backend_status.text.find("Saved before install") >= 0, "Install action did not report save-before-install ordering")
 	_require(ui._confirm_dialog.dialog_text.find("Proof mode") >= 0 and ui._confirm_dialog.dialog_text.find("instead of running installers") >= 0, "Install action lost confirmation/proof no-download boundary")
 

@@ -70,8 +70,8 @@ func _run() -> void:
 	ui._refresh_backend_setup_controls()
 	yield(self, "idle_frame")
 	all_text = _collect_visible_text(ui)
-	_require(settings.read("backend_ollama_model") == "mistral-v0.3", "empty Ollama model did not default to visible Mistral choice")
-	_require(all_text.find("Hardware check") >= 0, "Ollama hardware check did not render")
+	_require(settings.read("backend_ollama_model") == "mistral:v0.3", "empty Ollama model did not default to visible Mistral choice")
+	_require(all_text.find("RAM:") >= 0 and all_text.find("GiB") >= 0, "Ollama GiB hardware check did not render")
 	_require(all_text.find("Mistral model") >= 0 and all_text.find("Nemotron model") >= 0, "Ollama readiness rows did not name supported model families")
 	_require(_status_container_has_states(ui._ollama_status_lights, ["green", "yellow"]), "Ollama readiness rows did not expose explicit states")
 
