@@ -35,6 +35,7 @@ var _command_preview_box: TextEdit = null
 var _save_button: Button = null
 var _check_button: Button = null
 var _install_button: Button = null
+var _runner_test_button: Button = null
 var _confirm_dialog: ConfirmationDialog = null
 
 
@@ -226,6 +227,11 @@ func _build_controls() -> void:
 	_install_button.hint_tooltip = "Saves current options first, then opens a confirmation prompt; automated tests do not install packages or pull models."
 	_install_button.connect("pressed", self, "_on_ConfirmGuidedInstall_pressed")
 	button_row.add_child(_install_button)
+	_runner_test_button = Button.new()
+	_runner_test_button.text = "Runner test"
+	_runner_test_button.hint_tooltip = "Saves options, then asks before exercising C-AOL tools/llm_runner/runner.py. Proof mode uses --dry-run and makes no API call or model request."
+	_runner_test_button.connect("pressed", self, "_on_ConfirmRunnerTest_pressed")
+	button_row.add_child(_runner_test_button)
 
 	_command_preview_box = TextEdit.new()
 	_command_preview_box.name = "BackendCommandPreview"
@@ -285,6 +291,8 @@ func _refresh_backend_setup_controls() -> void:
 		_install_python_button.hint_tooltip = "Advanced: creates/updates only the runner.py venv. The main API setup action also installs AnyLLM packages."
 		_install_button.text = "Set up API / AnyLLM"
 		_install_button.hint_tooltip = "Saves options, then asks before creating/updating the venv and installing AnyLLM/provider packages into it.\nNo API call or API-secret read is performed."
+		_runner_test_button.text = "Test API runner"
+		_runner_test_button.hint_tooltip = "Asks before exercising C-AOL runner.py with the selected API provider/model/env-var. Proof mode uses --dry-run so no live API call or secret read happens."
 		_guidance.text = "API path: choose provider/model, set env-var name, then run setup."
 	elif mode == "ollama":
 		_backend_endpoint_label.text = "Ollama URL"
@@ -308,6 +316,8 @@ func _refresh_backend_setup_controls() -> void:
 		_install_python_button.hint_tooltip = "Creates or updates the runner.py Python venv only.\nOllama itself and model pulls use Install Ollama / model."
 		_install_button.text = "Install Ollama / model"
 		_install_button.hint_tooltip = "Saves options, then asks before installing Ollama or pulling the selected model.\nAutomated proof records intent only."
+		_runner_test_button.text = "Test Ollama runner"
+		_runner_test_button.hint_tooltip = "Asks before exercising C-AOL runner.py against the selected local Ollama endpoint/model. It never installs Ollama or pulls a model."
 		_select_ollama_choice(Settings.read("backend_ollama_model"))
 		_guidance.text = "Ollama path: Check hardware/readiness, then install or pull one step at a time."
 
@@ -336,11 +346,13 @@ func _set_backend_status(mode: String, raw_status: String, prefix: String = "") 
 		if _api_status_lights != null:
 			_set_status_rows(_api_status_lights, _api_status_rows(raw_status))
 		lines.append("Secret policy: env-var name only; pasted keys are session-only and cleared after use. Check makes no API call.")
+		lines.append("Runner test: confirmation-gated; proof mode invokes C-AOL runner.py with --dry-run and no API call.")
 		lines.append("Setup path: creates/updates the venv, installs AnyLLM/provider packages, then use Check.")
 	elif mode == "ollama":
 		if _ollama_status_lights != null:
 			_set_status_rows(_ollama_status_lights, _ollama_status_rows())
 		lines.append("Install policy: serialized confirmed steps only; no chained install+pull when Ollama is not ready.")
+		lines.append("Runner test: confirmation-gated C-AOL runner.py check; no Ollama install or model pull.")
 		lines.append("The launcher may appear to time out. Wait for Ollama installation to commence.")
 	_backend_status.text = "\n".join(lines)
 	_update_command_preview_box(mode)
@@ -362,7 +374,8 @@ func _ollama_status_rows() -> Array:
 		{"label": "mistral:v0.3 performance", "state": performance.get(OLLAMA_MODEL_MISTRAL, "gray"), "state_label": _performance_label(performance.get(OLLAMA_MODEL_MISTRAL, "gray"))},
 		{"label": "nemotron-9b performance", "state": performance.get(OLLAMA_MODEL_NEMOTRON, "gray"), "state_label": _performance_label(performance.get(OLLAMA_MODEL_NEMOTRON, "gray"))},
 		{"label": "Python/venv", "state": readiness.get("python_state", readiness.get("python_light", "red"))},
-		{"label": "Options", "state": readiness.get("options_state", readiness.get("options_light", "green"))}
+		{"label": "Options", "state": readiness.get("options_state", readiness.get("options_light", "green"))},
+		{"label": "Ollama runner test", "state": _runner_test_state("ollama")}
 	]
 
 
@@ -379,8 +392,18 @@ func _api_status_rows(raw_status: String) -> Array:
 		{"label": "Python / venv", "state": python_state},
 		{"label": "AnyLLM packages", "state": import_state},
 		{"label": "API-key env var", "state": env_state},
-		{"label": "API setup", "state": ready_state}
+		{"label": "API setup", "state": ready_state},
+		{"label": "API runner test", "state": _runner_test_state("api")}
 	]
+
+
+func _runner_test_state(mode: String) -> String:
+	var status = str(Settings.read("backend_%s_runner_test_status" % mode))
+	if status.find("runner_test_ok") >= 0:
+		return "green"
+	if status.find("runner_test_failed") >= 0 or status.find("runner_test_runner_missing") >= 0:
+		return "red"
+	return "yellow"
 
 
 func _set_status_rows(container: VBoxContainer, rows: Array) -> void:
@@ -607,6 +630,18 @@ func _on_ConfirmGuidedInstall_pressed() -> void:
 	_confirm_dialog.popup_centered(CONFIRM_DIALOG_SIZE)
 
 
+func _on_ConfirmRunnerTest_pressed() -> void:
+	var result = _save_current_backend_setup()
+	var mode = Settings.read("backend_mode")
+	_pending_confirm_action = "%s_runner_test" % mode
+	if result != "ok":
+		_set_backend_status(mode, result, "Runner test save failed")
+		return
+	_set_backend_status(mode, _check_current_backend_status(), "Saved before runner test")
+	_confirm_dialog.dialog_text = _confirmation_text_for_mode(_pending_confirm_action)
+	_confirm_dialog.popup_centered(CONFIRM_DIALOG_SIZE)
+
+
 func _update_command_preview_box(mode: String) -> void:
 	if _command_preview_box == null:
 		return
@@ -635,6 +670,16 @@ func _confirmation_text_for_mode(mode: String) -> String:
 		var plan = BackendConfig.build_ollama_setup_plan(fields.get("endpoint", BackendConfig.DEFAULT_OLLAMA_URL), fields.get("model", ""))
 		var proof_note = "\n\nProof mode is enabled for this run, so Catapult-Dabubu records the confirmed intent only instead of running installers or `ollama pull`." if _external_setup_proof_only_enabled() else ""
 		return "Confirm Ollama setup for model %s.\n\nCLI input (serialized, not shell-chained):\n%s\n\nThis may install Ollama or pull a model only after the matching readiness step is available. If Ollama was just installed or is still opening, run Check before pulling the model.\nThe launcher may appear to time out. Wait for Ollama installation to commence.\nCatapult-Dabubu will not pull models before this confirmation.%s" % [plan.get("model", Settings.read("backend_ollama_model")), plan.get("command_preview", "manual install required"), proof_note]
+	if mode == "api_runner_test" or mode == "ollama_runner_test":
+		var fields = _collect_current_backend_fields()
+		var backend = "api" if mode == "api_runner_test" else "ollama"
+		var proof_only = _runner_test_proof_only_enabled()
+		var plan = BackendConfig.build_backend_runner_test_plan(backend, fields.get("endpoint", ""), fields.get("model", ""), fields.get("python_path", ""), fields.get("api_provider", BackendConfig.DEFAULT_API_PROVIDER), fields.get("api_key_env", BackendConfig.DEFAULT_API_KEY_ENV), proof_only)
+		if backend == "api":
+			var api_live_note = "\n\nProof mode is enabled, so this invokes C-AOL runner.py with --dry-run: no API call, no secret read, and no spend." if proof_only else "\n\nThis can make one live API self-test call after confirmation using only the named env-var; the key value is not shown or saved."
+			return "Confirm API runner test.\n\nC-AOL runner command:\n%s\n\nThis exercises tools/llm_runner/runner.py instead of only launcher metadata.%s" % [plan.get("command_preview", "python runner.py --backend api --dry-run"), api_live_note]
+		var ollama_live_note = "\n\nProof mode is enabled, so this invokes C-AOL runner.py with --dry-run: no Ollama request is sent." if proof_only else "\n\nThis can send one local Ollama self-test request to the selected endpoint/model. It will not install Ollama or pull a model."
+		return "Confirm Ollama runner test.\n\nC-AOL runner command:\n%s\n\nThis exercises tools/llm_runner/runner.py instead of only launcher metadata.%s" % [plan.get("command_preview", "python runner.py --backend ollama --dry-run"), ollama_live_note]
 	if mode == "python_venv":
 		var plan = BackendConfig.build_python_venv_setup_plan(_backend_python_path.text if _backend_python_path != null else "")
 		var proof_note = "\n\nProof mode is enabled for this run, so Catapult-Dabubu records the venv intent only." if _external_setup_proof_only_enabled() else ""
@@ -648,6 +693,10 @@ func _api_setup_proof_only_enabled() -> bool:
 
 func _external_setup_proof_only_enabled() -> bool:
 	return Settings.read("backend_external_setup_proof_only") == true or Settings.read("backend_api_setup_proof_only") == true
+
+
+func _runner_test_proof_only_enabled() -> bool:
+	return Settings.read("backend_runner_test_proof_only") == true or _external_setup_proof_only_enabled()
 
 
 func _on_ExternalBackendAction_confirmed() -> void:
@@ -694,6 +743,17 @@ func _on_ExternalBackendAction_confirmed() -> void:
 		else:
 			_set_backend_status("ollama", _check_current_backend_status(), "Ollama setup command finished")
 			post_message = "Ollama setup command finished after confirmation; installer/CLI/server and model-pull state can be checked separately."
+	elif _pending_confirm_action == "api_runner_test" or _pending_confirm_action == "ollama_runner_test":
+		var fields = _collect_current_backend_fields()
+		var backend = "api" if _pending_confirm_action == "api_runner_test" else "ollama"
+		var proof_only = _runner_test_proof_only_enabled()
+		var setup_result = BackendConfig.run_backend_runner_test(backend, fields.get("endpoint", ""), fields.get("model", ""), fields.get("python_path", ""), fields.get("api_provider", BackendConfig.DEFAULT_API_PROVIDER), fields.get("api_key_env", BackendConfig.DEFAULT_API_KEY_ENV), proof_only)
+		var status = setup_result.get("status", "runner_test_unknown")
+		Settings.store("backend_%s_runner_test_status" % backend, status)
+		_set_backend_status(backend, _check_current_backend_status(), "Runner test")
+		post_message = _runner_test_message(setup_result, backend, proof_only)
+		Status.post(post_message, Enums.MSG_INFO if status == "runner_test_ok" else Enums.MSG_ERROR)
+		return
 	elif _pending_confirm_action == "python_venv":
 		var proof_only = _external_setup_proof_only_enabled()
 		if not proof_only:
@@ -719,6 +779,17 @@ func _on_ExternalBackendAction_confirmed() -> void:
 	else:
 		_backend_status.text = "Confirmed guided setup intent for %s. No external package install, model pull, API call, or real machine mutation was performed by this action.\n%s" % [_pending_confirm_action, _backend_status.text]
 	Status.post(post_message)
+
+
+func _runner_test_message(setup_result: Dictionary, backend: String, proof_only: bool) -> String:
+	var status = setup_result.get("status", "runner_test_unknown")
+	var summary = str(setup_result.get("output_summary", "")).strip_edges()
+	var prefix = "C-AOL %s runner test" % backend.capitalize()
+	var boundary = "Proof mode used --dry-run; no API call, secret read, Ollama request, install, or model pull happened." if proof_only else "Confirmed self-test ran no install or model pull; API route may have used the named env-var only."
+	var message = "%s %s. %s" % [prefix, "passed" if status == "runner_test_ok" else "failed", boundary]
+	if summary != "":
+		message += "\nRunner output:\n%s" % summary
+	return message
 
 
 func _set_external_action_progress(mode: String, message: String) -> void:

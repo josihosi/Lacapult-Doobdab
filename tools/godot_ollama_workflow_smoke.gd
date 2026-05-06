@@ -22,12 +22,14 @@ func _run() -> void:
 	var dir_err = d.make_dir_recursive(install_dir)
 	_require(dir_err == OK or dir_err == ERR_ALREADY_EXISTS, "could not create sandbox active install dir")
 	_require(helpers.save_to_json_file({"name": "Package 4 Sandbox"}, install_dir.plus_file("catapult_install_info.json")), "could not create sandbox install info")
+	_write_runner_fixture(install_dir)
 
 	settings.store("backend_mode", "ollama")
 	settings.store("backend_ollama_endpoint", backend_config.DEFAULT_OLLAMA_URL)
 	settings.store("backend_ollama_model", "mistral:v0.3")
 	settings.store("backend_python_path", "python3")
 	settings.store("backend_external_setup_proof_only", true)
+	settings.store("backend_runner_test_proof_only", true)
 	OS.set_environment("LACAPULT_OLLAMA_FIXTURE", "models:mistral:v0.3")
 
 	var missing = backend_config.get_ollama_readiness(backend_config.DEFAULT_OLLAMA_URL, "python3")
@@ -46,10 +48,12 @@ func _run() -> void:
 	var patch_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_PATCH_FILENAME)
 	var ollama_intent_path = paths.config.plus_file(backend_config.OLLAMA_SETUP_INTENT_FILENAME)
 	var venv_intent_path = paths.config.plus_file(backend_config.PYTHON_VENV_SETUP_INTENT_FILENAME)
+	var runner_intent_path = paths.config.plus_file(backend_config.RUNNER_TEST_INTENT_FILENAME)
 	_remove_if_exists(config_path)
 	_remove_if_exists(patch_path)
 	_remove_if_exists(ollama_intent_path)
 	_remove_if_exists(venv_intent_path)
+	_remove_if_exists(runner_intent_path)
 
 	var ui_script = load("res://scripts/BackendSetupUI.gd")
 	var ui = VBoxContainer.new()
@@ -63,7 +67,7 @@ func _run() -> void:
 	_require(all_text.find("Ollama model tag") < 0, "duplicate freeform Ollama model field is still visible")
 	_require(_option_has_item(ui._ollama_model_choice, "Mistral v0.3") and _option_has_item(ui._ollama_model_choice, "Nemotron 9B"), "supported Ollama model choices did not render")
 	_require(all_text.find("Ollama command") >= 0 and all_text.find("Mistral") >= 0 and all_text.find("Nemotron") >= 0 and all_text.find("Python/venv") >= 0, "Ollama status rows did not render")
-	_require(all_text.find("Save options") >= 0 and all_text.find("Check") >= 0 and all_text.find("Install Ollama / model") >= 0 and all_text.find("Create venv only") >= 0, "Ollama action row did not render Save/Check/Install/venv actions")
+	_require(all_text.find("Save options") >= 0 and all_text.find("Check") >= 0 and all_text.find("Install Ollama / model") >= 0 and all_text.find("Create venv only") >= 0 and all_text.find("Test Ollama runner") >= 0, "Ollama action row did not render Save/Check/Install/venv/runner-test actions")
 	_require(all_text.find("API key") < 0 and all_text.find("Provider") < 0, "Ollama mode leaked API-only controls")
 	_require(all_text.find("RAM: 15.6 GiB") >= 0 and all_text.find("VRAM: 1.0 GiB") >= 0 and all_text.find("mistral:v0.3 performance") >= 0 and all_text.find("nemotron-9b performance") >= 0 and all_text.find("Hardware check: missing") < 0, "Ollama GiB hardware/performance display did not render or still says missing")
 
@@ -84,6 +88,23 @@ func _run() -> void:
 	_require(ollama_config.get("backend", "") == "ollama", "backend config did not persist Ollama mode")
 	_require(ollama_config.get("model", "") == "mistral:v0.3", "backend config did not persist selected Ollama model")
 	_require(JSON.print(ollama_config).find("LLM_INTENT_PYTHON") >= 0, "options patch/config did not explain shared Python runner path")
+
+	var runner_button = _find_button(ui, "Test Ollama runner")
+	_require(runner_button != null, "Test Ollama runner button lookup failed")
+	runner_button.emit_signal("pressed")
+	yield(self, "idle_frame")
+	_require(ui._confirm_dialog.dialog_text.find("tools/llm_runner/runner.py") >= 0 and ui._confirm_dialog.dialog_text.find("--backend ollama") >= 0, "Ollama runner confirmation did not invoke C-AOL runner.py route")
+	_require(ui._confirm_dialog.dialog_text.find("--dry-run") >= 0 and ui._confirm_dialog.dialog_text.find("no Ollama request") >= 0, "Ollama runner confirmation lost proof/no-request boundary")
+	ui._on_ExternalBackendAction_confirmed()
+	yield(self, "idle_frame")
+	_require(File.new().file_exists(runner_intent_path), "confirmed Ollama runner test did not record runner intent")
+	var runner_intent = helpers.load_json_file(runner_intent_path)
+	var runner_text = JSON.print(runner_intent)
+	_require(runner_intent.get("action", "") == "runner_test" and runner_intent.get("backend", "") == "ollama", "Ollama runner intent action/backend mismatch")
+	_require(runner_intent.get("result_summary", "") == "runner_test_ok", "Ollama runner dry-run did not pass")
+	_require(runner_intent.get("performed_live_backend_call", true) == false, "Ollama runner proof claimed a live backend call")
+	_require(runner_text.find("--dry-run") >= 0 and runner_text.find("mistral:v0.3") >= 0, "Ollama runner intent lost dry-run/model tag boundary")
+	_require(_find_status_row(ui._ollama_status_lights, "OllamarunnertestStatusRow", "green"), "Ollama runner status row did not turn green after proof dry-run")
 
 	var install_button = _find_button(ui, "Install Ollama / model")
 	_require(install_button != null, "Install Ollama / model button lookup failed")
@@ -120,8 +141,19 @@ func _run() -> void:
 	print("  Fixture proof: command-missing, server-unreachable, model-present, and model-missing states are distinguishable without real pulls")
 	print("  Check proof: readiness-only; no backend config write")
 	print("  Save proof: Ollama endpoint/model/Python metadata round-tripped into sandbox launcher config/options patch")
+	print("  Runner proof: confirmation-gated C-AOL runner.py --backend ollama --dry-run exercised the runner route without Ollama request/install/pull")
 	print("  Install proof: confirmation-gated Ollama/model and Python venv intents recorded in proof mode; no installer, venv creation, model pull, API call, or real user config mutation")
 	quit(0)
+
+
+func _write_runner_fixture(install_dir: String) -> void:
+	var runner_dir = install_dir.plus_file("tools").plus_file("llm_runner")
+	var err = Directory.new().make_dir_recursive(runner_dir)
+	_require(err == OK or err == ERR_ALREADY_EXISTS, "could not create runner fixture dir")
+	var f = File.new()
+	_require(f.open(runner_dir.plus_file("runner.py"), File.WRITE) == OK, "could not open runner fixture")
+	f.store_string("import sys\nif '--dry-run' in sys.argv and '--backend' in sys.argv:\n    print('dry-run ok')\n    raise SystemExit(0)\nprint('fixture blocks live calls', file=sys.stderr)\nraise SystemExit(2)\n")
+	f.close()
 
 
 func _remove_if_exists(path: String) -> void:

@@ -72,7 +72,7 @@ This is a Josef-only retest repair lane. It does not lift quarantine, authorize 
 - [x] Nemotron uses real tag `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest` internally while the selector shows a short label.
 - [x] Hardware display shows RAM/VRAM in GiB plus red/yellow/green estimated performance lights for Mistral and Nemotron, with no advisory prose wall.
 - [x] Hardware measured-but-low state is not displayed as `missing`.
-- [ ] API and Ollama routes each expose a runner test button that exercises the actual C-AOL runner route under explicit safety boundaries.
+- [x] API and Ollama routes each expose a runner test button that exercises the actual C-AOL runner route under explicit safety boundaries.
 - [x] Ollama install/model confirmation uses the exact short timeout/commencement warning.
 - [ ] Mods catalog no longer stays empty for supported JSON mod discovery; Magiclysm and DinoMod are attempted or clearly reported unavailable.
 - [ ] Focused static/Godot smoke tests cover the repaired seams without live secrets, unapproved package installs, model pulls, or real user-data mutation.

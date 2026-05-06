@@ -99,10 +99,27 @@ Evidence:
 - `HOME=$(mktemp -d /tmp/lacapult-v2-save-home.XXXXXX) godot --path . --no-window -s tools/godot_backend_setup_save_check_smoke.gd`
 - `HOME=$(mktemp -d /tmp/lacapult-v2-win-v1-home.XXXXXX) godot --path . --no-window -s tools/godot_windows_retest_followup_v1_smoke.gd`
 
+## Alex local checkpoint — 2026-05-06 runner-test slice
+
+Implemented/proofed in this slice:
+
+- API setup page now exposes `Test API runner`.
+- Ollama setup page now exposes `Test Ollama runner`.
+- Both buttons save current options first, open an explicit confirmation, and exercise the active C-AOL `tools/llm_runner/runner.py` route rather than only launcher metadata.
+- Proof mode invokes the runner with `--dry-run`, records `caol_runner_test_intent.json`, and does not call APIs, read secrets, send Ollama requests, install packages, create venvs, pull models, or mutate real user data.
+- Non-proof/manual confirmation path is shaped as one runner self-test for the selected backend; API still warns about possible live spend and passes only the env-var name, while Ollama still forbids install/pull behavior.
+
+Evidence:
+
+- `python3 tools/prove_windows_retest_followup_v2_backend_static.py`
+- `HOME=$(mktemp -d /tmp/lacapult-v2-api-runner-home.XXXXXX) godot --path . --no-window -s tools/godot_api_anyllm_workflow_smoke.gd`
+- `HOME=$(mktemp -d /tmp/lacapult-v2-ollama-runner-home.XXXXXX) godot --path . --no-window -s tools/godot_ollama_workflow_smoke.gd`
+- `python3 /Users/josefhorvath/Schanigarten/Cataclysm-AOL/tools/llm_runner/runner.py --backend api --api-provider openrouter --api-model openai/gpt-4.1-mini --api-key-env LACAPULT_NO_SECRET --dry-run`
+- `python3 /Users/josefhorvath/Schanigarten/Cataclysm-AOL/tools/llm_runner/runner.py --backend ollama --ollama-url http://127.0.0.1:11434 --ollama-model mistral:v0.3 --dry-run`
+
 Still open:
 
-- API/Ollama runner test buttons that exercise the C-AOL runner path under explicit safe/no-surprise-spend boundaries.
 - JSON mod catalog/summarizer footing for Magiclysm/DinoMod.
 - Broader focused regression/package proof and fresh Josef-only Windows v2 Draft/prerelease after local proof.
 
-Hollow-rock suspicion: runner-test and Mods catalog remain real v2 blockers; this checkpoint only closes the backend setup/model/hardware wording slice, not the full v2 lane.
+Hollow-rock suspicion: proof mode uses runner `--dry-run`; that is the right no-spend automated gate, but not a real API spend/local-model response. Josef/Windows still needs the packaged visible-button retest, and Mods catalog remains the main unimplemented v2 blocker.

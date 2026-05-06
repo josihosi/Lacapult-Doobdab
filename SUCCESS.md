@@ -46,7 +46,7 @@ Success state:
 - [x] Nemotron uses `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest` internally while the selector shows a short label.
 - [x] Ollama hardware display shows RAM/VRAM in GiB plus red/yellow/green estimated performance lights for Mistral and Nemotron.
 - [x] Measured low hardware is not displayed as `missing`.
-- [ ] API and Ollama routes each expose a safe runner test button that exercises the actual C-AOL runner route.
+- [x] API and Ollama routes each expose a safe runner test button that exercises the actual C-AOL runner route.
 - [x] Ollama install/model confirmation uses the short timeout/commencement warning.
 - [ ] Mods catalog/summarizer footing handles Magiclysm/DinoMod when present/available, or reports unavailability precisely.
 - [ ] Focused static/Godot/backend/mod proof passes without live secrets, unapproved package installs, model pulls, or real user-data mutation.

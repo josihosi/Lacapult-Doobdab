@@ -65,7 +65,9 @@ Scope order:
 
 This v2 lane supersedes the v1 ready-for-retest state after Josef's new Windows findings. It does **not** lift release quarantine, authorize a public/final release, permit surprise live API calls/secrets/package installs/model pulls in automated proof, rename the GitHub repo, or start C-AOL release work.
 
-2026-05-06 local backend/setup slice checkpoint: API package identity, normal base-URL hiding, package failure output, Ollama runtime tags/short labels, GiB hardware/performance lights, measured-low-not-missing behavior, and the short Ollama timeout wording are patched and locally proofed. Remaining v2 implementation targets are runner test buttons, JSON mod catalog/summarizer footing, broader proof/package work, and fresh Josef-only Windows v2 release packaging after local proof.
+2026-05-06 local backend/setup slice checkpoint: API package identity, normal base-URL hiding, package failure output, Ollama runtime tags/short labels, GiB hardware/performance lights, measured-low-not-missing behavior, and the short Ollama timeout wording are patched and locally proofed.
+
+2026-05-06 local runner-test slice checkpoint: API and Ollama setup pages now expose confirmation-gated runner test buttons. Proof mode invokes the active C-AOL `tools/llm_runner/runner.py` route with `--dry-run`, records `caol_runner_test_intent.json`, and does not call APIs, read secrets, send Ollama requests, install packages, or pull models. Remaining v2 implementation targets are JSON mod catalog/summarizer footing, broader proof/package work, and fresh Josef-only Windows v2 release packaging after local proof.
 
 ## Previous Windows retest follow-up lane v1
 

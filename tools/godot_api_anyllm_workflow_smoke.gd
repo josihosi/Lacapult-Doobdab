@@ -24,6 +24,7 @@ func _run() -> void:
 	var dir_err = d.make_dir_recursive(install_dir)
 	_require(dir_err == OK or dir_err == ERR_ALREADY_EXISTS, "could not create sandbox active install dir")
 	_require(helpers.save_to_json_file({"name": "Package 3 Sandbox"}, install_dir.plus_file("catapult_install_info.json")), "could not create sandbox install info")
+	_write_runner_fixture(install_dir)
 
 	settings.store("backend_mode", "api")
 	settings.store("backend_api_endpoint", "")
@@ -32,13 +33,16 @@ func _run() -> void:
 	settings.store("backend_api_key_env", "LACAPULT_PACKAGE3_KEY")
 	settings.store("backend_python_path", "python3")
 	settings.store("backend_api_setup_proof_only", true)
+	settings.store("backend_runner_test_proof_only", true)
 
 	var config_path = paths.config.plus_file(backend_config.BACKEND_CONFIG_FILENAME)
 	var patch_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_PATCH_FILENAME)
 	var intent_path = paths.config.plus_file(backend_config.API_SETUP_INTENT_FILENAME)
+	var runner_intent_path = paths.config.plus_file(backend_config.RUNNER_TEST_INTENT_FILENAME)
 	_remove_if_exists(config_path)
 	_remove_if_exists(patch_path)
 	_remove_if_exists(intent_path)
+	_remove_if_exists(runner_intent_path)
 
 	var ui_script = load("res://scripts/BackendSetupUI.gd")
 	var ui = VBoxContainer.new()
@@ -55,7 +59,7 @@ func _run() -> void:
 	_require(all_text.find("Use for this session") >= 0, "session API key action did not render")
 	_require(_option_has_item(ui._backend_provider_button, "OpenAI") and _option_has_item(ui._backend_provider_button, "OpenRouter") and _option_has_item(ui._backend_provider_button, "AnyLLM custom provider"), "provider choices did not render")
 	_require(_status_container_has_states(ui._api_status_lights, ["green", "yellow"]), "API status rows did not expose explicit colored states")
-	_require(all_text.find("Set up API / AnyLLM") >= 0 and all_text.find("Create venv only") >= 0, "API setup/venv actions did not render")
+	_require(all_text.find("Set up API / AnyLLM") >= 0 and all_text.find("Create venv only") >= 0 and all_text.find("Test API runner") >= 0, "API setup/venv/runner-test actions did not render")
 	_require(all_text.find("hardware") < 0 and all_text.find("Ollama URL") < 0, "API mode leaked Ollama/hardware copy")
 
 	var check_button = _find_button(ui, "Check")
@@ -96,6 +100,24 @@ func _run() -> void:
 	_require(patch_text.find("LLM_INTENT_API_PROVIDER") >= 0 and patch_text.find("openrouter") >= 0, "options patch did not carry provider metadata")
 	_require(patch_text.find(FAKE_SECRET) < 0, "options patch leaked API secret")
 
+	var runner_button = _find_button(ui, "Test API runner")
+	_require(runner_button != null, "Test API runner button lookup failed")
+	runner_button.emit_signal("pressed")
+	yield(self, "idle_frame")
+	_require(ui._confirm_dialog.dialog_text.find("tools/llm_runner/runner.py") >= 0 and ui._confirm_dialog.dialog_text.find("--backend api") >= 0, "API runner confirmation did not invoke C-AOL runner.py route")
+	_require(ui._confirm_dialog.dialog_text.find("--dry-run") >= 0 and ui._confirm_dialog.dialog_text.find("no API call") >= 0, "API runner confirmation lost proof/no-spend boundary")
+	_require(ui._confirm_dialog.dialog_text.find(FAKE_SECRET) < 0, "API runner confirmation leaked API secret")
+	ui._on_ExternalBackendAction_confirmed()
+	yield(self, "idle_frame")
+	_require(File.new().file_exists(runner_intent_path), "confirmed API runner test did not record runner intent")
+	var runner_intent = helpers.load_json_file(runner_intent_path)
+	var runner_text = JSON.print(runner_intent)
+	_require(runner_intent.get("action", "") == "runner_test" and runner_intent.get("backend", "") == "api", "API runner intent action/backend mismatch")
+	_require(runner_intent.get("result_summary", "") == "runner_test_ok", "API runner dry-run did not pass")
+	_require(runner_intent.get("performed_live_backend_call", true) == false, "API runner proof claimed a live backend call")
+	_require(runner_text.find("--dry-run") >= 0 and runner_text.find(FAKE_SECRET) < 0, "API runner intent lost dry-run boundary or leaked secret")
+	_require(_find_status_row(ui._api_status_lights, "APIrunnertestStatusRow", "green"), "API runner status row did not turn green after proof dry-run")
+
 	var install_button = _find_button(ui, "Set up API / AnyLLM")
 	_require(install_button != null, "Set up API / AnyLLM button lookup failed")
 	install_button.emit_signal("pressed")
@@ -122,8 +144,19 @@ func _run() -> void:
 	print("  UI proof: API provider/model/env-var/session-key controls with normal base URL hidden, colored status rows, Create venv only, and Set up API / AnyLLM rendered")
 	print("  Check proof: readiness-only; no backend config write and no API call")
 	print("  Save proof: provider/default base URL/model/env-var name round-tripped without storing secret")
+	print("  Runner proof: confirmation-gated C-AOL runner.py --backend api --dry-run exercised the runner route without API call/secret read")
 	print("  Install proof: confirmation-gated venv + AnyLLM setup command staged in proof mode; no venv/pip/API call/secret read")
 	quit(0)
+
+
+func _write_runner_fixture(install_dir: String) -> void:
+	var runner_dir = install_dir.plus_file("tools").plus_file("llm_runner")
+	var err = Directory.new().make_dir_recursive(runner_dir)
+	_require(err == OK or err == ERR_ALREADY_EXISTS, "could not create runner fixture dir")
+	var f = File.new()
+	_require(f.open(runner_dir.plus_file("runner.py"), File.WRITE) == OK, "could not open runner fixture")
+	f.store_string("import sys\nif '--dry-run' in sys.argv and '--backend' in sys.argv:\n    print('dry-run ok')\n    raise SystemExit(0)\nprint('fixture blocks live calls', file=sys.stderr)\nraise SystemExit(2)\n")
+	f.close()
 
 
 func _remove_if_exists(path: String) -> void:

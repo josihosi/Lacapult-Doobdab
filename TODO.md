@@ -18,7 +18,7 @@ Raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-06.md`.
 - [x] Keep GUI model selector labels short, especially Nemotron, while mapping internally to the full runtime tag.
 - [x] Replace Ollama hardware advisory prose/status row with RAM/VRAM in GiB plus red/yellow/green estimated performance lights for Mistral and Nemotron.
 - [x] Ensure measured low hardware is not displayed as `Hardware check: missing`.
-- [ ] Add runner test buttons for API and Ollama routes that exercise the actual C-AOL runner path under safe/no-surprise-spend proof boundaries.
+- [x] Add runner test buttons for API and Ollama routes that exercise the actual C-AOL runner path under safe/no-surprise-spend proof boundaries.
 - [x] Change Ollama install/model wait note to: `The launcher may appear to time out. Wait for Ollama installation to commence.`
 - [ ] Start JSON-mod catalog/summarizer footing so Magiclysm and DinoMod are cataloged/summarized when present/available, or precisely reported unavailable.
 - [ ] Run focused static/Godot/backend/mod proof without live secrets, unapproved package installs, model pulls, or real user-data mutation.

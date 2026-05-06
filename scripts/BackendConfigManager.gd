@@ -12,6 +12,7 @@ const C_AOL_OPTIONS_PATCH_FILENAME = "caol_llm_options_patch.json"
 const API_SETUP_INTENT_FILENAME = "caol_api_setup_intent.json"
 const OLLAMA_SETUP_INTENT_FILENAME = "caol_ollama_setup_intent.json"
 const PYTHON_VENV_SETUP_INTENT_FILENAME = "caol_python_venv_setup_intent.json"
+const RUNNER_TEST_INTENT_FILENAME = "caol_runner_test_intent.json"
 const DEFAULT_HARDWARE_RAM_WARN_MB = 16000
 const DEFAULT_HARDWARE_VRAM_WARN_MB = 6000
 
@@ -292,6 +293,57 @@ func run_ollama_setup(endpoint: String = DEFAULT_OLLAMA_URL, model: String = "",
 		"failed_step": failed_step
 	}
 
+func build_backend_runner_test_plan(mode: String, endpoint: String = "", model: String = "", python_path: String = "", api_provider: String = DEFAULT_API_PROVIDER, api_key_env: String = DEFAULT_API_KEY_ENV, proof_only: bool = false) -> Dictionary:
+	var normalized = _normalize_backend_fields(mode, endpoint, model, python_path, api_provider, api_key_env, "", DEFAULT_OPENVINO_DEVICE)
+	var runner_path = _resolve_caol_runner_path()
+	var py = _resolve_python(normalized.get("python_path", ""))
+	var python_command = py.get("command", "") if py.get("ok", false) else "python3"
+	var args = []
+	if runner_path != "":
+		args.append(runner_path)
+	args.append("--backend")
+	args.append(mode)
+	if mode == BACKEND_API:
+		args.append_array(["--api-provider", normalized.get("api_provider", DEFAULT_API_PROVIDER), "--api-model", normalized.get("model", ""), "--api-key-env", normalized.get("api_key_env", DEFAULT_API_KEY_ENV)])
+	elif mode == BACKEND_OLLAMA:
+		args.append_array(["--ollama-url", normalized.get("endpoint", DEFAULT_OLLAMA_URL), "--ollama-model", normalized.get("model", "")])
+	if proof_only:
+		args.append("--dry-run")
+	else:
+		args.append_array(["--self-test", "--self-test-prompt", "Catapult-Dabubu runner test", "--max-tokens", "16"])
+	var preview_args = []
+	for arg in args:
+		preview_args.append(str(arg))
+	return {
+		"action": "runner_test",
+		"backend": mode,
+		"runner_path": runner_path,
+		"python_command": python_command,
+		"args": args,
+		"command_preview": "%s %s" % [python_command, PoolStringArray(preview_args).join(" ")],
+		"requires_confirmation": true,
+		"proof_only": proof_only,
+		"proof_policy": "dry_run_invokes_caol_runner_no_api_call_no_model_request" if proof_only else "confirmed_self_test_may_call_selected_backend_no_install_no_pull",
+		"secret_policy": "API key values are never written to the command preview or intent; only the configured env-var name is passed."
+	}
+
+
+func run_backend_runner_test(mode: String, endpoint: String = "", model: String = "", python_path: String = "", api_provider: String = DEFAULT_API_PROVIDER, api_key_env: String = DEFAULT_API_KEY_ENV, proof_only: bool = false) -> Dictionary:
+	var plan = build_backend_runner_test_plan(mode, endpoint, model, python_path, api_provider, api_key_env, proof_only)
+	if not mode in [BACKEND_API, BACKEND_OLLAMA]:
+		return {"status": "runner_test_unsupported_backend", "plan": plan, "exit_code": -1, "proof_only": proof_only, "performed_live_backend_call": false}
+	if plan.get("runner_path", "") == "":
+		var missing_result = write_backend_runner_test_intent(mode, plan, false, -1, "runner_test_runner_missing", "")
+		return {"status": "runner_test_runner_missing" if missing_result == "ok" else missing_result, "plan": plan, "exit_code": -1, "proof_only": proof_only, "performed_live_backend_call": false}
+	var output = []
+	var exit_code = OS.execute(plan.get("python_command", "python3"), plan.get("args", []), true, output, true)
+	var output_summary = _safe_command_output_summary(output)
+	var summary = "runner_test_ok" if exit_code == 0 else "runner_test_failed_%s" % exit_code
+	var write_result = write_backend_runner_test_intent(mode, plan, not proof_only, exit_code, summary, output_summary)
+	var status = summary if write_result == "ok" else write_result
+	return {"status": status, "plan": plan, "exit_code": exit_code, "proof_only": proof_only, "performed_live_backend_call": not proof_only, "output_summary": output_summary}
+
+
 func build_python_venv_setup_plan(python_path: String = "") -> Dictionary:
 	var input_path = python_path.strip_edges()
 	var target = input_path
@@ -507,6 +559,33 @@ func write_ollama_setup_intent(endpoint: String = DEFAULT_OLLAMA_URL, model: Str
 	return "ok"
 
 
+func write_backend_runner_test_intent(mode: String, plan: Dictionary, performed_live_backend_call: bool = false, exit_code: int = -1, result_summary: String = "plan_only_no_runner_call", output_summary: String = "") -> String:
+	var d = Directory.new()
+	if not d.dir_exists(Paths.config):
+		var err = d.make_dir_recursive(Paths.config)
+		if err != OK:
+			return "config_dir_error_%s" % err
+	var intent = {
+		"action": "runner_test",
+		"backend": mode,
+		"runner_path": plan.get("runner_path", ""),
+		"python_command": plan.get("python_command", "python3"),
+		"args": plan.get("args", []),
+		"command_preview": plan.get("command_preview", ""),
+		"confirmed": true,
+		"performed_live_backend_call": performed_live_backend_call,
+		"exit_code": exit_code,
+		"result_summary": result_summary,
+		"output_summary": output_summary,
+		"proof_policy": plan.get("proof_policy", "dry_run_invokes_caol_runner_no_api_call_no_model_request"),
+		"secret_policy": plan.get("secret_policy", "API key values are never stored."),
+		"recorded_at": OS.get_datetime()
+	}
+	if not Helpers.save_to_json_file(intent, Paths.config.plus_file(RUNNER_TEST_INTENT_FILENAME)):
+		return "runner_test_intent_write_error"
+	return "ok"
+
+
 func write_python_venv_setup_intent(target_path: String, performed_external_install: bool = false, exit_code: int = -1, result_summary: String = "plan_only_no_venv_mutation") -> String:
 	var d = Directory.new()
 	if not d.dir_exists(Paths.config):
@@ -529,6 +608,12 @@ func write_python_venv_setup_intent(target_path: String, performed_external_inst
 
 
 func _status_summary(raw_status: String) -> String:
+	if raw_status.find("runner_test_runner_missing") >= 0:
+		return "C-AOL runner.py was not found in the active install."
+	if raw_status.find("runner_test_failed") >= 0:
+		return "C-AOL runner test failed; inspect the runner output."
+	if raw_status.find("runner_test_ok") >= 0:
+		return "C-AOL runner path responded."
 	if raw_status.find("api_python_missing") >= 0:
 		return "Python is missing; C-AOL needs Python to run the LLM helper."
 	if raw_status.find("any_llm_missing") >= 0:
@@ -813,6 +898,20 @@ func _ollama_model_list_has(models: Array, model: String) -> bool:
 		if candidate == wanted or candidate.begins_with(wanted + ":") or wanted.begins_with(candidate + ":"):
 			return true
 	return false
+
+
+func _resolve_caol_runner_path() -> String:
+	var env_path = OS.get_environment("LACAPULT_CAOL_RUNNER_PATH")
+	if env_path != "" and File.new().file_exists(env_path):
+		return env_path
+	var d = Directory.new()
+	var game_runner = Paths.game_dir.plus_file("tools").plus_file("llm_runner").plus_file("runner.py")
+	if game_runner != "" and File.new().file_exists(game_runner):
+		return game_runner
+	var dev_runner = Paths.own_dir.get_base_dir().plus_file("Cataclysm-AOL").plus_file("tools").plus_file("llm_runner").plus_file("runner.py")
+	if d.file_exists(dev_runner):
+		return dev_runner
+	return ""
 
 
 func _command_exists(command: String) -> bool:

@@ -38,9 +38,18 @@ require('The launcher may appear to time out. Wait for Ollama installation to co
 require('The launcher may appear to time out. Wait for Ollama installation to commence.' in ui, "short Ollama timeout note missing in UI confirmation/status")
 require('output_summary' in backend and 'Package setup output:' in ui, "API package failure output is not captured/surfaced")
 
+require('RUNNER_TEST_INTENT_FILENAME = "caol_runner_test_intent.json"' in backend, "runner test intent file is missing")
+require('build_backend_runner_test_plan' in backend and '_resolve_caol_runner_path' in backend, "runner test plan does not resolve C-AOL runner.py")
+require('tools").plus_file("llm_runner").plus_file("runner.py")' in backend, "runner test does not target tools/llm_runner/runner.py")
+require('"--backend"' in backend and '"--dry-run"' in backend and '"--self-test"' in backend, "runner test plan lacks backend/dry-run/self-test arguments")
+require('performed_live_backend_call' in backend and 'API key values are never written' in backend, "runner test intent lacks live-call/secret boundary")
+require('Test API runner' in ui and 'Test Ollama runner' in ui, "runner test buttons missing from API/Ollama UI")
+require('_runner_test_proof_only_enabled' in ui and 'no API call' in ui and 'no Ollama request' in ui, "runner test proof/no-spend UI boundary missing")
+
 print("Catapult-Dabubu v2 backend static proof passed")
 print("  API setup uses any-llm-sdk[...] while preserving any_llm import checks")
 print("  normal API base URL is hidden; custom/advanced override remains")
 print("  Ollama selector labels are short and mapped to real runtime tags")
 print("  hardware display uses GiB plus model-specific performance lights")
 print("  package setup failures surface non-secret command output summaries")
+print("  API/Ollama runner test buttons invoke C-AOL runner.py with proof-mode dry-run boundaries")
