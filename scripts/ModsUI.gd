@@ -276,16 +276,22 @@ func reload_available() -> void:
 	for id in _mods.available:
 		var mod = _mods.available[id]
 		var show: bool
+		var is_caol_json_catalog = game == "caol" and str(mod.get("catalog_source", "")).begins_with("caol-json-")
 		
-		if _mods.mod_status(id) in [0, 3]:
+		if is_caol_json_catalog:
+			show = true
+		elif _mods.mod_status(id) in [0, 3]:
 			show = true
 		else:
 			show = include_installed
 	
 		if show:
+			var display_name = mod["modinfo"]["name"]
+			if is_caol_json_catalog:
+				display_name += " [JSON catalog; Summarizer]"
 			_available_mods_view.append({
 				"id": id,
-				"name": mod["modinfo"]["name"],
+				"name": display_name,
 				"location": mod["location"]
 			})
 		else:
@@ -304,7 +310,7 @@ func reload_available() -> void:
 	
 	_populate_list_with_mods(_available_mods_view, _available_list)
 	if game == "caol" and _available_mods_view.size() == 0:
-		_available_list.add_item("No downloadable add-on catalog entries. Built-in C-AOL mods from data/mods and installed user mods are in the Installed / inventory list; Summarizer creation/apply lives in Settings.")
+		_available_list.add_item("Magiclysm/DinoMod JSON catalog targets were not found in the active C-AOL data/mods, user mods, or mod_repo roots. Install/select a C-AOL package with those mods, or add them to mod_repo; Summarizer creation/apply lives in Settings.")
 		_available_list.set_item_disabled(0, true)
 		_available_list.set_item_custom_fg_color(0, Color(0.7, 0.7, 0.7))
 	
@@ -402,6 +408,9 @@ func _make_mod_info_string(mod: Dictionary) -> String:
 	
 	if mod_dict_key != "":
 		var mod_location = _mods.available[mod_dict_key]["location"]
+		var catalog_note = str(_mods.available[mod_dict_key].get("catalog_note", ""))
+		if catalog_note != "":
+			result += "[b][u]C-AOL JSON catalog:[/u][/b] %s\n" % catalog_note
 		
 		# Only show URL for downloadable mods (GitHub URLs)
 		if mod_location.begins_with("https://github.com/") or mod_location.begins_with("http"):

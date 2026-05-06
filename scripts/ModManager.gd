@@ -28,6 +28,8 @@ var available: Dictionary = {} setget , _get_available
 var _mod_release_date_cache: Dictionary = {}
 var _pending_api_calls: Array = []
 
+const CAOL_JSON_CATALOG_TARGET_IDS := ["magiclysm", "DinoMod"]
+
 signal mod_compatibility_checked(compatible_count, incompatible_count)
 
 
@@ -168,6 +170,13 @@ func refresh_available():
 	# Mods are not supported for EOD
 	if Settings.read("game") == "eod":
 		available = {}
+		return
+
+	# C-AOL ships many useful JSON mods in data/mods. Seed the visible catalog
+	# from the active install/user/catalog roots so the Mods page can surface the
+	# first supported JSON-mod Summarizer footing without inventing downloads.
+	if Settings.read("game") == "caol":
+		available = _build_caol_json_mod_catalog()
 		return
 	
 	# Custom mods for TLG (Cataclysm: The Last Generation)
@@ -457,6 +466,25 @@ func refresh_available():
 		}
 	else:
 		available = parse_mods_dir(Paths.mod_repo)
+
+
+func _build_caol_json_mod_catalog() -> Dictionary:
+	var result := {}
+	var roots = [
+		{"source": "stock", "mods": parse_mods_dir(Paths.mods_stock), "note": "built-in JSON mod; Summarizer can create a C-AOL companion pack"},
+		{"source": "user", "mods": parse_mods_dir(Paths.mods_user), "note": "installed JSON mod; Summarizer can create a C-AOL companion pack"},
+		{"source": "custom-catalog", "mods": parse_mods_dir(Paths.mod_repo), "note": "catalog JSON mod; install first, then Summarizer can create a C-AOL companion pack"},
+	]
+	for target_id in CAOL_JSON_CATALOG_TARGET_IDS:
+		for root in roots:
+			var mods = root.get("mods", {})
+			if mods.has(target_id):
+				var entry = mods[target_id].duplicate(true)
+				entry["catalog_source"] = "caol-json-%s" % root.get("source", "unknown")
+				entry["catalog_note"] = root.get("note", "JSON mod catalog entry")
+				result[target_id] = entry
+				break
+	return result
 
 
 func _delete_mod(mod_id: String) -> void:

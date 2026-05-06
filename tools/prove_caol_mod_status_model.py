@@ -59,6 +59,10 @@ def contextual_item(item_id: str) -> dict[str, str]:
     return {"type": "GENERIC", "id": item_id, "name": item_id, "description": "Fixture context item."}
 
 
+def contextual_monster(monster_id: str) -> dict[str, str]:
+    return {"type": "MONSTER", "id": monster_id, "name": monster_id, "description": "Fixture context monster."}
+
+
 def build_fixture(root: Path) -> dict[str, Path]:
     if root.exists():
         shutil.rmtree(root)
@@ -78,6 +82,20 @@ def build_fixture(root: Path) -> dict[str, Path]:
     )
     # Stock packaged: enabled, no contextual content, summary-not-needed.
     write_mod(stock, "fixture_no_summary_needed", modinfo("fixture_no_summary_needed", "Fixture No Summary Needed"))
+    write_mod(stock, "dda", modinfo("dda", "Dark Days Ahead Core"))
+    # C-AOL JSON catalog targets requested by the Windows v2 retest notes.
+    write_mod(
+        stock,
+        "Magiclysm",
+        modinfo("magiclysm", "Magiclysm", dependencies=["dda"]),
+        {"items/magic_fixture.json": [contextual_item("magiclysm_fixture_focus")]},
+    )
+    write_mod(
+        stock,
+        "DinoMod",
+        modinfo("DinoMod", "DinoMod", dependencies=["dda"]),
+        {"monsters/dino_fixture.json": [contextual_monster("dinomod_fixture_dino")]},
+    )
     # Stock packaged: obsolete-blocked.
     write_mod(stock, "fixture_obsolete", modinfo("fixture_obsolete", "Fixture Obsolete", obsolete=True))
     # Stock packaged: dependency-blocked.
@@ -160,8 +178,11 @@ def build_fixture(root: Path) -> dict[str, Path]:
     write_json(
         world / "mods.json",
         [
+            "dda",
             "fixture_context_stock",
             "fixture_no_summary_needed",
+            "magiclysm",
+            "DinoMod",
             "fixture_world_custom",
             "lacapult_summary_fixture_context_stock",
         ],
@@ -179,6 +200,13 @@ def require_status(result: dict[str, Any], mod_id: str, source_type: str, badge_
 
 
 def assert_fixture_status(result: dict[str, Any]) -> None:
+    catalog_targets = {target["id"]: target for target in result.get("json_catalog_targets", [])}
+    for target_id in ["magiclysm", "DinoMod"]:
+        target = catalog_targets.get(target_id)
+        if not target or not target.get("present"):
+            raise AssertionError(f"{target_id} was not reported as a present C-AOL JSON catalog target")
+        if not any(match.get("source_type") == "stock" and match.get("summary_status") == "summary-missing" for match in target.get("matches", [])):
+            raise AssertionError(f"{target_id} did not land as a stock JSON Summarizer candidate: {target}")
     require_status(result, "fixture_context_stock", "stock", "stock-packaged")
     require_status(result, "fixture_context_stock", "stock", "enabled-in-world")
     require_status(result, "fixture_context_stock", "stock", "summary-ready")
@@ -194,6 +222,8 @@ def assert_fixture_status(result: dict[str, Any]) -> None:
     require_status(result, "fixture_missing_dep", "stock", "dependency-blocked")
     require_status(result, "fixture_partial_summary", "stock", "summary-partial")
     require_status(result, "fixture_no_summary_needed", "stock", "summary-not-needed")
+    require_status(result, "magiclysm", "stock", "summary-missing")
+    require_status(result, "DinoMod", "stock", "summary-missing")
     require_status(result, "lacapult_summary_fixture_context_stock", "user", "generated-summary-pack-present")
 
 

@@ -48,7 +48,17 @@ Catapult-Dabubu Windows retest follow-up v2 runner-test slice local evidence lan
 - Direct C-AOL runner dry-run proof: `python3 /Users/josefhorvath/Schanigarten/Cataclysm-AOL/tools/llm_runner/runner.py --backend api --api-provider openrouter --api-model openai/gpt-4.1-mini --api-key-env LACAPULT_NO_SECRET --dry-run` and `python3 /Users/josefhorvath/Schanigarten/Cataclysm-AOL/tools/llm_runner/runner.py --backend ollama --ollama-url http://127.0.0.1:11434 --ollama-model mistral:v0.3 --dry-run` both printed `dry-run ok`.
 - Safety boundary: proof-mode runner tests exercise the C-AOL runner command route with `--dry-run`; live API/Ollama self-tests remain explicit confirmation actions only.
 
-Open for v2 after this slice: JSON mod catalog/summarizer footing, broader focused regression/package proof, and fresh Josef-only Windows v2 Draft/prerelease after local proof.
+Catapult-Dabubu Windows retest follow-up v2 JSON-mod catalog/summarizer footing evidence landed on 2026-05-07:
+
+- Source/UI shape: C-AOL `ModManager.refresh_available()` now seeds Magiclysm and DinoMod from the active stock/user/mod_repo roots when present, tags them as `caol-json-*` catalog entries, and `ModsUI` shows them as `[JSON catalog; Summarizer]` instead of leaving the C-AOL Downloadable catalog empty. If neither target is found, the empty-state names the checked roots and reports Magiclysm/DinoMod unavailable precisely.
+- Status-model shape: Godot and Python C-AOL mod status models now expose `json_catalog_targets` for `magiclysm` and `DinoMod`, including present/unavailable state, source type, JSON file count, content flags, dependency status, and summary status.
+- Fixture/static proof: `python3 tools/prove_caol_mod_status_model.py` proves Magiclysm and DinoMod as stock JSON mods with C-AOL summary-missing/Summarizer-candidate status.
+- Godot catalog smoke: `HOME=$(mktemp -d /tmp/lacapult-v2-json-mod-catalog-home.XXXXXX) godot --path . --no-window -s tools/godot_caol_json_mod_catalog_smoke.gd` proves the visible catalog seeding and status target shape from an isolated C-AOL install fixture.
+- Godot status smoke: `LACAPULT_CAOL_MOD_STATUS_FIXTURE=.proof-cache/caol-mod-status-fixture HOME=$(mktemp -d /tmp/lacapult-caol-mod-status-home.XXXXXX) godot --path . --no-window -s tools/godot_caol_mod_status_smoke.gd` proves the Godot status mirror sees Magiclysm/DinoMod JSON catalog targets and summary-missing status. The fixture deliberately includes broken-metadata JSON and emits expected parse-error log lines while still passing.
+- Regression proof also passed in the same gate: `python3 tools/prove_windows_retest_followup_v2_backend_static.py`, `python3 tools/prove_api_setup_status_copy_boundary.py`, `tools/godot_api_anyllm_workflow_smoke.gd`, `tools/godot_ollama_workflow_smoke.gd`, `tools/godot_backend_setup_save_check_smoke.gd`, `tools/godot_windows_retest_followup_v1_smoke.gd`, and `git diff --check`.
+- Safety boundary: no live API call, API secret readout, package-manager install, Python venv creation, Ollama request/model pull, public release action, or real Application Support/user-data mutation was performed.
+
+Open for v2 after this slice: fresh Josef-only Windows v2 Draft/prerelease packaging/release verification, then Josef Windows retest.
 
 
 Catapult-Dabubu Windows retest follow-up v1 local evidence landed on 2026-05-02:

@@ -20,6 +20,7 @@ SUMMARY_EXTRA_REL = Path("npcs") / "Backgrounds" / "Summaries_extra"
 SUMMARY_ROOTS = (SUMMARY_SHORT_REL, SUMMARY_EXTRA_REL)
 GENERATED_MANIFEST_TYPES = {"lacapult_summary_pack_manifest"}
 SUMMARY_RECORD_TYPES = {"npc_personality_summary", "npc_personality_summary_bundle"}
+CAOL_JSON_CATALOG_TARGET_IDS = ("magiclysm", "DinoMod")
 
 NPC_TYPES = {
     "npc",
@@ -414,6 +415,35 @@ def summarize_record(record: dict[str, Any], generated_by_source: dict[str, list
     return "summary-missing" if record_has_context(record) else "summary-not-needed"
 
 
+def json_catalog_targets(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    targets: list[dict[str, Any]] = []
+    for target_id in CAOL_JSON_CATALOG_TARGET_IDS:
+        matches = [
+            {
+                "id": record["id"],
+                "name": record["name"],
+                "source_type": record["source_type"],
+                "enabled_status": record.get("enabled_status"),
+                "summary_status": record.get("summary_status"),
+                "dependency_status": record.get("dependency_status"),
+                "json_file_count": record.get("json_content", {}).get("json_file_count", 0),
+                "content_flags": record.get("json_content", {}).get("content_flags", {}),
+            }
+            for record in records
+            if record["id"] == target_id
+        ]
+        targets.append(
+            {
+                "id": target_id,
+                "present": bool(matches),
+                "attempted_sources": ["stock", "user", "custom-catalog", "world-custom"],
+                "matches": matches,
+                "unavailable_reason": "" if matches else "not found in active C-AOL data/mods, user mods, mod_repo, or world custom mods",
+            }
+        )
+    return targets
+
+
 def build_status_model(
     *,
     stock_mods: Path | None,
@@ -492,6 +522,7 @@ def build_status_model(
             "status": backend_gate.get("status") if backend_gate else None,
             "generation_ready": gate_ready,
         },
+        "json_catalog_targets": json_catalog_targets(records),
         "counts": dict(Counter(badge for record in records for badge in record["status_badges"])),
         "mods": sorted(records, key=lambda item: (item["id"].lower(), item["source_type"], item["dir"])),
     }

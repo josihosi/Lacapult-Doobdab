@@ -67,7 +67,9 @@ This v2 lane supersedes the v1 ready-for-retest state after Josef's new Windows 
 
 2026-05-06 local backend/setup slice checkpoint: API package identity, normal base-URL hiding, package failure output, Ollama runtime tags/short labels, GiB hardware/performance lights, measured-low-not-missing behavior, and the short Ollama timeout wording are patched and locally proofed.
 
-2026-05-06 local runner-test slice checkpoint: API and Ollama setup pages now expose confirmation-gated runner test buttons. Proof mode invokes the active C-AOL `tools/llm_runner/runner.py` route with `--dry-run`, records `caol_runner_test_intent.json`, and does not call APIs, read secrets, send Ollama requests, install packages, or pull models. Remaining v2 implementation targets are JSON mod catalog/summarizer footing, broader proof/package work, and fresh Josef-only Windows v2 release packaging after local proof.
+2026-05-06 local runner-test slice checkpoint: API and Ollama setup pages now expose confirmation-gated runner test buttons. Proof mode invokes the active C-AOL `tools/llm_runner/runner.py` route with `--dry-run`, records `caol_runner_test_intent.json`, and does not call APIs, read secrets, send Ollama requests, install packages, or pull models.
+
+2026-05-07 local JSON-mod catalog/summarizer footing checkpoint: C-AOL Mods catalog now seeds Magiclysm and DinoMod from the active stock/user/mod_repo roots when present, marks them as JSON/Summarizer catalog entries instead of fake downloads, and the C-AOL status model reports explicit `json_catalog_targets` with precise unavailable reasons if they are absent. Focused backend/API/Ollama/mod smokes passed without live secrets, package installs, model pulls, or real user-data mutation. Remaining v2 target is fresh Josef-only Windows v2 package/release verification after local proof.
 
 ## Previous Windows retest follow-up lane v1
 

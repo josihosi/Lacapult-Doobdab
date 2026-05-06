@@ -123,3 +123,33 @@ Still open:
 - Broader focused regression/package proof and fresh Josef-only Windows v2 Draft/prerelease after local proof.
 
 Hollow-rock suspicion: proof mode uses runner `--dry-run`; that is the right no-spend automated gate, but not a real API spend/local-model response. Josef/Windows still needs the packaged visible-button retest, and Mods catalog remains the main unimplemented v2 blocker.
+
+## Alex local checkpoint — 2026-05-07 JSON-mod catalog/summarizer footing
+
+Implemented/proofed in this slice:
+
+- C-AOL Mods catalog now seeds Magiclysm and DinoMod from active stock/user/mod_repo roots when present.
+- The visible C-AOL Downloadable catalog shows those entries as `[JSON catalog; Summarizer]` instead of an empty shelf, while stock-present entries remain stock/skipped rather than fake downloads.
+- If Magiclysm/DinoMod are absent, the empty-state reports the checked roots precisely instead of implying generic emptiness.
+- Godot/Python C-AOL status models now expose `json_catalog_targets` for `magiclysm` and `DinoMod`, with present/unavailable state, source type, JSON file count, content flags, dependency status, and summary status.
+- Fixture proof treats Magiclysm and DinoMod as JSON Summarizer candidates (`summary-missing`) when enabled and present.
+
+Evidence:
+
+- `python3 tools/prove_windows_retest_followup_v2_backend_static.py`
+- `python3 tools/prove_api_setup_status_copy_boundary.py`
+- `python3 tools/prove_caol_mod_status_model.py`
+- `HOME=$(mktemp -d /tmp/lacapult-v2-json-mod-catalog-home.XXXXXX) godot --path . --no-window -s tools/godot_caol_json_mod_catalog_smoke.gd`
+- `LACAPULT_CAOL_MOD_STATUS_FIXTURE=.proof-cache/caol-mod-status-fixture HOME=$(mktemp -d /tmp/lacapult-caol-mod-status-home.XXXXXX) godot --path . --no-window -s tools/godot_caol_mod_status_smoke.gd`
+- `HOME=$(mktemp -d /tmp/lacapult-v2-api-home.XXXXXX) godot --path . --no-window -s tools/godot_api_anyllm_workflow_smoke.gd`
+- `HOME=$(mktemp -d /tmp/lacapult-v2-ollama-home.XXXXXX) godot --path . --no-window -s tools/godot_ollama_workflow_smoke.gd`
+- `HOME=$(mktemp -d /tmp/lacapult-v2-save-home.XXXXXX) godot --path . --no-window -s tools/godot_backend_setup_save_check_smoke.gd`
+- `HOME=$(mktemp -d /tmp/lacapult-v2-win-v1-home.XXXXXX) godot --path . --no-window -s tools/godot_windows_retest_followup_v1_smoke.gd`
+- `git diff --check`
+
+Still open:
+
+- Fresh Josef-only Windows v2 package/Draft-prerelease verification.
+- Josef Windows retest of the v2 package.
+
+Hollow-rock suspicion: this proves catalog seeding/status adapter behavior with fixtures and active install roots; it does not prove Josef's packaged Windows install actually has Magiclysm/DinoMod present until the v2 package is built and clicked on Windows.

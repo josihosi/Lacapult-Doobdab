@@ -20,8 +20,8 @@ Raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-06.md`.
 - [x] Ensure measured low hardware is not displayed as `Hardware check: missing`.
 - [x] Add runner test buttons for API and Ollama routes that exercise the actual C-AOL runner path under safe/no-surprise-spend proof boundaries.
 - [x] Change Ollama install/model wait note to: `The launcher may appear to time out. Wait for Ollama installation to commence.`
-- [ ] Start JSON-mod catalog/summarizer footing so Magiclysm and DinoMod are cataloged/summarized when present/available, or precisely reported unavailable.
-- [ ] Run focused static/Godot/backend/mod proof without live secrets, unapproved package installs, model pulls, or real user-data mutation.
+- [x] Start JSON-mod catalog/summarizer footing so Magiclysm and DinoMod are cataloged/summarized when present/available, or precisely reported unavailable.
+- [x] Run focused static/Godot/backend/mod proof without live secrets, unapproved package installs, model pulls, or real user-data mutation.
 - [ ] Build/package/upload a fresh Josef-only Windows v2 Draft/prerelease only after local proof.
 
 ## Completed debug-note stack

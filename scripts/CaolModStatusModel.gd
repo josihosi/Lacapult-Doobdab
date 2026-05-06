@@ -6,6 +6,7 @@ extends Node
 
 const SUMMARY_SHORT_REL := "npcs/Backgrounds/Summaries_short"
 const SUMMARY_EXTRA_REL := "npcs/Backgrounds/Summaries_extra"
+const CAOL_JSON_CATALOG_TARGET_IDS := ["magiclysm", "DinoMod"]
 
 const NPC_TYPES := ["npc", "npc_class", "npc_template", "talk_topic", "mission_definition", "npc_personality_summary", "npc_personality_summary_bundle"]
 const FACTION_TYPES := ["faction", "faction_template"]
@@ -101,6 +102,7 @@ func build_status(stock_mods_dir: String, user_mods_dir: String, custom_catalog_
 			"status": backend_gate.get("status", null) if typeof(backend_gate) == TYPE_DICTIONARY else null,
 			"generation_ready": gate_ready,
 		},
+		"json_catalog_targets": _json_catalog_targets(records),
 		"counts": _count_badges(records),
 		"mods": records,
 	}
@@ -659,6 +661,32 @@ func _candidate_briefs(records: Array) -> Array:
 			"dependency_status": record.get("dependency_status", ""),
 		})
 	return briefs
+
+
+func _json_catalog_targets(records: Array) -> Array:
+	var targets := []
+	for target_id in CAOL_JSON_CATALOG_TARGET_IDS:
+		var matches := []
+		for record in records:
+			if record.get("id", "") == target_id:
+				matches.append({
+					"id": record.get("id", ""),
+					"name": record.get("name", target_id),
+					"source_type": record.get("source_type", ""),
+					"enabled_status": record.get("enabled_status", ""),
+					"summary_status": record.get("summary_status", "summary-unknown"),
+					"dependency_status": record.get("dependency_status", ""),
+					"json_file_count": record.get("json_content", {}).get("json_file_count", 0),
+					"content_flags": record.get("json_content", {}).get("content_flags", {}),
+				})
+		targets.append({
+			"id": target_id,
+			"present": matches.size() > 0,
+			"attempted_sources": ["stock", "user", "custom-catalog", "world-custom"],
+			"matches": matches,
+			"unavailable_reason": "not found in active C-AOL data/mods, user mods, mod_repo, or world custom mods" if matches.empty() else "",
+		})
+	return targets
 
 
 func _overview_status_text(counts: Dictionary, all_enabled_state: String, candidate_count: int, world: Dictionary) -> String:

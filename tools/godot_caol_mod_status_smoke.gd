@@ -41,6 +41,10 @@ func _init() -> void:
 
 
 func _assert_status(result: Dictionary) -> bool:
+	for target_id in ["magiclysm", "DinoMod"]:
+		if not _has_catalog_target(result, target_id):
+			printerr("missing C-AOL JSON catalog target %s" % target_id)
+			return false
 	var checks = [
 		["fixture_context_stock", "stock", "summary-ready"],
 		["fixture_user_context", "user", "summary-missing"],
@@ -50,6 +54,8 @@ func _assert_status(result: Dictionary) -> bool:
 		["fixture_broken_metadata", "stock", "metadata-broken"],
 		["fixture_missing_dep", "stock", "dependency-blocked"],
 		["fixture_partial_summary", "stock", "summary-partial"],
+		["magiclysm", "stock", "summary-missing"],
+		["DinoMod", "stock", "summary-missing"],
 		["lacapult_summary_fixture_context_stock", "user", "generated-summary-pack-present"],
 	]
 	for check in checks:
@@ -57,6 +63,13 @@ func _assert_status(result: Dictionary) -> bool:
 			printerr("missing status %s/%s -> %s" % [check[0], check[1], check[2]])
 			return false
 	return true
+
+
+func _has_catalog_target(result: Dictionary, mod_id: String) -> bool:
+	for target in result.get("json_catalog_targets", []):
+		if target.get("id", "") == mod_id:
+			return target.get("present", false) == true
+	return false
 
 
 func _has_status(result: Dictionary, mod_id: String, source_type: String, status: String) -> bool:

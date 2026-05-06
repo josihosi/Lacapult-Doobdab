@@ -48,8 +48,8 @@ Success state:
 - [x] Measured low hardware is not displayed as `missing`.
 - [x] API and Ollama routes each expose a safe runner test button that exercises the actual C-AOL runner route.
 - [x] Ollama install/model confirmation uses the short timeout/commencement warning.
-- [ ] Mods catalog/summarizer footing handles Magiclysm/DinoMod when present/available, or reports unavailability precisely.
-- [ ] Focused static/Godot/backend/mod proof passes without live secrets, unapproved package installs, model pulls, or real user-data mutation.
+- [x] Mods catalog/summarizer footing handles Magiclysm/DinoMod when present/available, or reports unavailability precisely.
+- [x] Focused static/Godot/backend/mod proof passes without live secrets, unapproved package installs, model pulls, or real user-data mutation.
 - [ ] Fresh Josef-only Windows v2 Draft/prerelease is produced and verified after local proof.
 - [ ] Josef confirms the v2 Windows package.
 
