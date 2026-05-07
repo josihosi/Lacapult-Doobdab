@@ -6,6 +6,8 @@ Short queue only. Remove finished items instead of turning this into a museum.
 
 **Active target:** Catapult-Dabubu Windows retest follow-up v2.
 
+State: ready for Josef Windows retest after the fresh v2 Draft/prerelease package; no further local repair target is open until Josef reports the v2 result.
+
 Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`.
 Imagination source: `doc/catapult-dabubu-windows-retest-followup-v2-imagination-source-2026-05-06.md`.
 Handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`.

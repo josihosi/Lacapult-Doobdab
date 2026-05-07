@@ -36,7 +36,7 @@ Success state:
 
 ## Catapult-Dabubu Windows retest follow-up v2
 
-Status: ACTIVE / PACKAGED FOR ALEX
+Status: READY FOR JOSEF WINDOWS RETEST / QUARANTINE STILL ACTIVE
 
 Success state:
 - [x] API setup uses `any-llm-sdk[...]` provider extras while preserving the `from any_llm import completion` runtime seam.
