@@ -367,11 +367,14 @@ func _ollama_status_rows() -> Array:
 	var readiness = BackendConfig.get_ollama_readiness(endpoint, python_path)
 	var model_states = readiness.get("model_states", readiness.get("model_lights", {}))
 	var hardware = BackendConfig.get_ollama_hardware_check()
-	_hardware_hint.text = "RAM: %.1f GiB   VRAM: %.1f GiB" % [hardware.get("ram_gib", 0.0), hardware.get("vram_gib", 0.0)]
+	var acceleration = hardware.get("acceleration", {})
+	var acceleration_label = hardware.get("acceleration_label", acceleration.get("label", "acceleration not measured"))
+	_hardware_hint.text = "RAM: %.1f GiB   VRAM: %.1f GiB   Acceleration: %s" % [hardware.get("ram_gib", 0.0), hardware.get("vram_gib", 0.0), acceleration_label]
 	var performance = hardware.get("performance_lights", {})
 	return [
 		{"label": "Ollama command", "state": readiness.get("command_state", readiness.get("command_light", "red"))},
 		{"label": "Ollama server", "state": readiness.get("server_state", readiness.get("server_light", "red"))},
+		{"label": "Acceleration", "state": hardware.get("acceleration_state", acceleration.get("state", "gray")), "state_label": acceleration_label},
 		{"label": "Mistral model", "state": model_states.get(OLLAMA_MODEL_MISTRAL, "red")},
 		{"label": "Nemotron model", "state": model_states.get(OLLAMA_MODEL_NEMOTRON, "red")},
 		{"label": "mistral:v0.3 performance", "state": performance.get(OLLAMA_MODEL_MISTRAL, "gray"), "state_label": _performance_label(performance.get(OLLAMA_MODEL_MISTRAL, "gray"))},

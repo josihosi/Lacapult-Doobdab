@@ -17,10 +17,10 @@ Catapult-Dabubu Windows retest follow-up v3: package and implement the fresh v2 
    - `Save options` now writes a confirmed/sandbox apply patch with `LLM_INTENT_ENABLE=true`, selected backend, hidden API/local mode, selected API/Ollama model, and Python runner path.
    - Proof target met by `tools/godot_v3_save_apply_runner_smoke.gd`: API and Ollama saves are applied only to sandboxed C-AOL options artifacts without secrets or real user-data mutation.
 
-2. **Ollama slow-fallback status**
-   - Extend the v2 hardware fixture/status model to distinguish CPU-only/iGPU from accelerated local mode.
-   - Keep display compact and Windows-safe.
-   - Proof target: fixture UI smoke for CPU-only/iGPU => slow fallback, not green; accelerated route remains distinct.
+2. **DONE locally: Ollama slow-fallback status**
+   - The hardware model now carries acceleration state alongside RAM/VRAM and model lights.
+   - CPU-only renders red slow fallback; iGPU/other GPU renders yellow slow fallback; NVIDIA/CUDA remains distinct green.
+   - Proof target met by `tools/godot_v3_ollama_slow_fallback_smoke.gd` with fixture-only CPU/iGPU/NVIDIA cases.
 
 3. **Mod procedure proof**
    - Start with Magiclysm/DinoMod because v2 already built catalog/status footing there.

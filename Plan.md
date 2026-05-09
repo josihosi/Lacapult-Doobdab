@@ -68,6 +68,8 @@ This v3 lane supersedes the v2 ready-for-retest state after Josef's new Windows 
 
 2026-05-09 save/apply runner checkpoint: `Save options` now produces a C-AOL runner option patch that includes `LLM_INTENT_ENABLE=true`, selected backend mode, hidden API/local runner mode, selected API/Ollama model, and the shared Python runner path. Local proof applied API and Ollama cases only to sandbox options artifacts; no real user config, API call, install, or model pull was performed.
 
+2026-05-09 Ollama slow-fallback checkpoint: the Ollama hardware/status seam now adds compact acceleration state beside RAM/VRAM/model lights. CPU-only fixtures render red slow fallback, iGPU/other GPU fixtures render yellow slow fallback, and NVIDIA/CUDA fixtures remain distinct green accelerated local mode; proof stayed fixture-only with no install, model pull, API call, Ollama request, or real user-data mutation.
+
 ## Previous Windows retest follow-up lane v2
 
 **WINDOWS RETESTED / SUPERSEDED BY V3: Catapult-Dabubu Windows retest follow-up v2** - Josef completed the 2026-05-06 v1 Windows retest debug-note batch and explicitly asked to package and activate a cook. Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`; imagination source: `doc/catapult-dabubu-windows-retest-followup-v2-imagination-source-2026-05-06.md`; raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-06.md`; executor handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`.

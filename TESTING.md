@@ -43,6 +43,13 @@ Catapult-Dabubu Windows retest follow-up v3 save/apply runner evidence landed on
 - Focused regressions also passed: `python3 tools/prove_windows_retest_followup_v2_backend_static.py`; `HOME=$(mktemp -d /tmp/lacapult-v3-triad-home.XXXXXX) godot --path . --no-window -s tools/godot_backend_triad_smoke.gd`; `HOME=$(mktemp -d /tmp/lacapult-v3-save-check-home.XXXXXX) godot --path . --no-window -s tools/godot_backend_setup_save_check_smoke.gd`; `HOME=$(mktemp -d /tmp/lacapult-v3-ollama-home.XXXXXX) godot --path . --no-window -s tools/godot_ollama_workflow_smoke.gd`.
 - Safety boundary: no live API call, API secret readout, package-manager install, Python venv creation, Ollama request/model pull, public release action, or real Application Support/user-data mutation was performed.
 
+Catapult-Dabubu Windows retest follow-up v3 Ollama slow-fallback evidence landed on 2026-05-09:
+
+- Source/static proof: `python3 tools/prove_windows_retest_followup_v2_backend_static.py` now verifies the Ollama hardware check exposes acceleration/fallback state, CPU-only/iGPU/NVIDIA labels, compact GiB + acceleration UI copy, and the acceleration status row while preserving model-specific performance lights.
+- Godot UI fixture proof: `HOME=$(mktemp -d /tmp/lacapult-v3-ollama-fallback-home.XXXXXX) godot --path . --no-window -s tools/godot_v3_ollama_slow_fallback_smoke.gd` proves CPU-only renders red slow fallback, iGPU/other GPU renders yellow slow fallback instead of green, and NVIDIA/CUDA remains distinct/green.
+- Regression proof also passed: `HOME=$(mktemp -d /tmp/lacapult-v3-ollama-reg-home.XXXXXX) godot --path . --no-window -s tools/godot_ollama_workflow_smoke.gd`; `HOME=$(mktemp -d /tmp/lacapult-v3-win-v1-reg-home.XXXXXX) godot --path . --no-window -s tools/godot_windows_retest_followup_v1_smoke.gd`; `git diff --check`.
+- Safety boundary: fixture-only hardware/readiness proof; no live API call, API secret readout, package-manager install, Python venv creation, Ollama request/model pull, public release action, or real Application Support/user-data mutation was performed.
+
 Catapult-Dabubu Windows retest follow-up v3 Nemotron no-think setup slice landed on 2026-05-09:
 
 - Source/static proof: `python3 tools/prove_windows_retest_followup_v2_backend_static.py` now verifies the Nemotron setup source/runtime split: source tag `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest`, runtime alias `nemotron-9b-dumber:latest`, Modelfile `SYSTEM /no_think`, alias creation through `ollama create`, and explicit no-duplicate-weight boundary.

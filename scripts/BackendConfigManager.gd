@@ -220,12 +220,14 @@ func get_ollama_hardware_check() -> Dictionary:
 		return _ollama_hardware_fixture(fixture)
 	var ram_mb = 0
 	var vram_mb = 0
+	var gpu_names = []
 	var source = "unavailable"
 	if OS.get_name() == "Windows":
 		source = "windows_powershell_cim"
 		ram_mb = _windows_total_ram_mb()
 		vram_mb = _windows_max_vram_mb()
-	return _build_ollama_hardware_check(ram_mb, vram_mb, source)
+		gpu_names = _windows_gpu_names()
+	return _build_ollama_hardware_check(ram_mb, vram_mb, source, "", gpu_names)
 
 
 func build_ollama_setup_plan(endpoint: String = DEFAULT_OLLAMA_URL, model: String = "") -> Dictionary:
@@ -1033,9 +1035,25 @@ func _windows_max_vram_mb() -> int:
 	return int("\n".join(output).strip_edges())
 
 
+func _windows_gpu_names() -> Array:
+	var output = []
+	var code = "Get-CimInstance Win32_VideoController | ForEach-Object { ($_.Name + ' | ' + $_.VideoProcessor + ' | ' + $_.AdapterCompatibility) }"
+	var exit_code = OS.execute("powershell", ["-NoProfile", "-Command", code], true, output, true)
+	if exit_code != 0:
+		return []
+	var names = []
+	for line in output:
+		var cleaned = str(line).strip_edges()
+		if cleaned != "":
+			names.append(cleaned)
+	return names
+
+
 func _ollama_hardware_fixture(fixture: String) -> Dictionary:
 	var ram_mb = 0
 	var vram_mb = 0
+	var accel_hint = ""
+	var gpu_names = []
 	for part in fixture.split(","):
 		var bits = part.split(":")
 		if bits.size() != 2:
@@ -1044,23 +1062,54 @@ func _ollama_hardware_fixture(fixture: String) -> Dictionary:
 			ram_mb = int(bits[1])
 		elif bits[0] == "vram":
 			vram_mb = int(bits[1])
-	return _build_ollama_hardware_check(ram_mb, vram_mb, "fixture")
+		elif bits[0] == "accel":
+			accel_hint = str(bits[1])
+		elif bits[0] == "gpu":
+			gpu_names.append(str(bits[1]).replace("_", " "))
+	return _build_ollama_hardware_check(ram_mb, vram_mb, "fixture", accel_hint, gpu_names)
 
 
-func _build_ollama_hardware_check(ram_mb: int, vram_mb: int, source: String) -> Dictionary:
+func _build_ollama_hardware_check(ram_mb: int, vram_mb: int, source: String, accel_hint: String = "", gpu_names: Array = []) -> Dictionary:
 	var ram_gib = float(ram_mb) / 1024.0 if ram_mb > 0 else 0.0
 	var vram_gib = float(vram_mb) / 1024.0 if vram_mb > 0 else 0.0
 	var state = "gray"
+	var acceleration = _ollama_acceleration_state(accel_hint, gpu_names, vram_mb, source)
 	if ram_mb > 0 or vram_mb > 0:
 		state = "green"
 		var mistral_state = _ollama_performance_state(ram_mb, vram_mb, 16000, 4000, 8000, 1000)
 		var nemotron_state = _ollama_performance_state(ram_mb, vram_mb, 32000, 8000, 16000, 2000)
+		mistral_state = _cap_ollama_performance_for_acceleration(mistral_state, acceleration.get("state", "gray"))
+		nemotron_state = _cap_ollama_performance_for_acceleration(nemotron_state, acceleration.get("state", "gray"))
 		if mistral_state == "red" or nemotron_state == "red":
 			state = "red"
 		elif mistral_state == "yellow" or nemotron_state == "yellow":
 			state = "yellow"
-		return {"ram_mb": ram_mb, "vram_mb": vram_mb, "ram_gib": ram_gib, "vram_gib": vram_gib, "state": state, "performance_lights": {OLLAMA_MODEL_MISTRAL: mistral_state, OLLAMA_MODEL_NEMOTRON: nemotron_state}, "source": source, "proof_policy": "hardware_detect_only_no_install_no_pull"}
-	return {"ram_mb": ram_mb, "vram_mb": vram_mb, "ram_gib": ram_gib, "vram_gib": vram_gib, "state": state, "performance_lights": {OLLAMA_MODEL_MISTRAL: "gray", OLLAMA_MODEL_NEMOTRON: "gray"}, "source": source, "proof_policy": "hardware_detect_only_no_install_no_pull"}
+		if acceleration.get("state", "gray") == "red":
+			state = "red"
+		elif acceleration.get("state", "gray") == "yellow" and state == "green":
+			state = "yellow"
+		return {"ram_mb": ram_mb, "vram_mb": vram_mb, "ram_gib": ram_gib, "vram_gib": vram_gib, "state": state, "performance_lights": {OLLAMA_MODEL_MISTRAL: mistral_state, OLLAMA_MODEL_NEMOTRON: nemotron_state}, "acceleration": acceleration, "acceleration_state": acceleration.get("state", "gray"), "acceleration_label": acceleration.get("label", "not measured"), "gpu_names": gpu_names, "source": source, "proof_policy": "hardware_detect_only_no_install_no_pull"}
+	return {"ram_mb": ram_mb, "vram_mb": vram_mb, "ram_gib": ram_gib, "vram_gib": vram_gib, "state": state, "performance_lights": {OLLAMA_MODEL_MISTRAL: "gray", OLLAMA_MODEL_NEMOTRON: "gray"}, "acceleration": acceleration, "acceleration_state": acceleration.get("state", "gray"), "acceleration_label": acceleration.get("label", "not measured"), "gpu_names": gpu_names, "source": source, "proof_policy": "hardware_detect_only_no_install_no_pull"}
+
+
+func _ollama_acceleration_state(accel_hint: String, gpu_names: Array, vram_mb: int, source: String) -> Dictionary:
+	var hint = accel_hint.strip_edges().to_lower()
+	var joined = PoolStringArray(gpu_names).join(" ").to_lower()
+	if hint in ["nvidia", "cuda", "accelerated"] or joined.find("nvidia") >= 0:
+		return {"mode": "nvidia_cuda", "state": "green", "label": "NVIDIA/CUDA accelerated", "summary": "NVIDIA/CUDA detected for local Ollama."}
+	if hint in ["cpu", "cpu_only", "none"] or (source == "windows_powershell_cim" and vram_mb <= 0):
+		return {"mode": "cpu_only", "state": "red", "label": "CPU-only slow fallback", "summary": "CPU-only Windows Ollama will be very slow; prefer API or a smaller local model."}
+	if hint in ["igpu", "integrated", "intel", "amd", "other_gpu"] or joined.find("intel") >= 0 or joined.find("iris") >= 0 or joined.find("uhd") >= 0 or joined.find("radeon") >= 0:
+		return {"mode": "igpu_or_other_gpu", "state": "yellow", "label": "iGPU/other GPU slow fallback", "summary": "Windows local mode may fall back to slow iGPU/CPU behavior; API or smaller models may feel better."}
+	return {"mode": "not_measured", "state": "gray", "label": "acceleration not measured", "summary": "GPU acceleration was not measured by this check."}
+
+
+func _cap_ollama_performance_for_acceleration(state: String, acceleration_state: String) -> String:
+	if acceleration_state == "red":
+		return "red"
+	if acceleration_state == "yellow" and state == "green":
+		return "yellow"
+	return state
 
 
 func _ollama_performance_state(ram_mb: int, vram_mb: int, green_ram_mb: int, green_vram_mb: int, yellow_ram_mb: int, yellow_vram_mb: int) -> String:
