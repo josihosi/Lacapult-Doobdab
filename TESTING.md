@@ -15,21 +15,26 @@ Use the smallest evidence that honestly matches the change.
 
 ## Current proof target
 
-**Active validation target:** `Catapult-Dabubu Windows retest follow-up v2` is active after Josef's 2026-05-06 v1 Windows retest notes. The v1 Draft/prerelease exposed fresh blockers: wrong any-llm package install target, redundant normal API base URL field, wrong Ollama model tags, misleading hardware status/prose, missing runner-test buttons, Ollama wait wording, and empty Mods catalog behavior. This is not a quarantine lift or final/public-confidence claim.
+**Active validation target:** `Catapult-Dabubu Windows retest follow-up v3` is active after Josef's 2026-05-09 v2 Windows retest notes. The v2 Draft/prerelease exposed fresh blockers: save/apply semantics do not commit the selected LLM runner setup as expected, Windows Ollama CPU/iGPU fallback is painfully slow and needs honest status, mod compatibility/procedure still feels half-done beyond catalog seeding, and C-AOL local NPC speech can leak raw `<think>` reasoning output. This is not a quarantine lift or final/public-confidence claim.
 
-Minimum evidence for the active v2 slice:
-- source/static scan that API setup installs Mozilla `any-llm` as `any-llm-sdk[...]` provider extras and no stale `any_llm[` install target remains;
-- provider/default proof that API base URL is hidden from normal UI and retained only as advanced/custom override;
-- Godot API UI smoke for provider/model/key/setup/check/runner-test controls without normal base-url clutter;
-- Ollama model selector/readiness proof showing short labels but exact runtime tags `mistral:v0.3` and `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest`;
-- hardware fixture proof for RAM/VRAM in GiB plus Mistral/Nemotron red/yellow/green estimated performance lights, including measured-low hardware not rendering as `missing`;
-- safe runner-test proof for API and Ollama routes that exercises the C-AOL runner path without live secrets, surprise spend, model pulls, or installs in automated gates;
-- Mods catalog/summarizer proof for JSON mod footing, at least Magiclysm/DinoMod when present/available or precise unavailable status;
-- focused regression smokes for backend setup, Ollama workflow, Windows retest UI, and package proof;
-- GitHub Draft/prerelease verification only if a fresh Josef-only Windows v2 package is published;
-- Josef/Windows confirmation before closing the v2 visible UI/setup/model complaint.
+Minimum evidence for the active v3 slice:
+- source/static proof for the chosen `Save options` / apply action contract, including backend mode, selected API/Ollama model, runner mode, runner enablement, and no-secret boundaries;
+- Godot UI smoke for API and Ollama save/apply behavior that inspects the sandboxed C-AOL options/apply artifact rather than only launcher fields;
+- hardware/status fixture proof that CPU-only/iGPU Windows local mode renders as slow fallback/amber-red, distinct from accelerated local mode, while keeping compact RAM/VRAM/model lights;
+- mod procedure proof in fixture/sandbox for Magiclysm/DinoMod or current targets: discovery, compatibility/status, enable/install/apply plan, summarizer readiness or precise blockers, and no real user-data mutation;
+- `<think>` boundary proof if the seam is in Lacapult scope; otherwise a precise cross-repo blocker/handoff for the C-AOL runner/speech path;
+- focused regression smokes for backend setup, Ollama workflow, Windows retest UI, mod procedure/status, and package proof;
+- GitHub Draft/prerelease verification only if a fresh Josef-only Windows v3 package is published;
+- Josef/Windows confirmation before closing the v3 visible setup/mod/runtime complaints.
 
-Previous v1 evidence remains below as footing, not closure for the new v2 notes.
+Previous v2 evidence remains below as footing, not closure for the new v3 notes.
+
+Catapult-Dabubu Windows retest follow-up v3 intake/canon evidence landed on 2026-05-09:
+
+- Raw intake preserved in `doc/josef-catapult-dabubu-debug-intake-2026-05-09.md`.
+- Repair packet, imagination source, and Alex handoff added under `doc/catapult-dabubu-windows-retest-followup-v3-2026-05-09.md`, `doc/catapult-dabubu-windows-retest-followup-v3-imagination-source-2026-05-09.md`, and `doc/alex-catapult-dabubu-windows-retest-followup-v3-2026-05-09.md`.
+- Top-level `Plan.md`, `TODO.md`, `SUCCESS.md`, and `TESTING.md` now mark v3 as active and v2 as Windows-retested/superseded.
+- Safety boundary: docs/canon sync only; no live API call, API secret readout, package-manager install, Python venv creation, Ollama request/model pull, public release action, or real Application Support/user-data mutation was performed.
 
 Catapult-Dabubu Windows retest follow-up v2 backend/setup slice local evidence landed on 2026-05-06:
 

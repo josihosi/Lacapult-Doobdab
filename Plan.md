@@ -18,7 +18,7 @@ If these disagree, `Plan.md` wins; repair the other file instead of inventing a 
 
 ## Current status
 
-**State:** RELEASE QUARANTINE ACTIVE / V2 READY FOR JOSEF WINDOWS RETEST
+**State:** RELEASE QUARANTINE ACTIVE / V3 WINDOWS RETEST FOLLOW-UP INTAKE ACTIVE
 
 The 2026-04-26 Lacapult prerelease family is quarantined as Draft after Josef reported that the download looked like CAOL rather than clearly like Lacapult. No Lacapult release from that family should be republished until the quarantine/identity investigation is closed and Josef/Schani explicitly re-greenlight.
 
@@ -49,9 +49,24 @@ Canonical packet: `doc/lacapult-josef-test-release-v0-2026-04-27.md`.
 
 Do not schedule repeated reminders for this. It is a ledger item, not an implementation blocker.
 
-## Active Windows retest follow-up v2 lane
+## Active Windows retest follow-up v3 lane
 
-**ACTIVE: Catapult-Dabubu Windows retest follow-up v2** - Josef completed the 2026-05-06 v1 Windows retest debug-note batch and explicitly asked to package and activate a cook. Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`; imagination source: `doc/catapult-dabubu-windows-retest-followup-v2-imagination-source-2026-05-06.md`; raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-06.md`; executor handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`.
+**ACTIVE: Catapult-Dabubu Windows retest follow-up v3** - Josef retested the 2026-05-07 v2 Windows Draft/prerelease on 2026-05-09 and reported a fresh batch: mod compatibility/procedure still feels half-done, `Save options` does not commit the selected LLM runner setup as expected, Windows Ollama CPU/iGPU fallback is painfully slow and needs honest status, and local C-AOL NPC speech can leak raw `<think>` reasoning output. Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v3-2026-05-09.md`; imagination source: `doc/catapult-dabubu-windows-retest-followup-v3-imagination-source-2026-05-09.md`; raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-09.md`; executor handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v3-2026-05-09.md`.
+
+Scope order:
+1. Save/apply runner setup semantics: selected API/Ollama setup must honestly become the active C-AOL runner mode or the UI must clearly separate draft save from apply/commit.
+2. Ollama Windows CPU/GPU honesty: preserve compact RAM/VRAM/model lights while distinguishing slow CPU/iGPU fallback from acceptable accelerated local mode.
+3. Mod compatibility/procedure proof: move beyond Magiclysm/DinoMod catalog footing into safe sandbox proof of install/enable/summarizer procedure, without touching real saves/Application Support.
+4. C-AOL `<think>` speech leak boundary: assign/prove a hard strip/reject/retry/non-thinking seam; Alex must not edit Cataclysm-AOL under the standing Lacapult-only role without explicit cross-repo clearance.
+5. Fresh Josef-only Windows v3 retest package after local proof.
+
+This v3 lane supersedes the v2 ready-for-retest state after Josef's new Windows findings. It does **not** lift release quarantine, authorize a public/final release, permit surprise live API calls/secrets/package installs/model pulls in automated proof, rename the GitHub repo, or start C-AOL release work.
+
+2026-05-09 intake/canon checkpoint: raw v2 retest notes are promoted into canon and the v3 repair lane is active. First implementation target is the save/apply runner setup semantics; the `<think>` leak is likely a C-AOL runner/speech-path seam and needs explicit cross-repo assignment if it cannot be handled from Lacapult.
+
+## Previous Windows retest follow-up lane v2
+
+**WINDOWS RETESTED / SUPERSEDED BY V3: Catapult-Dabubu Windows retest follow-up v2** - Josef completed the 2026-05-06 v1 Windows retest debug-note batch and explicitly asked to package and activate a cook. Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`; imagination source: `doc/catapult-dabubu-windows-retest-followup-v2-imagination-source-2026-05-06.md`; raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-06.md`; executor handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`.
 
 Scope order:
 1. API / any-llm package setup repair: install Mozilla `any-llm` via PyPI `any-llm-sdk[...]` provider extras while preserving the `from any_llm import completion` runtime seam, and surface non-secret pip/package failure details.
@@ -71,7 +86,7 @@ This v2 lane supersedes the v1 ready-for-retest state after Josef's new Windows 
 
 2026-05-07 local JSON-mod catalog/summarizer footing checkpoint: C-AOL Mods catalog now seeds Magiclysm and DinoMod from the active stock/user/mod_repo roots when present, marks them as JSON/Summarizer catalog entries instead of fake downloads, and the C-AOL status model reports explicit `json_catalog_targets` with precise unavailable reasons if they are absent. Focused backend/API/Ollama/mod smokes passed without live secrets, package installs, model pulls, or real user-data mutation.
 
-2026-05-07 v2 Josef-only test release: Draft/prerelease `catapult-dabubu-josef-windows-retest-v2-2026-05-07` / `Catapult-Dabubu Josef Windows retest build v2 2026-05-07`, source commit `dfae55db0bedd458360e5dbf201bee0e1ae61bc8`, URL `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-d5b5f0671b6676dfc344`. Attached Windows asset `Catapult-Dabubu-windows-unsigned.zip`, 66,616,377 bytes, SHA-256 `492d63fbfeebdc44874d61093020dcba0f036ef61ac2859f79559caed96a0849`, plus `SHA256SUMS.txt`, `manifest.json`, and build notes. This is Josef-only retest packaging, not a quarantine lift. Remaining v2 target is Josef Windows confirmation.
+2026-05-07 v2 Josef-only test release: Draft/prerelease `catapult-dabubu-josef-windows-retest-v2-2026-05-07` / `Catapult-Dabubu Josef Windows retest build v2 2026-05-07`, source commit `dfae55db0bedd458360e5dbf201bee0e1ae61bc8`, URL `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-d5b5f0671b6676dfc344`. Attached Windows asset `Catapult-Dabubu-windows-unsigned.zip`, 66,616,377 bytes, SHA-256 `492d63fbfeebdc44874d61093020dcba0f036ef61ac2859f79559caed96a0849`, plus `SHA256SUMS.txt`, `manifest.json`, and build notes. This is Josef-only retest packaging, not a quarantine lift. Josef retested it on 2026-05-09 and reported the v3 batch above.
 
 ## Previous Windows retest follow-up lane v1
 

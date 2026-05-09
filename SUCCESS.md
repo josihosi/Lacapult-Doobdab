@@ -34,9 +34,29 @@ Success state:
 - [x] Package 5 locally complete: window chrome investigation/fix root-cause class named, smallest CustomTitleBar metric seam patched/proofed, and bounded Windows confirmation checklist written.
 - [ ] Windows/Josef visual confirmation before any cross-platform chrome-fix claim.
 
+## Catapult-Dabubu Windows retest follow-up v3
+
+Status: INTAKE CANONIZED / IMPLEMENTATION OPEN / QUARANTINE STILL ACTIVE
+
+Success state:
+- [x] Raw 2026-05-09 v2 Windows retest notes are preserved in canon.
+- [ ] Save/apply semantics coherently set selected backend, selected model, runner mode, and runner enablement, or the UI clearly separates draft-save from apply.
+- [ ] Ollama Windows CPU-only/iGPU fallback is shown as a slow fallback instead of a happy green local path.
+- [ ] Magiclysm/DinoMod mod compatibility/procedure is proved beyond catalog seeding in a safe sandbox/fixture path.
+- [ ] `<think>` reasoning leakage is fixed/proofed if in Lacapult scope, or handed off as an explicit C-AOL runner/speech-path blocker.
+- [ ] Focused local proof passes without live secrets, unapproved package installs, model pulls, or real user-data mutation.
+- [ ] Fresh Josef-only Windows v3 Draft/prerelease is produced and verified after local proof.
+- [ ] Josef confirms the v3 Windows package.
+
+Canonical docs:
+- `doc/catapult-dabubu-windows-retest-followup-v3-imagination-source-2026-05-09.md`
+- `doc/catapult-dabubu-windows-retest-followup-v3-2026-05-09.md`
+- `doc/alex-catapult-dabubu-windows-retest-followup-v3-2026-05-09.md`
+- `doc/josef-catapult-dabubu-debug-intake-2026-05-09.md`
+
 ## Catapult-Dabubu Windows retest follow-up v2
 
-Status: READY FOR JOSEF WINDOWS RETEST / QUARANTINE STILL ACTIVE
+Status: WINDOWS RETESTED / SUPERSEDED BY V3 / QUARANTINE STILL ACTIVE
 
 Success state:
 - [x] API setup uses `any-llm-sdk[...]` provider extras while preserving the `from any_llm import completion` runtime seam.
@@ -51,7 +71,7 @@ Success state:
 - [x] Mods catalog/summarizer footing handles Magiclysm/DinoMod when present/available, or reports unavailability precisely.
 - [x] Focused static/Godot/backend/mod proof passes without live secrets, unapproved package installs, model pulls, or real user-data mutation.
 - [x] Fresh Josef-only Windows v2 Draft/prerelease is produced and verified after local proof.
-- [ ] Josef confirms the v2 Windows package.
+- [x] Josef retested the v2 Windows package on 2026-05-09 and reported the v3 debug-note batch.
 
 Canonical docs:
 - `doc/catapult-dabubu-windows-retest-followup-v2-imagination-source-2026-05-06.md`
@@ -77,7 +97,7 @@ Success state:
 - [x] A fresh Josef-only Windows test build is produced after the fixes.
 - [x] A fresh Josef-only Windows Draft/prerelease is created/updated and verified after the fixes.
 - [x] Josef retested v1 on Windows and reported the 2026-05-06 v2 debug-note batch.
-- [ ] Josef confirms the next v2 Windows package after the new repair pass.
+- [x] Josef retested the next v2 Windows package; remaining findings are tracked in v3.
 
 Canonical docs:
 - `doc/catapult-dabubu-installer-vision-retest-imagination-source-2026-05-02.md`
