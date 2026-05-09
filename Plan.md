@@ -70,6 +70,8 @@ This v3 lane supersedes the v2 ready-for-retest state after Josef's new Windows 
 
 2026-05-09 Ollama slow-fallback checkpoint: the Ollama hardware/status seam now adds compact acceleration state beside RAM/VRAM/model lights. CPU-only fixtures render red slow fallback, iGPU/other GPU fixtures render yellow slow fallback, and NVIDIA/CUDA fixtures remain distinct green accelerated local mode; proof stayed fixture-only with no install, model pull, API call, Ollama request, or real user-data mutation.
 
+2026-05-09 Magiclysm/DinoMod procedure checkpoint: the v3 mod proof now exercises the real Godot ModManager/Summarizer seam in an isolated HOME fixture: JSON catalog discovery, sandbox world enable plan, confirmed fixture-backend companion summary apply, backup-visible rollback, and post-rollback status for both targets. No arbitrary mod download, live backend call, model pull, package install, or real Application Support/save mutation was performed.
+
 ## Previous Windows retest follow-up lane v2
 
 **WINDOWS RETESTED / SUPERSEDED BY V3: Catapult-Dabubu Windows retest follow-up v2** - Josef completed the 2026-05-06 v1 Windows retest debug-note batch and explicitly asked to package and activate a cook. Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`; imagination source: `doc/catapult-dabubu-windows-retest-followup-v2-imagination-source-2026-05-06.md`; raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-06.md`; executor handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`.

@@ -22,10 +22,10 @@ Catapult-Dabubu Windows retest follow-up v3: package and implement the fresh v2 
    - CPU-only renders red slow fallback; iGPU/other GPU renders yellow slow fallback; NVIDIA/CUDA remains distinct green.
    - Proof target met by `tools/godot_v3_ollama_slow_fallback_smoke.gd` with fixture-only CPU/iGPU/NVIDIA cases.
 
-3. **Mod procedure proof**
-   - Start with Magiclysm/DinoMod because v2 already built catalog/status footing there.
-   - Prove safe install/enable/summary procedure in sandbox/fixture before any live target.
-   - Do not install arbitrary mods into Josef's real tree or mutate real saves/Application Support.
+3. **DONE locally: Mod procedure proof**
+   - `tools/godot_v3_mod_procedure_smoke.gd` now proves Magiclysm/DinoMod beyond catalog seeding in an isolated HOME fixture.
+   - The smoke covers JSON catalog discovery, sandbox world enable plan, clean dependency/status checks, non-mutating preview, confirmed fixture-backend companion summary apply, native `Summaries_extra` output, backup visibility, and rollback back to disabled/summary-missing.
+   - No arbitrary mod download, live backend call, model pull, package install, or real Application Support/save mutation is performed.
 
 4. **Nemotron no-think setup + `<think>` boundary triage**
    - Implement/prove the Lacapult-side setup seam Josef clarified: Save options should persist the no-thinking runtime alias, and Nemotron setup should pull the Virtuoso source tag if needed, then create/use a local no-thinking runtime alias (`nemotron-9b-dumber:latest`) with a Modelfile containing `SYSTEM /no_think`.

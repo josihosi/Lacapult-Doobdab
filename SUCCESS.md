@@ -42,7 +42,7 @@ Success state:
 - [x] Raw 2026-05-09 v2 Windows retest notes are preserved in canon.
 - [x] Save/apply semantics coherently set selected backend, selected model, runner mode, and runner enablement in the produced confirmed/sandbox apply path without mutating real user config during proof.
 - [x] Ollama Windows CPU-only/iGPU fallback is shown as a slow fallback instead of a happy green local path.
-- [ ] Magiclysm/DinoMod mod compatibility/procedure is proved beyond catalog seeding in a safe sandbox/fixture path.
+- [x] Magiclysm/DinoMod mod compatibility/procedure is proved beyond catalog seeding in a safe sandbox/fixture path.
 - [ ] Nemotron local setup prepares a `SYSTEM /no_think` alias without duplicating model weights, and remaining `<think>` reasoning leakage is fixed/proofed in C-AOL or handed off as an explicit runner/speech-path blocker.
 - [ ] Focused local proof passes without live secrets, unapproved package installs, model pulls, or real user-data mutation.
 - [ ] Fresh Josef-only Windows v3 Draft/prerelease is produced and verified after local proof.

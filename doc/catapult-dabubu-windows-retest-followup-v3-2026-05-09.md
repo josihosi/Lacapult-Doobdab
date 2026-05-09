@@ -54,7 +54,7 @@ This is a Josef-only repair lane. It does not lift release quarantine, authorize
 - [ ] Canon/raw intake for the 2026-05-09 v2 retest notes is recorded and linked from top-level roadmap files.
 - [x] `Save options` / apply semantics are no longer ambiguous: selected backend, selected model, runner mode, and runner enablement line up in the produced confirmed/sandbox C-AOL options/apply path.
 - [x] The Ollama status UI/proof distinguishes slow CPU/iGPU fallback from acceptable accelerated local mode.
-- [ ] Magiclysm/DinoMod (or the current relevant mod targets) have a safe compatibility/procedure proof beyond catalog seeding.
+- [x] Magiclysm/DinoMod (or the current relevant mod targets) have a safe compatibility/procedure proof beyond catalog seeding.
 - [ ] Lacapult prepares the Nemotron no-think runtime alias from the Virtuoso source without duplicating model weights, and the remaining C-AOL runner/speech hardening seam is explicitly fixed or handed off.
 - [ ] Focused static/Godot/sandbox proof passes without live secrets, unapproved package installs, model pulls, or real user-data mutation.
 - [ ] A fresh Josef-only Windows Draft/prerelease v3 package is produced/verified only after local proof.
