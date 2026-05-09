@@ -13,10 +13,9 @@ Catapult-Dabubu Windows retest follow-up v3: package and implement the fresh v2 
 
 ## Recommended bounded slices
 
-1. **Save/apply semantics first**
-   - Inspect current `Save options` path in `scripts/BackendSetupUI.gd` and `scripts/BackendConfigManager.gd`.
-   - Decide the smallest honest contract: either rename/split draft save vs apply, or make the button commit the selected runner setup as Josef expects.
-   - Proof target: sandboxed C-AOL options/apply artifact includes selected backend, selected model, runner mode, and runner enablement without secrets.
+1. **DONE locally: Save/apply semantics first**
+   - `Save options` now writes a confirmed/sandbox apply patch with `LLM_INTENT_ENABLE=true`, selected backend, hidden API/local mode, selected API/Ollama model, and Python runner path.
+   - Proof target met by `tools/godot_v3_save_apply_runner_smoke.gd`: API and Ollama saves are applied only to sandboxed C-AOL options artifacts without secrets or real user-data mutation.
 
 2. **Ollama slow-fallback status**
    - Extend the v2 hardware fixture/status model to distinguish CPU-only/iGPU from accelerated local mode.

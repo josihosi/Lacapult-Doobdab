@@ -14,7 +14,7 @@ Handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v3-2026-05-09.md`.
 Raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-09.md`.
 
 - [x] Promote Josef/Schani 2026-05-09 v2 Windows retest notes into repo canon.
-- [ ] Fix or split `Save options` / apply semantics so selected API/Ollama setup coherently sets backend mode, selected model, runner mode, and runner enablement in the C-AOL options/apply path.
+- [x] Fix or split `Save options` / apply semantics so selected API/Ollama setup coherently sets backend mode, selected model, runner mode, and runner enablement in the C-AOL options/apply path.
 - [ ] Show Windows Ollama CPU-only/iGPU fallback as a slow/amber-red path, not a happy green local mode, while preserving compact RAM/VRAM/model lights.
 - [ ] Prove Magiclysm/DinoMod mod compatibility/procedure beyond catalog seeding in a safe sandbox/fixture path.
 - [ ] Finish `<think>` mitigation split: Lacapult now prepares a Nemotron `SYSTEM /no_think` local alias without duplicate weights; still prove/package the remaining C-AOL runner/speech hard reject/retry seam or hand it off explicitly.

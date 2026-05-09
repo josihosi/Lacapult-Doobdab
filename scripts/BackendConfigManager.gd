@@ -1,8 +1,8 @@
 extends Node
 
 # Safe first-pass backend setup helper for C-AOL.
-# This deliberately stores launcher-side metadata and environment-variable names,
-# never API keys. Installed-game options writes are proof-only/sandbox-guarded in v0.
+# This deliberately stores runner option values and environment-variable names,
+# never API keys. Installed-game options writes remain confirmation/sandbox-guarded.
 
 const BACKEND_API = "api"
 const BACKEND_OLLAMA = "ollama"
@@ -456,7 +456,7 @@ func get_supported_backends() -> Array:
 
 
 func get_backend_recommendation_summary() -> String:
-	return "Setup paths: API / AnyLLM for a hosted backend, Ollama for mainstream local play, and OpenVINO for specialized local acceleration. Check/Save are metadata/status only: no API call, model pull, package install, generated summary-pack apply, or real C-AOL config mutation happens without an explicit confirmation step."
+	return "Setup paths: API / AnyLLM for a hosted backend, Ollama for mainstream local play, and OpenVINO for specialized local acceleration. Check is detection-only. Save options writes the selected runner option patch (enablement, backend mode, model, and runner path) but no API call, model pull, package install, generated summary-pack apply, or real C-AOL config mutation happens without an explicit confirmation step."
 
 func get_backend_guidance(mode: String) -> String:
 	if mode == BACKEND_API:
@@ -777,17 +777,27 @@ func _build_caol_options_patch(mode: String, fields: Dictionary) -> Dictionary:
 	var patch = {
 		"format": "c-aol-options-patch-v1",
 		"source": "Catapult-Dabubu",
-		"apply_status": "preview_only_not_applied",
-		"notes": "These are the C-AOL option names Catapult-Dabubu can set once an installed game config path is chosen. API keys are referenced by environment variable only, never stored here. LLM_INTENT_ENABLE is intentionally left for the player/game UI until Catapult-Dabubu has an explicit apply step. LLM_INTENT_PYTHON is the shared Python/venv path used by C-AOL to launch tools/llm_runner/runner.py, not only OpenVINO.",
+		"apply_status": "ready_for_confirmed_apply_not_auto_applied",
+		"notes": "These are the C-AOL option names Catapult-Dabubu saves for the active runner setup. The patch now includes runner enablement, backend mode, selected model, and hidden API-vs-local mode so a confirmed/sandboxed apply does not leave C-AOL pointed at an old runner state. API keys are referenced by environment variable only, never stored here. LLM_INTENT_PYTHON is the shared Python/venv path used by C-AOL to launch tools/llm_runner/runner.py, not only OpenVINO.",
 		"metadata_only": {
 			"api_provider": fields.get("api_provider", DEFAULT_API_PROVIDER),
 			"api_provider_note": "C-AOL's current runtime path hardcodes openai in src/llm_intent.cpp; Catapult-Dabubu stores provider intent without storing secrets."
 		},
 		"options": [
 			{
+				"name": "LLM_INTENT_ENABLE",
+				"value": "true",
+				"reason": "Enable the C-AOL LLM runner when the selected setup is applied."
+			},
+			{
 				"name": "LLM_INTENT_BACKEND",
 				"value": mode,
 				"reason": "Select the LLM backend."
+			},
+			{
+				"name": "LLM_INTENT_USE_API",
+				"value": "true" if mode == BACKEND_API else "false",
+				"reason": "Clear stale hidden API/local runner mode when switching between API, Ollama, and OpenVINO."
 			}
 		]
 	}

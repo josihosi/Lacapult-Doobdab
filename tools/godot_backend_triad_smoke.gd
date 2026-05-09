@@ -67,11 +67,12 @@ func _run() -> void:
 	if not last_config or last_config.get("backend", "") != "openvino":
 		_fail("OpenVINO final config was not written")
 		return
-	if not last_patch or last_patch.get("apply_status", "") != "preview_only_not_applied":
-		_fail("OpenVINO preview patch guard missing")
+	if not last_patch or last_patch.get("apply_status", "") != "ready_for_confirmed_apply_not_auto_applied":
+		_fail("OpenVINO confirmed-apply guard missing")
 		return
-	if last_patch.get("options", []).empty() or last_patch["options"][0].get("value", "") != "openvino":
-		_fail("OpenVINO backend option missing from preview patch")
+	var openvino_values = _patch_option_values(last_patch)
+	if openvino_values.get("LLM_INTENT_ENABLE", "") != "true" or openvino_values.get("LLM_INTENT_BACKEND", "") != "openvino" or openvino_values.get("LLM_INTENT_USE_API", "") != "false":
+		_fail("OpenVINO runner enable/backend/mode options missing from apply patch")
 		return
 	if not _assert_backend_recommendations(backend.get_supported_backends(), backend.get_backend_recommendation_summary()):
 		return
@@ -183,6 +184,10 @@ func _option_values(options) -> Dictionary:
 		if typeof(option) == TYPE_DICTIONARY and str(option.get("name", "")).begins_with("LLM_INTENT_"):
 			values[option.get("name", "")] = option.get("value", "")
 	return values
+
+
+func _patch_option_values(patch: Dictionary) -> Dictionary:
+	return _option_values(patch.get("options", []))
 
 
 func _mkdir(path: String) -> void:

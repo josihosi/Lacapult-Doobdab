@@ -40,7 +40,7 @@ Status: INTAKE CANONIZED / IMPLEMENTATION OPEN / QUARANTINE STILL ACTIVE
 
 Success state:
 - [x] Raw 2026-05-09 v2 Windows retest notes are preserved in canon.
-- [ ] Save/apply semantics coherently set selected backend, selected model, runner mode, and runner enablement, or the UI clearly separates draft-save from apply.
+- [x] Save/apply semantics coherently set selected backend, selected model, runner mode, and runner enablement in the produced confirmed/sandbox apply path without mutating real user config during proof.
 - [ ] Ollama Windows CPU-only/iGPU fallback is shown as a slow fallback instead of a happy green local path.
 - [ ] Magiclysm/DinoMod mod compatibility/procedure is proved beyond catalog seeding in a safe sandbox/fixture path.
 - [ ] Nemotron local setup prepares a `SYSTEM /no_think` alias without duplicating model weights, and remaining `<think>` reasoning leakage is fixed/proofed in C-AOL or handed off as an explicit runner/speech-path blocker.

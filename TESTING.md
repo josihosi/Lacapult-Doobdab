@@ -36,6 +36,13 @@ Catapult-Dabubu Windows retest follow-up v3 intake/canon evidence landed on 2026
 - Top-level `Plan.md`, `TODO.md`, `SUCCESS.md`, and `TESTING.md` now mark v3 as active and v2 as Windows-retested/superseded.
 - Safety boundary: docs/canon sync only; no live API call, API secret readout, package-manager install, Python venv creation, Ollama request/model pull, public release action, or real Application Support/user-data mutation was performed.
 
+Catapult-Dabubu Windows retest follow-up v3 save/apply runner evidence landed on 2026-05-09:
+
+- Source/static proof: `python3 tools/prove_caol_backend_contract.py` verifies C-AOL exposes `LLM_INTENT_ENABLE`, backend/model/Python/env-var options, hidden `LLM_INTENT_USE_API`/provider metadata, and that Catapult's patch builder includes runner enablement plus selected backend/model/mode without secret-bearing fields.
+- Godot UI/sandbox proof: `HOME=$(mktemp -d /tmp/lacapult-v3-save-apply-home.XXXXXX) godot --path . --no-window -s tools/godot_v3_save_apply_runner_smoke.gd` exercises API and Ollama `Save options`, then applies only sandbox options artifacts. API proof sets `LLM_INTENT_ENABLE=true`, `LLM_INTENT_BACKEND=api`, `LLM_INTENT_USE_API=true`, selected API model/provider/env-var, and Python runner path. Ollama proof normalizes Nemotron to `nemotron-9b-dumber:latest` and sets `LLM_INTENT_ENABLE=true`, `LLM_INTENT_BACKEND=ollama`, `LLM_INTENT_USE_API=false`, selected URL/model, and Python runner path.
+- Focused regressions also passed: `python3 tools/prove_windows_retest_followup_v2_backend_static.py`; `HOME=$(mktemp -d /tmp/lacapult-v3-triad-home.XXXXXX) godot --path . --no-window -s tools/godot_backend_triad_smoke.gd`; `HOME=$(mktemp -d /tmp/lacapult-v3-save-check-home.XXXXXX) godot --path . --no-window -s tools/godot_backend_setup_save_check_smoke.gd`; `HOME=$(mktemp -d /tmp/lacapult-v3-ollama-home.XXXXXX) godot --path . --no-window -s tools/godot_ollama_workflow_smoke.gd`.
+- Safety boundary: no live API call, API secret readout, package-manager install, Python venv creation, Ollama request/model pull, public release action, or real Application Support/user-data mutation was performed.
+
 Catapult-Dabubu Windows retest follow-up v3 Nemotron no-think setup slice landed on 2026-05-09:
 
 - Source/static proof: `python3 tools/prove_windows_retest_followup_v2_backend_static.py` now verifies the Nemotron setup source/runtime split: source tag `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest`, runtime alias `nemotron-9b-dumber:latest`, Modelfile `SYSTEM /no_think`, alias creation through `ollama create`, and explicit no-duplicate-weight boundary.

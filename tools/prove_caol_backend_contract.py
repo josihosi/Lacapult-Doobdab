@@ -25,6 +25,7 @@ SETTINGS_UI = REPO_ROOT / "scripts" / "BackendSetupUI.gd"
 PROOF_DIR = REPO_ROOT / ".proof-cache" / "caol-backend-contract"
 
 REQUIRED_CAOL_OPTIONS = {
+    "LLM_INTENT_ENABLE",
     "LLM_INTENT_BACKEND",
     "LLM_INTENT_OLLAMA_URL",
     "LLM_INTENT_OLLAMA_MODEL",
@@ -74,19 +75,25 @@ REQUIRED_UI_TOKENS = {
 
 PATCH_CASES: dict[str, dict[str, str]] = {
     "api": {
+        "LLM_INTENT_ENABLE": "true",
         "LLM_INTENT_BACKEND": "api",
+        "LLM_INTENT_USE_API": "true",
         "LLM_INTENT_API_KEY_ENV": "CATA_API_KEY",
         "LLM_INTENT_API_MODEL": "example-api-model",
         "LLM_INTENT_PYTHON": sys.executable,
     },
     "ollama": {
+        "LLM_INTENT_ENABLE": "true",
         "LLM_INTENT_BACKEND": "ollama",
+        "LLM_INTENT_USE_API": "false",
         "LLM_INTENT_OLLAMA_URL": "http://127.0.0.1:11434",
         "LLM_INTENT_OLLAMA_MODEL": "llama-test",
         "LLM_INTENT_PYTHON": sys.executable,
     },
     "openvino": {
+        "LLM_INTENT_ENABLE": "true",
         "LLM_INTENT_BACKEND": "openvino",
+        "LLM_INTENT_USE_API": "false",
         "LLM_INTENT_PYTHON": sys.executable,
         "LLM_INTENT_MODEL_DIR": str(PROOF_DIR / "fake-openvino-model"),
         "LLM_INTENT_DEVICE": "AUTO",
@@ -299,10 +306,10 @@ def main() -> int:
         return 1
     print("  Lacapult exposes API/Ollama/OpenVINO readiness/config tokens without secret-bearing fields")
 
-    if "preview_only_not_applied" not in backend_text:
-        print("  Missing preview-only apply status guard")
+    if "ready_for_confirmed_apply_not_auto_applied" not in backend_text:
+        print("  Missing confirmed/sandbox apply status guard")
         return 1
-    print("  Launcher metadata patch remains preview-only; sandbox options apply is separately guarded")
+    print("  Launcher patch includes runner enablement/backend/mode values; real options writes stay confirmed/sandbox guarded")
 
     print("  Sandbox options apply proof wrote and verified:")
     for backend, detail in sandbox_apply.items():
