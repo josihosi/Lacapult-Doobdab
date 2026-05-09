@@ -27,14 +27,15 @@ Catapult-Dabubu Windows retest follow-up v3: package and implement the fresh v2 
    - The smoke covers JSON catalog discovery, sandbox world enable plan, clean dependency/status checks, non-mutating preview, confirmed fixture-backend companion summary apply, native `Summaries_extra` output, backup visibility, and rollback back to disabled/summary-missing.
    - No arbitrary mod download, live backend call, model pull, package install, or real Application Support/save mutation is performed.
 
-4. **Nemotron no-think setup + `<think>` boundary triage**
-   - Implement/prove the Lacapult-side setup seam Josef clarified: Save options should persist the no-thinking runtime alias, and Nemotron setup should pull the Virtuoso source tag if needed, then create/use a local no-thinking runtime alias (`nemotron-9b-dumber:latest`) with a Modelfile containing `SYSTEM /no_think`.
-   - Do not duplicate model weights; the alias-create step should reuse the pulled source blobs and the UI/proof should say so.
-   - Then identify whether any remaining Lacapult-side runner/procedure seam can prevent raw `<think>` speech.
-   - If the hard speech fix is in C-AOL `tools/llm_runner` / speech code, do not edit it as Alex without explicit cross-repo clearance; write the precise blocker/handoff instead.
+4. **DONE locally / C-AOL decision needed: Nemotron no-think setup + `<think>` boundary triage**
+   - Lacapult now persists/prepares the no-thinking Nemotron runtime alias (`nemotron-9b-dumber:latest`) from the Virtuoso source tag with a `SYSTEM /no_think` Modelfile and no duplicate-weight setup copy.
+   - Proof was rerun by static/backend checks plus `tools/godot_ollama_workflow_smoke.gd`.
+   - Remaining hard raw-`<think>` prevention is in C-AOL `tools/llm_runner/runner.py` and `src/llm_intent.cpp`, not safely in Lacapult scope.
+   - Precise cross-repo blocker/handoff: `doc/catapult-dabubu-v3-think-boundary-handoff-2026-05-10.md`.
 
-5. **Package v3 only after proof**
+5. **Package v3 only after proof + decision**
    - Fresh Josef-only Windows Draft/prerelease, not a quarantine lift.
+   - Decide first whether packaging waits for the C-AOL runner/speech fix or proceeds with the blocker explicitly caveated.
 
 ## Non-goals
 
