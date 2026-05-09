@@ -66,6 +66,7 @@ REQUIRED_UI_TOKENS = {
     "API key env var",
     "mistral:v0.3",
     "mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest",
+    "nemotron-9b-dumber:latest",
     "ConfirmExternalBackendAction",
     "Catapult-Dabubu will not pull models before this confirmation",
 }

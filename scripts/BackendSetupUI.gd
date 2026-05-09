@@ -2,7 +2,8 @@ extends VBoxContainer
 
 
 const OLLAMA_MODEL_MISTRAL = "mistral:v0.3"
-const OLLAMA_MODEL_NEMOTRON = "mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest"
+const OLLAMA_MODEL_NEMOTRON_SOURCE = "mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest"
+const OLLAMA_MODEL_NEMOTRON = "nemotron-9b-dumber:latest"
 const OLLAMA_LABEL_MISTRAL = "Mistral v0.3"
 const OLLAMA_LABEL_NEMOTRON = "Nemotron 9B"
 const CONFIRM_DIALOG_SIZE = Vector2(520, 260)
@@ -301,7 +302,9 @@ func _refresh_backend_setup_controls() -> void:
 		_backend_model.placeholder_text = "%s or %s" % [OLLAMA_MODEL_MISTRAL, OLLAMA_MODEL_NEMOTRON]
 		_backend_endpoint.hint_tooltip = "Local Ollama server URL."
 		_backend_endpoint.text = Settings.read("backend_ollama_endpoint")
-		_backend_model.text = Settings.read("backend_ollama_model")
+		var normalized_model = BackendConfig.normalize_ollama_model_tag(Settings.read("backend_ollama_model"))
+		_backend_model.text = normalized_model
+		Settings.store("backend_ollama_model", normalized_model)
 		_backend_endpoint.get_parent().visible = true
 		_backend_api_key_env.get_parent().visible = false
 		api_secret_row.visible = false
@@ -484,11 +487,7 @@ func _current_api_provider_id() -> String:
 func _select_ollama_choice(model_name: String) -> void:
 	if _ollama_model_choice == null:
 		return
-	var selected_model = model_name
-	if selected_model == "" or selected_model == "mistral-v0.3":
-		selected_model = OLLAMA_MODEL_MISTRAL
-	if selected_model == "nemotron-9b":
-		selected_model = OLLAMA_MODEL_NEMOTRON
+	var selected_model = BackendConfig.normalize_ollama_model_tag(model_name)
 	var idx = 0
 	for i in range(_ollama_model_choice.get_item_count()):
 		if str(_ollama_model_choice.get_item_metadata(i)) == selected_model:
@@ -509,7 +508,7 @@ func _collect_current_backend_fields() -> Dictionary:
 	var mode = Settings.read("backend_mode")
 	var model_value = "" if _backend_model == null else _backend_model.text
 	if mode == "ollama":
-		model_value = Settings.read("backend_ollama_model")
+		model_value = BackendConfig.normalize_ollama_model_tag(Settings.read("backend_ollama_model"))
 	return {
 		"mode": mode,
 		"endpoint": "" if _backend_endpoint == null else _backend_endpoint.text,
@@ -533,7 +532,7 @@ func _persist_current_fields_to_settings() -> void:
 		Settings.store("backend_api_key_env", fields.get("api_key_env", BackendConfig.DEFAULT_API_KEY_ENV))
 	elif mode == "ollama":
 		Settings.store("backend_ollama_endpoint", fields.get("endpoint", BackendConfig.DEFAULT_OLLAMA_URL))
-		Settings.store("backend_ollama_model", fields.get("model", ""))
+		Settings.store("backend_ollama_model", BackendConfig.normalize_ollama_model_tag(fields.get("model", "")))
 
 
 func _save_current_backend_setup() -> String:

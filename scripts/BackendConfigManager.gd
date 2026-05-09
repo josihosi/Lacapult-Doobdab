@@ -22,7 +22,9 @@ const DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
 const DEFAULT_OPENVINO_DEVICE = "AUTO"
 const ANY_LLM_PIP_PACKAGE = "any-llm-sdk"
 const OLLAMA_MODEL_MISTRAL = "mistral:v0.3"
-const OLLAMA_MODEL_NEMOTRON = "mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest"
+const OLLAMA_MODEL_NEMOTRON_SOURCE = "mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest"
+const OLLAMA_MODEL_NEMOTRON = "nemotron-9b-dumber:latest"
+const OLLAMA_MODEL_NEMOTRON_MODE = "system_no_think_alias_no_blob_copy"
 
 const API_PROVIDER_CHOICES = [
 	{
@@ -169,6 +171,13 @@ func get_ollama_model_choices() -> Array:
 	return [OLLAMA_MODEL_MISTRAL, OLLAMA_MODEL_NEMOTRON]
 
 
+func get_ollama_pull_source_for_model(model: String) -> String:
+	var normalized = normalize_ollama_model_tag(model)
+	if normalized == OLLAMA_MODEL_NEMOTRON:
+		return OLLAMA_MODEL_NEMOTRON_SOURCE
+	return normalized
+
+
 func get_ollama_readiness(endpoint: String = DEFAULT_OLLAMA_URL, python_path: String = "") -> Dictionary:
 	var inventory = _ollama_inventory(endpoint)
 	var py = _resolve_python(python_path)
@@ -220,7 +229,7 @@ func get_ollama_hardware_check() -> Dictionary:
 
 
 func build_ollama_setup_plan(endpoint: String = DEFAULT_OLLAMA_URL, model: String = "") -> Dictionary:
-	var selected_model = model.strip_edges()
+	var selected_model = normalize_ollama_model_tag(model)
 	if selected_model == "":
 		selected_model = OLLAMA_MODEL_MISTRAL
 	var inventory = _ollama_inventory(endpoint)
@@ -230,30 +239,41 @@ func build_ollama_setup_plan(endpoint: String = DEFAULT_OLLAMA_URL, model: Strin
 	if inventory.get("command", "missing") != "present":
 		if os_name == "OSX" and _command_exists("brew"):
 			installer = "homebrew"
-			commands.append({"command": "brew", "args": ["install", "ollama"], "purpose": "Install Ollama through Homebrew."})
+			commands.append({"phase": "install_ollama_cli", "command": "brew", "args": ["install", "ollama"], "purpose": "Install Ollama through Homebrew."})
 		elif os_name == "Windows" and _command_exists("winget"):
 			installer = "winget"
-			commands.append({"command": "winget", "args": ["install", "--id", "Ollama.Ollama", "-e"], "purpose": "Install the official Ollama Windows package through winget id Ollama.Ollama."})
+			commands.append({"phase": "install_ollama_cli", "command": "winget", "args": ["install", "--id", "Ollama.Ollama", "-e"], "purpose": "Install the official Ollama Windows package through winget id Ollama.Ollama."})
 		else:
 			installer = "manual_required"
 	if inventory.get("command", "missing") == "present" and inventory.get("server", "unreachable") == "running" and selected_model != "":
-		commands.append({"command": "ollama", "args": ["pull", selected_model], "purpose": "Pull the selected model after confirmation."})
+		if selected_model == OLLAMA_MODEL_NEMOTRON:
+			if not _ollama_model_list_has(inventory.get("models", []), OLLAMA_MODEL_NEMOTRON_SOURCE):
+				commands.append({"phase": "pull_nemotron_source", "command": "ollama", "args": ["pull", OLLAMA_MODEL_NEMOTRON_SOURCE], "purpose": "Pull the Nemotron Virtuoso source model after confirmation."})
+			if not _ollama_model_list_has(inventory.get("models", []), OLLAMA_MODEL_NEMOTRON):
+				var modelfile_path = _ollama_nemotron_modelfile_path()
+				commands.append({"phase": "write_nemotron_no_think_modelfile", "command": "write_file", "args": [modelfile_path], "preview": "write %s" % modelfile_path, "content": _ollama_nemotron_modelfile_text(), "purpose": "Write a local no-thinking Nemotron Modelfile. This records setup text only; it does not duplicate model weights."})
+				commands.append({"phase": "create_nemotron_no_think_alias", "command": "ollama", "args": ["create", OLLAMA_MODEL_NEMOTRON, "-f", modelfile_path], "purpose": "Create the C-AOL-safe Nemotron alias with SYSTEM /no_think. Ollama reuses the source model blobs instead of pulling a second copy."})
+		elif not _ollama_model_list_has(inventory.get("models", []), selected_model):
+			commands.append({"phase": "pull_selected_model", "command": "ollama", "args": ["pull", selected_model], "purpose": "Pull the selected model after confirmation."})
 	var preview = []
 	for step in commands:
-		preview.append("Step %s: %s %s" % [str(preview.size() + 1), step.get("command", ""), " ".join(step.get("args", []))])
+		preview.append("Step %s: %s" % [str(preview.size() + 1), step.get("preview", "%s %s" % [step.get("command", ""), " ".join(step.get("args", []))])])
 	return {
-		"action": "install_ollama_and_pull_model",
+		"action": "install_ollama_and_prepare_model",
 		"endpoint": endpoint.strip_edges() if endpoint.strip_edges() != "" else DEFAULT_OLLAMA_URL,
 		"model": selected_model,
+		"model_source": get_ollama_pull_source_for_model(selected_model),
+		"model_setup_mode": OLLAMA_MODEL_NEMOTRON_MODE if selected_model == OLLAMA_MODEL_NEMOTRON else "direct_pull",
 		"platform": os_name,
 		"installer": installer,
 		"commands": commands,
-		"command_preview": "\n".join(preview) if preview.size() > 0 else "Manual Ollama install/startup required before model pull; no safe one-step command is queued.",
+		"phase_order": _command_phases(commands),
+		"command_preview": "\n".join(preview) if preview.size() > 0 else "Manual Ollama install/startup required before model preparation; no safe one-step command is queued.",
 		"sequencing": "serialized_steps_not_shell_chained",
 		"timeout_note": "The launcher may appear to time out. Wait for Ollama installation to commence.",
-		"next_step": "Run Check after an Ollama install/startup step, then use Install Ollama / model again for model pull if needed.",
+		"next_step": "Run Check after an Ollama install/startup step, then use Install Ollama / model again for model pull or alias preparation if needed.",
 		"requires_confirmation": true,
-		"automated_proof_policy": "plan_only_no_installer_no_model_pull"
+		"automated_proof_policy": "plan_only_no_installer_no_model_pull_no_alias_create"
 	}
 
 
@@ -272,8 +292,12 @@ func run_ollama_setup(endpoint: String = DEFAULT_OLLAMA_URL, model: String = "",
 	var failed_step = {}
 	for step in plan.get("commands", []):
 		var output = []
-		var exit_code = OS.execute(step.get("command", ""), step.get("args", []), true, output, true)
-		var result = {"command": step.get("command", ""), "args": step.get("args", []), "purpose": step.get("purpose", "Ollama setup command."), "exit_code": exit_code, "output_line_count": output.size(), "output_summary": _safe_command_output_summary(output)}
+		var exit_code = 0
+		if step.get("command", "") == "write_file":
+			exit_code = _write_text_file(str(step.get("args", [""])[0]), str(step.get("content", "")), output)
+		else:
+			exit_code = OS.execute(step.get("command", ""), step.get("args", []), true, output, true)
+		var result = {"phase": step.get("phase", "ollama_setup"), "command": step.get("command", ""), "args": step.get("args", []), "purpose": step.get("purpose", "Ollama setup command."), "exit_code": exit_code, "output_line_count": output.size(), "output_summary": _safe_command_output_summary(output)}
 		results.append(result)
 		if exit_code != 0:
 			failed = true
@@ -541,17 +565,21 @@ func write_ollama_setup_intent(endpoint: String = DEFAULT_OLLAMA_URL, model: Str
 			return "config_dir_error_%s" % err
 	var plan = build_ollama_setup_plan(endpoint, model)
 	var intent = {
-		"action": "install_ollama_and_pull_model",
+		"action": plan.get("action", "install_ollama_and_prepare_model"),
 		"endpoint": plan.get("endpoint", DEFAULT_OLLAMA_URL),
 		"model": plan.get("model", model),
+		"model_source": plan.get("model_source", plan.get("model", model)),
+		"model_setup_mode": plan.get("model_setup_mode", "direct_pull"),
 		"platform": plan.get("platform", OS.get_name()),
 		"installer": plan.get("installer", "manual_required"),
 		"command_preview": plan.get("command_preview", ""),
+		"commands": plan.get("commands", []),
+		"phase_order": plan.get("phase_order", []),
 		"confirmed": true,
 		"performed_external_install": performed_external_install,
 		"command_results": command_results,
 		"result_summary": result_summary,
-		"proof_policy": plan.get("automated_proof_policy", "plan_only_no_installer_no_model_pull"),
+		"proof_policy": plan.get("automated_proof_policy", "plan_only_no_installer_no_model_pull_no_alias_create"),
 		"recorded_at": OS.get_datetime()
 	}
 	if not Helpers.save_to_json_file(intent, Paths.config.plus_file(OLLAMA_SETUP_INTENT_FILENAME)):
@@ -646,8 +674,12 @@ func _status_summary(raw_status: String) -> String:
 func _ollama_setup_failure_summary(failed_step: Dictionary) -> String:
 	var command = str(failed_step.get("command", ""))
 	var args = failed_step.get("args", [])
+	if command == "write_file":
+		return "ollama_setup_modelfile_write_failed_%s" % str(failed_step.get("exit_code", "unknown"))
 	if command == "ollama" and args.size() > 0 and str(args[0]) == "pull":
 		return "ollama_setup_model_pull_failed_%s" % str(failed_step.get("exit_code", "unknown"))
+	if command == "ollama" and args.size() > 0 and str(args[0]) == "create":
+		return "ollama_setup_model_alias_create_failed_%s" % str(failed_step.get("exit_code", "unknown"))
 	if command == "brew" or command == "winget":
 		return "ollama_setup_installer_failed_%s" % str(failed_step.get("exit_code", "unknown"))
 	return "ollama_setup_command_failed_%s" % str(failed_step.get("exit_code", "unknown"))
@@ -678,12 +710,57 @@ func _normalize_backend_fields(mode: String, endpoint: String, model: String, py
 			normalized["endpoint"] = get_api_provider_default_base_url(normalized["api_provider"])
 		if normalized["model"] == "":
 			normalized["model"] = get_api_provider_default_model(normalized["api_provider"])
-	if mode == BACKEND_OLLAMA and normalized["endpoint"] == "":
-		normalized["endpoint"] = DEFAULT_OLLAMA_URL
+	if mode == BACKEND_OLLAMA:
+		if normalized["endpoint"] == "":
+			normalized["endpoint"] = DEFAULT_OLLAMA_URL
+		normalized["model"] = normalize_ollama_model_tag(normalized["model"])
 	if mode == BACKEND_OPENVINO:
 		normalized["endpoint"] = ""
 		normalized["model"] = ""
 	return normalized
+
+
+func normalize_ollama_model_tag(model: String) -> String:
+	var cleaned = model.strip_edges()
+	if cleaned == "" or cleaned == "mistral-v0.3":
+		return OLLAMA_MODEL_MISTRAL
+	if cleaned == "nemotron-9b" or cleaned == OLLAMA_MODEL_NEMOTRON_SOURCE or cleaned == "nemotron-9b-full:latest":
+		return OLLAMA_MODEL_NEMOTRON
+	return cleaned
+
+
+func _ollama_nemotron_modelfile_path() -> String:
+	return Paths.config.plus_file("Nemotron-9B-no-think.Modelfile")
+
+
+func _ollama_nemotron_modelfile_text() -> String:
+	return "FROM %s\nSYSTEM \"/no_think\nAnswer directly. No reasoning.\nPrefer straightforward, practical answers.\nChoose the obvious option over a clever one.\nKeep outputs simple, grounded, and gamey.\nAvoid overexplaining, roleplay flourishes, and fancy wording unless explicitly asked.\n\"\nPARAMETER num_ctx 16384\nPARAMETER num_gpu 999\nPARAMETER num_keep 2048\nPARAMETER num_predict 4096\nPARAMETER temperature 0.85\nPARAMETER top_p 0.92\n" % OLLAMA_MODEL_NEMOTRON_SOURCE
+
+
+func _write_text_file(path: String, content: String, output: Array) -> int:
+	var dir = path.get_base_dir()
+	var d = Directory.new()
+	if dir != "" and not d.dir_exists(dir):
+		var err = d.make_dir_recursive(dir)
+		if err != OK:
+			output.append("failed to create directory %s: %s" % [dir, err])
+			return int(err) if int(err) != 0 else 1
+	var f = File.new()
+	var open_err = f.open(path, File.WRITE)
+	if open_err != OK:
+		output.append("failed to open %s: %s" % [path, open_err])
+		return int(open_err) if int(open_err) != 0 else 1
+	f.store_string(content)
+	f.close()
+	output.append("wrote %s" % path)
+	return 0
+
+
+func _command_phases(commands: Array) -> Array:
+	var phases = []
+	for step in commands:
+		phases.append(step.get("phase", step.get("command", "")))
+	return phases
 
 
 func _normalize_api_provider(provider_id: String) -> String:

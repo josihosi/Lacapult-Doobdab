@@ -17,7 +17,7 @@ Raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-09.md`.
 - [ ] Fix or split `Save options` / apply semantics so selected API/Ollama setup coherently sets backend mode, selected model, runner mode, and runner enablement in the C-AOL options/apply path.
 - [ ] Show Windows Ollama CPU-only/iGPU fallback as a slow/amber-red path, not a happy green local mode, while preserving compact RAM/VRAM/model lights.
 - [ ] Prove Magiclysm/DinoMod mod compatibility/procedure beyond catalog seeding in a safe sandbox/fixture path.
-- [ ] Triage the C-AOL `<think>` speech leak: implement/prove only if the seam is Lacapult-side; otherwise hand off the exact C-AOL runner/speech blocker for explicit cross-repo assignment.
+- [ ] Finish `<think>` mitigation split: Lacapult now prepares a Nemotron `SYSTEM /no_think` local alias without duplicate weights; still prove/package the remaining C-AOL runner/speech hard reject/retry seam or hand it off explicitly.
 - [ ] Run focused static/Godot/sandbox proof without live secrets, unapproved package installs, model pulls, or real user-data mutation.
 - [ ] Build/package/upload a fresh Josef-only Windows v3 Draft/prerelease only after local proof.
 

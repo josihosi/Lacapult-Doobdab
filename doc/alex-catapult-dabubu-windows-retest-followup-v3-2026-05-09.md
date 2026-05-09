@@ -28,9 +28,11 @@ Catapult-Dabubu Windows retest follow-up v3: package and implement the fresh v2 
    - Prove safe install/enable/summary procedure in sandbox/fixture before any live target.
    - Do not install arbitrary mods into Josef's real tree or mutate real saves/Application Support.
 
-4. **`<think>` boundary triage**
-   - Identify whether any Lacapult-side runner/procedure seam can prevent raw `<think>` speech.
-   - If the fix is in C-AOL `tools/llm_runner` / speech code, do not edit it as Alex without explicit cross-repo clearance; write the precise blocker/handoff instead.
+4. **Nemotron no-think setup + `<think>` boundary triage**
+   - Implement/prove the Lacapult-side setup seam Josef clarified: Save options should persist the no-thinking runtime alias, and Nemotron setup should pull the Virtuoso source tag if needed, then create/use a local no-thinking runtime alias (`nemotron-9b-dumber:latest`) with a Modelfile containing `SYSTEM /no_think`.
+   - Do not duplicate model weights; the alias-create step should reuse the pulled source blobs and the UI/proof should say so.
+   - Then identify whether any remaining Lacapult-side runner/procedure seam can prevent raw `<think>` speech.
+   - If the hard speech fix is in C-AOL `tools/llm_runner` / speech code, do not edit it as Alex without explicit cross-repo clearance; write the precise blocker/handoff instead.
 
 5. **Package v3 only after proof**
    - Fresh Josef-only Windows Draft/prerelease, not a quarantine lift.
@@ -50,7 +52,8 @@ Catapult-Dabubu Windows retest follow-up v3: package and implement the fresh v2 
 - Godot UI smoke for API/Ollama save/apply round-trip.
 - Hardware fixture smoke for CPU/iGPU/accelerated states.
 - Mod sandbox proof for Magiclysm/DinoMod procedure.
-- `<think>` proof or cross-repo blocker handoff.
+- Nemotron no-think alias setup proof.
+- Remaining `<think>` proof or cross-repo blocker handoff.
 
 ## Hollow-rock suspicion
 

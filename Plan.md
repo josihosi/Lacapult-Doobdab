@@ -64,6 +64,8 @@ This v3 lane supersedes the v2 ready-for-retest state after Josef's new Windows 
 
 2026-05-09 intake/canon checkpoint: raw v2 retest notes are promoted into canon and the v3 repair lane is active. First implementation target is the save/apply runner setup semantics; the `<think>` leak is likely a C-AOL runner/speech-path seam and needs explicit cross-repo assignment if it cannot be handled from Lacapult.
 
+2026-05-09 no-think setup checkpoint: Josef clarified that the working Mac Nemotron setup used the Virtuoso source model behind a local no-thinking Ollama alias. Catapult now treats Nemotron setup as source-pull plus local `SYSTEM /no_think` alias preparation (`nemotron-9b-dumber:latest`) without duplicating model weights; remaining raw `<think>` hardening still belongs at the C-AOL runner/speech boundary unless explicitly reassigned.
+
 ## Previous Windows retest follow-up lane v2
 
 **WINDOWS RETESTED / SUPERSEDED BY V3: Catapult-Dabubu Windows retest follow-up v2** - Josef completed the 2026-05-06 v1 Windows retest debug-note batch and explicitly asked to package and activate a cook. Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`; imagination source: `doc/catapult-dabubu-windows-retest-followup-v2-imagination-source-2026-05-06.md`; raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-06.md`; executor handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`.

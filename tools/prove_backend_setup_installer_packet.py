@@ -18,7 +18,8 @@ SETTINGS_UI = REPO / "scripts" / "SettingsUI.gd"
 EN_TEXT = REPO / "text" / "en" / "general.csv"
 
 MODEL_MISTRAL = "mistral:v0.3"
-MODEL_NEMOTRON = "mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest"
+MODEL_NEMOTRON_SOURCE = "mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest"
+MODEL_NEMOTRON = "nemotron-9b-dumber:latest"
 
 
 def read(path: Path) -> str:
@@ -56,6 +57,7 @@ def main() -> None:
         "API / AnyLLM",
         "Ollama local",
         MODEL_MISTRAL,
+        MODEL_NEMOTRON_SOURCE,
         MODEL_NEMOTRON,
         "ConfirmExternalBackendAction",
         "popup_centered",

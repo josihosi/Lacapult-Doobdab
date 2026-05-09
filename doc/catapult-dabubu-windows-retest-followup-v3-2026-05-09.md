@@ -30,10 +30,12 @@ This is a Josef-only repair lane. It does not lift release quarantine, authorize
    - Prove a safe procedure for relevant mods: discovery, compatibility/status, enable/install/apply plan, summarizer readiness, and rollback/no-real-user-data boundaries.
    - Use sandbox/fixture proof first. Do not mutate Josef's real saves/Application Support or install arbitrary mods without clearance.
 
-4. **C-AOL `<think>` speech leak boundary**
+4. **C-AOL `<think>` speech leak boundary / Ollama no-think setup**
    - Desired product behavior: local Ollama NPC speech requests non-thinking output, strips/rejects `<think>` blocks, retries/falls back when the final line is empty, and never sends raw `<think>` to `say`.
-   - This likely lives primarily in the Cataclysm-AOL runner/speech path. Alex must not edit the C-AOL repo under the standing Lacapult-only role unless Schani/Josef explicitly assign that cross-repo fix.
-   - Lacapult-side work may still document/prove the expected runner boundary and adjust launcher tests/procedure once the runtime seam is available.
+   - Lacapult-side installer scope is now clear: for Nemotron, pull the Virtuoso source model if needed, then create/use a local no-thinking alias with a Modelfile `SYSTEM /no_think` setup, mirroring Josef's working Mac setup without duplicating model weights.
+   - The prepared runtime alias is `nemotron-9b-dumber:latest`; the source model remains `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest`.
+   - The remaining hard speech guard likely lives primarily in the Cataclysm-AOL runner/speech path. Alex must not edit the C-AOL repo under the standing Lacapult-only role unless Schani/Josef explicitly assign that cross-repo fix.
+   - Lacapult-side proof must show Save options persists the no-think runtime alias, the setup plan writes the no-think Modelfile, creates the alias, and states that Ollama reuses source blobs instead of pulling a second copy.
 
 5. **Fresh Josef-only Windows v3 retest package**
    - Build/package/upload only after local proof for the implemented local scope.
@@ -53,7 +55,7 @@ This is a Josef-only repair lane. It does not lift release quarantine, authorize
 - [ ] `Save options` / apply semantics are no longer ambiguous: selected backend, selected model, runner mode, and runner enablement line up in the produced C-AOL options/apply path.
 - [ ] The Ollama status UI/proof distinguishes slow CPU/iGPU fallback from acceptable accelerated local mode.
 - [ ] Magiclysm/DinoMod (or the current relevant mod targets) have a safe compatibility/procedure proof beyond catalog seeding.
-- [ ] `<think>` leakage has an assigned owner/seam; if fixed under Lacapult's allowed scope, proof shows raw `<think>` cannot reach visible speech. If it requires C-AOL, the blocker is explicitly handed to Andi/Schani/Josef.
+- [ ] Lacapult prepares the Nemotron no-think runtime alias from the Virtuoso source without duplicating model weights, and the remaining C-AOL runner/speech hardening seam is explicitly fixed or handed off.
 - [ ] Focused static/Godot/sandbox proof passes without live secrets, unapproved package installs, model pulls, or real user-data mutation.
 - [ ] A fresh Josef-only Windows Draft/prerelease v3 package is produced/verified only after local proof.
 - [ ] Josef confirms the v3 Windows package.
@@ -66,7 +68,8 @@ Minimum proof before packaging:
 - Godot UI smoke that exercises the save/apply action in API and Ollama modes and inspects the sandboxed C-AOL options/apply artifact.
 - Hardware/status fixture proof for CPU-only/iGPU vs accelerated states, plus RAM/VRAM/model lights.
 - Mod procedure proof in fixture/sandbox: Magiclysm/DinoMod discovery, compatibility/status, summary readiness or precise blockers, and no real user-data mutation.
-- `<think>` boundary proof if the seam is in Lacapult scope; otherwise a parked cross-repo handoff naming the C-AOL runner/speech boundary.
+- Ollama setup proof for the Nemotron no-think alias plan: source pull if needed, Modelfile `SYSTEM /no_think`, alias create, runtime model persisted, and no duplicate-weight/no automated-pull boundary in proof mode.
+- Remaining `<think>` boundary proof if the seam is in Lacapult scope; otherwise a parked cross-repo handoff naming the C-AOL runner/speech boundary.
 - `git diff --check` and focused regression smokes for backend setup, Ollama workflow, Windows retest UI, mod status/procedure, and packaging shape.
 
 ## Known traps

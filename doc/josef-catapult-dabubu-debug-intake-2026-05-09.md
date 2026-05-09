@@ -93,8 +93,34 @@ Schani live read:
   4. never let raw `<think>` reach `say`.
 - Prefer Ollama `/api/chat` where useful because thinking-capable models may separate `message.thinking` from `message.content`; speech should use only content.
 
+## Note 5 — Mirror Josef's working Mac Nemotron setup without duplicating model weights
+
+Josef clarified after the `<think>` investigation:
+
+- `nemotron-9b-full:latest` is the local Mac alias for `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest`.
+- The Mac setup behaved better because Josef had a local Ollama setup with a SYSTEM no-thinking directive.
+- Catapult should mirror that setup instead of just pulling the raw registry tag.
+- Josef does **not** want the installer to copy/double the model weights immediately.
+
+Raw wording:
+
+> nemotron-9b-full:latest is mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest.
+> Ok then lets mirror the setup! i do not want us to copy the model and double it immediatley, so lets implement the SYSTEM /no_think for local models in ollama set up in the installer?
+>
+> ok? anything unclear? or can we wrapthe catapult debug notes?
+>
+> it works tho, somewhat! 😄 nice!
+
+Schani live read:
+
+- This makes the Lacapult-side setup work clear: the Ollama installer/model path should prepare a no-thinking runtime alias from the Virtuoso source model using an Ollama Modelfile.
+- The source pull remains `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest`; the C-AOL runtime model should be the prepared local alias, currently `nemotron-9b-dumber:latest`, with `SYSTEM /no_think`.
+- `ollama create <alias> -f <Modelfile>` should reuse the source model blobs rather than pull a second full model copy. The UI/proof must say that explicitly.
+- This does not remove the need for C-AOL runner hardening (`think:false`, strip/reject/retry), but it gives Catapult a concrete installer-side mitigation that mirrors Josef's known-good Mac behavior.
+
 ## Classification notes for Alex
 
 - Notes 1-3 are clearly Catapult-Dabubu/Lacapult launcher/procedure repair scope.
-- Note 4 appears to live primarily in the C-AOL runner/speech path. Alex must not edit the Cataclysm-AOL repo under the standing Lacapult-only role unless Schani/Josef explicitly assigns a cross-repo fix or the needed seam exists in Lacapult packaging/procedure.
+- Note 5 is Catapult-Dabubu/Lacapult installer/procedure scope: prepare a local no-thinking Nemotron runtime alias from the Virtuoso source without duplicating model weights.
+- Note 4 still appears to live primarily in the C-AOL runner/speech path for hard strip/reject/retry behavior. Alex must not edit the Cataclysm-AOL repo under the standing Lacapult-only role unless Schani/Josef explicitly assigns a cross-repo fix or the needed seam exists in Lacapult packaging/procedure.
 - No package install, model pull, live API call, API secret readout, or real Application Support/save mutation is cleared by this intake.

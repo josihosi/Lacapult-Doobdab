@@ -36,6 +36,14 @@ Catapult-Dabubu Windows retest follow-up v3 intake/canon evidence landed on 2026
 - Top-level `Plan.md`, `TODO.md`, `SUCCESS.md`, and `TESTING.md` now mark v3 as active and v2 as Windows-retested/superseded.
 - Safety boundary: docs/canon sync only; no live API call, API secret readout, package-manager install, Python venv creation, Ollama request/model pull, public release action, or real Application Support/user-data mutation was performed.
 
+Catapult-Dabubu Windows retest follow-up v3 Nemotron no-think setup slice landed on 2026-05-09:
+
+- Source/static proof: `python3 tools/prove_windows_retest_followup_v2_backend_static.py` now verifies the Nemotron setup source/runtime split: source tag `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest`, runtime alias `nemotron-9b-dumber:latest`, Modelfile `SYSTEM /no_think`, alias creation through `ollama create`, and explicit no-duplicate-weight boundary.
+- Installer packet/backend contract proof: `python3 tools/prove_backend_setup_installer_packet.py` and `python3 tools/prove_caol_backend_contract.py` pass with the no-think alias shape.
+- Godot Ollama UI smoke: `HOME=$(mktemp -d /tmp/lacapult-v3-ollama-home.XXXXXX) godot --path . --no-window -s tools/godot_ollama_workflow_smoke.gd` proves the short-label Ollama UI still renders, direct Nemotron plan normalizes `nemotron-9b` to `nemotron-9b-dumber:latest`, Save options also rewrites an old/source Nemotron setting to that no-think runtime alias, preserves source `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest`, writes a `/no_think` Modelfile, creates the no-think alias, and records proof-mode setup intent without installer, venv creation, model pull, alias create, API call, or real user config mutation.
+- Remaining caveat: this is the Lacapult installer/procedure mitigation. C-AOL still needs its runner/speech hard strip/reject/retry seam before the raw `<think>` product bug can be fully closed.
+
+
 Catapult-Dabubu Windows retest follow-up v2 backend/setup slice local evidence landed on 2026-05-06:
 
 - Static/source proof: `python3 tools/prove_windows_retest_followup_v2_backend_static.py` verifies API setup uses `any-llm-sdk[...]` provider extras while preserving `any_llm` import checks; normal API base URL is hidden except custom/advanced override; Ollama labels map to runtime tags `mistral:v0.3` and `mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest`; hardware display uses GiB plus model-specific performance lights; and API package failures capture/surface non-secret command output summaries.
