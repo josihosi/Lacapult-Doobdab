@@ -74,7 +74,9 @@ This v3 lane supersedes the v2 ready-for-retest state after Josef's new Windows 
 
 2026-05-10 `<think>` split checkpoint: Lacapult-side Nemotron no-think alias setup remains locally proofed, and the remaining hard raw-`<think>` speech guard is explicitly handed off as a C-AOL runner/speech blocker in `doc/catapult-dabubu-v3-think-boundary-handoff-2026-05-10.md`. Next decision: wait for the C-AOL fix before v3 packaging, or package with that blocker loudly caveated for Josef.
 
-2026-05-10 aggregate proof checkpoint: focused v3 static/Godot/sandbox/package-shape proof passed for save/apply runner semantics, Ollama slow fallback, Magiclysm/DinoMod procedure, Nemotron no-think alias setup, backend regressions, mod status, and unsigned local package shape. The only remaining v3 gate before Josef-only packaging is the decision on the known C-AOL `<think>` runner/speech blocker.
+2026-05-10 aggregate proof checkpoint: focused v3 static/Godot/sandbox/package-shape proof passed for save/apply runner semantics, Ollama slow fallback, Magiclysm/DinoMod procedure, Nemotron no-think alias setup, backend regressions, mod status, and unsigned local package shape.
+
+2026-05-10 v3 Josef-only test release: Josef/Schani chose to package v3 with the known C-AOL `<think>` runner/speech blocker explicitly caveated instead of waiting for the C-AOL fix. Draft/prerelease `catapult-dabubu-josef-windows-retest-v3-2026-05-10` / `Catapult-Dabubu Josef Windows retest build v3 2026-05-10`, source commit `ff18d530d723829e1ec964b0413a95aa36487c28`, URL `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-c5610f7f8f416c0002b2`. Attached Windows asset `Catapult-Dabubu-windows-unsigned.zip`, 66,656,569 bytes, SHA-256 `ce10e73262ae6a46e82c4be8cb8d17a63dacefc10b928bf5861285248b549f5a`, plus `SHA256SUMS.txt`, `manifest.json`, and caveated build notes. This is Josef-only retest packaging, not a quarantine lift, and it does not claim the C-AOL raw `<think>` leakage class is solved.
 
 ## Previous Windows retest follow-up lane v2
 

@@ -33,9 +33,10 @@ Catapult-Dabubu Windows retest follow-up v3: package and implement the fresh v2 
    - Remaining hard raw-`<think>` prevention is in C-AOL `tools/llm_runner/runner.py` and `src/llm_intent.cpp`, not safely in Lacapult scope.
    - Precise cross-repo blocker/handoff: `doc/catapult-dabubu-v3-think-boundary-handoff-2026-05-10.md`.
 
-5. **Package v3 only after proof + decision**
-   - Fresh Josef-only Windows Draft/prerelease, not a quarantine lift.
-   - Decide first whether packaging waits for the C-AOL runner/speech fix or proceeds with the blocker explicitly caveated.
+5. **DONE: Package v3 after proof + caveat decision**
+   - Fresh Josef-only Windows Draft/prerelease exists, not a quarantine lift.
+   - Josef/Schani chose packaging with the C-AOL runner/speech `<think>` blocker explicitly caveated.
+   - Release checkpoint: `catapult-dabubu-josef-windows-retest-v3-2026-05-10` / `Catapult-Dabubu Josef Windows retest build v3 2026-05-10`, URL `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-c5610f7f8f416c0002b2`, source `ff18d530d723829e1ec964b0413a95aa36487c28`, Windows SHA-256 `ce10e73262ae6a46e82c4be8cb8d17a63dacefc10b928bf5861285248b549f5a`.
 
 ## Non-goals
 

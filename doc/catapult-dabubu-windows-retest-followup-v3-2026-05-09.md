@@ -57,9 +57,22 @@ This is a Josef-only repair lane. It does not lift release quarantine, authorize
 - [x] Magiclysm/DinoMod (or the current relevant mod targets) have a safe compatibility/procedure proof beyond catalog seeding.
 - [x] Lacapult prepares the Nemotron no-think runtime alias from the Virtuoso source without duplicating model weights, and the remaining C-AOL runner/speech hardening seam is explicitly handed off in `doc/catapult-dabubu-v3-think-boundary-handoff-2026-05-10.md`.
 - [x] Focused static/Godot/sandbox proof passes without live secrets, unapproved package installs, model pulls, or real user-data mutation.
-- [ ] Schani/Josef decide whether v3 packaging waits for the C-AOL runner/speech fix or proceeds with the blocker explicitly caveated.
-- [ ] A fresh Josef-only Windows Draft/prerelease v3 package is produced/verified only after local proof and that decision.
+- [x] Schani/Josef decide whether v3 packaging waits for the C-AOL runner/speech fix or proceeds with the blocker explicitly caveated. Decision: package v3 with the C-AOL blocker explicitly caveated.
+- [x] A fresh Josef-only Windows Draft/prerelease v3 package is produced/verified only after local proof and that decision.
 - [ ] Josef confirms the v3 Windows package.
+
+## Release checkpoint — 2026-05-10
+
+Josef/Schani chose caveated v3 packaging instead of waiting for the C-AOL runner/speech hardening fix.
+
+- Draft/prerelease tag: `catapult-dabubu-josef-windows-retest-v3-2026-05-10`
+- Release name: `Catapult-Dabubu Josef Windows retest build v3 2026-05-10`
+- URL: `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-c5610f7f8f416c0002b2`
+- Source commit: `ff18d530d723829e1ec964b0413a95aa36487c28`
+- Windows asset: `Catapult-Dabubu-windows-unsigned.zip`, 66,656,569 bytes, SHA-256 `ce10e73262ae6a46e82c4be8cb8d17a63dacefc10b928bf5861285248b549f5a`
+- Uploaded support assets: `SHA256SUMS.txt`, `manifest.json`, `Catapult-Dabubu-josef-windows-retest-v3-build-notes-2026-05-10.md`
+
+Hard caveat: release copy and build notes explicitly state that C-AOL raw `<think>` runner/speech hardening remains a known blocker/limitation. This package tests the locally proofed launcher-side v3 fixes; it does not close the raw `<think>` product bug.
 
 ## Testing and evidence expectations
 

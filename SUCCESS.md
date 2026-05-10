@@ -36,7 +36,7 @@ Success state:
 
 ## Catapult-Dabubu Windows retest follow-up v3
 
-Status: LOCAL IMPLEMENTATION PROOFED / DECISION NEEDED / QUARANTINE STILL ACTIVE
+Status: READY FOR JOSEF WINDOWS RETEST / C-AOL THINK CAVEAT / QUARANTINE STILL ACTIVE
 
 Success state:
 - [x] Raw 2026-05-09 v2 Windows retest notes are preserved in canon.
@@ -45,9 +45,16 @@ Success state:
 - [x] Magiclysm/DinoMod mod compatibility/procedure is proved beyond catalog seeding in a safe sandbox/fixture path.
 - [x] Nemotron local setup prepares a `SYSTEM /no_think` alias without duplicating model weights, and remaining `<think>` reasoning leakage is handed off as an explicit C-AOL runner/speech-path blocker in `doc/catapult-dabubu-v3-think-boundary-handoff-2026-05-10.md`.
 - [x] Focused local proof passes without live secrets, unapproved package installs, model pulls, or real user-data mutation.
-- [ ] Schani/Josef decide whether v3 packaging waits for the C-AOL runner/speech fix or proceeds with the blocker explicitly caveated.
-- [ ] Fresh Josef-only Windows v3 Draft/prerelease is produced and verified after local proof and that decision.
+- [x] Schani/Josef decide whether v3 packaging waits for the C-AOL runner/speech fix or proceeds with the blocker explicitly caveated. Decision: package v3 with the C-AOL blocker explicitly caveated.
+- [x] Fresh Josef-only Windows v3 Draft/prerelease is produced and verified after local proof and that decision.
 - [ ] Josef confirms the v3 Windows package.
+
+Release checkpoint:
+- Draft/prerelease: `catapult-dabubu-josef-windows-retest-v3-2026-05-10` / `Catapult-Dabubu Josef Windows retest build v3 2026-05-10`.
+- URL: `https://github.com/josihosi/Lacapult-Doobdab/releases/tag/untagged-c5610f7f8f416c0002b2`.
+- Source commit: `ff18d530d723829e1ec964b0413a95aa36487c28`.
+- Windows asset: `Catapult-Dabubu-windows-unsigned.zip`, 66,656,569 bytes, SHA-256 `ce10e73262ae6a46e82c4be8cb8d17a63dacefc10b928bf5861285248b549f5a`.
+- Release copy and build notes explicitly say the C-AOL raw `<think>` runner/speech leakage class is still a known blocker/limitation.
 
 Canonical docs:
 - `doc/catapult-dabubu-windows-retest-followup-v3-imagination-source-2026-05-09.md`

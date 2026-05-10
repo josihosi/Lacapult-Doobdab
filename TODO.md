@@ -6,7 +6,7 @@ Short queue only. Remove finished items instead of turning this into a museum.
 
 **Active target:** Catapult-Dabubu Windows retest follow-up v3.
 
-State: v2 Windows Draft/prerelease was retested by Josef on 2026-05-09 and produced fresh blockers; v3 intake is canonized and implementation is open. This remains Josef-only/quarantined, not public/final release work.
+State: v3 launcher-side repairs are locally proofed and packaged as a Josef-only Windows Draft/prerelease with the C-AOL `<think>` runner/speech blocker explicitly caveated. This remains Josef-only/quarantined, not public/final release work.
 
 Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v3-2026-05-09.md`.
 Imagination source: `doc/catapult-dabubu-windows-retest-followup-v3-imagination-source-2026-05-09.md`.
@@ -19,8 +19,8 @@ Raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-09.md`.
 - [x] Prove Magiclysm/DinoMod mod compatibility/procedure beyond catalog seeding in a safe sandbox/fixture path.
 - [x] Finish `<think>` mitigation split: Lacapult prepares a Nemotron `SYSTEM /no_think` local alias without duplicate weights; remaining C-AOL runner/speech hard reject/retry seam is explicitly handed off in `doc/catapult-dabubu-v3-think-boundary-handoff-2026-05-10.md`.
 - [x] Run focused static/Godot/sandbox proof without live secrets, unapproved package installs, model pulls, or real user-data mutation.
-- [ ] Decide whether to package v3 with the known C-AOL `<think>` blocker handed off, or wait for the C-AOL runner/speech fix.
-- [ ] Build/package/upload a fresh Josef-only Windows v3 Draft/prerelease only after local proof and that decision.
+- [x] Decide whether to package v3 with the known C-AOL `<think>` blocker handed off, or wait for the C-AOL runner/speech fix. Josef/Schani chose caveated v3 packaging on 2026-05-10.
+- [x] Build/package/upload a fresh Josef-only Windows v3 Draft/prerelease after local proof and that decision.
 
 ## Completed debug-note stack
 
@@ -62,7 +62,7 @@ Raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-09.md`.
   - [x] Josef retested the fresh `Catapult-Dabubu` Windows Draft/prerelease package on 2026-05-02 and found remaining blockers: AnyLLM packages not installed with venv creation, too much background text, and broken Unicode readiness lights.
   - [x] Josef retested the v1 Windows Draft/prerelease package `catapult-dabubu-josef-windows-retest-v1-2026-05-02` and reported the 2026-05-06 v2 debug-note batch.
   - [x] Josef retested the v2 Windows Draft/prerelease on 2026-05-09 and reported the v3 debug-note batch.
-  - [ ] Josef retests the next v3 Windows Draft/prerelease after the new repair pass.
+  - [ ] Josef retests the v3 Windows Draft/prerelease `catapult-dabubu-josef-windows-retest-v3-2026-05-10`, with the known C-AOL `<think>` runner/speech blocker caveated.
 
 ## Greenlit implementation stack
 
