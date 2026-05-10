@@ -21,11 +21,11 @@ Then inspect only the source files needed for the active target.
 
 ## Current rule
 
-Lacapult remains in release quarantine, but Josef/Schani explicitly reopened the debug-note correction stack for Alex on 2026-04-27. Later on 2026-04-27, Josef superseded parking and explicitly cleared a bounded Lacapult Josef test release v0 so he can test the current debug-stack-complete state.
+Catapult-Dabubu/Lacapult remains in release quarantine. Top-level canon (`Plan.md`, `TODO.md`, `SUCCESS.md`, and `TESTING.md`) is the current active-lane source; if this file drifts, repair this file rather than following old package lore.
 
-Use `doc/lacapult-parked-debug-note-correction-packages-2026-04-27.md` as the active stack source and start with Package 1 unless reprioritized. Keep Andi on C-AOL; do not point Andi at this repo.
+As of 2026-05-10, the active debug-note correction stack and Windows retest follow-up v3 launcher-side work are locally complete. A Josef-only Draft/prerelease v3 Windows retest package exists, explicitly caveated with the known C-AOL `<think>` runner/speech blocker. The current open state is Josef Windows v3 retest confirmation and/or explicit Schani/Josef reassignment for the C-AOL runner/speech hardening seam; Alex should not restart Package 1 or invent a new Lacapult lane from stale notes.
 
-The test-release clearance authorizes only a clearly labelled Draft/prerelease Lacapult launcher test build for Josef validation. It does **not** lift quarantine, authorize stable/latest/final confidence, announce broadly, create C-AOL releases, mutate real user data, install packages/models, or widen scope beyond the canonized debug-note stack plus test-release packaging.
+The Josef test-release clearances authorize only clearly labelled Draft/prerelease launcher test builds for Josef validation. They do **not** lift quarantine, authorize stable/latest/final confidence, announce broadly, create C-AOL releases, mutate real user data, install packages/models, or widen scope beyond current canon.
 
 ## External/public actions
 
