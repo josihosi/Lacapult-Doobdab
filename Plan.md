@@ -74,6 +74,8 @@ This v3 lane supersedes the v2 ready-for-retest state after Josef's new Windows 
 
 2026-05-10 `<think>` split checkpoint: Lacapult-side Nemotron no-think alias setup remains locally proofed, and the remaining hard raw-`<think>` speech guard is explicitly handed off as a C-AOL runner/speech blocker in `doc/catapult-dabubu-v3-think-boundary-handoff-2026-05-10.md`. Next decision: wait for the C-AOL fix before v3 packaging, or package with that blocker loudly caveated for Josef.
 
+2026-05-10 aggregate proof checkpoint: focused v3 static/Godot/sandbox/package-shape proof passed for save/apply runner semantics, Ollama slow fallback, Magiclysm/DinoMod procedure, Nemotron no-think alias setup, backend regressions, mod status, and unsigned local package shape. The only remaining v3 gate before Josef-only packaging is the decision on the known C-AOL `<think>` runner/speech blocker.
+
 ## Previous Windows retest follow-up lane v2
 
 **WINDOWS RETESTED / SUPERSEDED BY V3: Catapult-Dabubu Windows retest follow-up v2** - Josef completed the 2026-05-06 v1 Windows retest debug-note batch and explicitly asked to package and activate a cook. Canonical contract: `doc/catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`; imagination source: `doc/catapult-dabubu-windows-retest-followup-v2-imagination-source-2026-05-06.md`; raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-06.md`; executor handoff: `doc/alex-catapult-dabubu-windows-retest-followup-v2-2026-05-06.md`.

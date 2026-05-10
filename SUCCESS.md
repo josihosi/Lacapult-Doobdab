@@ -36,7 +36,7 @@ Success state:
 
 ## Catapult-Dabubu Windows retest follow-up v3
 
-Status: INTAKE CANONIZED / IMPLEMENTATION OPEN / QUARANTINE STILL ACTIVE
+Status: LOCAL IMPLEMENTATION PROOFED / DECISION NEEDED / QUARANTINE STILL ACTIVE
 
 Success state:
 - [x] Raw 2026-05-09 v2 Windows retest notes are preserved in canon.
@@ -44,7 +44,7 @@ Success state:
 - [x] Ollama Windows CPU-only/iGPU fallback is shown as a slow fallback instead of a happy green local path.
 - [x] Magiclysm/DinoMod mod compatibility/procedure is proved beyond catalog seeding in a safe sandbox/fixture path.
 - [x] Nemotron local setup prepares a `SYSTEM /no_think` alias without duplicating model weights, and remaining `<think>` reasoning leakage is handed off as an explicit C-AOL runner/speech-path blocker in `doc/catapult-dabubu-v3-think-boundary-handoff-2026-05-10.md`.
-- [ ] Focused local proof passes without live secrets, unapproved package installs, model pulls, or real user-data mutation.
+- [x] Focused local proof passes without live secrets, unapproved package installs, model pulls, or real user-data mutation.
 - [ ] Schani/Josef decide whether v3 packaging waits for the C-AOL runner/speech fix or proceeds with the blocker explicitly caveated.
 - [ ] Fresh Josef-only Windows v3 Draft/prerelease is produced and verified after local proof and that decision.
 - [ ] Josef confirms the v3 Windows package.

@@ -18,7 +18,7 @@ Raw intake: `doc/josef-catapult-dabubu-debug-intake-2026-05-09.md`.
 - [x] Show Windows Ollama CPU-only/iGPU fallback as a slow/amber-red path, not a happy green local mode, while preserving compact RAM/VRAM/model lights.
 - [x] Prove Magiclysm/DinoMod mod compatibility/procedure beyond catalog seeding in a safe sandbox/fixture path.
 - [x] Finish `<think>` mitigation split: Lacapult prepares a Nemotron `SYSTEM /no_think` local alias without duplicate weights; remaining C-AOL runner/speech hard reject/retry seam is explicitly handed off in `doc/catapult-dabubu-v3-think-boundary-handoff-2026-05-10.md`.
-- [ ] Run focused static/Godot/sandbox proof without live secrets, unapproved package installs, model pulls, or real user-data mutation.
+- [x] Run focused static/Godot/sandbox proof without live secrets, unapproved package installs, model pulls, or real user-data mutation.
 - [ ] Decide whether to package v3 with the known C-AOL `<think>` blocker handed off, or wait for the C-AOL runner/speech fix.
 - [ ] Build/package/upload a fresh Josef-only Windows v3 Draft/prerelease only after local proof and that decision.
 

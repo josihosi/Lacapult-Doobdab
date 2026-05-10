@@ -70,6 +70,13 @@ Catapult-Dabubu Windows retest follow-up v3 `<think>` boundary handoff landed on
 - Handoff written: `doc/catapult-dabubu-v3-think-boundary-handoff-2026-05-10.md` names the exact blocker and acceptance bar. Alex did not edit Cataclysm-AOL under the Lacapult-only role.
 - Safety boundary: no package install, model pull, alias create, API call, secret readout, public release action, or real user config/Application Support/save mutation was performed.
 
+Catapult-Dabubu Windows retest follow-up v3 aggregate proof gate passed on 2026-05-10:
+
+- Aggregate gate: `git diff --check`; `python3 tools/prove_windows_retest_followup_v2_backend_static.py`; `python3 tools/prove_backend_setup_installer_packet.py`; `python3 tools/prove_caol_backend_contract.py`; `python3 tools/prove_api_setup_status_copy_boundary.py`; `python3 tools/prove_caol_mod_status_model.py`; `tools/godot_v3_save_apply_runner_smoke.gd`; `tools/godot_v3_ollama_slow_fallback_smoke.gd`; `tools/godot_v3_mod_procedure_smoke.gd`; `tools/godot_api_anyllm_workflow_smoke.gd`; `tools/godot_ollama_workflow_smoke.gd`; `tools/godot_backend_setup_save_check_smoke.gd`; `tools/godot_windows_retest_followup_v1_smoke.gd`; `tools/godot_caol_mod_status_smoke.gd`; and `python3 tools/prove_lacapult_export_packaging.py`.
+- Package-shape proof exported unsigned local packages only; Windows package `.proof-cache/lacapult-export/packages/Catapult-Dabubu-windows-unsigned.zip` is 66,656,569 bytes with SHA-256 `ce10e73262ae6a46e82c4be8cb8d17a63dacefc10b928bf5861285248b549f5a` and expected root `Catapult-Dabubu.exe` plus `utils/7za.exe`/license.
+- Safety boundary: local fixture/sandbox/export proof only; no live API call, secret readout, package-manager install, Python venv creation, Ollama request/model pull/alias create, public release action, or real Application Support/user-data mutation was performed.
+- Remaining gate: decide whether Josef-only v3 packaging waits for the C-AOL runner/speech `<think>` fix or proceeds with that blocker explicitly caveated.
+
 
 Catapult-Dabubu Windows retest follow-up v2 backend/setup slice local evidence landed on 2026-05-06:
 
