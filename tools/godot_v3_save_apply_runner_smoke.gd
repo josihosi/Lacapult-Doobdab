@@ -1,10 +1,10 @@
 extends SceneTree
 
 # Headless v3 smoke for Save options / active runner apply semantics.
-# It exercises the API and Ollama Save options UI, then applies the produced
-# C-AOL option set only to sandbox options.json files. It never reads API
-# secrets, calls a backend, installs packages, pulls models, or mutates real
-# Application Support/user data.
+# It exercises the API and Ollama Save options UI, proves active C-AOL
+# userdir options.json is updated, then also applies the produced C-AOL option
+# set to sandbox options.json files. It never reads API secrets, calls a backend,
+# installs packages, pulls models, or mutates non-isolated Application Support/user data.
 
 func _init() -> void:
 	call_deferred("_run")
@@ -42,9 +42,9 @@ func _run() -> void:
 	_run_ollama_save_apply_case(ui, backend, helpers, paths, settings)
 
 	print("v3 Save/apply runner UI smoke passed")
-	print("  API proof: Save options produced backend=api, LLM_INTENT_ENABLE=true, LLM_INTENT_USE_API=true, selected model, provider metadata, Python runner path, and env-var name without a secret")
-	print("  Ollama proof: Save options normalized Nemotron to nemotron-9b-dumber:latest and produced backend=ollama, LLM_INTENT_ENABLE=true, LLM_INTENT_USE_API=false, URL, model, and Python runner path")
-	print("  Sandbox apply proof: both cases were applied only to sandbox options.json artifacts; no real user config mutation, backend call, install, or model pull occurred")
+	print("  API proof: Save options produced backend=api and active options.json has LLM_INTENT_ENABLE=true, LLM_INTENT_USE_API=true, selected model, provider metadata, Python runner path, and env-var name without a secret")
+	print("  Ollama proof: Save options normalized Nemotron to nemotron-9b-dumber:latest and active options.json has backend=ollama, LLM_INTENT_ENABLE=true, LLM_INTENT_USE_API=false, URL, model, and Python runner path")
+	print("  Sandbox apply proof: both cases were also applied to sandbox options.json artifacts; no non-isolated user config mutation, backend call, install, or model pull occurred")
 	quit(0)
 
 
@@ -58,12 +58,15 @@ func _run_api_save_apply_case(ui: Node, backend: Node, helpers: Node, paths: Nod
 
 	var config = helpers.load_json_file(paths.config.plus_file(backend.BACKEND_CONFIG_FILENAME))
 	var patch = helpers.load_json_file(paths.config.plus_file(backend.C_AOL_OPTIONS_PATCH_FILENAME))
+	var apply_manifest = helpers.load_json_file(paths.config.plus_file(backend.C_AOL_OPTIONS_APPLY_FILENAME))
+	var active_values = _option_values(helpers.load_json_file(paths.config.plus_file("options.json")))
 	var patch_values = _patch_option_values(patch)
 	_require(config.get("backend", "") == "api", "API save did not persist API backend")
 	_require(config.get("model", "") == "openai/gpt-4.1-mini", "API save did not persist selected model")
 	_require(config.get("api_key_env", "") == "LACAPULT_V3_KEY", "API save did not persist env-var name")
 	_require(JSON.print(config).find("sk-") < 0 and JSON.print(patch).find("sk-") < 0, "API save leaked a secret-shaped value")
-	_require(patch.get("apply_status", "") == "ready_for_confirmed_apply_not_auto_applied", "API patch did not carry confirmed/sandbox apply guard")
+	_require(patch.get("apply_status", "") == "applied_to_active_userdir_on_save", "API patch did not carry active apply status")
+	_require(apply_manifest.get("ok", false) == true and str(apply_manifest.get("status", "")).begins_with("ok_changed_"), "API active options apply manifest did not report success")
 	_require(patch_values.get("LLM_INTENT_ENABLE", "") == "true", "API patch did not enable runner")
 	_require(patch_values.get("LLM_INTENT_BACKEND", "") == "api", "API patch did not set backend mode")
 	_require(patch_values.get("LLM_INTENT_USE_API", "") == "true", "API patch did not set hidden API runner mode")
@@ -71,6 +74,10 @@ func _run_api_save_apply_case(ui: Node, backend: Node, helpers: Node, paths: Nod
 	_require(patch_values.get("LLM_INTENT_API_MODEL", "") == "openai/gpt-4.1-mini", "API patch lost selected model")
 	_require(patch_values.get("LLM_INTENT_API_KEY_ENV", "") == "LACAPULT_V3_KEY", "API patch lost env-var name")
 	_require(patch_values.get("LLM_INTENT_PYTHON", "") == "python3", "API patch lost Python runner path")
+	_require(active_values.get("LLM_INTENT_ENABLE", "") == "true", "API active options did not enable runner")
+	_require(active_values.get("LLM_INTENT_BACKEND", "") == "api" and active_values.get("LLM_INTENT_USE_API", "") == "true", "API active options did not set runner mode")
+	_require(active_values.get("LLM_INTENT_API_PROVIDER", "") == "openrouter", "API active options lost provider")
+	_require(active_values.get("LLM_INTENT_API_MODEL", "") == "openai/gpt-4.1-mini" and active_values.get("LLM_INTENT_API_KEY_ENV", "") == "LACAPULT_V3_KEY", "API active options lost selected model/env-var")
 
 	var sandbox_path = paths.config.plus_file("sandbox_v3_api_options.json")
 	_require(helpers.save_to_json_file(_stale_options_fixture(), sandbox_path), "could not write API sandbox options")
@@ -93,17 +100,23 @@ func _run_ollama_save_apply_case(ui: Node, backend: Node, helpers: Node, paths: 
 
 	var config = helpers.load_json_file(paths.config.plus_file(backend.BACKEND_CONFIG_FILENAME))
 	var patch = helpers.load_json_file(paths.config.plus_file(backend.C_AOL_OPTIONS_PATCH_FILENAME))
+	var apply_manifest = helpers.load_json_file(paths.config.plus_file(backend.C_AOL_OPTIONS_APPLY_FILENAME))
+	var active_values = _option_values(helpers.load_json_file(paths.config.plus_file("options.json")))
 	var patch_values = _patch_option_values(patch)
 	_require(config.get("backend", "") == "ollama", "Ollama save did not persist Ollama backend")
 	_require(config.get("model", "") == "nemotron-9b-dumber:latest", "Ollama save did not persist no-think runtime alias")
 	_require(settings.read("backend_ollama_model") == "nemotron-9b-dumber:latest", "Ollama setting was not normalized to no-think runtime alias")
-	_require(patch.get("apply_status", "") == "ready_for_confirmed_apply_not_auto_applied", "Ollama patch did not carry confirmed/sandbox apply guard")
+	_require(patch.get("apply_status", "") == "applied_to_active_userdir_on_save", "Ollama patch did not carry active apply status")
+	_require(apply_manifest.get("ok", false) == true and str(apply_manifest.get("status", "")).begins_with("ok_changed_"), "Ollama active options apply manifest did not report success")
 	_require(patch_values.get("LLM_INTENT_ENABLE", "") == "true", "Ollama patch did not enable runner")
 	_require(patch_values.get("LLM_INTENT_BACKEND", "") == "ollama", "Ollama patch did not set backend mode")
 	_require(patch_values.get("LLM_INTENT_USE_API", "") == "false", "Ollama patch did not clear hidden API runner mode")
 	_require(patch_values.get("LLM_INTENT_OLLAMA_URL", "") == "http://127.0.0.1:11434", "Ollama patch lost endpoint")
 	_require(patch_values.get("LLM_INTENT_OLLAMA_MODEL", "") == "nemotron-9b-dumber:latest", "Ollama patch lost selected no-think model")
 	_require(patch_values.get("LLM_INTENT_PYTHON", "") == "python3", "Ollama patch lost Python runner path")
+	_require(active_values.get("LLM_INTENT_ENABLE", "") == "true", "Ollama active options did not enable runner")
+	_require(active_values.get("LLM_INTENT_BACKEND", "") == "ollama" and active_values.get("LLM_INTENT_USE_API", "") == "false", "Ollama active options did not set local runner mode")
+	_require(active_values.get("LLM_INTENT_OLLAMA_URL", "") == "http://127.0.0.1:11434" and active_values.get("LLM_INTENT_OLLAMA_MODEL", "") == "nemotron-9b-dumber:latest", "Ollama active options lost selected URL/model")
 
 	var sandbox_path = paths.config.plus_file("sandbox_v3_ollama_options.json")
 	_require(helpers.save_to_json_file(_stale_options_fixture(), sandbox_path), "could not write Ollama sandbox options")

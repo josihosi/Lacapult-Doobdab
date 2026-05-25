@@ -145,7 +145,7 @@ func _looks_like_game_directory(dir_path: String) -> bool:
 		"cataclysm-tiles", "cataclysm-bn-tiles", "cataclysm-tlg-tiles",
 		"cataclysm-eod-tiles", "cataclysm-tish-tiles", "Cataclysm-AOL",
 		"cataclysm-tiles.exe", "cataclysm-bn-tiles.exe", "cataclysm-tlg-tiles.exe",
-		"cataclysm-eod-tiles.exe", "cataclysm-tish-tiles.exe"
+		"cataclysm-eod-tiles.exe", "cataclysm-tish-tiles.exe", "Cataclysm-AOL.exe"
 	]
 
 	for exe in game_executables:

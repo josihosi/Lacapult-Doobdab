@@ -18,3 +18,54 @@ git_api.gdns
 
 # Local proof artifacts
 .proof-cache/
+
+# Schanigarten local/private/generated hygiene
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+Desktop.ini
+
+# Local secrets / machine config
+.env
+.env.*
+!.env.example
+!.env.sample
+*.local
+*.local.*
+*.secret
+*.secrets
+.secrets/
+
+# Editor / agent-local state
+.idea/
+.vscode/
+.cursor/
+.claude/
+.openclaw/
+.codex/
+.aider*
+
+# Root-local generated output
+/logs/
+/tmp/
+/temp/
+/runtime/
+/artifacts/
+/screenshots/
+/captures/
+
+# Scratch / patch leftovers
+*.tmp
+*.bak
+*.orig
+*.rej
+*.swp
+*.swo
+*~
+
+# Godot local/generated cache
+.godot/
+.import/
+export_credentials.cfg

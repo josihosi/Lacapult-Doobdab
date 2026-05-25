@@ -2,9 +2,9 @@ extends SceneTree
 
 # Headless UI smoke for Package 3: API / AnyLLM setup workflow.
 # Proves provider/model/env-var/session-key controls render, normal base URL stays hidden, and settings round-trip
-# safely, Check is non-mutating/no-call, and Set up API / AnyLLM records a
+# safely, Check is non-mutating/no-call, Save applies active C-AOL options, and Set up API / AnyLLM records a
 # confirmation-gated venv + package setup intent. It does not run pip, call APIs, install packages,
-# read a real secret, or mutate real Application Support data.
+# read a real secret, or mutate non-isolated Application Support data.
 
 const FAKE_SECRET = "sk-package3-secret-do-not-save"
 
@@ -37,10 +37,14 @@ func _run() -> void:
 
 	var config_path = paths.config.plus_file(backend_config.BACKEND_CONFIG_FILENAME)
 	var patch_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_PATCH_FILENAME)
+	var apply_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_APPLY_FILENAME)
+	var options_path = paths.config.plus_file("options.json")
 	var intent_path = paths.config.plus_file(backend_config.API_SETUP_INTENT_FILENAME)
 	var runner_intent_path = paths.config.plus_file(backend_config.RUNNER_TEST_INTENT_FILENAME)
 	_remove_if_exists(config_path)
 	_remove_if_exists(patch_path)
+	_remove_if_exists(apply_path)
+	_remove_if_exists(options_path)
 	_remove_if_exists(intent_path)
 	_remove_if_exists(runner_intent_path)
 
@@ -87,6 +91,8 @@ func _run() -> void:
 	yield(self, "idle_frame")
 	_require(File.new().file_exists(config_path), "Save options did not write backend config")
 	_require(File.new().file_exists(patch_path), "Save options did not write options patch")
+	_require(File.new().file_exists(apply_path), "Save options did not write options apply manifest")
+	_require(File.new().file_exists(options_path), "Save options did not write active C-AOL options.json")
 	var api_config = helpers.load_json_file(config_path)
 	_require(api_config.get("backend", "") == "api", "backend config did not persist API mode")
 	_require(api_config.get("api_provider", "") == "openrouter", "backend config did not persist provider")
@@ -99,6 +105,17 @@ func _run() -> void:
 	var patch_text = JSON.print(patch)
 	_require(patch_text.find("LLM_INTENT_API_PROVIDER") >= 0 and patch_text.find("openrouter") >= 0, "options patch did not carry provider metadata")
 	_require(patch_text.find(FAKE_SECRET) < 0, "options patch leaked API secret")
+	var apply_manifest = helpers.load_json_file(apply_path)
+	var applied = _option_values(helpers.load_json_file(options_path))
+	_require(apply_manifest.get("ok", false) == true and str(apply_manifest.get("status", "")).begins_with("ok_changed_"), "active options apply manifest did not report success")
+	_require(api_config.get("caol_options_apply", {}).get("ok", false) == true, "backend config did not include successful active options apply result")
+	_require(applied.get("LLM_INTENT_ENABLE", "") == "true", "active options did not enable the LLM runner")
+	_require(applied.get("LLM_INTENT_BACKEND", "") == "api" and applied.get("LLM_INTENT_USE_API", "") == "true", "active options did not select API runner mode")
+	_require(applied.get("LLM_INTENT_API_PROVIDER", "") == "openrouter", "active options lost API provider")
+	_require(applied.get("LLM_INTENT_API_MODEL", "") == "openai/gpt-4.1-mini", "active options lost API model")
+	_require(applied.get("LLM_INTENT_API_KEY_ENV", "") == "LACAPULT_PACKAGE3_KEY", "active options lost API env-var name")
+	_require(applied.get("LLM_INTENT_PYTHON", "") == "python3", "active options lost Python runner path")
+	_require(JSON.print(applied).find(FAKE_SECRET) < 0, "active options leaked API secret")
 
 	var runner_button = _find_button(ui, "Test API runner")
 	_require(runner_button != null, "Test API runner button lookup failed")
@@ -143,7 +160,7 @@ func _run() -> void:
 	print("API / AnyLLM workflow UI smoke passed")
 	print("  UI proof: API provider/model/env-var/session-key controls with normal base URL hidden, colored status rows, Create venv only, and Set up API / AnyLLM rendered")
 	print("  Check proof: readiness-only; no backend config write and no API call")
-	print("  Save proof: provider/default base URL/model/env-var name round-tripped without storing secret")
+	print("  Save proof: provider/default base URL/model/env-var name round-tripped and active C-AOL options.json enables API runner without storing secret")
 	print("  Runner proof: confirmation-gated C-AOL runner.py --backend api --dry-run exercised the runner route without API call/secret read")
 	print("  Install proof: confirmation-gated venv + AnyLLM setup command staged in proof mode; no venv/pip/API call/secret read")
 	quit(0)
@@ -225,6 +242,16 @@ func _find_button(node: Node, text: String):
 		if found != null:
 			return found
 	return null
+
+
+func _option_values(options) -> Dictionary:
+	var values = {}
+	if typeof(options) != TYPE_ARRAY:
+		return values
+	for option in options:
+		if typeof(option) == TYPE_DICTIONARY:
+			values[str(option.get("name", ""))] = str(option.get("value", ""))
+	return values
 
 
 func _require(condition: bool, message: String) -> void:

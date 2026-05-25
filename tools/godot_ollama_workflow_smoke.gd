@@ -3,8 +3,9 @@ extends SceneTree
 # Headless UI smoke for Package 4: Ollama installer/model readiness workflow.
 # Proves the visible Ollama setup has one model-choice control, compact readiness
 # lights for Mistral/Nemotron plus Python/options state, Check/Save/Install actions,
-# and confirmation-gated setup intents. It does not install Ollama, create a real
-# venv, pull models, call APIs, or mutate real user Application Support data.
+# active C-AOL options apply, and confirmation-gated setup intents. It does not
+# install Ollama, create a real venv, pull models, call APIs, or mutate non-isolated
+# Application Support data.
 
 func _init() -> void:
 	call_deferred("_run")
@@ -53,11 +54,15 @@ func _run() -> void:
 
 	var config_path = paths.config.plus_file(backend_config.BACKEND_CONFIG_FILENAME)
 	var patch_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_PATCH_FILENAME)
+	var apply_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_APPLY_FILENAME)
+	var options_path = paths.config.plus_file("options.json")
 	var ollama_intent_path = paths.config.plus_file(backend_config.OLLAMA_SETUP_INTENT_FILENAME)
 	var venv_intent_path = paths.config.plus_file(backend_config.PYTHON_VENV_SETUP_INTENT_FILENAME)
 	var runner_intent_path = paths.config.plus_file(backend_config.RUNNER_TEST_INTENT_FILENAME)
 	_remove_if_exists(config_path)
 	_remove_if_exists(patch_path)
+	_remove_if_exists(apply_path)
+	_remove_if_exists(options_path)
 	_remove_if_exists(ollama_intent_path)
 	_remove_if_exists(venv_intent_path)
 	_remove_if_exists(runner_intent_path)
@@ -91,11 +96,22 @@ func _run() -> void:
 	yield(self, "idle_frame")
 	_require(File.new().file_exists(config_path), "Save options did not write backend config")
 	_require(File.new().file_exists(patch_path), "Save options did not write options patch")
+	_require(File.new().file_exists(apply_path), "Save options did not write options apply manifest")
+	_require(File.new().file_exists(options_path), "Save options did not write active C-AOL options.json")
 	var ollama_config = helpers.load_json_file(config_path)
 	_require(ollama_config.get("backend", "") == "ollama", "backend config did not persist Ollama mode")
 	_require(ollama_config.get("model", "") == "nemotron-9b-dumber:latest", "Save options did not normalize/persist the Nemotron no-think runtime alias")
 	_require(settings.read("backend_ollama_model") == "nemotron-9b-dumber:latest", "Save options did not update the saved Ollama model setting to the no-think runtime alias")
 	_require(JSON.print(ollama_config).find("LLM_INTENT_PYTHON") >= 0, "options patch/config did not explain shared Python runner path")
+	var apply_manifest = helpers.load_json_file(apply_path)
+	var applied = _option_values(helpers.load_json_file(options_path))
+	_require(apply_manifest.get("ok", false) == true and str(apply_manifest.get("status", "")).begins_with("ok_changed_"), "active options apply manifest did not report success")
+	_require(ollama_config.get("caol_options_apply", {}).get("ok", false) == true, "backend config did not include successful active options apply result")
+	_require(applied.get("LLM_INTENT_ENABLE", "") == "true", "active options did not enable the LLM runner")
+	_require(applied.get("LLM_INTENT_BACKEND", "") == "ollama" and applied.get("LLM_INTENT_USE_API", "") == "false", "active options did not select local Ollama runner mode")
+	_require(applied.get("LLM_INTENT_OLLAMA_URL", "") == backend_config.DEFAULT_OLLAMA_URL, "active options lost Ollama URL")
+	_require(applied.get("LLM_INTENT_OLLAMA_MODEL", "") == "nemotron-9b-dumber:latest", "active options lost no-think Ollama model")
+	_require(applied.get("LLM_INTENT_PYTHON", "") == "python3", "active options lost Python runner path")
 
 	var runner_button = _find_button(ui, "Test Ollama runner")
 	_require(runner_button != null, "Test Ollama runner button lookup failed")
@@ -149,9 +165,9 @@ func _run() -> void:
 	print("  UI proof: one short-label Ollama model-choice control, real Mistral tag and Nemotron no-think alias, GiB hardware/performance lights, Check, Save, Install Ollama / model, and Create venv only rendered")
 	print("  Fixture proof: command-missing, server-unreachable, model-present, and model-missing states are distinguishable without real pulls")
 	print("  Check proof: readiness-only; no backend config write")
-	print("  Save proof: Ollama endpoint/model/Python metadata round-tripped into sandbox launcher config/options patch")
+	print("  Save proof: Ollama endpoint/model/Python metadata round-tripped and active C-AOL options.json enables local runner")
 	print("  Runner proof: confirmation-gated C-AOL runner.py --backend ollama --dry-run exercised the runner route without Ollama request/install/pull")
-	print("  Install proof: confirmation-gated Ollama/model and Python venv intents recorded in proof mode; no installer, venv creation, model pull, API call, or real user config mutation")
+	print("  Install proof: confirmation-gated Ollama/model and Python venv intents recorded in proof mode; no installer, venv creation, model pull, API call, or non-isolated user config mutation")
 	quit(0)
 
 
@@ -243,6 +259,16 @@ func _visible_text_count(text: String, needle: String) -> int:
 		count += 1
 		offset = idx + needle.length()
 	return count
+
+
+func _option_values(options) -> Dictionary:
+	var values = {}
+	if typeof(options) != TYPE_ARRAY:
+		return values
+	for option in options:
+		if typeof(option) == TYPE_DICTIONARY:
+			values[str(option.get("name", ""))] = str(option.get("value", ""))
+	return values
 
 
 func _require(condition: bool, message: String) -> void:

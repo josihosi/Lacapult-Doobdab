@@ -2,8 +2,9 @@ extends SceneTree
 
 # Headless Godot smoke for Lacapult's v0 backend selector/config contract.
 # Runs under an isolated HOME. It creates a tiny fake active C-AOL install record
-# so Paths.config resolves, then writes API/Ollama/OpenVINO launcher-side backend
-# metadata without secrets, model pulls, runtime installs, or installed-game mutation.
+# so Paths.config resolves, then writes API/Ollama/OpenVINO backend metadata and
+# active C-AOL options without secrets, model pulls, runtime installs, or
+# non-isolated installed-game mutation.
 
 const INFO_FILENAME := "catapult_install_info.json"
 
@@ -42,16 +43,24 @@ func _run() -> void:
 	var sandbox_results = _run_sandbox_options_apply(paths, helpers, backend, install_dir)
 	var config_path = paths.config.plus_file("caol_backend_setup.json")
 	var patch_path = paths.config.plus_file("caol_llm_options_patch.json")
+	var apply_path = paths.config.plus_file("caol_llm_options_apply.json")
+	var options_path = paths.config.plus_file("options.json")
 	var last_config = helpers.load_json_file(config_path)
 	var last_patch = helpers.load_json_file(patch_path)
+	var last_apply = helpers.load_json_file(apply_path)
+	var active_options = helpers.load_json_file(options_path)
 	var proof = {
 		"home": OS.get_environment("HOME"),
 		"config_path": config_path,
 		"patch_path": patch_path,
+		"apply_path": apply_path,
+		"options_path": options_path,
 		"results": results,
 		"sandbox_options_apply": sandbox_results,
 		"last_config": last_config,
 		"last_patch": last_patch,
+		"last_apply": last_apply,
+		"active_option_values": _option_values(active_options),
 		"supported_backends": backend.get_supported_backends(),
 		"recommendation_summary": backend.get_backend_recommendation_summary()
 	}
@@ -67,12 +76,19 @@ func _run() -> void:
 	if not last_config or last_config.get("backend", "") != "openvino":
 		_fail("OpenVINO final config was not written")
 		return
-	if not last_patch or last_patch.get("apply_status", "") != "ready_for_confirmed_apply_not_auto_applied":
-		_fail("OpenVINO confirmed-apply guard missing")
+	if not last_patch or last_patch.get("apply_status", "") != "applied_to_active_userdir_on_save":
+		_fail("OpenVINO active-apply status missing")
+		return
+	if not last_apply or last_apply.get("ok", false) != true:
+		_fail("OpenVINO active options apply manifest missing/failed")
 		return
 	var openvino_values = _patch_option_values(last_patch)
 	if openvino_values.get("LLM_INTENT_ENABLE", "") != "true" or openvino_values.get("LLM_INTENT_BACKEND", "") != "openvino" or openvino_values.get("LLM_INTENT_USE_API", "") != "false":
 		_fail("OpenVINO runner enable/backend/mode options missing from apply patch")
+		return
+	var active_values = _option_values(active_options)
+	if active_values.get("LLM_INTENT_ENABLE", "") != "true" or active_values.get("LLM_INTENT_BACKEND", "") != "openvino" or active_values.get("LLM_INTENT_USE_API", "") != "false":
+		_fail("OpenVINO runner enable/backend/mode options missing from active options.json")
 		return
 	if not _assert_backend_recommendations(backend.get_supported_backends(), backend.get_backend_recommendation_summary()):
 		return

@@ -78,6 +78,7 @@ PATCH_CASES: dict[str, dict[str, str]] = {
         "LLM_INTENT_ENABLE": "true",
         "LLM_INTENT_BACKEND": "api",
         "LLM_INTENT_USE_API": "true",
+        "LLM_INTENT_API_PROVIDER": "openrouter",
         "LLM_INTENT_API_KEY_ENV": "CATA_API_KEY",
         "LLM_INTENT_API_MODEL": "example-api-model",
         "LLM_INTENT_PYTHON": sys.executable,
@@ -132,7 +133,7 @@ def verify_runner_truth(caol_root: Path) -> list[str]:
         'cfg.backend = get_option<std::string>( "LLM_INTENT_BACKEND" )',
         'cfg.runner_path = "tools/llm_runner/runner.py"',
         'get_option<std::string>( "LLM_INTENT_PYTHON" )',
-        'cfg.api_provider = "openai"',
+        'cfg.api_provider = get_option<std::string>( "LLM_INTENT_API_PROVIDER" )',
         'cfg.ollama_url = get_option<std::string>( "LLM_INTENT_OLLAMA_URL" )',
         'cfg.ollama_model = get_option<std::string>( "LLM_INTENT_OLLAMA_MODEL" )',
     ]
@@ -293,8 +294,7 @@ def main() -> int:
         for token in missing_runner_truth:
             print(f"    - {token}")
         return 1
-    print("  C-AOL runner truth: API via any_llm, Ollama HTTP, OpenVINO imports, self-test/dry-run, and shared Python runner path are present")
-    print("  C-AOL runtime currently hardcodes API provider to openai in src/llm_intent.cpp; Catapult-Dabubu stores provider intent but does not pretend C-AOL consumes arbitrary providers yet")
+    print("  C-AOL runner truth: API via any_llm, provider option, Ollama HTTP, OpenVINO imports, self-test/dry-run, and shared Python runner path are present")
 
     if missing_in_lacapult:
         print(f"  Missing from Lacapult patch builder: {', '.join(missing_in_lacapult)}")
@@ -306,10 +306,10 @@ def main() -> int:
         return 1
     print("  Lacapult exposes API/Ollama/OpenVINO readiness/config tokens without secret-bearing fields")
 
-    if "ready_for_confirmed_apply_not_auto_applied" not in backend_text:
-        print("  Missing confirmed/sandbox apply status guard")
+    if "applied_to_active_userdir_on_save" not in backend_text:
+        print("  Missing active-userdir apply status")
         return 1
-    print("  Launcher patch includes runner enablement/backend/mode values; real options writes stay confirmed/sandbox guarded")
+    print("  Launcher patch includes runner enablement/backend/mode values and Save options applies them to active C-AOL options.json with a backup")
 
     print("  Sandbox options apply proof wrote and verified:")
     for backend, detail in sandbox_apply.items():
@@ -320,7 +320,7 @@ def main() -> int:
     print(f"  OpenVINO dependency probe with current Python: rc={openvino_probe[0]} {openvino_probe[1]}")
     print("  OpenVINO installer posture: specialized detect/config path; installs/downloads are confirmation-gated")
     print(f"  Ollama probe: {ollama_probe}")
-    print("  No API call, secret readout, model pull, OpenVINO install, or real user config mutation was performed")
+    print("  No API call, secret readout, model pull, OpenVINO install, or real user config mutation was performed by this static/sandbox proof")
     return 0
 
 

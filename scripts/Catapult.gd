@@ -885,6 +885,7 @@ func _start_game(world := "") -> void:
 	
 	var command_path: String
 	var command_args: PoolStringArray
+	var launch_display_name := ""
 	
 	match OS.get_name():
 		"X11":
@@ -894,20 +895,16 @@ func _start_game(world := "") -> void:
 				command_args.append_array(["--world", _escape_path(world)])
 		
 		"Windows":
-			var world_str := ""
-			if world != "":
-				world_str = "--world \"%s\"" % world
-
-			var exe_file = "cataclysm-tiles.exe"
-			if Settings.read("game") == "bn" and Directory.new().file_exists(Paths.game_dir.plus_file("cataclysm-bn-tiles.exe")):
-				exe_file = "cataclysm-bn-tiles.exe"
-			if Settings.read("game") == "tlg" and Directory.new().file_exists(Paths.game_dir.plus_file("cataclysm-tlg-tiles.exe")):
-				exe_file = "cataclysm-tlg-tiles.exe"
+			var exe_info = _find_windows_executable(Paths.game_dir)
+			if exe_info.empty():
+				Status.post(tr("msg_no_executable_found_macos"), Enums.MSG_ERROR)
+				return
 
 			# For Windows, we need to use cmd to change directory and launch the executable
 			# This ensures the game runs from its installation directory
 			command_path = "cmd"
-			var game_exe_path = Paths.game_dir.plus_file(exe_file)
+			var game_exe_path = exe_info.get("path", "")
+			launch_display_name = exe_info.get("name", game_exe_path.get_file())
 			var cmd_string = "cd /d \"%s\" && \"%s\" --userdir \"%s/\"" % [Paths.game_dir, game_exe_path, Paths.userdata]
 			if world != "":
 				cmd_string += " --world \"%s\"" % world
@@ -988,13 +985,11 @@ func _start_game(world := "") -> void:
 	
 	# Show appropriate status message
 	var game_name = command_path
-	if OS.get_name() == "Windows":
-		# For Windows, extract the actual game executable name from the command
-		var exe_file = "cataclysm-tiles.exe"
-		if Settings.read("game") == "bn" and Directory.new().file_exists(Paths.game_dir.plus_file("cataclysm-bn-tiles.exe")):
-			exe_file = "cataclysm-bn-tiles.exe"
-		if Settings.read("game") == "tlg" and Directory.new().file_exists(Paths.game_dir.plus_file("cataclysm-tlg-tiles.exe")):
-			exe_file = "cataclysm-tlg-tiles.exe"
+	if launch_display_name != "":
+		game_name = launch_display_name
+	elif OS.get_name() == "Windows":
+		var exe_info = _find_windows_executable(Paths.game_dir)
+		var exe_file = exe_info.get("name", "cataclysm-tiles.exe") if not exe_info.empty() else "cataclysm-tiles.exe"
 		game_name = exe_file
 	
 	Status.post(tr("Starting game: %s") % game_name)
@@ -1953,7 +1948,7 @@ func _find_macos_executable(game_dir: String) -> Dictionary:
 		"tish":
 			exe_names = ["cataclysm-tish-tiles", "cataclysm-tiles"]
 		"caol":
-			exe_names = ["cataclysm-tiles", "cataclysm-tiles.exe", "Cataclysm-AOL"]
+			exe_names = ["cataclysm-tiles", "Cataclysm-AOL", "Cataclysm-AOL.exe", "cataclysm-tiles.exe"]
 		_:
 			exe_names = ["cataclysm-tiles"]
 	
@@ -1975,6 +1970,38 @@ func _find_macos_executable(game_dir: String) -> Dictionary:
 				return exe_info
 	
 	return {}
+
+
+func _find_windows_executable(game_dir: String) -> Dictionary:
+	var d = Directory.new()
+	var candidates = _windows_executable_candidates()
+	for exe_name in candidates:
+		var exe_path = game_dir.plus_file(exe_name)
+		if d.file_exists(exe_path):
+			return {"path": exe_path, "name": exe_name}
+
+	for item in FS.list_dir(game_dir):
+		if item.to_lower().ends_with(".exe") and item.to_lower().find("cataclysm") >= 0:
+			var full_path = game_dir.plus_file(item)
+			if d.file_exists(full_path):
+				return {"path": full_path, "name": item}
+
+	return {}
+
+
+func _windows_executable_candidates() -> Array:
+	match Settings.read("game"):
+		"bn":
+			return ["cataclysm-bn-tiles.exe", "cataclysm-tiles.exe"]
+		"tlg":
+			return ["cataclysm-tlg-tiles.exe", "cataclysm-tiles.exe"]
+		"eod":
+			return ["cataclysm-eod-tiles.exe", "cataclysm-tiles.exe"]
+		"tish":
+			return ["cataclysm-tish-tiles.exe", "cataclysm-tiles.exe"]
+		"caol":
+			return ["Cataclysm-AOL.exe", "cataclysm-tiles.exe", "cataclysm.exe", "Cataclysm.exe"]
+	return ["cataclysm-tiles.exe"]
 
 
 func _find_app_bundle_executable(app_path: String, preferred_names: Array) -> Dictionary:

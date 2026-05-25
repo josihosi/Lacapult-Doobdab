@@ -97,12 +97,18 @@ func _add_caol_mod_bridge_status_controls() -> void:
 	section.add_child(_caol_summarizer_world_select)
 
 	var chooser_label = Label.new()
-	chooser_label.text = "Summarizer target mod"
+	chooser_label.text = "Mod target"
 	section.add_child(chooser_label)
 
 	_caol_summarizer_mod_select = OptionButton.new()
-	_caol_summarizer_mod_select.hint_tooltip = "Choose one enabled contextual mod from the current world before previewing or confirming a generated C-AOL summary companion pack."
+	_caol_summarizer_mod_select.hint_tooltip = "Choose a disabled C-AOL mod to enable in the selected world, or an enabled contextual mod that needs a generated C-AOL summary companion pack."
 	section.add_child(_caol_summarizer_mod_select)
+
+	var enable_button = Button.new()
+	enable_button.text = "Enable selected mod in world"
+	enable_button.hint_tooltip = "Writes the selected world's mods.json after confirmation, ordering required dependencies before the selected mod. It does not call a backend or generate summaries."
+	enable_button.connect("pressed", self, "_on_CaolModEnableConfirmed_pressed")
+	section.add_child(enable_button)
 
 	var dry_run_button = Button.new()
 	dry_run_button.text = "Summarizer dry-run status"
@@ -124,7 +130,7 @@ func _add_caol_mod_bridge_status_controls() -> void:
 
 	var summary_roots = Label.new()
 	summary_roots.autowrap = true
-	summary_roots.text = "C-AOL summary roots stay native: generated companion packs belong in active mod roots under npcs/Backgrounds/Summaries_short or npcs/Backgrounds/Summaries_extra. The preview button shows the real apply/backup plan; the confirm button is the explicit confirmation step before a pack write or mods.json change, and backend/package/model actions remain gated."
+	summary_roots.text = "C-AOL summary roots stay native: generated companion packs belong in active mod roots under npcs/Backgrounds/Summaries_short or npcs/Backgrounds/Summaries_extra. Enable writes the selected world's mods.json with dependency ordering; preview shows the real summary apply/backup plan; confirm is the explicit backend-generation step before a pack write or mods.json change."
 	section.add_child(summary_roots)
 
 	var report_reference = Label.new()
@@ -192,16 +198,29 @@ func _populate_caol_summarizer_target_selector(overview: Dictionary) -> void:
 	var previous_id = _selected_caol_summarizer_mod_id()
 	_caol_summarizer_selected_mod_ids.clear()
 	_caol_summarizer_mod_select.clear()
+	var mods = get_node_or_null("/root/Mods")
 	var candidates = overview.get("summarizer_candidates", [])
-	if typeof(candidates) != TYPE_ARRAY or candidates.empty():
-		_caol_summarizer_mod_select.add_item("No eligible enabled contextual mod needs summaries", 0)
+	var enable_candidates = []
+	if mods != null and mods.has_method("get_caol_mod_enable_candidates"):
+		enable_candidates = mods.get_caol_mod_enable_candidates(_selected_caol_summarizer_world_name())
+	if (typeof(candidates) != TYPE_ARRAY or candidates.empty()) and (typeof(enable_candidates) != TYPE_ARRAY or enable_candidates.empty()):
+		_caol_summarizer_mod_select.add_item("No disabled mod or enabled summary candidate found", 0)
 		_caol_summarizer_mod_select.disabled = true
 		return
 	_caol_summarizer_mod_select.disabled = false
 	var selected_index = 0
 	for candidate in candidates:
 		var mod_id = str(candidate.get("id", ""))
-		var label = "%s (%s) - %s" % [candidate.get("name", mod_id), mod_id, candidate.get("summary_status", "summary-unknown")]
+		var label = "Summarize: %s (%s) - %s" % [candidate.get("name", mod_id), mod_id, candidate.get("summary_status", "summary-unknown")]
+		_caol_summarizer_selected_mod_ids.append(mod_id)
+		_caol_summarizer_mod_select.add_item(label, _caol_summarizer_selected_mod_ids.size() - 1)
+		if mod_id == previous_id:
+			selected_index = _caol_summarizer_selected_mod_ids.size() - 1
+	for candidate in enable_candidates:
+		var mod_id = str(candidate.get("id", ""))
+		if _caol_summarizer_selected_mod_ids.has(mod_id):
+			continue
+		var label = "Enable: %s (%s) - %s" % [candidate.get("name", mod_id), mod_id, candidate.get("summary_status", "summary-unknown")]
 		_caol_summarizer_selected_mod_ids.append(mod_id)
 		_caol_summarizer_mod_select.add_item(label, _caol_summarizer_selected_mod_ids.size() - 1)
 		if mod_id == previous_id:
@@ -249,6 +268,22 @@ func _on_CaolSummarizerApplyPreview_pressed() -> void:
 	var preview = mods.get_caol_summarizer_apply_preview(selected_world, selected_mod_id)
 	_caol_mod_bridge_status.text = preview.get("message", "Summarizer apply preview unavailable.")
 	Status.post("C-AOL Summarizer apply preview built for %s; explicit confirmation is still required before any backend call, generated pack, or save mutation." % (selected_mod_id if selected_mod_id != "" else "the current eligible mod"))
+
+
+func _on_CaolModEnableConfirmed_pressed() -> void:
+	var mods = get_node_or_null("/root/Mods")
+	if mods == null or not mods.has_method("enable_caol_mod_for_world"):
+		_caol_mod_bridge_status.text = "C-AOL mod enable unavailable: Mods autoload is not ready."
+		return
+	var selected_world = _selected_caol_summarizer_world_name()
+	var selected_mod_id = _selected_caol_summarizer_mod_id()
+	var result = mods.enable_caol_mod_for_world(selected_world, selected_mod_id, true)
+	_caol_mod_bridge_status.text = result.get("message", "C-AOL mod enable unavailable.")
+	if result.get("enabled", false):
+		Status.post("C-AOL mod enabled in the selected world; run Summarizer preview/confirm if it now needs summaries.")
+		_refresh_caol_mod_bridge_status()
+	else:
+		Status.post("C-AOL mod enable blocked before mutation; review the visible reason.", Enums.MSG_ERROR)
 
 
 func _on_CaolSummarizerApplyConfirmed_pressed() -> void:
@@ -378,5 +413,4 @@ func _on_sbScaleOverride_value_changed(value: float) -> void:
 		Settings.store("ui_scale_override", value / 100.0)
 		Geom.scale = value / 100.0
 		_root.theme.apply_scale(Geom.scale)
-
 

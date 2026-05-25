@@ -5,7 +5,7 @@ extends SceneTree
 # visible backend statuses use explicit colored big-dot rows rather than emoji
 # traffic lights, Ollama hardware/readiness rows include fixture RAM/VRAM, and
 # Ollama setup previews are serialized instead of shell-chained. No pip install,
-# venv creation, model pull, API call, secret read, or real user-data mutation.
+# venv creation, model pull, API call, secret read, or non-isolated user-data mutation.
 
 const OLD_LIGHTS = ["🟢", "🟡", "🔴", "🚦"]
 const FAKE_SECRET = "sk-v1-proof-secret-do-not-save"
@@ -16,9 +16,15 @@ func _init() -> void:
 
 func _run() -> void:
 	var settings = root.get_node("/root/Settings")
+	var paths = root.get_node("/root/Paths")
 	var helpers = root.get_node("/root/Helpers")
 	var backend_config = root.get_node("/root/BackendConfig")
 	settings.store("game", "caol")
+	settings.store("active_install_caol", "Windows V1 Sandbox")
+	var install_dir = paths.own_dir.plus_file("caol").plus_file("game0")
+	var dir_err = Directory.new().make_dir_recursive(install_dir)
+	_require(dir_err == OK or dir_err == ERR_ALREADY_EXISTS, "could not create sandbox active install dir")
+	_require(helpers.save_to_json_file({"name": "Windows V1 Sandbox"}, install_dir.plus_file("catapult_install_info.json")), "could not create sandbox install info")
 	settings.store("backend_mode", "api")
 	settings.store("backend_api_endpoint", "")
 	settings.store("backend_api_provider", "openrouter")
@@ -53,7 +59,7 @@ func _run() -> void:
 	_require(ui._confirm_dialog.dialog_text.find(FAKE_SECRET) < 0, "confirmation leaked fake API secret")
 	ui._on_ExternalBackendAction_confirmed()
 	yield(self, "idle_frame")
-	var intent_path = root.get_node("/root/Paths").config.plus_file(backend_config.API_SETUP_INTENT_FILENAME)
+	var intent_path = paths.config.plus_file(backend_config.API_SETUP_INTENT_FILENAME)
 	_require(File.new().file_exists(intent_path), "API setup proof intent not written")
 	var intent = helpers.load_json_file(intent_path)
 	_require(intent.get("performed_external_install", true) == false, "proof intent claimed external install")

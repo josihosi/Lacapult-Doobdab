@@ -91,17 +91,20 @@ const _ASSET_FILTERS = {
 	"caol-release-linux": {
 		"field": "name",
 		"substring": "_linux.tar.gz",
+		"preferred_tags": ["v0.2.0"],
 		"allowed_tag_prefixes": ["caol-cdda-master", "caol-ctlg-master", "caol-cdda-0-h", "caol-cdda-0-i"],
 	},
 	"caol-release-win": {
 		"field": "name",
 		"substring": "_windows.zip",
+		"preferred_tags": ["v0.2.0"],
 		"allowed_tag_prefixes": ["caol-cdda-master", "caol-ctlg-master", "caol-cdda-0-h", "caol-cdda-0-i"],
 	},
 	"caol-release-mac": {
 		"field": "name",
 		"substring": "_macos.dmg",
 		"fallback_substrings": ["_macos.tar.gz", "_macos.zip"],
+		"preferred_tags": ["v0.2.0"],
 		"allowed_tag_prefixes": ["caol-cdda-master", "caol-ctlg-master", "caol-cdda-0-h", "caol-cdda-0-i"],
 	},
 }
@@ -476,8 +479,8 @@ func _parse_builds(data: PoolByteArray, write_to: Array, filter: Dictionary) -> 
 		# Include all releases, even those without matching assets
 		tmp_arr.append(build)
 
-	if "allowed_tag_prefixes" in filter:
-		tmp_arr = _order_release_builds_by_prefix(tmp_arr, filter["allowed_tag_prefixes"])
+	if "allowed_tag_prefixes" in filter or "preferred_tags" in filter:
+		tmp_arr = _order_release_builds_by_filter(tmp_arr, filter)
 	elif "preferred_tag" in filter:
 		tmp_arr = _prioritize_release_builds(tmp_arr, filter["preferred_tag"])
 
@@ -488,22 +491,46 @@ func _parse_builds(data: PoolByteArray, write_to: Array, filter: Dictionary) -> 
 
 
 func _release_allowed_by_filter(rec: Dictionary, filter: Dictionary) -> bool:
+	var tag_name = rec.get("tag_name", "")
+	if "preferred_tags" in filter and tag_name in filter["preferred_tags"]:
+		return true
 	if not "allowed_tag_prefixes" in filter:
 		return true
-	var tag_name = rec.get("tag_name", "")
 	for prefix in filter["allowed_tag_prefixes"]:
 		if tag_name.begins_with(prefix):
 			return true
 	return false
 
 
-func _order_release_builds_by_prefix(builds: Array, allowed_tag_prefixes: Array) -> Array:
+func _order_release_builds_by_filter(builds: Array, filter: Dictionary) -> Array:
 	var ordered = []
-	for prefix in allowed_tag_prefixes:
+	var installable = []
+	var blocked = []
+
+	for preferred_tag in filter.get("preferred_tags", []):
 		for build in builds:
-			if build.get("tag_name", "").begins_with(prefix):
+			if build.get("tag_name", "") == preferred_tag and not _ordered_builds_have_tag(ordered, preferred_tag):
 				ordered.append(build)
+
+	for prefix in filter.get("allowed_tag_prefixes", []):
+		for build in builds:
+			var tag_name = build.get("tag_name", "")
+			if not tag_name.begins_with(prefix) or _ordered_builds_have_tag(ordered, tag_name):
+				continue
+			if build.get("url", "") != "":
+				installable.append(build)
+			else:
+				blocked.append(build)
+	ordered.append_array(installable)
+	ordered.append_array(blocked)
 	return ordered
+
+
+func _ordered_builds_have_tag(builds: Array, tag_name: String) -> bool:
+	for build in builds:
+		if build.get("tag_name", "") == tag_name:
+			return true
+	return false
 
 
 func _prioritize_release_builds(builds: Array, preferred_tag: String) -> Array:

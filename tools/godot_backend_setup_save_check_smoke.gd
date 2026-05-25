@@ -4,10 +4,10 @@ extends SceneTree
 # It instantiates the actual BackendSetupUI under an isolated HOME and proves:
 # - Save options / Check / backend-specific Install controls render;
 # - Check refreshes status without writing backend config;
-# - Save writes the current UI fields to launcher-side config/options metadata;
+# - Save writes the current UI fields to launcher-side config/options metadata and active C-AOL options.json;
 # - Install actions save current options before opening the confirm-gated setup step.
-# It does not install packages, pull models, call APIs, read secrets, or mutate real
-# Application Support data.
+# It does not install packages, pull models, call APIs, read secrets, or mutate
+# non-isolated Application Support data.
 
 func _init() -> void:
 	call_deferred("_run")
@@ -39,8 +39,12 @@ func _run() -> void:
 
 	var config_path = paths.config.plus_file(backend_config.BACKEND_CONFIG_FILENAME)
 	var patch_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_PATCH_FILENAME)
+	var apply_path = paths.config.plus_file(backend_config.C_AOL_OPTIONS_APPLY_FILENAME)
+	var options_path = paths.config.plus_file("options.json")
 	_remove_if_exists(config_path)
 	_remove_if_exists(patch_path)
+	_remove_if_exists(apply_path)
+	_remove_if_exists(options_path)
 
 	var ui_script = load("res://scripts/BackendSetupUI.gd")
 	var ui = VBoxContainer.new()
@@ -75,12 +79,17 @@ func _run() -> void:
 	yield(self, "idle_frame")
 	_require(File.new().file_exists(config_path), "Save options did not write backend config")
 	_require(File.new().file_exists(patch_path), "Save options did not write C-AOL options patch")
+	_require(File.new().file_exists(apply_path), "Save options did not write C-AOL options apply manifest")
+	_require(File.new().file_exists(options_path), "Save options did not write active C-AOL options.json")
 	var api_config = helpers.load_json_file(config_path)
 	_require(api_config.get("backend", "") == "api", "Save options did not persist API backend")
 	_require(api_config.get("endpoint", "") == "https://api.example.invalid/v1", "Save options did not persist API endpoint from current UI field")
 	_require(api_config.get("model", "") == "example-package2-api-model", "Save options did not persist API model from current UI field")
 	_require(api_config.get("api_key_env", "") == "LACAPULT_PACKAGE2_KEY", "Save options did not persist env-var name only")
 	_require(not api_config.has("api_key") and not api_config.has("secret"), "Save options stored a secret-shaped API key field")
+	var applied = _option_values(helpers.load_json_file(options_path))
+	_require(applied.get("LLM_INTENT_ENABLE", "") == "true" and applied.get("LLM_INTENT_BACKEND", "") == "api", "Save options did not apply API runner settings to active options.json")
+	_require(applied.get("LLM_INTENT_API_MODEL", "") == "example-package2-api-model" and applied.get("LLM_INTENT_API_KEY_ENV", "") == "LACAPULT_PACKAGE2_KEY", "Save options did not apply API model/env-var to active options.json")
 
 	settings.store("backend_mode", "ollama")
 	ui._refresh_backend_setup_controls()
@@ -101,7 +110,7 @@ func _run() -> void:
 	print("backend setup Save/Check UI smoke passed")
 	print("  rendered actions: Save options / Check / Set up API / AnyLLM / Install Ollama / model")
 	print("  Check proof: detection-only status refresh; no backend config write")
-	print("  Save proof: API fields persisted to sandboxed launcher config/options patch")
+	print("  Save proof: API fields persisted to sandboxed launcher config/options patch and active C-AOL options.json")
 	print("  Install proof: Ollama fields saved before confirm-gated setup intent; proof mode does no pull/install/API call")
 	quit(0)
 
@@ -158,6 +167,16 @@ func _find_button(node: Node, text: String):
 		if found != null:
 			return found
 	return null
+
+
+func _option_values(options) -> Dictionary:
+	var values = {}
+	if typeof(options) != TYPE_ARRAY:
+		return values
+	for option in options:
+		if typeof(option) == TYPE_DICTIONARY:
+			values[str(option.get("name", ""))] = str(option.get("value", ""))
+	return values
 
 
 func _require(condition: bool, message: String) -> void:

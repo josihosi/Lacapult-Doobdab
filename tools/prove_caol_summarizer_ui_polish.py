@@ -30,29 +30,45 @@ def main() -> None:
         "var _caol_summarizer_mod_select: OptionButton",
         "var _caol_summarizer_selected_mod_ids := []",
         "Summarizer target world",
-        "Summarizer target mod",
-        "Choose one enabled contextual mod from the current world",
+        "Mod target",
+        "Choose a disabled C-AOL mod to enable in the selected world",
+        "Enable selected mod in world",
         "get_caol_summarizer_world_names",
+        "get_caol_mod_enable_candidates",
         "_populate_caol_summarizer_target_selector(overview)",
         "overview.get(\"summarizer_candidates\", [])",
-        "No eligible enabled contextual mod needs summaries",
+        "No disabled mod or enabled summary candidate found",
         "func _selected_caol_summarizer_world_name() -> String:",
         "func _selected_caol_summarizer_mod_id() -> String:",
+        "enable_caol_mod_for_world(selected_world, selected_mod_id, true)",
         "get_caol_summarizer_apply_preview(selected_world, selected_mod_id)",
         "generate_and_apply_caol_summarizer_pack(selected_world, selected_mod_id, true, true)",
     ]:
         require(token in settings_ui, f"Settings Summarizer UI token missing: {token}")
 
     require("func get_caol_summarizer_world_names() -> Array:" in mod_manager, "world chooser source helper missing")
+    require("func get_caol_mod_enable_candidates(world_name := \"\") -> Array:" in mod_manager, "mod enable candidate helper missing")
+    require("func enable_caol_mod_for_world(world_name := \"\", selected_mod_id := \"\", confirmation_received := false) -> Dictionary:" in mod_manager, "confirmed mod enable writer missing")
+    require("Explicit player confirmation is required before changing world mods.json." in mod_manager, "mod-enable confirmation gate missing")
+    require("_caol_append_mod_with_dependencies" in mod_manager, "mod-enable dependency ordering helper missing")
     require("mods.json" in mod_manager, "world chooser does not check world mods.json")
     require("allow_backend_call := false" in mod_manager, "backend-call confirmation gate missing")
     require("a separate explicit backend-call confirmation is required" in mod_manager, "backend-call blocked message missing")
     require("preview did not pass confirmation/backend/world gates" in mod_manager, "confirmed apply gate message missing")
+    require('"api_provider": _current_backend_provider(mode)' in mod_manager, "API provider is not passed to summary generation bridge")
+    require('"api_key_env": _current_backend_api_key_env(mode)' in mod_manager, "API key env-var name is not passed to summary generation bridge")
+    require("def api(req):" in mod_manager, "AnyLLM API summary generation bridge missing")
+    require("from any_llm import completion" in mod_manager, "AnyLLM completion seam missing from summary generation bridge")
+    require("elif mode == 'api':" in mod_manager, "API generation mode is not routed")
+    require("mode in ('api', 'openvino')" not in mod_manager, "API generation is still grouped with gated OpenVINO path")
+    require("API generated one C-AOL summary entry through AnyLLM" in mod_manager, "API generation success path missing")
+    require("def normalize_summary_entry" in mod_manager, "generated summary entry normalization missing")
 
     print("C-AOL Summarizer UI polish proof passed")
     print("  Settings surface has selectable target world and eligible contextual mod controls")
     print("  Preview and confirmed generation/apply pass the chosen world and mod id")
     print("  Existing backend-call and write confirmations remain gated")
+    print("  API summary generation routes through AnyLLM instead of the old gated stub")
 
 
 if __name__ == "__main__":

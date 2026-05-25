@@ -215,7 +215,7 @@ func _build_controls() -> void:
 	add_child(button_row)
 	_save_button = Button.new()
 	_save_button.text = "Save options"
-	_save_button.hint_tooltip = "Persist the current backend options without installing packages, pulling models, or calling an API."
+	_save_button.hint_tooltip = "Persist current backend options and apply them to the active C-AOL options.json without installing packages, pulling models, or calling an API."
 	_save_button.connect("pressed", self, "_on_SaveBackendSetup_pressed")
 	button_row.add_child(_save_button)
 	_check_button = Button.new()
@@ -345,6 +345,7 @@ func _set_backend_status(mode: String, raw_status: String, prefix: String = "") 
 	if prefix != "":
 		lead = "%s — %s" % [prefix, lead]
 	lines.append("%s: %s" % [lead, light.get("summary", raw_status)])
+	lines.append("Save options: writes active C-AOL config/options.json with a backup; no install, model pull, or backend call.")
 	if mode == "api":
 		if _api_status_lights != null:
 			_set_status_rows(_api_status_lights, _api_status_rows(raw_status))
@@ -510,14 +511,21 @@ func _store_backend_field(setting_prefix: String, value: String) -> void:
 func _collect_current_backend_fields() -> Dictionary:
 	var mode = Settings.read("backend_mode")
 	var model_value = "" if _backend_model == null else _backend_model.text
+	var endpoint_value = "" if _backend_endpoint == null else _backend_endpoint.text
+	var api_provider = _current_api_provider_id()
+	if mode == "api":
+		if model_value.strip_edges() == "":
+			model_value = BackendConfig.get_api_provider_default_model(api_provider)
+		if endpoint_value.strip_edges() == "":
+			endpoint_value = BackendConfig.get_api_provider_default_base_url(api_provider)
 	if mode == "ollama":
 		model_value = BackendConfig.normalize_ollama_model_tag(Settings.read("backend_ollama_model"))
 	return {
 		"mode": mode,
-		"endpoint": "" if _backend_endpoint == null else _backend_endpoint.text,
+		"endpoint": endpoint_value,
 		"model": model_value,
 		"python_path": "" if _backend_python_path == null else _backend_python_path.text,
-		"api_provider": _current_api_provider_id(),
+		"api_provider": api_provider,
 		"api_key_env": "" if _backend_api_key_env == null else _backend_api_key_env.text,
 		"openvino_model_dir": Settings.read("backend_openvino_model_dir"),
 		"openvino_device": Settings.read("backend_openvino_device")

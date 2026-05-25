@@ -28,6 +28,7 @@ var _mods_to_install := []
 var _ids_to_delete := []
 var _ids_to_install := []
 var _ids_to_reinstall := []
+var _ids_to_enable_caol := []
 
 # Track which game types have had their mod release dates fetched this session
 var _fetched_game_types := []
@@ -663,18 +664,24 @@ func _on_BtnAddSelectedMod_pressed() -> void:
 	
 	var selection = _available_list.get_selected_items()
 	_mods_to_install = []
+	_ids_to_enable_caol = []
 	var num_stock = 0
 	var incompatible_mods = []
 
 	for index in selection:
 		var id = _available_mods_view[index]["id"]
 		var status = _mods.mod_status(id)
-		if status == 2:
-				num_stock += 1
+		var is_caol_json_catalog = Settings.read("game") == "caol" and str(_mods.available.get(id, {}).get("catalog_source", "")).begins_with("caol-json-")
+		if is_caol_json_catalog and status in [1, 2]:
+			_ids_to_enable_caol.append(id)
+		elif status == 2:
+			num_stock += 1
 		else:
 			_mods_to_install.append(id)
+			if is_caol_json_catalog:
+				_ids_to_enable_caol.append(id)
 			# Check for incompatible mods in all channels (both stable and experimental)
-			if not _mods.is_mod_compatible(id):
+			if not is_caol_json_catalog and not _mods.is_mod_compatible(id):
 				incompatible_mods.append(_mods.available[id]["modinfo"]["name"])
 
 	if num_stock == 1:
@@ -718,14 +725,28 @@ func _on_BtnAddAllMods_pressed() -> void:
 
 func _do_mod_installation() -> void:
 	
+	var did_work := false
 	if len(_ids_to_delete) > 0:
 		_mods.delete_mods(_ids_to_reinstall)
 		yield(_mods, "mod_deletion_finished")
 		_mods.install_mods(_ids_to_install + _ids_to_reinstall)
 		yield(_mods, "mod_installation_finished")
-	else:
+		did_work = true
+	elif len(_ids_to_install) > 0:
 		_mods.install_mods(_ids_to_install)
 		yield(_mods, "mod_installation_finished")
+		did_work = true
+
+	if len(_ids_to_enable_caol) > 0:
+		var enable_result = _mods.enable_caol_mods_for_world("", _ids_to_enable_caol, true)
+		if enable_result.get("enabled", false):
+			Status.post(enable_result.get("message", "C-AOL mod(s) enabled in the selected world."))
+		else:
+			Status.post(enable_result.get("message", "C-AOL mod enable failed before mutation."), Enums.MSG_ERROR)
+		did_work = true
+
+	if not did_work:
+		Status.post("No mod install or C-AOL world-enable action was available for the current selection.", Enums.MSG_WARN)
 	
 	reload_installed()
 	reload_available()

@@ -1621,6 +1621,150 @@ func get_caol_summarizer_world_names() -> Array:
 	return worlds
 
 
+func get_caol_mod_enable_candidates(world_name := "") -> Array:
+	if Settings.read("game") != "caol":
+		return []
+	var status = get_caol_mod_summarizer_status(world_name)
+	var enabled_ids = status.get("world", {}).get("enabled_mod_ids", [])
+	var result := []
+	for record in status.get("mods", []):
+		if not _caol_record_can_load_in_world(record):
+			continue
+		if enabled_ids.has(record.get("id", "")):
+			continue
+		if record.get("metadata_status", "") == "metadata-broken" or record.get("obsolete_status", "") == "obsolete-blocked":
+			continue
+		result.append({
+			"id": record.get("id", ""),
+			"name": record.get("name", record.get("id", "")),
+			"source_type": record.get("source_type", ""),
+			"summary_status": record.get("summary_status", "summary-unknown"),
+			"dependency_status": record.get("dependency_status", "unknown"),
+		})
+	return result
+
+
+func get_caol_mod_enable_preview(world_name := "", selected_mod_id := "", confirmation_received := false) -> Dictionary:
+	var status = get_caol_mod_summarizer_status(world_name)
+	var world = status.get("world", {})
+	var world_path = str(world.get("world_path", ""))
+	var mods_json_path = world_path.plus_file("mods.json") if world_path != "" else ""
+	var enabled_ids = world.get("enabled_mod_ids", [])
+	var planned_order := []
+	for id in enabled_ids:
+		planned_order.append(id)
+
+	var selected = _find_caol_enable_record(status, selected_mod_id)
+	var blocked_reasons := []
+	if Settings.read("game") != "caol":
+		blocked_reasons.append("C-AOL mod enable only runs for game=caol.")
+	if selected_mod_id == "":
+		blocked_reasons.append("Choose a C-AOL mod before enabling it in a world.")
+	elif selected.empty():
+		blocked_reasons.append("Selected mod is not installed as a C-AOL stock/user/world mod; install it before enabling.")
+	if world_path == "" or world.get("mods_json_present", false) != true:
+		blocked_reasons.append("Select a world with a readable mods.json before enabling mods.")
+	if not selected.empty():
+		_caol_append_mod_with_dependencies(status, selected_mod_id, planned_order, blocked_reasons, [])
+	if confirmation_received != true:
+		blocked_reasons.append("Explicit player confirmation is required before changing world mods.json.")
+
+	var already_enabled = selected_mod_id != "" and enabled_ids.has(selected_mod_id)
+	var would_write = blocked_reasons.empty() and planned_order != enabled_ids
+	var lines := []
+	if selected.empty():
+		lines.append("C-AOL mod enable preview: blocked.")
+	else:
+		lines.append("C-AOL mod enable preview: %s." % ("ready after confirmation" if would_write else ("already enabled" if already_enabled and blocked_reasons.empty() else "blocked")))
+		lines.append("Target mod/world: %s (%s) in %s." % [selected.get("name", selected_mod_id), selected_mod_id, world.get("world_name", "unknown world")])
+		lines.append("World mods.json: %s." % mods_json_path)
+		lines.append("Planned mod order: %s." % JSON.print(planned_order))
+	for reason in blocked_reasons:
+		lines.append("Blocked: %s" % reason)
+
+	return {
+		"action": "caol_mod_enable_plan_v0",
+		"version": 1,
+		"read_only_preview": true,
+		"selected_mod_id": selected_mod_id,
+		"selected_mod_name": selected.get("name", selected_mod_id) if not selected.empty() else "",
+		"world_name": world.get("world_name", null),
+		"world_path": world_path,
+		"requires_confirmation": true,
+		"confirmation_received": confirmation_received,
+		"already_enabled": already_enabled,
+		"would_mutate": would_write,
+		"would_enable_mods": would_write,
+		"blocked_reasons": blocked_reasons,
+		"write_plan": {
+			"mods_json": mods_json_path,
+			"previous_mod_order": enabled_ids,
+			"planned_mod_order": planned_order,
+		},
+		"message": "\n".join(lines),
+	}
+
+
+func enable_caol_mod_for_world(world_name := "", selected_mod_id := "", confirmation_received := false) -> Dictionary:
+	var preview = get_caol_mod_enable_preview(world_name, selected_mod_id, confirmation_received)
+	if preview.get("already_enabled", false) and preview.get("blocked_reasons", []).empty():
+		return _caol_enable_result(true, preview, "C-AOL mod is already enabled in the selected world.", {})
+	if preview.get("would_mutate", false) != true:
+		return _caol_enable_result(false, preview, "C-AOL mod enable blocked; preview did not pass confirmation/world/mod gates.", {})
+
+	var write_plan = preview.get("write_plan", {})
+	var mods_json_path = str(write_plan.get("mods_json", ""))
+	if mods_json_path == "":
+		return _caol_enable_result(false, preview, "C-AOL mod enable failed before writing: mods.json path is empty.", {})
+
+	var timestamp = _caol_apply_timestamp()
+	var backup_dir = Paths.save_backups.plus_file("lacapult_mod_enable_%s_%s" % [_safe_id_fragment(preview.get("selected_mod_id", "unknown")), timestamp])
+	var d = Directory.new()
+	var mkdir_err = d.make_dir_recursive(backup_dir)
+	if mkdir_err != OK:
+		return _caol_enable_result(false, preview, "C-AOL mod enable failed before writing: could not create backup directory (%s)." % mkdir_err, {"backup_dir": backup_dir})
+	var previous_mods_text = _read_text_file(mods_json_path)
+	if previous_mods_text == null:
+		return _caol_enable_result(false, preview, "C-AOL mod enable failed before writing: target world mods.json could not be read.", {"mods_json": mods_json_path})
+	_write_text_file(backup_dir.plus_file("mods.json.before.exact"), previous_mods_text)
+	Helpers.save_to_json_file(write_plan.get("previous_mod_order", []), backup_dir.plus_file("mods.json.before.json"))
+
+	var wrote_mods = Helpers.save_to_json_file(write_plan.get("planned_mod_order", []), mods_json_path)
+	if not wrote_mods:
+		return _caol_enable_result(false, preview, "C-AOL mod enable failed while updating world mods.json; backup is available for rollback.", {"backup_dir": backup_dir, "mods_json": mods_json_path})
+
+	var details = {
+		"mods_json": mods_json_path,
+		"backup_dir": backup_dir,
+		"previous_mod_order": write_plan.get("previous_mod_order", []),
+		"planned_mod_order": write_plan.get("planned_mod_order", []),
+	}
+	return _caol_enable_result(true, preview, "C-AOL mod enabled in world after explicit confirmation. Backup is available at %s." % backup_dir, details)
+
+
+func enable_caol_mods_for_world(world_name := "", mod_ids := [], confirmation_received := false) -> Dictionary:
+	var applied := []
+	var last_result := {}
+	for mod_id in mod_ids:
+		last_result = enable_caol_mod_for_world(world_name, str(mod_id), confirmation_received)
+		if not last_result.get("enabled", false):
+			return {
+				"action": "caol_mod_enable_batch_v0",
+				"enabled": false,
+				"applied": applied,
+				"failed": last_result,
+				"message": last_result.get("message", "C-AOL mod enable batch failed."),
+			}
+		applied.append(last_result)
+	return {
+		"action": "caol_mod_enable_batch_v0",
+		"enabled": true,
+		"applied": applied,
+		"failed": {},
+		"message": "Enabled %s C-AOL mod(s) in the selected world." % applied.size(),
+	}
+
+
 func get_caol_summarizer_apply_preview(world_name := "", selected_mod_id := "", confirmation_received := false) -> Dictionary:
 	# Slice 6 preview/action plan. This builds a player-facing plan but does not
 	# call a backend, generate files, apply packs, enable mods, or mutate saves.
@@ -1789,13 +1933,30 @@ func _current_backend_model(mode: String) -> String:
 	if mode == "ollama":
 		return str(Settings.read("backend_ollama_model"))
 	if mode == "api":
-		return str(Settings.read("backend_api_model"))
+		var model = str(Settings.read("backend_api_model")).strip_edges()
+		if model == "" and get_node_or_null("/root/BackendConfig") != null:
+			model = BackendConfig.get_api_provider_default_model(str(Settings.read("backend_api_provider")))
+		return model
 	return ""
 
 
 func _current_backend_endpoint(mode: String) -> String:
 	if mode == "ollama":
 		return str(Settings.read("backend_ollama_endpoint"))
+	if mode == "api":
+		return str(Settings.read("backend_api_endpoint"))
+	return ""
+
+
+func _current_backend_provider(mode: String) -> String:
+	if mode == "api":
+		return str(Settings.read("backend_api_provider"))
+	return ""
+
+
+func _current_backend_api_key_env(mode: String) -> String:
+	if mode == "api":
+		return str(Settings.read("backend_api_key_env"))
 	return ""
 
 
@@ -1807,6 +1968,8 @@ func _caol_generate_summary_entries(preview: Dictionary, selected: Dictionary) -
 		"backend_status": str(preview.get("backend_status", "")),
 		"endpoint": _current_backend_endpoint(mode),
 		"model": _current_backend_model(mode),
+		"api_provider": _current_backend_provider(mode),
+		"api_key_env": _current_backend_api_key_env(mode),
 		"source_mod_id": str(selected.get("id", preview.get("selected_mod_id", "unknown"))),
 		"source_mod_name": str(selected.get("name", preview.get("selected_mod_name", "unknown"))),
 		"source_type": str(selected.get("source_type", "unknown")),
@@ -1851,6 +2014,82 @@ def write(path, payload):
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(payload, f, indent=2, sort_keys=True)
 
+def nonempty(value, fallback):
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    return fallback
+
+def summary_prompt(req):
+    source_id = req.get('source_mod_id') or 'unknown'
+    source_name = req.get('source_mod_name') or source_id
+    return ('Generate exactly one compact JSON object for a Cataclysm: Arsenic and Old Lace NPC personality summary. '
+            'Return only JSON with keys selector, topic, your_background, your_expression, source_tag. '
+            'Do not invent secrets or launcher metadata. Source mod id: %s. Source mod name: %s. Content flags: %s.'
+            % (source_id, source_name, json.dumps(req.get('content_flags') or {}, sort_keys=True)))
+
+def normalize_summary_entry(entry, source_id, source_name):
+    if not isinstance(entry, dict):
+        raise ValueError('summary entry is not a JSON object')
+    result = dict(entry)
+    result['type'] = nonempty(result.get('type'), 'npc_personality_summary')
+    result['selector'] = nonempty(result.get('selector'), source_id + ':context')
+    result['topic'] = nonempty(result.get('topic'), source_id + '_world_context')
+    result['your_background'] = nonempty(result.get('your_background'), 'Generated summary for ' + source_name + '.')
+    result['your_expression'] = nonempty(result.get('your_expression'), 'Refer to generated context from ' + source_name + '.')
+    result['source_tag'] = nonempty(result.get('source_tag'), 'lacapult-generated:' + source_id)
+    return result
+
+def parse_summary_entry(text, source_id, source_name):
+    response = (text or '').strip()
+    if response.startswith('```'):
+        response = response.strip('`').replace('json\\n', '', 1).strip()
+    return normalize_summary_entry(json.loads(response), source_id, source_name)
+
+def extract_message_content_text(content):
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for item in content:
+            if isinstance(item, str):
+                parts.append(item)
+            elif isinstance(item, dict):
+                text = item.get('text')
+                if isinstance(text, str) and text:
+                    parts.append(text)
+            else:
+                text = getattr(item, 'text', None)
+                if isinstance(text, str) and text:
+                    parts.append(text)
+        return ''.join(parts)
+    if isinstance(content, dict):
+        text = content.get('text')
+        if isinstance(text, str):
+            return text
+    text = getattr(content, 'text', None)
+    return text if isinstance(text, str) else ''
+
+def extract_completion_text(response):
+    if response is None:
+        return ''
+    if isinstance(response, dict):
+        choices = response.get('choices')
+        if isinstance(choices, list) and choices:
+            message = choices[0].get('message', {})
+            text = extract_message_content_text(message.get('content'))
+            if text:
+                return text
+    choices = getattr(response, 'choices', None)
+    if isinstance(choices, list) and choices:
+        message = getattr(choices[0], 'message', None)
+        text = extract_message_content_text(getattr(message, 'content', None))
+        if text:
+            return text
+    output_text = getattr(response, 'output_text', None)
+    if isinstance(output_text, str) and output_text:
+        return output_text
+    return str(response)
+
 def fixture(req):
     source_id = req.get('source_mod_id') or 'unknown'
     source_name = req.get('source_mod_name') or source_id
@@ -1875,10 +2114,7 @@ def ollama(req):
     source_name = req.get('source_mod_name') or source_id
     if not model:
         return {'ok': False, 'backend_mode': 'ollama', 'message': 'Ollama model is not selected; no model pull was attempted.'}
-    prompt = ('Generate exactly one compact JSON object for a Cataclysm: Arsenic and Old Lace NPC personality summary. '
-              'Return only JSON with keys selector, topic, your_background, your_expression, source_tag. '
-              'Do not invent secrets or launcher metadata. Source mod id: %s. Source mod name: %s. Content flags: %s.'
-              % (source_id, source_name, json.dumps(req.get('content_flags') or {}, sort_keys=True)))
+    prompt = summary_prompt(req)
     body = json.dumps({'model': model, 'prompt': prompt, 'stream': False, 'format': 'json', 'options': {'temperature': 0.2, 'num_predict': 240}}).encode('utf-8')
     http_req = urllib.request.Request(endpoint + '/api/generate', data=body, headers={'Content-Type': 'application/json'}, method='POST')
     try:
@@ -1890,21 +2126,54 @@ def ollama(req):
         response = json.loads(raw).get('response', '').strip()
     except Exception as exc:
         return {'ok': False, 'backend_mode': 'ollama', 'message': 'Ollama response was not valid JSON envelope: ' + str(exc), 'raw_sample': raw[:500]}
-    if response.startswith('```'):
-        response = response.strip('`').replace('json\\n', '', 1).strip()
     try:
-        entry = json.loads(response)
+        entry = parse_summary_entry(response, source_id, source_name)
     except Exception as exc:
         return {'ok': False, 'backend_mode': 'ollama', 'message': 'Ollama response was not a JSON summary object: ' + str(exc), 'raw_sample': response[:500]}
-    if not isinstance(entry, dict):
-        return {'ok': False, 'backend_mode': 'ollama', 'message': 'Ollama response was not a JSON object.'}
-    entry.setdefault('type', 'npc_personality_summary')
-    entry.setdefault('selector', source_id + ':context')
-    entry.setdefault('topic', source_id + '_world_context')
-    entry.setdefault('your_background', 'Generated summary for ' + source_name + '.')
-    entry.setdefault('your_expression', 'Refer to generated context from ' + source_name + '.')
-    entry.setdefault('source_tag', 'lacapult-generated:' + source_id)
     return {'ok': True, 'backend_mode': 'ollama', 'model': model, 'message': 'Ollama generated one C-AOL summary entry; no model pull or API secret was used.', 'entries': [entry]}
+
+def api(req):
+    try:
+        from any_llm import completion
+    except Exception as exc:
+        return {'ok': False, 'backend_mode': 'api', 'message': 'AnyLLM import failed before any API call or file write: ' + str(exc)}
+    provider = (req.get('api_provider') or 'openai').strip()
+    model = (req.get('model') or '').strip()
+    api_key_env = (req.get('api_key_env') or '').strip()
+    endpoint = (req.get('endpoint') or '').strip()
+    source_id = req.get('source_mod_id') or 'unknown'
+    source_name = req.get('source_mod_name') or source_id
+    if not model:
+        return {'ok': False, 'backend_mode': 'api', 'message': 'API model is not selected; no API call was attempted.'}
+    if not api_key_env:
+        return {'ok': False, 'backend_mode': 'api', 'message': 'API key environment-variable name is empty; no API call was attempted.'}
+    import os
+    api_key = os.environ.get(api_key_env, '')
+    if not api_key:
+        return {'ok': False, 'backend_mode': 'api', 'message': 'API key env var is not set; no secret was read and no API call was attempted.', 'api_key_env': api_key_env}
+    if provider.lower() == 'openai':
+        os.environ['OPENAI_API_KEY'] = api_key
+    kwargs = {
+        'model': model,
+        'provider': provider,
+        'messages': [{'role': 'user', 'content': summary_prompt(req)}],
+        'api_key': api_key,
+    }
+    if endpoint and provider == 'custom_any_llm':
+        kwargs['api_base'] = endpoint
+    try:
+        try:
+            response = completion(**kwargs)
+        except TypeError:
+            if 'api_base' in kwargs:
+                kwargs['base_url'] = kwargs.pop('api_base')
+                response = completion(**kwargs)
+            else:
+                raise
+        entry = parse_summary_entry(extract_completion_text(response), source_id, source_name)
+    except Exception as exc:
+        return {'ok': False, 'backend_mode': 'api', 'message': 'API generation failed before any file write: ' + str(exc), 'provider': provider, 'model': model}
+    return {'ok': True, 'backend_mode': 'api', 'provider': provider, 'model': model, 'message': 'API generated one C-AOL summary entry through AnyLLM; API key value was not written by Catapult-Dabubu.', 'entries': [entry]}
 
 def main():
     req_path, out_path = sys.argv[1], sys.argv[2]
@@ -1915,7 +2184,9 @@ def main():
         result = fixture(req)
     elif mode == 'ollama':
         result = ollama(req)
-    elif mode in ('api', 'openvino'):
+    elif mode == 'api':
+        result = api(req)
+    elif mode == 'openvino':
         result = {'ok': False, 'backend_mode': mode, 'message': mode + ' live summary generation is still gated; no API secret, package install, model conversion, or file write was attempted.'}
     else:
         result = {'ok': False, 'backend_mode': mode or 'unknown', 'message': 'Unsupported Summarizer backend mode.'}
@@ -1932,6 +2203,63 @@ func _find_caol_status_record(status: Dictionary, mod_id: String) -> Dictionary:
 		if record.get("id", "") == mod_id:
 			return record
 	return {}
+
+
+func _find_caol_enable_record(status: Dictionary, mod_id: String) -> Dictionary:
+	var fallback := {}
+	for record in status.get("mods", []):
+		if record.get("id", "") != mod_id:
+			continue
+		if not _caol_record_can_load_in_world(record):
+			continue
+		if record.get("enabled_status", "") == "enabled-in-world":
+			return record
+		if fallback.empty() or ["user", "world-custom"].has(record.get("source_type", "")):
+			fallback = record
+	return fallback
+
+
+func _caol_record_can_load_in_world(record: Dictionary) -> bool:
+	if record.get("generated_summary_pack", {}).get("present", false):
+		return false
+	return ["stock", "user", "world-custom"].has(record.get("source_type", ""))
+
+
+func _caol_append_mod_with_dependencies(status: Dictionary, mod_id: String, planned_order: Array, blocked_reasons: Array, visiting: Array) -> void:
+	if planned_order.has(mod_id):
+		return
+	if visiting.has(mod_id):
+		blocked_reasons.append("Dependency cycle detected while enabling %s." % mod_id)
+		return
+	var record = _find_caol_enable_record(status, mod_id)
+	if record.empty():
+		blocked_reasons.append("Required mod %s is not installed as a loadable C-AOL mod." % mod_id)
+		return
+	if record.get("metadata_status", "") == "metadata-broken":
+		blocked_reasons.append("Required mod %s has broken metadata." % mod_id)
+		return
+	if record.get("obsolete_status", "") == "obsolete-blocked":
+		blocked_reasons.append("Required mod %s is marked obsolete." % mod_id)
+		return
+	var next_visiting = visiting.duplicate()
+	next_visiting.append(mod_id)
+	for dep in record.get("dependencies", []):
+		_caol_append_mod_with_dependencies(status, str(dep), planned_order, blocked_reasons, next_visiting)
+	if not planned_order.has(mod_id):
+		planned_order.append(mod_id)
+
+
+func _caol_enable_result(enabled: bool, preview: Dictionary, message: String, details: Dictionary) -> Dictionary:
+	return {
+		"action": "caol_mod_enable_confirmed_v0",
+		"version": 1,
+		"enabled": enabled,
+		"preview": preview,
+		"message": message,
+		"details": details,
+		"mutated_paths": [details.get("mods_json", "")] if enabled and details.has("mods_json") else [],
+		"rollback_visible": enabled and details.has("backup_dir"),
+	}
 
 
 func _caol_apply_result(applied: bool, preview: Dictionary, message: String, details: Dictionary) -> Dictionary:
@@ -2024,4 +2352,3 @@ func _caol_remove_dir(path: String) -> void:
 		elif d.file_exists(child):
 			d.remove(child)
 	d.remove(path)
-

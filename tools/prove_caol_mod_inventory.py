@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_CAOL_ROOT = ROOT.parent / "Cataclysm-AOL"
 DEFAULT_DMG = ROOT / ".proof-cache" / "caol-dmg" / "caol_cdda-0-h_2026-03-29-1556_macos.dmg"
 DEFAULT_REPORT_DIR = ROOT / ".proof-cache" / "caol-mod-bridge"
 
@@ -326,7 +327,7 @@ def write_markdown_report(path: Path, result: dict[str, Any]) -> None:
         "",
         "## Summary",
         "",
-        f"- App bundle: `{result['app_bundle']}`",
+        f"- Source: `{result.get('app_bundle', result.get('source_path', result.get('source', 'unknown')) )}`",
         f"- Stock mod root: `{result['stock_mods_path']}`",
         f"- Non-obsolete packaged mods: {result['stock_mod_count']}",
         f"- Obsolete packaged mods: {result['obsolete_stock_mod_count']}",
@@ -381,12 +382,78 @@ def write_reports(report_dir: Path, result: dict[str, Any]) -> dict[str, str]:
     return paths
 
 
+def build_result_from_mods_dir(mods_dir: Path, source_label: str, source_path: Path) -> dict[str, Any]:
+    mods = build_mod_report(mods_dir)
+    stock_ids = sorted(str(mod.get("id")) for mod in mods if mod.get("id") and not mod.get("obsolete"))
+    obsolete_ids = sorted(str(mod.get("id")) for mod in mods if mod.get("id") and mod.get("obsolete"))
+    data_dir = mods_dir.parent
+    caol_root = data_dir.parent if data_dir.name == "data" else source_path
+    return {
+        "source": source_label,
+        "source_path": str(source_path),
+        "stock_mods_path": str(mods_dir),
+        "stock_mod_count": len(stock_ids),
+        "obsolete_stock_mod_count": len(obsolete_ids),
+        "stock_mod_ids_sample": stock_ids[:30],
+        "obsolete_stock_mod_ids_sample": obsolete_ids[:20],
+        "soundpack_dir_exists": (data_dir / "sound").exists(),
+        "tileset_gfx_dir_exists": (caol_root / "gfx").exists(),
+        "lacapult_source_assumptions": inspect_lacapult_sources(),
+        "summarizer_bridge_contract": {
+            "runtime_source": "C-AOL src/llm_intent.cpp background_summary_data_roots/load_background_summary_dir",
+            "roots_loaded_by_runtime": [
+                "core data/json",
+                "active world mod paths",
+                "world custom mods path",
+            ],
+            "active_mod_summary_dirs": [
+                SUMMARY_SHORT_REL.as_posix(),
+                SUMMARY_EXTRA_REL.as_posix(),
+            ],
+            "formats": [
+                "legacy pipe-delimited .txt",
+                "npc_personality_summary JSON object/array/bundle",
+            ],
+            "lacapult_bridge_rule": "Generate or install summary packs into active C-AOL mod roots; do not invent a Lacapult-only summary metadata format.",
+        },
+        "classification": {
+            "stock_packaged_caol_mods": "supported_by_path_shape_and_present_in_selected_caol_tree",
+            "user_installed_mods": "mechanically_supported_by_inherited_userdata_mods_path_content_compatibility_unknown",
+            "custom_download_catalogs_for_caol": "unknown_or_empty_until_caol_mod_repo_is_populated",
+            "inherited_dda_bn_tlg_catalogs": "untested_for_caol",
+            "future_npc_llm_mod_summaries": "use_existing_active_mod_summary_roots_not_runtime_integrated_by_lacapult_yet",
+        },
+        "status_counts": status_counts(mods),
+        "mods": mods,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dmg", type=Path, default=DEFAULT_DMG)
+    parser.add_argument("--caol-root", type=Path, default=None)
+    parser.add_argument("--mods-dir", type=Path, default=None)
     parser.add_argument("--report-dir", type=Path, default=DEFAULT_REPORT_DIR)
     parser.add_argument("--no-write-reports", action="store_true")
     args = parser.parse_args()
+
+    if args.mods_dir is not None or args.caol_root is not None:
+        source_path = args.caol_root or args.mods_dir
+        mods_dir = args.mods_dir or (args.caol_root / "data" / "mods")
+        if not mods_dir.exists():
+            print(f"Missing C-AOL mods dir: {mods_dir}", file=sys.stderr)
+            return 2
+        result = build_result_from_mods_dir(mods_dir, "local_caol_tree", source_path)
+        if not args.no_write_reports:
+            result["report_paths"] = write_reports(args.report_dir, result)
+        print(json.dumps(result, indent=2, sort_keys=True))
+        if result["stock_mod_count"] == 0:
+            print("No stock C-AOL mod IDs found", file=sys.stderr)
+            return 1
+        if not result["lacapult_source_assumptions"]["mods_stock_uses_app_bundle_data"]:
+            print("Lacapult stock mod path does not use app-bundle data path", file=sys.stderr)
+            return 1
+        return 0
 
     if sys.platform != "darwin":
         print("This proof currently inspects the macOS DMG/app-bundle shape and must run on macOS.", file=sys.stderr)

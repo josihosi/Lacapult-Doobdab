@@ -2,13 +2,16 @@ extends Node
 
 # Safe first-pass backend setup helper for C-AOL.
 # This deliberately stores runner option values and environment-variable names,
-# never API keys. Installed-game options writes remain confirmation/sandbox-guarded.
+# never API keys. Save options applies runner settings to the active C-AOL userdir
+# with a backup and manifest; installs/downloads/backend calls remain confirmation-gated.
 
 const BACKEND_API = "api"
 const BACKEND_OLLAMA = "ollama"
 const BACKEND_OPENVINO = "openvino"
 const BACKEND_CONFIG_FILENAME = "caol_backend_setup.json"
 const C_AOL_OPTIONS_PATCH_FILENAME = "caol_llm_options_patch.json"
+const C_AOL_OPTIONS_APPLY_FILENAME = "caol_llm_options_apply.json"
+const C_AOL_OPTIONS_FILENAME = "options.json"
 const API_SETUP_INTENT_FILENAME = "caol_api_setup_intent.json"
 const OLLAMA_SETUP_INTENT_FILENAME = "caol_ollama_setup_intent.json"
 const PYTHON_VENV_SETUP_INTENT_FILENAME = "caol_python_venv_setup_intent.json"
@@ -458,7 +461,7 @@ func get_supported_backends() -> Array:
 
 
 func get_backend_recommendation_summary() -> String:
-	return "Setup paths: API / AnyLLM for a hosted backend, Ollama for mainstream local play, and OpenVINO for specialized local acceleration. Check is detection-only. Save options writes the selected runner option patch (enablement, backend mode, model, and runner path) but no API call, model pull, package install, generated summary-pack apply, or real C-AOL config mutation happens without an explicit confirmation step."
+	return "Setup paths: API / AnyLLM for a hosted backend, Ollama for mainstream local play, and OpenVINO for specialized local acceleration. Check is detection-only. Save options writes the selected runner option patch and applies it to the active C-AOL userdir options.json with a backup. It still makes no API call, model pull, package install, or generated summary-pack apply."
 
 func get_backend_guidance(mode: String) -> String:
 	if mode == BACKEND_API:
@@ -480,7 +483,7 @@ func check_backend_status(mode: String, endpoint: String = "", model: String = "
 func get_status_light(raw_status: String) -> Dictionary:
 	if raw_status == "ok":
 		return {"color": "green", "state": "Ready", "summary": "Options saved."}
-	if raw_status.find("unsupported") >= 0 or raw_status.find("write_error") >= 0 or raw_status.find("config_dir_error") >= 0:
+	if raw_status.find("unsupported") >= 0 or raw_status.find("write_error") >= 0 or raw_status.find("config_dir_error") >= 0 or raw_status.find("game_config_dir_unavailable") >= 0 or raw_status.find("options_apply") >= 0 or raw_status.find("options_json") >= 0:
 		return {"color": "red", "state": "Error", "summary": "Save/check failed."}
 	if raw_status.find("api_python_missing") >= 0 or raw_status.find("ollama_command_missing") >= 0 or raw_status.find("openvino_python_missing") >= 0:
 		return {"color": "red", "state": "Missing", "summary": _status_summary(raw_status)}
@@ -495,15 +498,19 @@ func write_launcher_backend_config(mode: String, endpoint: String = "", model: S
 	if not mode in [BACKEND_API, BACKEND_OLLAMA, BACKEND_OPENVINO]:
 		return "unsupported_backend"
 
+	var config_dir = Paths.config
+	if config_dir == "":
+		return "game_config_dir_unavailable_active_install_required"
 	var d = Directory.new()
-	if not d.dir_exists(Paths.config):
-		var err = d.make_dir_recursive(Paths.config)
+	if not d.dir_exists(config_dir):
+		var err = d.make_dir_recursive(config_dir)
 		if err != OK:
 			return "config_dir_error_%s" % err
 
 	var normalized = _normalize_backend_fields(mode, endpoint, model, python_path, api_provider, api_key_env, openvino_model_dir, openvino_device)
 	var status = _detect_backend_status(mode, normalized)
 	var options_patch = _build_caol_options_patch(mode, normalized)
+	var options_apply = _apply_caol_options_patch_to_active_user_config(options_patch)
 	var safe_config = {
 		"backend": mode,
 		"status": status,
@@ -518,21 +525,37 @@ func write_launcher_backend_config(mode: String, endpoint: String = "", model: S
 		"last_check": OS.get_datetime(),
 		"notes": _backend_notes(mode),
 		"guidance": get_backend_guidance(mode),
-		"caol_options_patch": options_patch
+		"caol_options_patch": options_patch,
+		"caol_options_apply": options_apply
 	}
-	if not Helpers.save_to_json_file(safe_config, Paths.config.plus_file(BACKEND_CONFIG_FILENAME)):
+	if not Helpers.save_to_json_file(safe_config, config_dir.plus_file(BACKEND_CONFIG_FILENAME)):
 		return "config_write_error"
-	if not Helpers.save_to_json_file(options_patch, Paths.config.plus_file(C_AOL_OPTIONS_PATCH_FILENAME)):
+	if not Helpers.save_to_json_file(options_patch, config_dir.plus_file(C_AOL_OPTIONS_PATCH_FILENAME)):
 		return "options_patch_write_error"
+	if not Helpers.save_to_json_file(options_apply, config_dir.plus_file(C_AOL_OPTIONS_APPLY_FILENAME)):
+		return "options_apply_manifest_write_error"
+	if not options_apply.get("ok", false):
+		return str(options_apply.get("status", "options_apply_failed"))
 	return "ok"
 
 
-func write_api_setup_intent(provider_id: String, python_path: String = "", performed_external_install: bool = false, exit_code: int = -1, result_summary: String = "plan_only_no_venv_no_pip_no_secret_no_api_call", command_results: Array = []) -> String:
+func _ensure_backend_config_dir() -> Dictionary:
+	var config_dir = Paths.config
+	if config_dir == "":
+		return {"ok": false, "status": "game_config_dir_unavailable_active_install_required", "path": ""}
 	var d = Directory.new()
-	if not d.dir_exists(Paths.config):
-		var err = d.make_dir_recursive(Paths.config)
-		if err != OK:
-			return "config_dir_error_%s" % err
+	if not d.dir_exists(config_dir):
+		var err = d.make_dir_recursive(config_dir)
+		if err != OK and err != ERR_ALREADY_EXISTS:
+			return {"ok": false, "status": "config_dir_error_%s" % err, "path": config_dir}
+	return {"ok": true, "status": "ok", "path": config_dir}
+
+
+func write_api_setup_intent(provider_id: String, python_path: String = "", performed_external_install: bool = false, exit_code: int = -1, result_summary: String = "plan_only_no_venv_no_pip_no_secret_no_api_call", command_results: Array = []) -> String:
+	var config_dir_status = _ensure_backend_config_dir()
+	if not config_dir_status.get("ok", false):
+		return config_dir_status.get("status", "config_dir_error")
+	var config_dir = config_dir_status.get("path", "")
 	var plan = build_api_setup_plan(provider_id, python_path)
 	var intent = {
 		"action": "install_api_backend",
@@ -553,18 +576,17 @@ func write_api_setup_intent(provider_id: String, python_path: String = "", perfo
 		"secret_policy": "No API key is stored or displayed; only the env-var name belongs in backend config.",
 		"recorded_at": OS.get_datetime()
 	}
-	if not Helpers.save_to_json_file(intent, Paths.config.plus_file(API_SETUP_INTENT_FILENAME)):
+	if not Helpers.save_to_json_file(intent, config_dir.plus_file(API_SETUP_INTENT_FILENAME)):
 		return "api_setup_intent_write_error"
 	return "ok"
 
 
 
 func write_ollama_setup_intent(endpoint: String = DEFAULT_OLLAMA_URL, model: String = "", performed_external_install: bool = false, command_results: Array = [], result_summary: String = "plan_only_no_installer_no_model_pull") -> String:
-	var d = Directory.new()
-	if not d.dir_exists(Paths.config):
-		var err = d.make_dir_recursive(Paths.config)
-		if err != OK:
-			return "config_dir_error_%s" % err
+	var config_dir_status = _ensure_backend_config_dir()
+	if not config_dir_status.get("ok", false):
+		return config_dir_status.get("status", "config_dir_error")
+	var config_dir = config_dir_status.get("path", "")
 	var plan = build_ollama_setup_plan(endpoint, model)
 	var intent = {
 		"action": plan.get("action", "install_ollama_and_prepare_model"),
@@ -584,17 +606,16 @@ func write_ollama_setup_intent(endpoint: String = DEFAULT_OLLAMA_URL, model: Str
 		"proof_policy": plan.get("automated_proof_policy", "plan_only_no_installer_no_model_pull_no_alias_create"),
 		"recorded_at": OS.get_datetime()
 	}
-	if not Helpers.save_to_json_file(intent, Paths.config.plus_file(OLLAMA_SETUP_INTENT_FILENAME)):
+	if not Helpers.save_to_json_file(intent, config_dir.plus_file(OLLAMA_SETUP_INTENT_FILENAME)):
 		return "ollama_setup_intent_write_error"
 	return "ok"
 
 
 func write_backend_runner_test_intent(mode: String, plan: Dictionary, performed_live_backend_call: bool = false, exit_code: int = -1, result_summary: String = "plan_only_no_runner_call", output_summary: String = "") -> String:
-	var d = Directory.new()
-	if not d.dir_exists(Paths.config):
-		var err = d.make_dir_recursive(Paths.config)
-		if err != OK:
-			return "config_dir_error_%s" % err
+	var config_dir_status = _ensure_backend_config_dir()
+	if not config_dir_status.get("ok", false):
+		return config_dir_status.get("status", "config_dir_error")
+	var config_dir = config_dir_status.get("path", "")
 	var intent = {
 		"action": "runner_test",
 		"backend": mode,
@@ -611,17 +632,16 @@ func write_backend_runner_test_intent(mode: String, plan: Dictionary, performed_
 		"secret_policy": plan.get("secret_policy", "API key values are never stored."),
 		"recorded_at": OS.get_datetime()
 	}
-	if not Helpers.save_to_json_file(intent, Paths.config.plus_file(RUNNER_TEST_INTENT_FILENAME)):
+	if not Helpers.save_to_json_file(intent, config_dir.plus_file(RUNNER_TEST_INTENT_FILENAME)):
 		return "runner_test_intent_write_error"
 	return "ok"
 
 
 func write_python_venv_setup_intent(target_path: String, performed_external_install: bool = false, exit_code: int = -1, result_summary: String = "plan_only_no_venv_mutation") -> String:
-	var d = Directory.new()
-	if not d.dir_exists(Paths.config):
-		var err = d.make_dir_recursive(Paths.config)
-		if err != OK:
-			return "config_dir_error_%s" % err
+	var config_dir_status = _ensure_backend_config_dir()
+	if not config_dir_status.get("ok", false):
+		return config_dir_status.get("status", "config_dir_error")
+	var config_dir = config_dir_status.get("path", "")
 	var intent = {
 		"action": "create_python_venv",
 		"target_path": target_path,
@@ -632,12 +652,20 @@ func write_python_venv_setup_intent(target_path: String, performed_external_inst
 		"proof_policy": "plan_only_no_venv_mutation",
 		"recorded_at": OS.get_datetime()
 	}
-	if not Helpers.save_to_json_file(intent, Paths.config.plus_file(PYTHON_VENV_SETUP_INTENT_FILENAME)):
+	if not Helpers.save_to_json_file(intent, config_dir.plus_file(PYTHON_VENV_SETUP_INTENT_FILENAME)):
 		return "python_venv_setup_intent_write_error"
 	return "ok"
 
 
 func _status_summary(raw_status: String) -> String:
+	if raw_status.find("game_config_dir_unavailable") >= 0:
+		return "Choose/install an active C-AOL build before saving game options."
+	if raw_status.find("options_json_not_array") >= 0:
+		return "Active C-AOL options.json is not a JSON option array; a backup was preserved."
+	if raw_status.find("options_backup") >= 0:
+		return "Could not back up active C-AOL options.json before applying runner options."
+	if raw_status.find("options_apply") >= 0 or raw_status.find("options_write_error") >= 0:
+		return "Could not apply runner options to the active C-AOL options.json."
 	if raw_status.find("runner_test_runner_missing") >= 0:
 		return "C-AOL runner.py was not found in the active install."
 	if raw_status.find("runner_test_failed") >= 0:
@@ -688,8 +716,8 @@ func _ollama_setup_failure_summary(failed_step: Dictionary) -> String:
 
 
 func write_sandboxed_options_config(options_path: String, mode: String, endpoint: String = "", model: String = "", python_path: String = "", api_provider: String = DEFAULT_API_PROVIDER, api_key_env: String = DEFAULT_API_KEY_ENV, openvino_model_dir: String = "", openvino_device: String = DEFAULT_OPENVINO_DEVICE) -> String:
-	# v0 guardrail: this is for repeatable proofs only. The UI does not call it,
-	# and it refuses normal-looking user/Application Support paths.
+	# Repeatable proof helper only. Normal Save options writes the active C-AOL
+	# userdir config/options.json; this helper still refuses normal-looking paths.
 	if not _is_sandbox_options_path(options_path):
 		return "unsafe_options_path_refused"
 	var normalized = _normalize_backend_fields(mode, endpoint, model, python_path, api_provider, api_key_env, openvino_model_dir, openvino_device)
@@ -779,11 +807,11 @@ func _build_caol_options_patch(mode: String, fields: Dictionary) -> Dictionary:
 	var patch = {
 		"format": "c-aol-options-patch-v1",
 		"source": "Catapult-Dabubu",
-		"apply_status": "ready_for_confirmed_apply_not_auto_applied",
-		"notes": "These are the C-AOL option names Catapult-Dabubu saves for the active runner setup. The patch now includes runner enablement, backend mode, selected model, and hidden API-vs-local mode so a confirmed/sandboxed apply does not leave C-AOL pointed at an old runner state. API keys are referenced by environment variable only, never stored here. LLM_INTENT_PYTHON is the shared Python/venv path used by C-AOL to launch tools/llm_runner/runner.py, not only OpenVINO.",
+		"apply_status": "applied_to_active_userdir_on_save",
+		"notes": "These are the C-AOL option names Catapult-Dabubu saves for the active runner setup and applies to the active userdir config/options.json. The patch includes runner enablement, backend mode, selected model, and hidden API-vs-local mode so C-AOL does not keep an old runner state. API keys are referenced by environment variable only, never stored here. LLM_INTENT_PYTHON is the shared Python/venv path used by C-AOL to launch tools/llm_runner/runner.py, not only OpenVINO.",
 		"metadata_only": {
 			"api_provider": fields.get("api_provider", DEFAULT_API_PROVIDER),
-			"api_provider_note": "C-AOL's current runtime path hardcodes openai in src/llm_intent.cpp; Catapult-Dabubu stores provider intent without storing secrets."
+			"api_provider_note": "C-AOL reads LLM_INTENT_API_PROVIDER; Catapult-Dabubu stores provider intent without storing secrets."
 		},
 		"options": [
 			{
@@ -815,7 +843,7 @@ func _build_caol_options_patch(mode: String, fields: Dictionary) -> Dictionary:
 		patch["options"].append({
 			"name": "LLM_INTENT_API_PROVIDER",
 			"value": fields.get("api_provider", DEFAULT_API_PROVIDER),
-			"reason": "Selected API provider metadata; current C-AOL runtime still consumes OpenAI-compatible paths first."
+			"reason": "Selected API provider for C-AOL runner.py/AnyLLM."
 		})
 		patch["options"].append({
 			"name": "LLM_INTENT_API_KEY_ENV",
@@ -1185,6 +1213,149 @@ func _python_import_status(python_command: String, modules: Array) -> String:
 	return "imports_failed"
 
 
+func _apply_caol_options_patch_to_active_user_config(patch: Dictionary) -> Dictionary:
+	var config_dir = Paths.config
+	if str(Settings.read("game")) != "caol":
+		return {"ok": false, "status": "game_config_dir_unavailable_caol_required", "options_path": ""}
+	if config_dir == "":
+		return {"ok": false, "status": "game_config_dir_unavailable_active_install_required", "options_path": ""}
+
+	var d = Directory.new()
+	if not d.dir_exists(config_dir):
+		var dir_err = d.make_dir_recursive(config_dir)
+		if dir_err != OK and dir_err != ERR_ALREADY_EXISTS:
+			return {"ok": false, "status": "config_dir_error_%s" % dir_err, "options_path": ""}
+
+	var options_path = config_dir.plus_file(C_AOL_OPTIONS_FILENAME)
+	var existed_before = File.new().file_exists(options_path)
+	var backup = _backup_options_file_for_apply(options_path, existed_before)
+	if not backup.get("ok", false):
+		return backup
+	var seed_result = _ensure_options_file_for_apply(options_path)
+	if not seed_result.get("ok", false):
+		seed_result["backup_dir"] = backup.get("backup_dir", "")
+		seed_result["backup_path"] = backup.get("backup_path", "")
+		return seed_result
+
+	var apply_status = _apply_options_patch_to_file(options_path, patch)
+	var ok = str(apply_status).begins_with("ok_changed_")
+	return {
+		"ok": ok,
+		"status": apply_status if ok else "options_apply_failed_%s" % apply_status,
+		"raw_apply_status": apply_status,
+		"options_path": options_path,
+		"backup_dir": backup.get("backup_dir", ""),
+		"backup_path": backup.get("backup_path", ""),
+		"existed_before": existed_before,
+		"seed_status": seed_result.get("status", ""),
+		"template_path": seed_result.get("template_path", ""),
+		"patch_values": _patch_option_values(patch),
+		"applied_at": OS.get_datetime(),
+		"secret_policy": "API key values are never stored; only the configured environment variable name is written."
+	}
+
+
+func _ensure_options_file_for_apply(options_path: String) -> Dictionary:
+	if File.new().file_exists(options_path):
+		var current = Helpers.load_json_file(options_path)
+		if typeof(current) != TYPE_ARRAY:
+			return {"ok": false, "status": "options_json_not_array", "options_path": options_path}
+		return {"ok": true, "status": "options_file_present", "options_path": options_path, "template_path": ""}
+
+	var template_path = _find_caol_options_template_path()
+	var seed_options = []
+	if template_path != "":
+		var template = Helpers.load_json_file(template_path)
+		if typeof(template) != TYPE_ARRAY:
+			return {"ok": false, "status": "options_template_json_not_array", "options_path": options_path, "template_path": template_path}
+		seed_options = template
+
+	if not Helpers.save_to_json_file(seed_options, options_path):
+		return {"ok": false, "status": "options_seed_write_error", "options_path": options_path, "template_path": template_path}
+
+	var seed_status = "options_file_seeded_from_template" if template_path != "" else "options_file_created_minimal"
+	return {"ok": true, "status": seed_status, "options_path": options_path, "template_path": template_path}
+
+
+func _find_caol_options_template_path() -> String:
+	var game_dir = Paths.game_dir
+	if game_dir == "":
+		return ""
+	var candidates = [
+		game_dir.plus_file("config").plus_file(C_AOL_OPTIONS_FILENAME)
+	]
+	for item in FS.list_dir(game_dir):
+		if item.ends_with(".app"):
+			candidates.append(game_dir.plus_file(item).plus_file("Contents").plus_file("Resources").plus_file("config").plus_file(C_AOL_OPTIONS_FILENAME))
+	for candidate in candidates:
+		if File.new().file_exists(candidate):
+			return candidate
+	return ""
+
+
+func _backup_options_file_for_apply(options_path: String, existed_before: bool) -> Dictionary:
+	var backup_root = Paths.save_backups
+	if backup_root == "":
+		backup_root = Paths.own_dir.plus_file(str(Settings.read("game"))).plus_file("save_backups")
+	var backup_dir = backup_root.plus_file("caol_llm_options_%s" % _timestamp_fragment())
+	var d = Directory.new()
+	var dir_err = d.make_dir_recursive(backup_dir)
+	if dir_err != OK and dir_err != ERR_ALREADY_EXISTS:
+		return {"ok": false, "status": "options_backup_dir_error_%s" % dir_err, "options_path": options_path, "backup_dir": backup_dir}
+
+	var backup_path = backup_dir.plus_file("options.json.before")
+	if not existed_before:
+		backup_path = backup_dir.plus_file("options.json.before.missing.json")
+		var missing_write = _write_text_file_simple(backup_path, "{\n    \"missing_before_apply\": true\n}\n")
+		if missing_write != "ok":
+			return {"ok": false, "status": "options_backup_write_error_%s" % missing_write, "options_path": options_path, "backup_dir": backup_dir, "backup_path": backup_path}
+		return {"ok": true, "status": "options_backup_missing_marker_written", "options_path": options_path, "backup_dir": backup_dir, "backup_path": backup_path}
+
+	var read_result = _read_text_file_simple(options_path)
+	if not read_result.get("ok", false):
+		read_result["backup_dir"] = backup_dir
+		return read_result
+	var write_result = _write_text_file_simple(backup_path, read_result.get("text", ""))
+	if write_result != "ok":
+		return {"ok": false, "status": "options_backup_write_error_%s" % write_result, "options_path": options_path, "backup_dir": backup_dir, "backup_path": backup_path}
+	return {"ok": true, "status": "options_backup_written", "options_path": options_path, "backup_dir": backup_dir, "backup_path": backup_path}
+
+
+func _read_text_file_simple(path: String) -> Dictionary:
+	var f = File.new()
+	var err = f.open(path, File.READ)
+	if err != OK:
+		return {"ok": false, "status": "options_backup_read_error_%s" % err, "options_path": path}
+	var text = f.get_as_text()
+	f.close()
+	return {"ok": true, "status": "ok", "text": text}
+
+
+func _write_text_file_simple(path: String, content: String) -> String:
+	var f = File.new()
+	var err = f.open(path, File.WRITE)
+	if err != OK:
+		return str(err)
+	f.store_string(content)
+	f.close()
+	return "ok"
+
+
+func _timestamp_fragment() -> String:
+	var dt = OS.get_datetime()
+	return "%04d%02d%02d_%02d%02d%02d_%s" % [dt["year"], dt["month"], dt["day"], dt["hour"], dt["minute"], dt["second"], str(OS.get_ticks_msec())]
+
+
+func _patch_option_values(patch: Dictionary) -> Dictionary:
+	var values = {}
+	for patch_option in patch.get("options", []):
+		if typeof(patch_option) == TYPE_DICTIONARY:
+			var option_name = str(patch_option.get("name", ""))
+			if option_name != "":
+				values[option_name] = str(patch_option.get("value", ""))
+	return values
+
+
 func _apply_options_patch_to_file(options_path: String, patch: Dictionary) -> String:
 	var options = Helpers.load_json_file(options_path)
 	if typeof(options) != TYPE_ARRAY:
@@ -1206,7 +1377,7 @@ func _apply_options_patch_to_file(options_path: String, patch: Dictionary) -> St
 			options.append({
 				"name": option_name,
 				"value": option_value,
-				"info": "Added by Catapult-Dabubu sandbox backend proof from %s." % patch.get("source", "Catapult-Dabubu")
+				"info": "Added by Catapult-Dabubu backend options apply from %s." % patch.get("source", "Catapult-Dabubu")
 			})
 			changed += 1
 	if not Helpers.save_to_json_file(options, options_path):
