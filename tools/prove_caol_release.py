@@ -24,7 +24,7 @@ FILTERS = {
     "Windows": ["_windows.zip"],
 }
 
-PREFERRED_CAOL_TAGS = ("v0.2.0",)
+PREFERRED_CAOL_TAGS = ("caol-cdda-master-2026-05-25-1954", "v0.2.0")
 
 CURATED_CAOL_TAG_PREFIXES = (
     "caol-cdda-master",
@@ -144,7 +144,7 @@ def main() -> int:
     parser.add_argument(
         "--all-platforms",
         action="store_true",
-        help="prove Linux, macOS, and Windows v0.2.0 asset filters instead of only this host",
+        help="prove Linux, macOS, and Windows preferred C-AOL asset filters instead of only this host",
     )
     args = parser.parse_args()
 
@@ -187,8 +187,9 @@ def main() -> int:
             print(f"no curated UI rows for {system}", file=sys.stderr)
             return 1
         first = system_order[0]
-        if first["tag_name"] != "v0.2.0" or not first["installable"]:
-            print(f"{system} first row is not installable v0.2.0: {first}", file=sys.stderr)
+        expected_first_tag = PREFERRED_CAOL_TAGS[0]
+        if first["tag_name"] != expected_first_tag or not first["installable"]:
+            print(f"{system} first row is not installable {expected_first_tag}: {first}", file=sys.stderr)
             return 1
         seen_blocked = False
         for item in system_order:
@@ -201,7 +202,7 @@ def main() -> int:
     for platform in platform_results:
         first_release = platform["releases"][0] if platform["releases"] else {}
         if not first_release.get("installable", False):
-            print(f"preferred v0.2.0 row is not installable for {platform['system']}", file=sys.stderr)
+            print(f"preferred {PREFERRED_CAOL_TAGS[0]} row is not installable for {platform['system']}", file=sys.stderr)
             return 1
     return 0
 

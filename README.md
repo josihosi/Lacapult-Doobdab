@@ -4,7 +4,7 @@
 
 It is derived from [Hihahahalol's Dabdoob / Catapult_Dabdoob](https://github.com/Hihahahalol/Catapult_Dabdoob), which is based on [qrrk's Catapult launcher](https://github.com/qrrk/Catapult). The inherited launcher code remains MIT licensed; see `LICENSE` and `ATTRIBUTION.md`.
 
-> Current development target: fetch and install existing C-AOL `v0.2.0` GitHub release assets, expose the first backend setup selector for API/Ollama/OpenVINO, and keep packaging/installability blockers honest before any public release.
+> Current development target: fetch and install the current C-AOL CDDA master test release assets, expose the first backend setup selector for API/Ollama/OpenVINO, and keep packaging/installability blockers honest before any public release.
 
 ## What v0 is meant to do
 

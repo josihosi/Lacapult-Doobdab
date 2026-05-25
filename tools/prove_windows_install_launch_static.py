@@ -20,7 +20,10 @@ def main() -> None:
 
     require('"caol-release-win"' in release_manager, "C-AOL Windows release filter is missing")
     require('"substring": "_windows.zip"' in release_manager, "Windows release filter does not select _windows.zip assets")
-    require('"preferred_tags": ["v0.2.0"]' in release_manager, "v0.2.0 is not the preferred cross-platform release row")
+    require(
+        '"preferred_tags": ["caol-cdda-master-2026-05-25-1954", "v0.2.0"]' in release_manager,
+        "latest C-AOL test release is not the preferred cross-platform release row",
+    )
     require("_order_release_builds_by_filter" in release_manager, "C-AOL release rows are not ordered through the installability-aware filter")
     require("ordered.append_array(installable)" in release_manager and "ordered.append_array(blocked)" in release_manager, "installable release rows are not ordered before blocked rows")
 
@@ -34,7 +37,7 @@ def main() -> None:
     require('var game_exe_path = exe_info.get("path", "")' in catapult, "Windows command does not launch the discovered executable path")
 
     print("Windows install/launch static proof passed")
-    print("  release list: v0.2.0 preferred; _windows.zip selected; installable rows precede blocked rows")
+    print("  release list: latest C-AOL test release preferred; _windows.zip selected; installable rows precede blocked rows")
     print("  install guard: Cataclysm-AOL.exe and inherited cataclysm-tiles.exe are accepted")
     print("  launch path: Windows Play discovers the installed C-AOL executable instead of hardcoding one name")
 

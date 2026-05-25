@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Controlled proof for the selected C-AOL v0.2.0 macOS DMG install shape.
+"""Controlled proof for the selected preferred C-AOL macOS DMG install shape.
 
 This script fetches live release metadata, selects the same preferred macOS asset
 used by Lacapult's release proof, optionally downloads it into a local proof cache,
@@ -29,7 +29,7 @@ from typing import Any
 
 RELEASES_URL = "https://api.github.com/repos/josihosi/Cataclysm-AOL/releases"
 MACOS_FILTERS = ["_macos.dmg", "_macos.tar.gz", "_macos.zip"]
-PREFERRED_TAG = "v0.2.0"
+PREFERRED_TAG = "caol-cdda-master-2026-05-25-1954"
 DEFAULT_CACHE_DIR = Path(".proof-cache/caol-dmg")
 INFO_FILENAME = "catapult_install_info.json"
 LACAPULT_CAOL_EXECUTABLE_NAMES = ["cataclysm-tiles", "cataclysm-tiles.exe", "Cataclysm-AOL"]
