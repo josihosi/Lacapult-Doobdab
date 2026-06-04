@@ -23,7 +23,7 @@
 "lbl_num_releases_to_request","Number of releases to request:"
 "lbl_ui_scale_override","Custom UI scaling:"
 "lbl_proxy_settings","Proxy server:"
-"tooltip_debug_mode","Shows the Debug tab with some testing functions\nand enables debug messages in the status\npane (useful for troubleshooting)."
+"tooltip_debug_mode","Enables debug messages in the status\npane (useful for troubleshooting)."
 "tooltip_keep_launcher_open","If turned off, the launcher will close after clicking Play or Resume.\nNote that if the game fails to start for any reason, the launcher\nwill still close."
 "tooltip_num_prs_to_request","How many recent pull requests (code additions)\nwill be requested from GitHub to form the changelog.\nHigh numbers may lead to slow responses and failures."
 "tooltip_num_releases_to_request","How many latest releases will be requested\nfrom GitHub after starting the launcher,\nchoosing the game or clicking Refresh."

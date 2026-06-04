@@ -163,6 +163,8 @@ func assign_localized_text() -> void:
 	_tabs.set_tab_title(6, tr("tab_settings"))
 	_tabs.set_tab_title(7, "LLM")
 	_tabs.set_tab_title(8, tr("tab_about"))
+	if _tabs.get_tab_count() > 9:
+		_tabs.set_tab_title(9, "Playtest")
 	
 	_lbl_changelog.bbcode_text = tr("lbl_changelog")
 	
@@ -565,8 +567,6 @@ func _on_UserDir_pressed() -> void:
 func _setup_ui() -> void:
 
 	_game_info.visible = Settings.read("show_game_desc")
-	if not Settings.read("debug_mode"):
-		_tabs.remove_child(_debug_ui)
 	
 	_cb_update.pressed = Settings.read("update_current_when_installing")
 	

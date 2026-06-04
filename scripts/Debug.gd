@@ -36,7 +36,7 @@ func _build_manual_handoff_controls() -> void:
 	add_constant_override("separation", 6)
 
 	var title = Label.new()
-	title.text = "Manual Debug Scenarios"
+	title.text = "Manual Playtest Scenarios"
 	title.align = Label.ALIGN_CENTER
 	add_child(title)
 

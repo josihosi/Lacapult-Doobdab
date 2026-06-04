@@ -1,6 +1,6 @@
 extends SceneTree
 
-# Headless UI smoke for the shipped Debug tab manual handoff workflow.
+# Headless UI smoke for the shipped Playtest tab manual handoff workflow.
 # It uses a fake packaged C-AOL install and fake startup_harness.py so the test
 # clicks the launcher controls without launching the real game.
 
@@ -27,7 +27,7 @@ func _run() -> void:
 	yield(self, "idle_frame")
 	yield(_wait_until_idle(ui), "completed")
 
-	_require(ui._manual_scenarios.size() == 1, "Debug tab did not filter to exactly one manual scenario")
+	_require(ui._manual_scenarios.size() == 1, "Playtest tab did not filter to exactly one manual scenario")
 	_require(ui._manual_scenarios[0].get("name", "") == "manual.intact_camp_shakedown_mcw", "manual scenario name mismatch")
 	_require(ui._scenario_list.get_item_count() == 1, "manual scenario list item count mismatch")
 	_require(ui._details_label.text.find("Does the staged scene make sense?") >= 0, "manual playtest question did not render")
@@ -51,7 +51,7 @@ func _run() -> void:
 	_require(ui._output_box.text.find("\"mode\": \"handoff\"") >= 0, "handoff output did not stay in handoff mode")
 	_require(ui._output_box.text.find("\"probe\"") < 0, "handoff output exposed probe mode")
 
-	print("Manual handoff Debug tab smoke passed")
+	print("Manual handoff Playtest tab smoke passed")
 	print("  refresh: packaged manual scenarios loaded from fake active install")
 	print("  filter: automated/probe scenario hidden from shipped UI")
 	print("  controls: copy command, validate setup, and start handoff exercised")
@@ -64,7 +64,7 @@ func _wait_until_idle(ui: Node):
 		yield(self, "idle_frame")
 		if not ui._busy:
 			return true
-	_require(false, "Debug tab command did not finish")
+	_require(false, "Playtest tab command did not finish")
 	return false
 
 
@@ -150,5 +150,5 @@ func _mkdir(path: String) -> void:
 func _require(condition: bool, message: String) -> void:
 	if not condition:
 		push_error(message)
-		print("Manual handoff Debug tab smoke failed: %s" % message)
+		print("Manual handoff Playtest tab smoke failed: %s" % message)
 		quit(1)
