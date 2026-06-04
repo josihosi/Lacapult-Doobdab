@@ -73,8 +73,8 @@ func _build_manual_handoff_controls() -> void:
 	button_row.add_child(_handoff_button)
 
 	_open_report_button = Button.new()
-	_open_report_button.text = "Open report"
-	_open_report_button.hint_tooltip = "Open the last handoff report folder."
+	_open_report_button.text = "Open handoff folder"
+	_open_report_button.hint_tooltip = "Open the last handoff run folder."
 	_open_report_button.connect("pressed", self, "_on_OpenHandoffReport_pressed")
 	button_row.add_child(_open_report_button)
 
@@ -149,11 +149,11 @@ func _add_diag_button(parent: HBoxContainer, text: String, method: String) -> vo
 func _refresh_manual_scenarios() -> void:
 	if _busy:
 		return
-	var script_path = BackendConfig.resolve_openclaw_harness_script_path()
+	var script_path = _manual_handoff_script_path()
 	if script_path == "":
 		_manual_scenarios.clear()
 		_render_manual_scenarios()
-		_set_handoff_status("Manual handoff harness not found in the active C-AOL install. Install a build that includes tools/openclaw_harness.")
+		_set_handoff_status(_manual_handoff_missing_status())
 		_set_output("")
 		_update_handoff_buttons()
 		return
@@ -271,23 +271,24 @@ func _on_ValidateHandoff_pressed() -> void:
 	var scenario = _selected_manual_scenario()
 	if scenario.empty() or _busy:
 		return
-	var script_path = BackendConfig.resolve_openclaw_harness_script_path()
+	var script_path = _manual_handoff_script_path()
 	var python = _python_command_for_harness()
 	var args = [script_path, "handoff", scenario.get("name", ""), "--compact-stdout", "--dry-run"]
 	_set_handoff_status("Validating %s without launching the game..." % scenario.get("name", "manual scenario"))
 	var result = yield(_run_harness_command("validate", python, args), "completed")
 	_set_output(result.get("text", ""))
+	var parsed = _parse_json_text(result.get("text", ""))
 	if result.get("exit_code", -1) == 0:
 		_set_handoff_status("Validation passed for %s. Start handoff will launch the game." % scenario.get("name", "manual scenario"))
 	else:
-		_set_handoff_status("Validation failed for %s. Check the output before launching." % scenario.get("name", "manual scenario"))
+		_set_handoff_status(_command_failure_status("Validation", result, parsed))
 
 
 func _on_StartHandoff_pressed() -> void:
 	var scenario = _selected_manual_scenario()
 	if scenario.empty() or _busy:
 		return
-	var script_path = BackendConfig.resolve_openclaw_harness_script_path()
+	var script_path = _manual_handoff_script_path()
 	var python = _python_command_for_harness()
 	var args = [script_path, "handoff", scenario.get("name", ""), "--compact-stdout"]
 	_set_handoff_status("Starting handoff for %s..." % scenario.get("name", "manual scenario"))
@@ -303,7 +304,7 @@ func _on_StartHandoff_pressed() -> void:
 			suffix = " Report: %s" % _last_report_path
 		_set_handoff_status("Handoff started; C-AOL is left running for human testing.%s" % suffix)
 	else:
-		_set_handoff_status("Handoff failed. Check the output and active install.")
+		_set_handoff_status(_command_failure_status("Handoff", result, parsed))
 	_update_handoff_buttons()
 
 
@@ -321,9 +322,9 @@ func _on_CopyHandoffCommand_pressed() -> void:
 	var scenario = _selected_manual_scenario()
 	if scenario.empty():
 		return
-	var script_path = BackendConfig.resolve_openclaw_harness_script_path()
+	var script_path = _manual_handoff_script_path()
 	if script_path == "":
-		_set_handoff_status("Cannot copy command because the manual handoff harness is missing.")
+		_set_handoff_status(_manual_handoff_missing_status())
 		return
 	var python = _python_command_for_harness()
 	var args = [script_path, "handoff", scenario.get("name", ""), "--compact-stdout"]
@@ -350,11 +351,53 @@ func _python_command_for_harness() -> String:
 	return BackendConfig.resolve_runner_python_command(str(Settings.read("backend_python_path")))
 
 
+func _manual_handoff_script_path() -> String:
+	return BackendConfig.resolve_active_install_openclaw_harness_script_path()
+
+
+func _manual_handoff_missing_status() -> String:
+	var game = str(Settings.read("game"))
+	var active = str(Settings.read("active_install_" + game)).strip_edges()
+	var game_dir = str(Paths.game_dir)
+	if active == "":
+		active = "(none selected)"
+	if game_dir == "":
+		game_dir = "(unresolved)"
+	return "Manual handoff requires an active C-AOL install with tools/openclaw_harness/startup_harness.py. Active install: %s. Path: %s" % [active, game_dir]
+
+
 func _parse_json_text(text: String) -> Dictionary:
 	var parsed = JSON.parse(text.strip_edges())
 	if parsed.error == OK and parsed.result is Dictionary:
 		return parsed.result
 	return {}
+
+
+func _command_failure_status(action: String, result: Dictionary, parsed: Dictionary) -> String:
+	var exit_code = int(result.get("exit_code", -1))
+	var detail = ""
+	if not parsed.empty():
+		for key in ["start_stderr", "stderr", "reason", "verdict"]:
+			if parsed.has(key):
+				detail = _first_output_line(str(parsed.get(key, "")))
+				if detail != "":
+					break
+	if detail == "":
+		detail = _first_output_line(str(result.get("text", "")))
+	if detail != "":
+		return "%s failed (exit %s): %s" % [action, exit_code, detail]
+	return "%s failed (exit %s). Check the output box above and the active C-AOL install." % [action, exit_code]
+
+
+func _first_output_line(text: String) -> String:
+	for line in text.replace("\r", "\n").split("\n"):
+		var cleaned = str(line).strip_edges()
+		if cleaned == "" or cleaned == "{" or cleaned == "}":
+			continue
+		if cleaned.length() > 220:
+			return cleaned.substr(0, 220) + "..."
+		return cleaned
+	return ""
 
 
 func _set_handoff_status(text: String) -> void:
@@ -376,7 +419,7 @@ func _trim_output(text: String) -> String:
 
 
 func _update_handoff_buttons() -> void:
-	var has_harness = BackendConfig.resolve_openclaw_harness_script_path() != ""
+	var has_harness = _manual_handoff_script_path() != ""
 	var has_selection = not _selected_manual_scenario().empty()
 	if _refresh_button != null:
 		_refresh_button.disabled = _busy

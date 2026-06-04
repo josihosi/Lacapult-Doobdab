@@ -1080,6 +1080,10 @@ func resolve_openclaw_harness_script_path() -> String:
 	return _resolve_caol_relative_file_path(OPENCLAW_HARNESS_SCRIPT_RELATIVE_PATH, "LACAPULT_OPENCLAW_HARNESS_PATH")
 
 
+func resolve_active_install_openclaw_harness_script_path() -> String:
+	return _resolve_caol_active_install_relative_file_path(OPENCLAW_HARNESS_SCRIPT_RELATIVE_PATH)
+
+
 func resolve_openclaw_harness_requirements_path() -> String:
 	return _resolve_caol_relative_file_path(OPENCLAW_HARNESS_REQUIREMENTS_RELATIVE_PATH, "LACAPULT_OPENCLAW_HARNESS_REQUIREMENTS")
 
@@ -1117,18 +1121,33 @@ func _resolve_caol_relative_file_path(relative_path: String, env_name: String) -
 	return ""
 
 
-func _caol_resource_roots() -> Array:
+func _resolve_caol_active_install_relative_file_path(relative_path: String) -> String:
+	var d = Directory.new()
+	for root in _caol_active_install_resource_roots():
+		var candidate = root.plus_file(relative_path)
+		if d.file_exists(candidate):
+			return candidate
+	return ""
+
+
+func _caol_active_install_resource_roots() -> Array:
 	var roots = []
 	var game_dir = Paths.game_dir
-	if game_dir != "":
-		roots.append(game_dir)
-		if game_dir.ends_with(".app"):
-			roots.append(game_dir.plus_file("Contents").plus_file("Resources"))
-		else:
-			var d = Directory.new()
-			for item in FS.list_dir(game_dir):
-				if item.ends_with(".app"):
-					roots.append(game_dir.plus_file(item).plus_file("Contents").plus_file("Resources"))
+	if game_dir == "" or not Directory.new().dir_exists(game_dir):
+		return roots
+	roots.append(game_dir)
+	if game_dir.ends_with(".app"):
+		roots.append(game_dir.plus_file("Contents").plus_file("Resources"))
+	else:
+		var d = Directory.new()
+		for item in FS.list_dir(game_dir):
+			if item.ends_with(".app"):
+				roots.append(game_dir.plus_file(item).plus_file("Contents").plus_file("Resources"))
+	return roots
+
+
+func _caol_resource_roots() -> Array:
+	var roots = _caol_active_install_resource_roots()
 	var dev_root = Paths.own_dir.get_base_dir().plus_file("Cataclysm-AOL")
 	roots.append(dev_root)
 	return roots
