@@ -25,7 +25,7 @@ func _run() -> void:
 	ui.set_script(ui_script)
 	root.add_child(ui)
 	yield(self, "idle_frame")
-	yield(_wait_until_idle(ui), "completed")
+	yield(_wait_for_manual_load(ui), "completed")
 
 	_require(ui._manual_scenarios.size() == 1, "Playtest tab did not filter to exactly one manual scenario")
 	_require(ui._manual_scenarios[0].get("name", "") == "manual.intact_camp_shakedown_mcw", "manual scenario name mismatch")
@@ -66,6 +66,19 @@ func _wait_until_idle(ui: Node):
 		if not ui._busy:
 			return true
 	_require(false, "Playtest tab command did not finish")
+	return false
+
+
+func _wait_for_manual_load(ui: Node):
+	for _i in range(240):
+		yield(self, "idle_frame")
+		if not ui._busy and ui._manual_scenarios.size() > 0:
+			return true
+		if not ui._busy and ui._status_label.text.find("No manual handoff scenarios") >= 0:
+			break
+		if not ui._busy and ui._status_label.text.find("Could not list manual scenarios") >= 0:
+			break
+	_require(false, "Playtest tab did not finish loading manual scenarios")
 	return false
 
 
