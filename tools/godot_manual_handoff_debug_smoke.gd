@@ -4,6 +4,8 @@ extends SceneTree
 # It uses a fake packaged C-AOL install and fake startup_harness.py so the test
 # clicks the launcher controls without launching the real game.
 
+var _had_failure := false
+
 func _init() -> void:
 	call_deferred("_run")
 
@@ -40,17 +42,19 @@ func _run() -> void:
 	_require(copied.find("probe") < 0, "copy command exposed probe mode")
 
 	ui._validate_button.emit_signal("pressed")
-	yield(_wait_until_idle(ui), "completed")
+	yield(_wait_for_status(ui, ["Validation passed", "Validation failed"]), "completed")
 	_require(ui._output_box.text.find("\"dry_run\": true") >= 0, "validate setup did not dry-run the handoff contract")
 	_require(ui._status_label.text.find("Validation passed") >= 0, "validate setup did not report success")
 
 	ui._handoff_button.emit_signal("pressed")
-	yield(_wait_until_idle(ui), "completed")
+	yield(_wait_for_status(ui, ["Handoff started", "Handoff failed"]), "completed")
 	_require(ui._last_report_path.ends_with("handoff.report.json"), "handoff did not record report path")
 	_require(ui._open_report_button.disabled == false, "open report button did not enable after handoff")
 	_require(ui._status_label.text.find("left running for human testing") >= 0, "handoff success text did not say game is left running")
 	_require(ui._output_box.text.find("\"mode\": \"handoff\"") >= 0, "handoff output did not stay in handoff mode")
 	_require(ui._output_box.text.find("\"probe\"") < 0, "handoff output exposed probe mode")
+	if _had_failure:
+		return
 
 	print("Manual handoff Playtest tab smoke passed")
 	print("  refresh: packaged manual scenarios loaded from fake active install")
@@ -79,6 +83,18 @@ func _wait_for_manual_load(ui: Node):
 		if not ui._busy and ui._status_label.text.find("Could not list manual scenarios") >= 0:
 			break
 	_require(false, "Playtest tab did not finish loading manual scenarios")
+	return false
+
+
+func _wait_for_status(ui: Node, phrases: Array):
+	for _i in range(240):
+		yield(self, "idle_frame")
+		if ui._busy:
+			continue
+		for phrase in phrases:
+			if ui._status_label.text.find(str(phrase)) >= 0:
+				return true
+	_require(false, "Playtest tab did not reach expected status: %s" % PoolStringArray(phrases).join(", "))
 	return false
 
 
@@ -163,6 +179,7 @@ func _mkdir(path: String) -> void:
 
 func _require(condition: bool, message: String) -> void:
 	if not condition:
+		_had_failure = true
 		push_error(message)
 		print("Manual handoff Playtest tab smoke failed: %s" % message)
 		quit(1)
