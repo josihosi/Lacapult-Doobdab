@@ -24,6 +24,7 @@ func _run() -> void:
 	_require(dir_err == OK or dir_err == ERR_ALREADY_EXISTS, "could not create sandbox active install dir")
 	_require(helpers.save_to_json_file({"name": "Package 4 Sandbox"}, install_dir.plus_file("catapult_install_info.json")), "could not create sandbox install info")
 	_write_runner_fixture(install_dir)
+	_write_harness_requirements_fixture(install_dir)
 
 	settings.store("backend_mode", "ollama")
 	settings.store("backend_ollama_endpoint", backend_config.DEFAULT_OLLAMA_URL)
@@ -79,7 +80,7 @@ func _run() -> void:
 	_require(all_text.find("Ollama model tag") < 0, "duplicate freeform Ollama model field is still visible")
 	_require(_option_has_item(ui._ollama_model_choice, "Mistral v0.3") and _option_has_item(ui._ollama_model_choice, "Nemotron 9B"), "supported Ollama model choices did not render")
 	_require(all_text.find("Ollama command") >= 0 and all_text.find("Mistral") >= 0 and all_text.find("Nemotron") >= 0 and all_text.find("Python/venv") >= 0, "Ollama status rows did not render")
-	_require(all_text.find("Save options") >= 0 and all_text.find("Check") >= 0 and all_text.find("Install Ollama / model") >= 0 and all_text.find("Create venv only") >= 0 and all_text.find("Test Ollama runner") >= 0, "Ollama action row did not render Save/Check/Install/venv/runner-test actions")
+	_require(all_text.find("Save options") >= 0 and all_text.find("Check") >= 0 and all_text.find("Install Ollama / model") >= 0 and all_text.find("Set up Python venv") >= 0 and all_text.find("Test Ollama runner") >= 0, "Ollama action row did not render Save/Check/Install/venv/runner-test actions")
 	_require(all_text.find("API key") < 0 and all_text.find("Provider") < 0, "Ollama mode leaked API-only controls")
 	_require(all_text.find("RAM: 15.6 GiB") >= 0 and all_text.find("VRAM: 1.0 GiB") >= 0 and all_text.find("mistral:v0.3 performance") >= 0 and all_text.find("nemotron-9b performance") >= 0 and all_text.find("Hardware check: missing") < 0, "Ollama GiB hardware/performance display did not render or still says missing")
 
@@ -145,24 +146,26 @@ func _run() -> void:
 	_require(ollama_intent.get("model_source", "") == "mirage335/NVIDIA-Nemotron-Nano-9B-v2-virtuoso:latest", "Ollama setup intent lost Virtuoso source model")
 	_require(ollama_intent.get("performed_external_install", true) == false, "Ollama setup proof claimed an external install ran")
 
-	var venv_button = _find_button(ui, "Create venv only")
-	_require(venv_button != null, "Create venv only button lookup failed")
+	var venv_button = _find_button(ui, "Set up Python venv")
+	_require(venv_button != null, "Set up Python venv button lookup failed")
 	var executable_venv_plan = backend_config.build_python_venv_setup_plan("python3")
 	_require(executable_venv_plan.get("target_path", "").find("caol-llm-python-venv") >= 0, "Python venv plan treated executable name as the venv target path")
 	ui._backend_python_path.text = ""
 	venv_button.emit_signal("pressed")
 	yield(self, "idle_frame")
-	_require(ui._confirm_dialog.dialog_text.find("python3 -m venv") >= 0 and ui._confirm_dialog.dialog_text.find("runner.py") >= 0, "Python venv confirmation did not explain runner.py setup")
+	_require(ui._confirm_dialog.dialog_text.find("python3 -m venv") >= 0 and ui._confirm_dialog.dialog_text.find("runner.py") >= 0 and ui._confirm_dialog.dialog_text.find("harness requirements") >= 0, "Python venv confirmation did not explain runner.py/manual harness setup")
 	ui._on_ExternalBackendAction_confirmed()
 	yield(self, "idle_frame")
 	_require(File.new().file_exists(venv_intent_path), "confirmed Python venv setup did not record setup intent")
 	var venv_intent = helpers.load_json_file(venv_intent_path)
 	_require(venv_intent.get("action", "") == "create_python_venv", "Python venv setup intent action mismatch")
 	_require(venv_intent.get("performed_external_install", true) == false, "Python venv proof claimed a venv was created")
+	_require(venv_intent.get("phase_order", []).has("install_openclaw_harness_requirements"), "Python venv proof did not include harness requirements phase")
+	_require(venv_intent.get("harness_requirements_path", "").find("tools/openclaw_harness/requirements.txt") >= 0, "Python venv proof did not record harness requirements path")
 	_require(ui._backend_python_path.text.find("caol-llm-python-venv") >= 0, "Python venv proof did not fill the intended path field")
 
 	print("Ollama workflow UI smoke passed")
-	print("  UI proof: one short-label Ollama model-choice control, real Mistral tag and Nemotron no-think alias, GiB hardware/performance lights, Check, Save, Install Ollama / model, and Create venv only rendered")
+	print("  UI proof: one short-label Ollama model-choice control, real Mistral tag and Nemotron no-think alias, GiB hardware/performance lights, Check, Save, Install Ollama / model, and Set up Python venv rendered")
 	print("  Fixture proof: command-missing, server-unreachable, model-present, and model-missing states are distinguishable without real pulls")
 	print("  Check proof: readiness-only; no backend config write")
 	print("  Save proof: Ollama endpoint/model/Python metadata round-tripped and active C-AOL options.json enables local runner")
@@ -178,6 +181,16 @@ func _write_runner_fixture(install_dir: String) -> void:
 	var f = File.new()
 	_require(f.open(runner_dir.plus_file("runner.py"), File.WRITE) == OK, "could not open runner fixture")
 	f.store_string("import sys\nif '--dry-run' in sys.argv and '--backend' in sys.argv:\n    print('dry-run ok')\n    raise SystemExit(0)\nprint('fixture blocks live calls', file=sys.stderr)\nraise SystemExit(2)\n")
+	f.close()
+
+
+func _write_harness_requirements_fixture(install_dir: String) -> void:
+	var harness_dir = install_dir.plus_file("tools").plus_file("openclaw_harness")
+	var err = Directory.new().make_dir_recursive(harness_dir)
+	_require(err == OK or err == ERR_ALREADY_EXISTS, "could not create harness fixture dir")
+	var f = File.new()
+	_require(f.open(harness_dir.plus_file("requirements.txt"), File.WRITE) == OK, "could not open harness requirements fixture")
+	f.store_string("# stdlib-only harness requirements fixture\n")
 	f.close()
 
 

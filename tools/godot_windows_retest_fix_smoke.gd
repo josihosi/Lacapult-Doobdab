@@ -12,6 +12,15 @@ func _init() -> void:
 
 func _run() -> void:
 	var settings = root.get_node("/root/Settings")
+	var paths = root.get_node("/root/Paths")
+	var helpers = root.get_node("/root/Helpers")
+	settings.store("game", "caol")
+	settings.store("active_install_caol", "Windows Retest Sandbox")
+	var install_dir = paths.own_dir.plus_file("caol").plus_file("game0")
+	var dir_err = Directory.new().make_dir_recursive(install_dir)
+	_require(dir_err == OK or dir_err == ERR_ALREADY_EXISTS, "could not create sandbox active install dir")
+	_require(helpers.save_to_json_file({"name": "Windows Retest Sandbox"}, install_dir.plus_file("catapult_install_info.json")), "could not create sandbox install info")
+
 	settings.store("backend_mode", "api")
 	settings.store("backend_api_provider", "openrouter")
 	settings.store("backend_api_model", "openai/gpt-4.1-mini")
@@ -43,19 +52,19 @@ func _run() -> void:
 	yield(self, "idle_frame")
 
 	var all_text = _collect_visible_text(ui)
-	_require(all_text.find("Create venv only") >= 0, "API venv-only action did not render")
+	_require(all_text.find("Set up Python venv") >= 0, "API Python venv action did not render")
 	_require(all_text.find("Set up API / AnyLLM") >= 0, "API setup action did not render")
-	_require(all_text.find("Setup path: creates/updates the venv, installs AnyLLM/provider packages") >= 0, "API status did not explain venv/package setup path")
+	_require(all_text.find("Setup path: creates/updates the venv, installs harness requirements and AnyLLM/provider packages") >= 0, "API status did not explain venv/harness/package setup path")
 	_require(ui._confirm_dialog.dialog_autowrap == true, "confirmation dialog autowrap is not enabled")
 	_require(ui._confirm_dialog.rect_min_size.x <= ProjectSettings.get_setting("display/window/size/width") - 120, "confirmation dialog width is too close to launcher width")
 	_require(ui._set_session_key_button.hint_tooltip.find("\n") >= 0, "session tooltip was not split into short lines")
 
-	var venv_button = _find_button(ui, "Create venv only")
-	_require(venv_button != null, "Create venv only lookup failed")
+	var venv_button = _find_button(ui, "Set up Python venv")
+	_require(venv_button != null, "Set up Python venv lookup failed")
 	venv_button.emit_signal("pressed")
 	yield(self, "idle_frame")
 	_require(ui._confirm_dialog.dialog_text.find("\n\n") >= 0, "venv confirmation text did not use paragraphs/newlines")
-	_require(ui._confirm_dialog.dialog_text.find("does not install AnyLLM packages") >= 0, "venv confirmation did not clarify AnyLLM is separate")
+	_require(ui._confirm_dialog.dialog_text.find("does not install AnyLLM/provider packages") >= 0, "venv confirmation did not clarify AnyLLM is separate")
 	_require(ui._confirm_dialog.dialog_text.find("main API setup") >= 0, "venv confirmation did not point to main API setup action")
 
 	var install_button = _find_button(ui, "Set up API / AnyLLM")
@@ -78,7 +87,7 @@ func _run() -> void:
 	print("Windows retest fix focused UI smoke passed")
 	print("  Layout proof: default window enlarged; native resizable chrome active; custom titlebar hidden")
 	print("  Popup proof: backend confirmation dialog autowraps, is width-bounded, and uses newline paragraphs")
-	print("  API proof: proof-only default safe-reads false; main API setup now stages venv + AnyLLM packages")
+	print("  API proof: proof-only default safe-reads false; main API setup now stages venv + harness requirements + AnyLLM packages")
 	print("  Ollama proof: empty model defaults to visible Mistral choice; hardware check and explicit readiness rows render")
 	quit(0)
 

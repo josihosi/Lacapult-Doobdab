@@ -25,6 +25,7 @@ func _run() -> void:
 	_require(dir_err == OK or dir_err == ERR_ALREADY_EXISTS, "could not create sandbox active install dir")
 	_require(helpers.save_to_json_file({"name": "Package 3 Sandbox"}, install_dir.plus_file("catapult_install_info.json")), "could not create sandbox install info")
 	_write_runner_fixture(install_dir)
+	_write_harness_requirements_fixture(install_dir)
 
 	settings.store("backend_mode", "api")
 	settings.store("backend_api_endpoint", "")
@@ -63,7 +64,7 @@ func _run() -> void:
 	_require(all_text.find("Use for this session") >= 0, "session API key action did not render")
 	_require(_option_has_item(ui._backend_provider_button, "OpenAI") and _option_has_item(ui._backend_provider_button, "OpenRouter") and _option_has_item(ui._backend_provider_button, "AnyLLM custom provider"), "provider choices did not render")
 	_require(_status_container_has_states(ui._api_status_lights, ["green", "yellow"]), "API status rows did not expose explicit colored states")
-	_require(all_text.find("Set up API / AnyLLM") >= 0 and all_text.find("Create venv only") >= 0 and all_text.find("Test API runner") >= 0, "API setup/venv/runner-test actions did not render")
+	_require(all_text.find("Set up API / AnyLLM") >= 0 and all_text.find("Set up Python venv") >= 0 and all_text.find("Test API runner") >= 0, "API setup/venv/runner-test actions did not render")
 	_require(all_text.find("hardware") < 0 and all_text.find("Ollama URL") < 0, "API mode leaked Ollama/hardware copy")
 
 	var check_button = _find_button(ui, "Check")
@@ -139,8 +140,8 @@ func _run() -> void:
 	_require(install_button != null, "Set up API / AnyLLM button lookup failed")
 	install_button.emit_signal("pressed")
 	yield(self, "idle_frame")
-	_require(ui._confirm_dialog.dialog_text.find("-m venv") >= 0 and ui._confirm_dialog.dialog_text.find("pip install --upgrade any-llm-sdk[openrouter]") >= 0, "confirmation did not show planned venv + any-llm-sdk setup phases")
-	_require(ui._confirm_dialog.dialog_text.find("creates/updates") >= 0 and ui._confirm_dialog.dialog_text.find("installs AnyLLM") >= 0, "confirmation did not explain real venv/package install boundary")
+	_require(ui._confirm_dialog.dialog_text.find("-m venv") >= 0 and ui._confirm_dialog.dialog_text.find("tools/openclaw_harness/requirements.txt") >= 0 and ui._confirm_dialog.dialog_text.find("pip install --upgrade any-llm-sdk[openrouter]") >= 0, "confirmation did not show planned venv + harness + any-llm-sdk setup phases")
+	_require(ui._confirm_dialog.dialog_text.find("creates/updates") >= 0 and ui._confirm_dialog.dialog_text.find("harness requirements") >= 0 and ui._confirm_dialog.dialog_text.find("installs AnyLLM") >= 0, "confirmation did not explain real venv/harness/package install boundary")
 	_require(ui._confirm_dialog.dialog_text.find("\n") >= 0 and ui._confirm_dialog.dialog_autowrap == true, "confirmation dialog did not use wrapped/newline layout")
 	_require(ui._confirm_dialog.dialog_text.find("Proof mode") >= 0 and ui._confirm_dialog.dialog_text.find("instead of creating a venv or running pip") >= 0, "confirmation lost proof-mode no-pip boundary")
 	_require(ui._confirm_dialog.dialog_text.find(FAKE_SECRET) < 0, "confirmation leaked API secret")
@@ -150,19 +151,19 @@ func _run() -> void:
 	var intent = helpers.load_json_file(intent_path)
 	var intent_text = JSON.print(intent)
 	_require(intent.get("action", "") == "install_api_backend", "setup intent action mismatch")
-	_require(intent.get("phase_order", []).has("create_or_update_venv") and intent.get("phase_order", []).has("install_anyllm_packages"), "setup intent missing venv/package phases")
+	_require(intent.get("phase_order", []).has("create_or_update_venv") and intent.get("phase_order", []).has("install_openclaw_harness_requirements") and intent.get("phase_order", []).has("install_anyllm_packages"), "setup intent missing venv/harness/package phases")
 	_require(intent.get("provider", "") == "openrouter", "setup intent provider mismatch")
 	_require(intent.get("package_spec", "") == "any-llm-sdk[openrouter]", "setup intent did not use Mozilla any-llm PyPI package shape")
 	_require(intent.get("performed_external_install", true) == false, "setup intent claimed an external install ran")
-	_require(intent.get("phase_order", []).has("create_or_update_venv") and intent.get("phase_order", []).has("install_anyllm_packages"), "setup intent did not record venv/package phases")
+	_require(intent.get("harness_requirements_path", "").find("tools/openclaw_harness/requirements.txt") >= 0, "setup intent did not record harness requirements path")
 	_require(intent_text.find(FAKE_SECRET) < 0, "setup intent leaked API secret")
 
 	print("API / AnyLLM workflow UI smoke passed")
-	print("  UI proof: API provider/model/env-var/session-key controls with normal base URL hidden, colored status rows, Create venv only, and Set up API / AnyLLM rendered")
+	print("  UI proof: API provider/model/env-var/session-key controls with normal base URL hidden, colored status rows, Set up Python venv, and Set up API / AnyLLM rendered")
 	print("  Check proof: readiness-only; no backend config write and no API call")
 	print("  Save proof: provider/default base URL/model/env-var name round-tripped and active C-AOL options.json enables API runner without storing secret")
 	print("  Runner proof: confirmation-gated C-AOL runner.py --backend api --dry-run exercised the runner route without API call/secret read")
-	print("  Install proof: confirmation-gated venv + AnyLLM setup command staged in proof mode; no venv/pip/API call/secret read")
+	print("  Install proof: confirmation-gated venv + harness requirements + AnyLLM setup command staged in proof mode; no venv/pip/API call/secret read")
 	quit(0)
 
 
@@ -173,6 +174,16 @@ func _write_runner_fixture(install_dir: String) -> void:
 	var f = File.new()
 	_require(f.open(runner_dir.plus_file("runner.py"), File.WRITE) == OK, "could not open runner fixture")
 	f.store_string("import sys\nif '--dry-run' in sys.argv and '--backend' in sys.argv:\n    print('dry-run ok')\n    raise SystemExit(0)\nprint('fixture blocks live calls', file=sys.stderr)\nraise SystemExit(2)\n")
+	f.close()
+
+
+func _write_harness_requirements_fixture(install_dir: String) -> void:
+	var harness_dir = install_dir.plus_file("tools").plus_file("openclaw_harness")
+	var err = Directory.new().make_dir_recursive(harness_dir)
+	_require(err == OK or err == ERR_ALREADY_EXISTS, "could not create harness fixture dir")
+	var f = File.new()
+	_require(f.open(harness_dir.plus_file("requirements.txt"), File.WRITE) == OK, "could not open harness requirements fixture")
+	f.store_string("# stdlib-only harness requirements fixture\n")
 	f.close()
 
 

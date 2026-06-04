@@ -22,10 +22,13 @@ EXECUTABLE_CANDIDATES = (
     "Cataclysm.exe",
 )
 REQUIRED_FILES = (
-    "tools/llm_runner/runner.py",
-    "README.md",
-    "TechnicalTome.md",
-    "VERSION.txt",
+	"tools/llm_runner/runner.py",
+	"tools/openclaw_harness/startup_harness.py",
+	"tools/openclaw_harness/requirements.txt",
+	"tools/openclaw_harness/scenarios/manual.intact_camp_shakedown_mcw.json",
+	"README.md",
+	"TechnicalTome.md",
+	"VERSION.txt",
 )
 REQUIRED_PREFIXES = (
     "data/json/",
@@ -79,12 +82,14 @@ def main() -> int:
             "size": archive.stat().st_size,
             "sha256": sha256_file(archive),
             "entry_count": len(names),
-            "executables": executables,
-            "dll_count": len(dlls),
-            "runner": "tools/llm_runner/runner.py",
-            "required_prefixes": REQUIRED_PREFIXES,
-            "crc_checked": not args.skip_crc,
-        }
+			"executables": executables,
+			"dll_count": len(dlls),
+			"runner": "tools/llm_runner/runner.py",
+			"manual_handoff_harness": "tools/openclaw_harness/startup_harness.py",
+			"manual_handoff_requirements": "tools/openclaw_harness/requirements.txt",
+			"required_prefixes": REQUIRED_PREFIXES,
+			"crc_checked": not args.skip_crc,
+		}
 
     print(json.dumps(proof, indent=2))
     print("C-AOL Windows archive shape proof passed")

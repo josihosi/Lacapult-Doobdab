@@ -107,6 +107,9 @@ def inspect_mount(mount_point: str) -> dict[str, Any]:
     for app in apps:
         macos_dir = app / "Contents" / "MacOS"
         resources_dir = app / "Contents" / "Resources"
+        harness_script = resources_dir / "tools" / "openclaw_harness" / "startup_harness.py"
+        harness_requirements = resources_dir / "tools" / "openclaw_harness" / "requirements.txt"
+        manual_scenario = resources_dir / "tools" / "openclaw_harness" / "scenarios" / "manual.intact_camp_shakedown_mcw.json"
         executable_candidates = []
         lacapult_guard_matches = []
         for search_dir in [macos_dir, resources_dir]:
@@ -134,6 +137,9 @@ def inspect_mount(mount_point: str) -> dict[str, Any]:
                 "executable_candidates": executable_candidates,
                 "lacapult_guard_matches": lacapult_guard_matches,
                 "launchable_by_lacapult_guard": bool(lacapult_guard_matches),
+                "manual_handoff_harness_present": harness_script.is_file(),
+                "manual_handoff_requirements_present": harness_requirements.is_file(),
+                "manual_handoff_scenario_present": manual_scenario.is_file(),
             }
         )
 
@@ -144,6 +150,9 @@ def inspect_mount(mount_point: str) -> dict[str, Any]:
         "apps": app_results,
         "release_installer_root_expectation": "top-level .app keeps the containing temp directory as install root",
         "looks_launchable": any(app["launchable_by_lacapult_guard"] for app in app_results),
+        "manual_handoff_harness_present": any(app["manual_handoff_harness_present"] for app in app_results),
+        "manual_handoff_requirements_present": any(app["manual_handoff_requirements_present"] for app in app_results),
+        "manual_handoff_scenario_present": any(app["manual_handoff_scenario_present"] for app in app_results),
     }
 
 
@@ -337,6 +346,14 @@ def main() -> int:
     if not proof.get("mount_inspection", {}).get("looks_launchable"):
         print("Mounted DMG did not expose a launchable .app shape", file=sys.stderr)
         return 1
+    for key in (
+        "manual_handoff_harness_present",
+        "manual_handoff_requirements_present",
+        "manual_handoff_scenario_present",
+    ):
+        if not proof.get("mount_inspection", {}).get(key):
+            print(f"Mounted DMG is missing required manual handoff payload: {key}", file=sys.stderr)
+            return 1
     if args.install_sandbox and not proof.get("sandbox_install", {}).get("looks_launchable_after_move"):
         print("Sandbox install did not preserve a launchable final install shape", file=sys.stderr)
         return 1

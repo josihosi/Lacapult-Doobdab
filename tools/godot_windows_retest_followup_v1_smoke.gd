@@ -1,7 +1,7 @@
 extends SceneTree
 
 # Headless smoke for Catapult-Dabubu Windows retest follow-up v1.
-# Proves the API setup path plans venv + AnyLLM install in proof mode,
+# Proves the API setup path plans venv + harness requirements + AnyLLM install in proof mode,
 # visible backend statuses use explicit colored big-dot rows rather than emoji
 # traffic lights, Ollama hardware/readiness rows include fixture RAM/VRAM, and
 # Ollama setup previews are serialized instead of shell-chained. No pip install,
@@ -25,6 +25,7 @@ func _run() -> void:
 	var dir_err = Directory.new().make_dir_recursive(install_dir)
 	_require(dir_err == OK or dir_err == ERR_ALREADY_EXISTS, "could not create sandbox active install dir")
 	_require(helpers.save_to_json_file({"name": "Windows V1 Sandbox"}, install_dir.plus_file("catapult_install_info.json")), "could not create sandbox install info")
+	_write_harness_requirements_fixture(install_dir)
 	settings.store("backend_mode", "api")
 	settings.store("backend_api_endpoint", "")
 	settings.store("backend_api_provider", "openrouter")
@@ -55,7 +56,8 @@ func _run() -> void:
 	yield(self, "idle_frame")
 	_require(ui._confirm_dialog.dialog_text.find("CLI input") >= 0, "confirmation did not mark command preview as CLI input")
 	_require(ui._confirm_dialog.dialog_text.find("Step 1:") >= 0 and ui._confirm_dialog.dialog_text.find("-m venv") >= 0, "API setup confirmation missing venv phase")
-	_require(ui._confirm_dialog.dialog_text.find("Step 2:") >= 0 and ui._confirm_dialog.dialog_text.find("pip install --upgrade") >= 0, "API setup confirmation missing AnyLLM package phase")
+	_require(ui._confirm_dialog.dialog_text.find("Step 2:") >= 0 and ui._confirm_dialog.dialog_text.find("tools/openclaw_harness/requirements.txt") >= 0, "API setup confirmation missing harness requirements phase")
+	_require(ui._confirm_dialog.dialog_text.find("Step 3:") >= 0 and ui._confirm_dialog.dialog_text.find("pip install --upgrade any-llm-sdk[openrouter]") >= 0, "API setup confirmation missing AnyLLM package phase")
 	_require(ui._confirm_dialog.dialog_text.find(FAKE_SECRET) < 0, "confirmation leaked fake API secret")
 	ui._on_ExternalBackendAction_confirmed()
 	yield(self, "idle_frame")
@@ -63,7 +65,7 @@ func _run() -> void:
 	_require(File.new().file_exists(intent_path), "API setup proof intent not written")
 	var intent = helpers.load_json_file(intent_path)
 	_require(intent.get("performed_external_install", true) == false, "proof intent claimed external install")
-	_require(intent.get("phase_order", []).has("create_or_update_venv") and intent.get("phase_order", []).has("install_anyllm_packages"), "API setup intent missing venv/package phases")
+	_require(intent.get("phase_order", []).has("create_or_update_venv") and intent.get("phase_order", []).has("install_openclaw_harness_requirements") and intent.get("phase_order", []).has("install_anyllm_packages"), "API setup intent missing venv/harness/package phases")
 	_require(JSON.print(intent).find(FAKE_SECRET) < 0, "API setup intent leaked fake secret")
 
 	OS.set_environment("LACAPULT_OLLAMA_FIXTURE", "models:mistral:v0.3")
@@ -87,7 +89,7 @@ func _run() -> void:
 	_require(missing_plan.get("next_step", "").find("Run Check") >= 0, "Ollama missing-command plan did not tell user to Check before pull")
 
 	print("Windows retest follow-up v1 UI/backend smoke passed")
-	print("  API setup: proof-only venv + AnyLLM package phases recorded without secrets/pip/venv mutation")
+	print("  API setup: proof-only venv + harness requirements + AnyLLM package phases recorded without secrets/pip/venv mutation")
 	print("  Status UI: explicit colored big-dot rows for API/Ollama/model performance, no emoji traffic lights")
 	print("  Ollama: fixture GiB hardware/performance check, timeout/wait warning, serialized setup plan, no install+pull chain when not ready")
 	quit(0)
@@ -153,6 +155,16 @@ func _find_button(node: Node, text: String):
 		if found != null:
 			return found
 	return null
+
+
+func _write_harness_requirements_fixture(install_dir: String) -> void:
+	var harness_dir = install_dir.plus_file("tools").plus_file("openclaw_harness")
+	var err = Directory.new().make_dir_recursive(harness_dir)
+	_require(err == OK or err == ERR_ALREADY_EXISTS, "could not create harness fixture dir")
+	var f = File.new()
+	_require(f.open(harness_dir.plus_file("requirements.txt"), File.WRITE) == OK, "could not open harness requirements fixture")
+	f.store_string("# stdlib-only harness requirements fixture\n")
+	f.close()
 
 
 func _require(condition: bool, message: String) -> void:

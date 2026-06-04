@@ -1,13 +1,416 @@
 extends VBoxContainer
 
 
-onready var _mods = $"../../../Mods"
-onready var _sound = $"../../../Sound"
+const MANUAL_SCENARIO_PREFIX = "manual."
+const MAX_OUTPUT_CHARS = 5000
+
+onready var _mods = get_node_or_null("../../../Mods")
+onready var _sound = get_node_or_null("../../../Sound")
+
+var _scenario_list: ItemList = null
+var _details_label: Label = null
+var _status_label: Label = null
+var _output_box: TextEdit = null
+var _refresh_button: Button = null
+var _validate_button: Button = null
+var _handoff_button: Button = null
+var _open_report_button: Button = null
+var _copy_command_button: Button = null
+var _diagnostics_container: VBoxContainer = null
+var _manual_scenarios := []
+var _last_report_path := ""
+var _last_run_dir := ""
+var _busy := false
+
+
+func _ready() -> void:
+	_build_manual_handoff_controls()
+	_refresh_manual_scenarios()
+
+
+func _build_manual_handoff_controls() -> void:
+	for child in get_children():
+		remove_child(child)
+		child.queue_free()
+
+	add_constant_override("separation", 6)
+
+	var title = Label.new()
+	title.text = "Manual Debug Scenarios"
+	title.align = Label.ALIGN_CENTER
+	add_child(title)
+
+	var intro = Label.new()
+	intro.autowrap = true
+	intro.text = "Choose a packaged manual scenario and start a C-AOL handoff for human playtesting."
+	add_child(intro)
+
+	_status_label = Label.new()
+	_status_label.name = "HandoffStatus"
+	_status_label.autowrap = true
+	add_child(_status_label)
+
+	var button_row = HBoxContainer.new()
+	button_row.name = "HandoffActions"
+	add_child(button_row)
+
+	_refresh_button = Button.new()
+	_refresh_button.text = "Refresh"
+	_refresh_button.hint_tooltip = "Reload packaged manual scenarios from the active C-AOL install."
+	_refresh_button.connect("pressed", self, "_refresh_manual_scenarios")
+	button_row.add_child(_refresh_button)
+
+	_validate_button = Button.new()
+	_validate_button.text = "Validate setup"
+	_validate_button.hint_tooltip = "Dry-run the selected handoff contract without launching the game."
+	_validate_button.connect("pressed", self, "_on_ValidateHandoff_pressed")
+	button_row.add_child(_validate_button)
+
+	_handoff_button = Button.new()
+	_handoff_button.text = "Start handoff"
+	_handoff_button.hint_tooltip = "Set up the selected scenario, launch C-AOL, and leave the game open for human testing."
+	_handoff_button.connect("pressed", self, "_on_StartHandoff_pressed")
+	button_row.add_child(_handoff_button)
+
+	_open_report_button = Button.new()
+	_open_report_button.text = "Open report"
+	_open_report_button.hint_tooltip = "Open the last handoff report folder."
+	_open_report_button.connect("pressed", self, "_on_OpenHandoffReport_pressed")
+	button_row.add_child(_open_report_button)
+
+	_copy_command_button = Button.new()
+	_copy_command_button.text = "Copy command"
+	_copy_command_button.hint_tooltip = "Copy the selected handoff command for terminal use on another machine."
+	_copy_command_button.connect("pressed", self, "_on_CopyHandoffCommand_pressed")
+	button_row.add_child(_copy_command_button)
+
+	_scenario_list = ItemList.new()
+	_scenario_list.name = "ManualScenarioList"
+	_scenario_list.rect_min_size = Vector2(0, 170)
+	_scenario_list.size_flags_horizontal = SIZE_EXPAND_FILL
+	_scenario_list.size_flags_vertical = SIZE_EXPAND_FILL
+	_scenario_list.connect("item_selected", self, "_on_ManualScenario_selected")
+	add_child(_scenario_list)
+
+	_details_label = Label.new()
+	_details_label.name = "ManualScenarioDetails"
+	_details_label.autowrap = true
+	add_child(_details_label)
+
+	_output_box = TextEdit.new()
+	_output_box.name = "HandoffOutput"
+	_output_box.readonly = true
+	_output_box.rect_min_size = Vector2(0, 110)
+	_output_box.size_flags_horizontal = SIZE_EXPAND_FILL
+	add_child(_output_box)
+
+	var separator = HSeparator.new()
+	add_child(separator)
+
+	_build_launcher_diagnostics()
+	_set_handoff_status("Ready. Select Refresh if you changed the active install.")
+	_update_handoff_buttons()
+
+
+func _build_launcher_diagnostics() -> void:
+	_diagnostics_container = VBoxContainer.new()
+	_diagnostics_container.name = "LauncherDiagnostics"
+	_diagnostics_container.add_constant_override("separation", 4)
+	add_child(_diagnostics_container)
+
+	var label = Label.new()
+	label.text = "Launcher diagnostics"
+	label.align = Label.ALIGN_CENTER
+	_diagnostics_container.add_child(label)
+
+	var row_a = HBoxContainer.new()
+	_diagnostics_container.add_child(row_a)
+	_add_diag_button(row_a, "Mods", "_on_Button_pressed")
+	_add_diag_button(row_a, "Sound", "_on_Button2_pressed")
+	_add_diag_button(row_a, "Paths", "_on_Button7_pressed")
+	_add_diag_button(row_a, "Screen", "_on_Button9_pressed")
+
+	var row_b = HBoxContainer.new()
+	_diagnostics_container.add_child(row_b)
+	_add_diag_button(row_b, "Status", "_on_Button4_pressed")
+	_add_diag_button(row_b, "Listing", "_on_Button5_pressed")
+	_add_diag_button(row_b, "Tip", "_on_Button6_pressed")
+	_add_diag_button(row_b, "Locale", "_on_Button8_pressed")
+
+
+func _add_diag_button(parent: HBoxContainer, text: String, method: String) -> void:
+	var button = Button.new()
+	button.text = text
+	button.size_flags_horizontal = SIZE_EXPAND_FILL
+	button.connect("pressed", self, method)
+	parent.add_child(button)
+
+
+func _refresh_manual_scenarios() -> void:
+	if _busy:
+		return
+	var script_path = BackendConfig.resolve_openclaw_harness_script_path()
+	if script_path == "":
+		_manual_scenarios.clear()
+		_render_manual_scenarios()
+		_set_handoff_status("Manual handoff harness not found in the active C-AOL install. Install a build that includes tools/openclaw_harness.")
+		_set_output("")
+		_update_handoff_buttons()
+		return
+	var python = _python_command_for_harness()
+	_set_handoff_status("Loading manual scenarios from %s" % script_path)
+	var result = yield(_run_harness_command("list", python, [script_path, "list-scenarios"]), "completed")
+	if result.get("exit_code", -1) != 0:
+		_manual_scenarios.clear()
+		_render_manual_scenarios()
+		_set_handoff_status("Could not list manual scenarios. Check Python and the active C-AOL install.")
+		_set_output(result.get("text", ""))
+		_update_handoff_buttons()
+		return
+	var parsed = _parse_json_text(result.get("text", ""))
+	if parsed.empty() or not parsed.has("scenarios"):
+		_manual_scenarios.clear()
+		_render_manual_scenarios()
+		_set_handoff_status("Harness returned an unreadable scenario list.")
+		_set_output(result.get("text", ""))
+		_update_handoff_buttons()
+		return
+	_manual_scenarios.clear()
+	for scenario in parsed.get("scenarios", []):
+		if not (scenario is Dictionary):
+			continue
+		var name = str(scenario.get("name", ""))
+		if name.begins_with(MANUAL_SCENARIO_PREFIX):
+			_manual_scenarios.append(scenario)
+	_render_manual_scenarios()
+	_set_output(result.get("text", ""))
+	if _manual_scenarios.size() == 0:
+		_set_handoff_status("No manual handoff scenarios were packaged in this C-AOL install.")
+	else:
+		_set_handoff_status("Loaded %s manual handoff scenario(s)." % _manual_scenarios.size())
+	_update_handoff_buttons()
+
+
+func _render_manual_scenarios() -> void:
+	if _scenario_list == null:
+		return
+	_scenario_list.clear()
+	for scenario in _manual_scenarios:
+		var name = str(scenario.get("name", ""))
+		var label = name.replace(MANUAL_SCENARIO_PREFIX, "")
+		if scenario.get("status", "active") != "active":
+			label += " (blocked)"
+		var index = _scenario_list.get_item_count()
+		_scenario_list.add_item(label)
+		_scenario_list.set_item_metadata(index, scenario)
+		_scenario_list.set_item_tooltip(index, str(scenario.get("description", "")))
+		if scenario.get("status", "active") != "active":
+			_scenario_list.set_item_disabled(index, true)
+	if _manual_scenarios.size() > 0:
+		_scenario_list.select(0)
+		_update_selected_scenario_details()
+	else:
+		_details_label.text = ""
+
+
+func _on_ManualScenario_selected(_index: int) -> void:
+	_update_selected_scenario_details()
+	_update_handoff_buttons()
+
+
+func _update_selected_scenario_details() -> void:
+	if _details_label == null:
+		return
+	var scenario = _selected_manual_scenario()
+	if scenario.empty():
+		_details_label.text = "No manual scenario selected."
+		return
+	var lines = []
+	lines.append(str(scenario.get("name", "")))
+	lines.append(str(scenario.get("description", "")))
+	var full = _load_scenario_file(scenario)
+	if not full.empty() and full.has("manual_playtest"):
+		var manual = full.get("manual_playtest", {})
+		if manual is Dictionary:
+			var question = str(manual.get("question", "")).strip_edges()
+			if question != "":
+				lines.append("Question: %s" % question)
+			var notes = manual.get("tester_notes", [])
+			if notes is Array and notes.size() > 0:
+				lines.append("Tester notes:")
+				for note in notes:
+					lines.append("- %s" % str(note))
+	if scenario.get("status", "active") != "active":
+		lines.append("Blocked: %s" % str(scenario.get("blocked_reason", "required helper missing")))
+	_details_label.text = PoolStringArray(lines).join("\n")
+
+
+func _load_scenario_file(scenario: Dictionary) -> Dictionary:
+	var path = str(scenario.get("path", ""))
+	if path == "" or not File.new().file_exists(path):
+		return {}
+	var parsed = Helpers.load_json_file(path)
+	if parsed is Dictionary:
+		return parsed
+	return {}
+
+
+func _selected_manual_scenario() -> Dictionary:
+	if _scenario_list == null:
+		return {}
+	var selected = _scenario_list.get_selected_items()
+	if selected.size() == 0:
+		return {}
+	var metadata = _scenario_list.get_item_metadata(selected[0])
+	if metadata is Dictionary:
+		return metadata
+	return {}
+
+
+func _on_ValidateHandoff_pressed() -> void:
+	var scenario = _selected_manual_scenario()
+	if scenario.empty() or _busy:
+		return
+	var script_path = BackendConfig.resolve_openclaw_harness_script_path()
+	var python = _python_command_for_harness()
+	var args = [script_path, "handoff", scenario.get("name", ""), "--compact-stdout", "--dry-run"]
+	_set_handoff_status("Validating %s without launching the game..." % scenario.get("name", "manual scenario"))
+	var result = yield(_run_harness_command("validate", python, args), "completed")
+	_set_output(result.get("text", ""))
+	if result.get("exit_code", -1) == 0:
+		_set_handoff_status("Validation passed for %s. Start handoff will launch the game." % scenario.get("name", "manual scenario"))
+	else:
+		_set_handoff_status("Validation failed for %s. Check the output before launching." % scenario.get("name", "manual scenario"))
+
+
+func _on_StartHandoff_pressed() -> void:
+	var scenario = _selected_manual_scenario()
+	if scenario.empty() or _busy:
+		return
+	var script_path = BackendConfig.resolve_openclaw_harness_script_path()
+	var python = _python_command_for_harness()
+	var args = [script_path, "handoff", scenario.get("name", ""), "--compact-stdout"]
+	_set_handoff_status("Starting handoff for %s..." % scenario.get("name", "manual scenario"))
+	var result = yield(_run_harness_command("handoff", python, args), "completed")
+	_set_output(result.get("text", ""))
+	var parsed = _parse_json_text(result.get("text", ""))
+	if not parsed.empty():
+		_last_report_path = str(parsed.get("report_path", ""))
+		_last_run_dir = str(parsed.get("run_dir", ""))
+	if result.get("exit_code", -1) == 0:
+		var suffix = ""
+		if _last_report_path != "":
+			suffix = " Report: %s" % _last_report_path
+		_set_handoff_status("Handoff started; C-AOL is left running for human testing.%s" % suffix)
+	else:
+		_set_handoff_status("Handoff failed. Check the output and active install.")
+	_update_handoff_buttons()
+
+
+func _on_OpenHandoffReport_pressed() -> void:
+	var folder = _last_run_dir
+	if folder == "" and _last_report_path != "":
+		folder = _last_report_path.get_base_dir()
+	if folder == "" or not Directory.new().dir_exists(folder):
+		_set_handoff_status("No handoff report folder is available yet.")
+		return
+	_open_directory(folder)
+
+
+func _on_CopyHandoffCommand_pressed() -> void:
+	var scenario = _selected_manual_scenario()
+	if scenario.empty():
+		return
+	var script_path = BackendConfig.resolve_openclaw_harness_script_path()
+	if script_path == "":
+		_set_handoff_status("Cannot copy command because the manual handoff harness is missing.")
+		return
+	var python = _python_command_for_harness()
+	var args = [script_path, "handoff", scenario.get("name", ""), "--compact-stdout"]
+	var command = _quote_cli(python)
+	for arg in args:
+		command += " " + _quote_cli(str(arg))
+	OS.set_clipboard(command)
+	_set_handoff_status("Copied handoff command for %s." % scenario.get("name", "manual scenario"))
+
+
+func _run_harness_command(_kind: String, python: String, args: Array):
+	_busy = true
+	_update_handoff_buttons()
+	var oew = OSExecWrapper.new()
+	oew.execute(python, PoolStringArray(args), true)
+	yield(oew, "process_exited")
+	_busy = false
+	_update_handoff_buttons()
+	var text = PoolStringArray(oew.output).join("\n")
+	return {"exit_code": int(oew.exit_code), "text": text}
+
+
+func _python_command_for_harness() -> String:
+	return BackendConfig.resolve_runner_python_command(str(Settings.read("backend_python_path")))
+
+
+func _parse_json_text(text: String) -> Dictionary:
+	var parsed = JSON.parse(text.strip_edges())
+	if parsed.error == OK and parsed.result is Dictionary:
+		return parsed.result
+	return {}
+
+
+func _set_handoff_status(text: String) -> void:
+	if _status_label != null:
+		_status_label.text = text
+	Status.post(text, Enums.MSG_INFO)
+
+
+func _set_output(text: String) -> void:
+	if _output_box == null:
+		return
+	_output_box.text = _trim_output(text)
+
+
+func _trim_output(text: String) -> String:
+	if text.length() <= MAX_OUTPUT_CHARS:
+		return text
+	return text.substr(0, MAX_OUTPUT_CHARS) + "\n... [truncated]"
+
+
+func _update_handoff_buttons() -> void:
+	var has_harness = BackendConfig.resolve_openclaw_harness_script_path() != ""
+	var has_selection = not _selected_manual_scenario().empty()
+	if _refresh_button != null:
+		_refresh_button.disabled = _busy
+	if _validate_button != null:
+		_validate_button.disabled = _busy or not has_harness or not has_selection
+	if _handoff_button != null:
+		_handoff_button.disabled = _busy or not has_harness or not has_selection
+	if _copy_command_button != null:
+		_copy_command_button.disabled = _busy or not has_harness or not has_selection
+	if _open_report_button != null:
+		_open_report_button.disabled = _last_report_path == "" and _last_run_dir == ""
+
+
+func _quote_cli(value: String) -> String:
+	if value.find(" ") < 0 and value.find("\"") < 0 and value.find("'") < 0:
+		return value
+	if OS.get_name() == "Windows":
+		return "\"" + value.replace("\"", "\\\"") + "\""
+	return "'" + value.replace("'", "'\\''") + "'"
+
+
+func _open_directory(path: String) -> void:
+	if OS.get_name() == "OSX":
+		OS.execute("open", [path], false)
+	else:
+		OS.shell_open(path)
 
 
 func _on_Button_pressed() -> void:
 	
 	# Test modinfo parsing.
+	if _mods == null:
+		Status.post("Mod diagnostics are unavailable outside the full Catapult scene.", Enums.MSG_WARN)
+		return
 	
 	var message = "Found mods:"
 	var mods_dir = Paths.mods_stock
@@ -24,6 +427,9 @@ func _on_Button_pressed() -> void:
 func _on_Button2_pressed() -> void:
 	
 	# Test soundpack parsing.
+	if _sound == null:
+		Status.post("Sound diagnostics are unavailable outside the full Catapult scene.", Enums.MSG_WARN)
+		return
 	
 	var message = "Found soundpacks:"
 	var sound_dir = Paths.sound_user

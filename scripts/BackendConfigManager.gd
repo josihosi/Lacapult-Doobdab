@@ -16,6 +16,8 @@ const API_SETUP_INTENT_FILENAME = "caol_api_setup_intent.json"
 const OLLAMA_SETUP_INTENT_FILENAME = "caol_ollama_setup_intent.json"
 const PYTHON_VENV_SETUP_INTENT_FILENAME = "caol_python_venv_setup_intent.json"
 const RUNNER_TEST_INTENT_FILENAME = "caol_runner_test_intent.json"
+const OPENCLAW_HARNESS_SCRIPT_RELATIVE_PATH = "tools/openclaw_harness/startup_harness.py"
+const OPENCLAW_HARNESS_REQUIREMENTS_RELATIVE_PATH = "tools/openclaw_harness/requirements.txt"
 const DEFAULT_HARDWARE_RAM_WARN_MB = 16000
 const DEFAULT_HARDWARE_VRAM_WARN_MB = 6000
 
@@ -104,7 +106,12 @@ func build_api_setup_plan(provider_id: String, python_path: String = "") -> Dict
 			"args": ["-m", "venv", target_path],
 			"preview": venv_plan.get("command_preview", "python3 -m venv"),
 			"purpose": "Create or update the Python venv used by C-AOL runner.py."
-		},
+		}
+	]
+	var harness_step = _build_openclaw_harness_requirements_step(venv_python_command)
+	if not harness_step.empty():
+		commands.append(harness_step)
+	commands.append(
 		{
 			"phase": "install_anyllm_packages",
 			"command": venv_python_command,
@@ -112,20 +119,24 @@ func build_api_setup_plan(provider_id: String, python_path: String = "") -> Dict
 			"preview": "%s -m pip install --upgrade %s" % [venv_python_command, package_spec],
 			"purpose": "Install AnyLLM/provider packages into that venv."
 		}
-	]
+	)
 	var preview = []
+	var phase_order = []
 	for i in range(commands.size()):
 		preview.append("Step %s: %s" % [str(i + 1), commands[i].get("preview", "")])
+		phase_order.append(commands[i].get("phase", ""))
+	phase_order.append("check_readiness_next")
 	return {
 		"provider": choice.get("id", DEFAULT_API_PROVIDER),
 		"provider_label": choice.get("label", "OpenAI"),
 		"target_venv_path": target_path,
 		"python_command": venv_python_command,
 		"package_spec": package_spec,
+		"harness_requirements_path": resolve_openclaw_harness_requirements_path(),
 		"commands": commands,
 		"command": PoolStringArray(preview).join("\n"),
 		"requires_confirmation": true,
-		"phase_order": ["create_or_update_venv", "install_anyllm_packages", "check_readiness_next"],
+		"phase_order": phase_order,
 		"automated_proof_policy": "plan_only_no_venv_no_pip_no_secret_no_api_call"
 	}
 
@@ -154,7 +165,7 @@ func run_api_setup(provider_id: String, python_path: String = "", proof_only: bo
 			failed = true
 			break
 	var failed_phase = results[results.size() - 1].get("phase", "api_setup") if results.size() > 0 else "api_setup"
-	var summary = "api_venv_and_anyllm_install_ok" if not failed else "%s_failed" % failed_phase
+	var summary = "api_venv_harness_and_anyllm_install_ok" if not failed else "%s_failed" % failed_phase
 	var write_result = write_api_setup_intent(provider_id, python_path, true, exit_code, summary, results)
 	var status = "api_setup_install_ok" if not failed else "api_setup_%s_failed_%s" % [failed_phase, exit_code]
 	if write_result != "ok":
@@ -382,29 +393,61 @@ func build_python_venv_setup_plan(python_path: String = "") -> Dictionary:
 	if not py.get("ok", false):
 		py = _resolve_python("")
 	var python_command = py.get("command", "python3") if py.get("ok", false) else "python3"
+	var venv_python_command = _venv_python_command(target)
+	var commands = [
+		{
+			"phase": "create_or_update_venv",
+			"command": python_command,
+			"args": ["-m", "venv", target],
+			"preview": "%s -m venv %s" % [python_command, target],
+			"purpose": "Create or update the shared Python venv used by C-AOL runner.py and manual debug handoffs."
+		}
+	]
+	var harness_step = _build_openclaw_harness_requirements_step(venv_python_command)
+	if not harness_step.empty():
+		commands.append(harness_step)
+	var preview = []
+	var phase_order = []
+	for i in range(commands.size()):
+		preview.append("Step %s: %s" % [str(i + 1), commands[i].get("preview", "")])
+		phase_order.append(commands[i].get("phase", ""))
 	return {
 		"action": "create_python_venv",
 		"target_path": target,
 		"python_command": python_command,
+		"venv_python_command": venv_python_command,
 		"command_preview": "%s -m venv %s" % [python_command, target],
+		"command": PoolStringArray(preview).join("\n"),
+		"commands": commands,
+		"phase_order": phase_order,
+		"harness_requirements_path": resolve_openclaw_harness_requirements_path(),
 		"requires_confirmation": true,
-		"automated_proof_policy": "plan_only_no_venv_mutation"
+		"automated_proof_policy": "plan_only_no_venv_no_pip_mutation"
 	}
 
 
 func run_python_venv_setup(python_path: String = "", proof_only: bool = false) -> Dictionary:
 	var plan = build_python_venv_setup_plan(python_path)
 	if proof_only:
-		var proof_result = write_python_venv_setup_intent(plan.get("target_path", ""), false, -1, "proof_only_no_venv_mutation")
+		var proof_result = write_python_venv_setup_intent(plan.get("target_path", ""), false, -1, "proof_only_no_venv_no_pip_mutation", plan, [])
 		return {"status": proof_result, "plan": plan, "performed_external_install": false, "proof_only": true}
-	var output = []
-	var exit_code = OS.execute(plan.get("python_command", "python3"), ["-m", "venv", plan.get("target_path", "")], true, output, true)
-	var summary = "venv_create_ok" if exit_code == 0 else "venv_create_failed"
-	var write_result = write_python_venv_setup_intent(plan.get("target_path", ""), true, exit_code, summary)
-	var status = "python_venv_setup_ok" if exit_code == 0 else "python_venv_setup_failed_%s" % exit_code
+	var results = []
+	var failed = false
+	var exit_code = 0
+	for step in plan.get("commands", []):
+		var output = []
+		exit_code = OS.execute(step.get("command", ""), step.get("args", []), true, output, true)
+		results.append({"phase": step.get("phase", ""), "command": step.get("command", ""), "args": step.get("args", []), "purpose": step.get("purpose", ""), "exit_code": exit_code, "output_line_count": output.size(), "output_summary": _safe_command_output_summary(output)})
+		if exit_code != 0:
+			failed = true
+			break
+	var failed_phase = results[results.size() - 1].get("phase", "python_venv") if results.size() > 0 else "python_venv"
+	var summary = "python_venv_and_harness_requirements_setup_ok" if not failed else "%s_failed" % failed_phase
+	var write_result = write_python_venv_setup_intent(plan.get("target_path", ""), true, exit_code, summary, plan, results)
+	var status = "python_venv_setup_ok" if not failed else "python_venv_setup_%s_failed_%s" % [failed_phase, exit_code]
 	if write_result != "ok":
 		status = write_result
-	return {"status": status, "plan": plan, "performed_external_install": true, "proof_only": false, "exit_code": exit_code, "output_line_count": output.size()}
+	return {"status": status, "plan": plan, "performed_external_install": true, "proof_only": false, "exit_code": exit_code, "results": results}
 
 
 func get_supported_backends() -> Array:
@@ -564,6 +607,7 @@ func write_api_setup_intent(provider_id: String, python_path: String = "", perfo
 		"target_venv_path": plan.get("target_venv_path", ""),
 		"python_command": plan.get("python_command", "python3"),
 		"package_spec": plan.get("package_spec", ANY_LLM_PIP_PACKAGE),
+		"harness_requirements_path": plan.get("harness_requirements_path", ""),
 		"command_preview": plan.get("command", "python3 -m pip install --upgrade %s" % ANY_LLM_PIP_PACKAGE),
 		"commands": plan.get("commands", []),
 		"phase_order": plan.get("phase_order", []),
@@ -637,19 +681,27 @@ func write_backend_runner_test_intent(mode: String, plan: Dictionary, performed_
 	return "ok"
 
 
-func write_python_venv_setup_intent(target_path: String, performed_external_install: bool = false, exit_code: int = -1, result_summary: String = "plan_only_no_venv_mutation") -> String:
+func write_python_venv_setup_intent(target_path: String, performed_external_install: bool = false, exit_code: int = -1, result_summary: String = "plan_only_no_venv_no_pip_mutation", plan: Dictionary = {}, command_results: Array = []) -> String:
 	var config_dir_status = _ensure_backend_config_dir()
 	if not config_dir_status.get("ok", false):
 		return config_dir_status.get("status", "config_dir_error")
 	var config_dir = config_dir_status.get("path", "")
+	if plan.empty():
+		plan = build_python_venv_setup_plan(target_path)
 	var intent = {
 		"action": "create_python_venv",
 		"target_path": target_path,
+		"venv_python_command": plan.get("venv_python_command", ""),
+		"harness_requirements_path": plan.get("harness_requirements_path", ""),
+		"command_preview": plan.get("command", plan.get("command_preview", "")),
+		"commands": plan.get("commands", []),
+		"phase_order": plan.get("phase_order", []),
 		"confirmed": true,
 		"performed_external_install": performed_external_install,
 		"exit_code": exit_code,
+		"command_results": command_results,
 		"result_summary": result_summary,
-		"proof_policy": "plan_only_no_venv_mutation",
+		"proof_policy": plan.get("automated_proof_policy", "plan_only_no_venv_no_pip_mutation"),
 		"recorded_at": OS.get_datetime()
 	}
 	if not Helpers.save_to_json_file(intent, config_dir.plus_file(PYTHON_VENV_SETUP_INTENT_FILENAME)):
@@ -1017,6 +1069,28 @@ func _ollama_model_list_has(models: Array, model: String) -> bool:
 	return false
 
 
+func resolve_runner_python_command(python_path: String = "") -> String:
+	var py = _resolve_python(python_path)
+	if py.get("ok", false):
+		return py.get("command", "")
+	return "python" if OS.get_name() == "Windows" else "python3"
+
+
+func resolve_openclaw_harness_script_path() -> String:
+	return _resolve_caol_relative_file_path(OPENCLAW_HARNESS_SCRIPT_RELATIVE_PATH, "LACAPULT_OPENCLAW_HARNESS_PATH")
+
+
+func resolve_openclaw_harness_requirements_path() -> String:
+	return _resolve_caol_relative_file_path(OPENCLAW_HARNESS_REQUIREMENTS_RELATIVE_PATH, "LACAPULT_OPENCLAW_HARNESS_REQUIREMENTS")
+
+
+func resolve_openclaw_harness_root() -> String:
+	var script_path = resolve_openclaw_harness_script_path()
+	if script_path == "":
+		return ""
+	return script_path.get_base_dir()
+
+
 func _resolve_caol_runner_path() -> String:
 	var env_path = OS.get_environment("LACAPULT_CAOL_RUNNER_PATH")
 	if env_path != "" and File.new().file_exists(env_path):
@@ -1029,6 +1103,48 @@ func _resolve_caol_runner_path() -> String:
 	if d.file_exists(dev_runner):
 		return dev_runner
 	return ""
+
+
+func _resolve_caol_relative_file_path(relative_path: String, env_name: String) -> String:
+	var env_path = OS.get_environment(env_name)
+	if env_path != "" and File.new().file_exists(env_path):
+		return env_path
+	var d = Directory.new()
+	for root in _caol_resource_roots():
+		var candidate = root.plus_file(relative_path)
+		if d.file_exists(candidate):
+			return candidate
+	return ""
+
+
+func _caol_resource_roots() -> Array:
+	var roots = []
+	var game_dir = Paths.game_dir
+	if game_dir != "":
+		roots.append(game_dir)
+		if game_dir.ends_with(".app"):
+			roots.append(game_dir.plus_file("Contents").plus_file("Resources"))
+		else:
+			var d = Directory.new()
+			for item in FS.list_dir(game_dir):
+				if item.ends_with(".app"):
+					roots.append(game_dir.plus_file(item).plus_file("Contents").plus_file("Resources"))
+	var dev_root = Paths.own_dir.get_base_dir().plus_file("Cataclysm-AOL")
+	roots.append(dev_root)
+	return roots
+
+
+func _build_openclaw_harness_requirements_step(venv_python_command: String) -> Dictionary:
+	var requirements_path = resolve_openclaw_harness_requirements_path()
+	if requirements_path == "":
+		return {}
+	return {
+		"phase": "install_openclaw_harness_requirements",
+		"command": venv_python_command,
+		"args": ["-m", "pip", "install", "--upgrade", "-r", requirements_path],
+		"preview": "%s -m pip install --upgrade -r %s" % [venv_python_command, requirements_path],
+		"purpose": "Install packaged OpenClaw manual-handoff harness requirements into the shared C-AOL Python venv."
+	}
 
 
 func _command_exists(command: String) -> bool:
