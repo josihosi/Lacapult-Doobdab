@@ -155,13 +155,13 @@ func _build_controls() -> void:
 	python_row.add_child(python_label)
 	_backend_python_path = LineEdit.new()
 	_backend_python_path.rect_min_size = Vector2(300, 0)
-	_backend_python_path.placeholder_text = "Optional Python executable or venv path for C-AOL runner.py"
+	_backend_python_path.placeholder_text = "Optional venv Python executable for C-AOL runner.py"
 	_backend_python_path.size_flags_horizontal = SIZE_EXPAND_FILL
 	_backend_python_path.connect("text_changed", self, "_on_BackendPython_text_changed")
 	python_row.add_child(_backend_python_path)
 	_install_python_button = Button.new()
 	_install_python_button.text = "Set up Python venv"
-	_install_python_button.hint_tooltip = "Creates or updates the shared runner.py/debug-handoff Python venv.\nInstalls packaged harness requirements.\nUse the API setup action for AnyLLM/provider packages."
+	_install_python_button.hint_tooltip = "Downloads pinned uv, installs app-managed CPython, creates the shared runner.py/debug-handoff venv, and installs packaged harness requirements.\nNo system Python or PATH change is required."
 	_install_python_button.connect("pressed", self, "_on_ConfirmPythonVenvInstall_pressed")
 	python_row.add_child(_install_python_button)
 
@@ -289,7 +289,7 @@ func _refresh_backend_setup_controls() -> void:
 		choice_row.visible = false
 		model_row.visible = true
 		_install_python_button.text = "Set up Python venv"
-		_install_python_button.hint_tooltip = "Advanced: creates/updates the shared runner.py/debug-handoff venv and installs harness requirements. The main API setup action also installs AnyLLM packages."
+		_install_python_button.hint_tooltip = "Advanced: uses pinned uv and app-managed CPython for the shared runner.py/debug-handoff venv. The main API setup action also installs AnyLLM packages."
 		_install_button.text = "Set up API / AnyLLM"
 		_install_button.hint_tooltip = "Saves options, then asks before creating/updating the venv and installing harness plus AnyLLM/provider packages into it.\nNo API call or API-secret read is performed."
 		_runner_test_button.text = "Test API runner"
@@ -316,7 +316,7 @@ func _refresh_backend_setup_controls() -> void:
 		choice_row.visible = true
 		model_row.visible = false
 		_install_python_button.text = "Set up Python venv"
-		_install_python_button.hint_tooltip = "Creates or updates the shared runner.py/debug-handoff Python venv and installs harness requirements.\nOllama itself and model pulls use Install Ollama / model."
+		_install_python_button.hint_tooltip = "Uses pinned uv and app-managed CPython to create/update the shared runner.py/debug-handoff venv and install harness requirements.\nOllama itself and model pulls use Install Ollama / model."
 		_install_button.text = "Install Ollama / model"
 		_install_button.hint_tooltip = "Saves options, then asks before installing Ollama or pulling the selected model.\nAutomated proof records intent only."
 		_runner_test_button.text = "Test Ollama runner"
@@ -351,7 +351,7 @@ func _set_backend_status(mode: String, raw_status: String, prefix: String = "") 
 			_set_status_rows(_api_status_lights, _api_status_rows(raw_status))
 		lines.append("Secret policy: env-var name only; pasted keys are session-only and cleared after use. Check makes no API call.")
 		lines.append("Runner test: confirmation-gated; proof mode invokes C-AOL runner.py with --dry-run and no API call.")
-		lines.append("Setup path: creates/updates the venv, installs harness requirements and AnyLLM/provider packages, then use Check.")
+		lines.append("Setup path: uses pinned uv plus app-managed CPython to create/update the venv, installs harness requirements and AnyLLM/provider packages, then use Check.")
 	elif mode == "ollama":
 		if _ollama_status_lights != null:
 			_set_status_rows(_ollama_status_lights, _ollama_status_rows())
@@ -381,7 +381,7 @@ func _ollama_status_rows() -> Array:
 		{"label": "mistral:v0.3 performance", "state": performance.get(OLLAMA_MODEL_MISTRAL, "gray"), "state_label": _performance_label(performance.get(OLLAMA_MODEL_MISTRAL, "gray"))},
 		{"label": "nemotron-9b performance", "state": performance.get(OLLAMA_MODEL_NEMOTRON, "gray"), "state_label": _performance_label(performance.get(OLLAMA_MODEL_NEMOTRON, "gray"))},
 		{"label": "Python/venv", "state": readiness.get("python_state", readiness.get("python_light", "red"))},
-		{"label": "Harness requirements", "state": "green" if BackendConfig.resolve_openclaw_harness_requirements_path() != "" else "yellow"},
+		{"label": "Harness requirements", "state": "green" if BackendConfig.resolve_active_install_openclaw_harness_requirements_path() != "" else "yellow"},
 		{"label": "Options", "state": readiness.get("options_state", readiness.get("options_light", "green"))},
 		{"label": "Ollama runner test", "state": _runner_test_state("ollama")}
 	]
@@ -398,7 +398,7 @@ func _api_status_rows(raw_status: String) -> Array:
 	var ready_state = "green" if raw_status.find("any_llm_import_ok") >= 0 and raw_status.find("model_configured") >= 0 and raw_status.find("api_key_env_present_secret_not_read") >= 0 else "yellow"
 	return [
 		{"label": "Python / venv", "state": python_state},
-		{"label": "Harness requirements", "state": "green" if BackendConfig.resolve_openclaw_harness_requirements_path() != "" else "yellow"},
+		{"label": "Harness requirements", "state": "green" if BackendConfig.resolve_active_install_openclaw_harness_requirements_path() != "" else "yellow"},
 		{"label": "AnyLLM packages", "state": import_state},
 		{"label": "API-key env var", "state": env_state},
 		{"label": "API setup", "state": ready_state},
@@ -676,7 +676,7 @@ func _confirmation_text_for_mode(mode: String) -> String:
 		var proof_note = ""
 		if _api_setup_proof_only_enabled():
 			proof_note = "\n\nProof mode is enabled for this run, so Catapult-Dabubu records the confirmed intent only instead of creating a venv or running pip."
-		return "Confirm API / AnyLLM setup for %s.\n\nCLI input (serialized, not shell-chained):\n%s\n\nThis creates/updates the selected venv, installs packaged manual-handoff harness requirements, then installs AnyLLM/provider packages into that same venv.\nCatapult-Dabubu will not read API secrets or make API calls.%s" % [plan.get("provider_label", "provider"), plan.get("command", "python3 -m pip install --upgrade any-llm-sdk"), proof_note]
+		return "Confirm API / AnyLLM setup for %s.\n\nCLI input (serialized, not shell-chained):\n%s\n\nThis uses pinned uv plus app-managed CPython for the selected venv, installs packaged manual-handoff harness requirements, then installs AnyLLM/provider packages into that same venv.\nCatapult-Dabubu will not read API secrets or make API calls.%s" % [plan.get("provider_label", "provider"), plan.get("command", "uv pip install --upgrade any-llm-sdk"), proof_note]
 	if mode == "ollama":
 		var fields = _collect_current_backend_fields()
 		var plan = BackendConfig.build_ollama_setup_plan(fields.get("endpoint", BackendConfig.DEFAULT_OLLAMA_URL), fields.get("model", ""))
@@ -696,7 +696,7 @@ func _confirmation_text_for_mode(mode: String) -> String:
 		var plan = BackendConfig.build_python_venv_setup_plan(_backend_python_path.text if _backend_python_path != null else "")
 		var proof_note = "\n\nProof mode is enabled for this run, so Catapult-Dabubu records the venv intent only." if _external_setup_proof_only_enabled() else ""
 		var api_note = "\n\nAPI note: this does not install AnyLLM/provider packages; use the main API setup action for those dependencies." if Settings.read("backend_mode") == "api" else ""
-		return "Confirm Python venv setup.\n\nPlanned command after approval:\n%s\n\nThis creates or updates the shared venv used by C-AOL runner.py and manual debug handoffs, then installs packaged harness requirements.\nIt does not pull Ollama models or make backend calls.%s%s" % [plan.get("command", plan.get("command_preview", "python3 -m venv")), api_note, proof_note]
+		return "Confirm Python venv setup.\n\nPlanned command after approval:\n%s\n\nThis downloads pinned uv %s, verifies its checksum, installs app-managed CPython %s, creates/updates the shared venv, and installs packaged harness requirements from the active C-AOL install.\nNo system Python or global PATH change is required. It does not pull Ollama models or make backend calls.%s%s" % [plan.get("command", plan.get("command_preview", "uv venv")), str(plan.get("uv_version", "")), str(plan.get("managed_python_version", "")), api_note, proof_note]
 	return "Confirm before running an external backend setup action. This proof build records the intent only and does not run package managers or download models."
 
 func _api_setup_proof_only_enabled() -> bool:
@@ -726,10 +726,10 @@ func _on_ExternalBackendAction_confirmed() -> void:
 			post_message = _api_setup_failure_message(setup_result, proof_only)
 			Status.post(post_message)
 			return
-		var target_path = setup_result.get("plan", {}).get("target_venv_path", "")
-		if target_path != "":
-			_backend_python_path.text = target_path
-			Settings.store("backend_python_path", target_path)
+		var python_command = setup_result.get("plan", {}).get("python_command", "")
+		if python_command != "":
+			_backend_python_path.text = python_command
+			Settings.store("backend_python_path", python_command)
 		if setup_result.get("proof_only", false):
 			_backend_status.text = "Confirmed API backend setup intent was recorded. Proof mode performed no venv creation, pip install, API call, secret read, or real machine mutation.\n%s" % _backend_status.text
 			post_message = "C-AOL API backend setup intent recorded in proof mode; no external install/download was performed."
@@ -769,7 +769,7 @@ func _on_ExternalBackendAction_confirmed() -> void:
 	elif _pending_confirm_action == "python_venv":
 		var proof_only = _external_setup_proof_only_enabled()
 		if not proof_only:
-			_set_external_action_progress(Settings.read("backend_mode"), "Creating/updating the shared runner.py/debug-handoff Python venv and installing harness requirements. Keep Catapult-Dabubu open; this may take a while.")
+			_set_external_action_progress(Settings.read("backend_mode"), "Downloading pinned uv, installing app-managed CPython, creating/updating the shared runner.py/debug-handoff Python venv, and installing harness requirements. Keep Catapult-Dabubu open; this may take a while.")
 			yield(get_tree(), "idle_frame")
 		var setup_result = BackendConfig.run_python_venv_setup(_backend_python_path.text if _backend_python_path != null else "", proof_only)
 		var status = setup_result.get("status", "python_venv_setup_unknown")
@@ -778,16 +778,16 @@ func _on_ExternalBackendAction_confirmed() -> void:
 			post_message = "Python venv setup failed." if not proof_only else "Python venv proof intent failed; no venv was created."
 			Status.post(post_message)
 			return
-		var target_path = setup_result.get("plan", {}).get("target_path", "")
-		if target_path != "":
-			_backend_python_path.text = target_path
-			Settings.store("backend_python_path", target_path)
+		var python_command = setup_result.get("plan", {}).get("venv_python_command", "")
+		if python_command != "":
+			_backend_python_path.text = python_command
+			Settings.store("backend_python_path", python_command)
 		if setup_result.get("proof_only", false):
 			_backend_status.text = "Confirmed Python venv setup intent was recorded. Proof mode created no venv.\n%s" % _backend_status.text
 			post_message = "Python venv setup intent recorded in proof mode; no venv was created."
 		else:
 			_set_backend_status(Settings.read("backend_mode"), _check_current_backend_status(), "Python venv setup finished")
-			post_message = "Python venv setup command finished after confirmation; it created/updated the shared runner.py/debug-handoff venv and installed harness requirements. Run the main API setup if AnyLLM packages still need repair."
+			post_message = "Python venv setup command finished after confirmation; it created/updated the app-managed runner.py/debug-handoff venv and installed harness requirements. Run the main API setup if AnyLLM packages still need repair."
 	else:
 		_backend_status.text = "Confirmed guided setup intent for %s. No external package install, model pull, API call, or real machine mutation was performed by this action.\n%s" % [_pending_confirm_action, _backend_status.text]
 	Status.post(post_message)

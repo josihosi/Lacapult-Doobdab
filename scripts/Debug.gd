@@ -273,7 +273,7 @@ func _on_ValidateHandoff_pressed() -> void:
 		return
 	var script_path = _manual_handoff_script_path()
 	var python = _python_command_for_harness()
-	var args = [script_path, "handoff", scenario.get("name", ""), "--compact-stdout", "--dry-run"]
+	var args = [script_path, "handoff", scenario.get("name", ""), "--compact-stdout", "--launch-only", "--dry-run"]
 	_set_handoff_status("Validating %s without launching the game..." % scenario.get("name", "manual scenario"))
 	var result = yield(_run_harness_command("validate", python, args), "completed")
 	_set_output(result.get("text", ""))
@@ -290,7 +290,7 @@ func _on_StartHandoff_pressed() -> void:
 		return
 	var script_path = _manual_handoff_script_path()
 	var python = _python_command_for_harness()
-	var args = [script_path, "handoff", scenario.get("name", ""), "--compact-stdout"]
+	var args = [script_path, "handoff", scenario.get("name", ""), "--compact-stdout", "--launch-only"]
 	_set_handoff_status("Starting handoff for %s..." % scenario.get("name", "manual scenario"))
 	var result = yield(_run_harness_command("handoff", python, args), "completed")
 	_set_output(result.get("text", ""))
@@ -327,7 +327,7 @@ func _on_CopyHandoffCommand_pressed() -> void:
 		_set_handoff_status(_manual_handoff_missing_status())
 		return
 	var python = _python_command_for_harness()
-	var args = [script_path, "handoff", scenario.get("name", ""), "--compact-stdout"]
+	var args = [script_path, "handoff", scenario.get("name", ""), "--compact-stdout", "--launch-only"]
 	var command = _quote_cli(python)
 	for arg in args:
 		command += " " + _quote_cli(str(arg))

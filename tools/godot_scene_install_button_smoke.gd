@@ -2,14 +2,13 @@ extends SceneTree
 
 # Headless full-scene smoke for Lacapult's C-AOL install button path.
 #
-# Run with an isolated HOME and LACAPULT_CAOL_DMG pointing at the cached preferred
+# Run with an isolated HOME and LACAPULT_CAOL_DMG pointing at the cached selected
 # C-AOL macOS DMG. Unlike godot_install_release_smoke.gd, this instantiates the
 # main Catapult scene, waits for the real ReleaseManager live GitHub fetch to
 # populate the Game tab, selects the first build row, emits the Install button's
 # pressed signal, and then verifies the isolated installed C-AOL app shape.
 
 const INFO_FILENAME := "catapult_install_info.json"
-const EXPECTED_RELEASE := "Cataclysm: Arsenic and Old Lace CDDA master port 2026-05-25-1954"
 const MAX_FETCH_SECONDS := 45.0
 const MAX_INSTALL_SECONDS := 90.0
 
@@ -26,7 +25,7 @@ func _init() -> void:
 func _run() -> void:
 	var dmg_path := OS.get_environment("LACAPULT_CAOL_DMG")
 	if dmg_path == "":
-		_fail("LACAPULT_CAOL_DMG must point at the selected preferred C-AOL macOS DMG")
+		_fail("LACAPULT_CAOL_DMG must point at the selected C-AOL macOS DMG")
 		return
 	if not File.new().file_exists(dmg_path):
 		_fail("DMG does not exist: %s" % dmg_path)
@@ -80,11 +79,11 @@ func _run() -> void:
 		return
 
 	var selected = releases[0]
-	if selected.get("name", "") != EXPECTED_RELEASE:
-		_fail("First release row was not the prioritized preferred C-AOL target: %s" % selected.get("name", ""))
+	if not str(selected.get("name", "")).begins_with("Cataclysm: Arsenic and Old Lace CDDA master port"):
+		_fail("First release row was not a CDDA master C-AOL target: %s" % selected.get("name", ""))
 		return
 	if selected.get("url", "") == "" or selected.get("filename", "") == "":
-		_fail("Prioritized C-AOL release row is not installable: %s" % JSON.print(selected))
+		_fail("Selected C-AOL release row is not installable: %s" % JSON.print(selected))
 		return
 
 	_mkdir(paths.cache_dir)
@@ -104,7 +103,7 @@ func _run() -> void:
 	list.select(0)
 	list.emit_signal("item_selected", 0)
 	if install_button.disabled:
-		_fail("Install button stayed disabled after selecting the prioritized preferred C-AOL row")
+		_fail("Install button stayed disabled after selecting the first C-AOL release row")
 		return
 
 	install_button.emit_signal("pressed")
@@ -148,8 +147,8 @@ func _run() -> void:
 		_fail("Installed C-AOL target failed ReleaseInstaller launchability guard")
 		return
 	var info = proof["info"]
-	if typeof(info) != TYPE_DICTIONARY or info.get("name", "") != EXPECTED_RELEASE:
-		_fail("Install info did not record the selected preferred C-AOL release")
+	if typeof(info) != TYPE_DICTIONARY or info.get("name", "") != selected.get("name", ""):
+		_fail("Install info did not record the selected C-AOL release")
 		return
 
 	_exit_code = 0

@@ -36,6 +36,7 @@ func _run() -> void:
 	ui._on_CopyHandoffCommand_pressed()
 	var copied = OS.get_clipboard()
 	_require(copied.find("handoff") >= 0 and copied.find("manual.intact_camp_shakedown_mcw") >= 0, "copy command did not include handoff scenario")
+	_require(copied.find("--launch-only") >= 0, "copy command did not request launch-only manual handoff")
 	_require(copied.find("probe") < 0, "copy command exposed probe mode")
 
 	ui._validate_button.emit_signal("pressed")

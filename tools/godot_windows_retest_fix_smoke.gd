@@ -54,7 +54,7 @@ func _run() -> void:
 	var all_text = _collect_visible_text(ui)
 	_require(all_text.find("Set up Python venv") >= 0, "API Python venv action did not render")
 	_require(all_text.find("Set up API / AnyLLM") >= 0, "API setup action did not render")
-	_require(all_text.find("Setup path: creates/updates the venv, installs harness requirements and AnyLLM/provider packages") >= 0, "API status did not explain venv/harness/package setup path")
+	_require(all_text.find("Setup path: uses pinned uv plus app-managed CPython") >= 0, "API status did not explain uv-managed venv/harness/package setup path")
 	_require(ui._confirm_dialog.dialog_autowrap == true, "confirmation dialog autowrap is not enabled")
 	_require(ui._confirm_dialog.rect_min_size.x <= ProjectSettings.get_setting("display/window/size/width") - 120, "confirmation dialog width is too close to launcher width")
 	_require(ui._set_session_key_button.hint_tooltip.find("\n") >= 0, "session tooltip was not split into short lines")

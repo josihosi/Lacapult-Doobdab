@@ -153,7 +153,7 @@ func _run() -> void:
 	ui._backend_python_path.text = ""
 	venv_button.emit_signal("pressed")
 	yield(self, "idle_frame")
-	_require(ui._confirm_dialog.dialog_text.find("python3 -m venv") >= 0 and ui._confirm_dialog.dialog_text.find("runner.py") >= 0 and ui._confirm_dialog.dialog_text.find("harness requirements") >= 0, "Python venv confirmation did not explain runner.py/manual harness setup")
+	_require(ui._confirm_dialog.dialog_text.find("uv 0.11.19") >= 0 and ui._confirm_dialog.dialog_text.find("CPython 3.13.13") >= 0 and ui._confirm_dialog.dialog_text.find("harness requirements") >= 0, "Python venv confirmation did not explain uv-managed runner.py/manual harness setup")
 	ui._on_ExternalBackendAction_confirmed()
 	yield(self, "idle_frame")
 	_require(File.new().file_exists(venv_intent_path), "confirmed Python venv setup did not record setup intent")

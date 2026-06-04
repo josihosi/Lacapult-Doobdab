@@ -20,15 +20,15 @@ def main() -> None:
 
     require('"caol-release-win"' in release_manager, "C-AOL Windows release filter is missing")
     require('"substring": "_windows.zip"' in release_manager, "Windows release filter does not select _windows.zip assets")
-    require(
-        '"preferred_tags": ["caol-cdda-master-2026-05-25-1954", "v0.2.0"]' in release_manager,
-        "latest C-AOL test release is not the preferred cross-platform release row",
-    )
+    require("caol-cdda-master-2026-05-25-1954" not in release_manager, "stale C-AOL preferred release pin is still present")
+    require('"preferred_tags"' not in release_manager.split('"caol-release-linux"')[1].split('"caol-release": []')[0], "C-AOL release filters still use preferred_tags")
     require("_order_release_builds_by_filter" in release_manager, "C-AOL release rows are not ordered through the installability-aware filter")
     require("ordered.append_array(installable)" in release_manager and "ordered.append_array(blocked)" in release_manager, "installable release rows are not ordered before blocked rows")
 
     require('"Cataclysm-AOL.exe"' in installer, "installer launchability guard does not recognize Cataclysm-AOL.exe")
     require('"cataclysm-tiles.exe"' in installer, "installer launchability guard lost inherited Windows tile executable")
+    require('"zzip.exe" if OS.get_name() == "Windows" else "zzip"' in installer, "installer preflight does not require the platform zzip helper")
+    require("manual.mixed_hostile_siege_mcw" in installer and "manual.zombie_rider_open_field_mcw" in installer, "installer preflight does not require all manual scenarios")
 
     require("func _find_windows_executable" in catapult, "Windows launch path has no executable discovery helper")
     require('return ["Cataclysm-AOL.exe", "cataclysm-tiles.exe", "cataclysm.exe", "Cataclysm.exe"]' in catapult, "C-AOL Windows executable candidates are missing or reordered unexpectedly")
@@ -37,8 +37,8 @@ def main() -> None:
     require('var game_exe_path = exe_info.get("path", "")' in catapult, "Windows command does not launch the discovered executable path")
 
     print("Windows install/launch static proof passed")
-    print("  release list: latest C-AOL test release preferred; _windows.zip selected; installable rows precede blocked rows")
-    print("  install guard: Cataclysm-AOL.exe and inherited cataclysm-tiles.exe are accepted")
+    print("  release list: latest valid C-AOL release selected; stale preferred tag removed; _windows.zip selected")
+    print("  install guard: Cataclysm-AOL.exe and inherited cataclysm-tiles.exe are accepted; zzip.exe and manual scenarios are preflighted")
     print("  launch path: Windows Play discovers the installed C-AOL executable instead of hardcoding one name")
 
 

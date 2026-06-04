@@ -91,20 +91,17 @@ const _ASSET_FILTERS = {
 	"caol-release-linux": {
 		"field": "name",
 		"substring": "_linux.tar.gz",
-		"preferred_tags": ["caol-cdda-master-2026-05-25-1954", "v0.2.0"],
 		"allowed_tag_prefixes": ["caol-cdda-master", "caol-ctlg-master", "caol-cdda-0-h", "caol-cdda-0-i"],
 	},
 	"caol-release-win": {
 		"field": "name",
 		"substring": "_windows.zip",
-		"preferred_tags": ["caol-cdda-master-2026-05-25-1954", "v0.2.0"],
 		"allowed_tag_prefixes": ["caol-cdda-master", "caol-ctlg-master", "caol-cdda-0-h", "caol-cdda-0-i"],
 	},
 	"caol-release-mac": {
 		"field": "name",
 		"substring": "_macos.dmg",
 		"fallback_substrings": ["_macos.tar.gz", "_macos.zip"],
-		"preferred_tags": ["caol-cdda-master-2026-05-25-1954", "v0.2.0"],
 		"allowed_tag_prefixes": ["caol-cdda-master", "caol-ctlg-master", "caol-cdda-0-h", "caol-cdda-0-i"],
 	},
 }

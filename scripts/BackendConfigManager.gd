@@ -18,6 +18,9 @@ const PYTHON_VENV_SETUP_INTENT_FILENAME = "caol_python_venv_setup_intent.json"
 const RUNNER_TEST_INTENT_FILENAME = "caol_runner_test_intent.json"
 const OPENCLAW_HARNESS_SCRIPT_RELATIVE_PATH = "tools/openclaw_harness/startup_harness.py"
 const OPENCLAW_HARNESS_REQUIREMENTS_RELATIVE_PATH = "tools/openclaw_harness/requirements.txt"
+const UV_VERSION = "0.11.19"
+const MANAGED_CPYTHON_VERSION = "3.13.13"
+const UV_RELEASE_BASE_URL = "https://github.com/astral-sh/uv/releases/download/0.11.19"
 const DEFAULT_HARDWARE_RAM_WARN_MB = 16000
 const DEFAULT_HARDWARE_VRAM_WARN_MB = 6000
 
@@ -99,18 +102,8 @@ func build_api_setup_plan(provider_id: String, python_path: String = "") -> Dict
 	var venv_plan = build_python_venv_setup_plan(python_path)
 	var target_path = venv_plan.get("target_path", "")
 	var venv_python_command = _venv_python_command(target_path)
-	var commands = [
-		{
-			"phase": "create_or_update_venv",
-			"command": venv_plan.get("python_command", "python3"),
-			"args": ["-m", "venv", target_path],
-			"preview": venv_plan.get("command_preview", "python3 -m venv"),
-			"purpose": "Create or update the Python venv used by C-AOL runner.py."
-		}
-	]
-	var harness_step = _build_openclaw_harness_requirements_step(venv_python_command)
-	if not harness_step.empty():
-		commands.append(harness_step)
+	var commands = []
+	commands.append_array(venv_plan.get("commands", []))
 	commands.append(
 		{
 			"phase": "install_anyllm_packages",
@@ -132,7 +125,7 @@ func build_api_setup_plan(provider_id: String, python_path: String = "") -> Dict
 		"target_venv_path": target_path,
 		"python_command": venv_python_command,
 		"package_spec": package_spec,
-		"harness_requirements_path": resolve_openclaw_harness_requirements_path(),
+		"harness_requirements_path": resolve_active_install_openclaw_harness_requirements_path(),
 		"commands": commands,
 		"command": PoolStringArray(preview).join("\n"),
 		"requires_confirmation": true,
@@ -387,20 +380,60 @@ func run_backend_runner_test(mode: String, endpoint: String = "", model: String 
 func build_python_venv_setup_plan(python_path: String = "") -> Dictionary:
 	var input_path = python_path.strip_edges()
 	var target = input_path
-	var py = _resolve_python(input_path if _looks_like_python_executable_path(input_path) else "")
 	if target == "" or _looks_like_python_executable_path(target):
 		target = Paths.config.plus_file("caol-llm-python-venv")
-	if not py.get("ok", false):
-		py = _resolve_python("")
-	var python_command = py.get("command", "python3") if py.get("ok", false) else "python3"
+	var uv_plan = _build_uv_toolchain_plan()
+	var uv_command = uv_plan.get("uv_command", "")
 	var venv_python_command = _venv_python_command(target)
 	var commands = [
 		{
+			"phase": "prepare_uv_toolchain_dirs",
+			"command": uv_plan.get("ensure_dirs_command", ""),
+			"args": uv_plan.get("ensure_dirs_args", []),
+			"preview": "prepare app-managed uv/CPython directories under %s" % Paths.own_dir.plus_file("utils").plus_file("uv-toolchain"),
+			"purpose": "Create app-local toolchain directories without changing global PATH."
+		},
+		{
+			"phase": "download_uv",
+			"command": uv_plan.get("download_command", ""),
+			"args": uv_plan.get("download_args", []),
+			"preview": "download uv %s asset %s" % [UV_VERSION, uv_plan.get("asset_name", "")],
+			"purpose": "Download the pinned app-managed uv binary without changing PATH."
+		},
+		{
+			"phase": "download_uv_sha256",
+			"command": uv_plan.get("download_command", ""),
+			"args": uv_plan.get("download_sha_args", []),
+			"preview": "download uv %s sha256 for %s" % [UV_VERSION, uv_plan.get("asset_name", "")],
+			"purpose": "Download the pinned uv checksum before extraction."
+		},
+		{
+			"phase": "verify_uv_sha256",
+			"command": uv_plan.get("verify_command", ""),
+			"args": uv_plan.get("verify_args", []),
+			"preview": "verify sha256 for %s" % uv_plan.get("archive_path", ""),
+			"purpose": "Verify the downloaded uv archive checksum."
+		},
+		{
+			"phase": "extract_uv",
+			"command": uv_plan.get("extract_command", ""),
+			"args": uv_plan.get("extract_args", []),
+			"preview": "extract uv into %s" % uv_plan.get("uv_extract_dir", ""),
+			"purpose": "Extract uv into the Catapult-Dabubu app-managed toolchain."
+		},
+		{
+			"phase": "install_managed_cpython",
+			"command": uv_command,
+			"args": ["python", "install", MANAGED_CPYTHON_VERSION, "--managed-python", "--install-dir", uv_plan.get("python_install_dir", "")],
+			"preview": "%s python install %s --managed-python --install-dir %s" % [uv_command, MANAGED_CPYTHON_VERSION, uv_plan.get("python_install_dir", "")],
+			"purpose": "Install the pinned app-local managed CPython used by C-AOL runner.py and manual handoffs."
+		},
+		{
 			"phase": "create_or_update_venv",
-			"command": python_command,
-			"args": ["-m", "venv", target],
-			"preview": "%s -m venv %s" % [python_command, target],
-			"purpose": "Create or update the shared Python venv used by C-AOL runner.py and manual debug handoffs."
+			"command": uv_command,
+			"args": ["venv", target, "--python", MANAGED_CPYTHON_VERSION, "--managed-python"],
+			"preview": "%s venv %s --python %s --managed-python" % [uv_command, target, MANAGED_CPYTHON_VERSION],
+			"purpose": "Create or update the shared Python venv using the app-managed CPython."
 		}
 	]
 	var harness_step = _build_openclaw_harness_requirements_step(venv_python_command)
@@ -414,15 +447,19 @@ func build_python_venv_setup_plan(python_path: String = "") -> Dictionary:
 	return {
 		"action": "create_python_venv",
 		"target_path": target,
-		"python_command": python_command,
+		"uv_version": UV_VERSION,
+		"managed_python_version": MANAGED_CPYTHON_VERSION,
+		"uv_asset_name": uv_plan.get("asset_name", ""),
+		"uv_command": uv_command,
+		"python_command": venv_python_command,
 		"venv_python_command": venv_python_command,
-		"command_preview": "%s -m venv %s" % [python_command, target],
+		"command_preview": PoolStringArray(preview).join("\n"),
 		"command": PoolStringArray(preview).join("\n"),
 		"commands": commands,
 		"phase_order": phase_order,
-		"harness_requirements_path": resolve_openclaw_harness_requirements_path(),
+		"harness_requirements_path": resolve_active_install_openclaw_harness_requirements_path(),
 		"requires_confirmation": true,
-		"automated_proof_policy": "plan_only_no_venv_no_pip_mutation"
+		"automated_proof_policy": "plan_only_no_uv_download_no_python_install_no_venv_no_pip_mutation"
 	}
 
 
@@ -447,6 +484,8 @@ func run_python_venv_setup(python_path: String = "", proof_only: bool = false) -
 	var status = "python_venv_setup_ok" if not failed else "python_venv_setup_%s_failed_%s" % [failed_phase, exit_code]
 	if write_result != "ok":
 		status = write_result
+	if not failed:
+		Settings.store("backend_python_path", plan.get("venv_python_command", ""))
 	return {"status": status, "plan": plan, "performed_external_install": true, "proof_only": false, "exit_code": exit_code, "results": results}
 
 
@@ -1088,6 +1127,10 @@ func resolve_openclaw_harness_requirements_path() -> String:
 	return _resolve_caol_relative_file_path(OPENCLAW_HARNESS_REQUIREMENTS_RELATIVE_PATH, "LACAPULT_OPENCLAW_HARNESS_REQUIREMENTS")
 
 
+func resolve_active_install_openclaw_harness_requirements_path() -> String:
+	return _resolve_caol_active_install_relative_file_path(OPENCLAW_HARNESS_REQUIREMENTS_RELATIVE_PATH)
+
+
 func resolve_openclaw_harness_root() -> String:
 	var script_path = resolve_openclaw_harness_script_path()
 	if script_path == "":
@@ -1154,16 +1197,134 @@ func _caol_resource_roots() -> Array:
 
 
 func _build_openclaw_harness_requirements_step(venv_python_command: String) -> Dictionary:
-	var requirements_path = resolve_openclaw_harness_requirements_path()
+	var requirements_path = resolve_active_install_openclaw_harness_requirements_path()
 	if requirements_path == "":
 		return {}
 	return {
 		"phase": "install_openclaw_harness_requirements",
-		"command": venv_python_command,
-		"args": ["-m", "pip", "install", "--upgrade", "-r", requirements_path],
-		"preview": "%s -m pip install --upgrade -r %s" % [venv_python_command, requirements_path],
+		"command": _cached_uv_command(),
+		"args": ["pip", "install", "--python", venv_python_command, "--upgrade", "-r", requirements_path],
+		"preview": "%s pip install --python %s --upgrade -r %s" % [_cached_uv_command(), venv_python_command, requirements_path],
 		"purpose": "Install packaged OpenClaw manual-handoff harness requirements into the shared C-AOL Python venv."
 	}
+
+
+func _build_uv_toolchain_plan() -> Dictionary:
+	var asset_name = _uv_asset_name()
+	var base_dir = Paths.own_dir.plus_file("utils").plus_file("uv-toolchain")
+	var cache_dir = base_dir.plus_file("cache")
+	var uv_extract_dir = base_dir.plus_file("uv-%s" % UV_VERSION)
+	var python_install_dir = base_dir.plus_file("python")
+	var archive_path = cache_dir.plus_file(asset_name)
+	var sha_path = cache_dir.plus_file(asset_name + ".sha256")
+	var asset_url = UV_RELEASE_BASE_URL + "/" + asset_name
+	var sha_url = UV_RELEASE_BASE_URL + "/" + asset_name + ".sha256"
+	var uv_command = _uv_executable_path(uv_extract_dir)
+	var ensure_dirs = _ensure_toolchain_dirs_command([cache_dir, uv_extract_dir, python_install_dir])
+	var download = _download_command(asset_url, archive_path)
+	var download_sha = _download_command(sha_url, sha_path)
+	var verify = _verify_sha256_command(archive_path, sha_path)
+	var extract = _extract_archive_command(archive_path, uv_extract_dir)
+	return {
+		"asset_name": asset_name,
+		"asset_url": asset_url,
+		"sha_url": sha_url,
+		"archive_path": archive_path,
+		"sha_path": sha_path,
+		"cache_dir": cache_dir,
+		"uv_extract_dir": uv_extract_dir,
+		"uv_command": uv_command,
+		"python_install_dir": python_install_dir,
+		"ensure_dirs_command": ensure_dirs.get("command", ""),
+		"ensure_dirs_args": ensure_dirs.get("args", []),
+		"download_command": download.get("command", ""),
+		"download_args": download.get("args", []),
+		"download_sha_args": download_sha.get("args", []),
+		"verify_command": verify.get("command", ""),
+		"verify_args": verify.get("args", []),
+		"extract_command": extract.get("command", ""),
+		"extract_args": extract.get("args", []),
+	}
+
+
+func _cached_uv_command() -> String:
+	return _build_uv_toolchain_plan().get("uv_command", "uv")
+
+
+func _uv_asset_name() -> String:
+	var os_name = OS.get_name()
+	var arch = _machine_arch()
+	if os_name == "Windows":
+		if arch.find("arm") >= 0 or arch.find("aarch64") >= 0:
+			return "uv-aarch64-pc-windows-msvc.zip"
+		return "uv-x86_64-pc-windows-msvc.zip"
+	if os_name == "OSX":
+		if arch == "arm64" or arch == "aarch64":
+			return "uv-aarch64-apple-darwin.tar.gz"
+		return "uv-x86_64-apple-darwin.tar.gz"
+	if arch == "arm64" or arch == "aarch64":
+		return "uv-aarch64-unknown-linux-gnu.tar.gz"
+	return "uv-x86_64-unknown-linux-gnu.tar.gz"
+
+
+func _machine_arch() -> String:
+	if OS.get_name() == "Windows":
+		var env_arch = OS.get_environment("PROCESSOR_ARCHITECTURE").to_lower()
+		var env_arch_w6432 = OS.get_environment("PROCESSOR_ARCHITEW6432").to_lower()
+		if env_arch_w6432 != "":
+			env_arch = env_arch_w6432
+		if env_arch.find("arm") >= 0:
+			return "arm64"
+		return "x86_64"
+	var output = []
+	var exit_code = OS.execute("uname", ["-m"], true, output, true)
+	if exit_code == 0:
+		return "\n".join(output).strip_edges().to_lower()
+	return "x86_64"
+
+
+func _uv_executable_path(uv_extract_dir: String) -> String:
+	var exe_name = "uv.exe" if OS.get_name() == "Windows" else "uv"
+	var nested_dir = uv_extract_dir.plus_file(_uv_asset_name().replace(".tar.gz", "").replace(".zip", ""))
+	return nested_dir.plus_file(exe_name)
+
+
+func _ensure_toolchain_dirs_command(paths: Array) -> Dictionary:
+	if OS.get_name() == "Windows":
+		var script_parts = []
+		for path in paths:
+			script_parts.append("New-Item -ItemType Directory -Force -Path '%s' | Out-Null" % _ps_quote(str(path)))
+		return {"command": "powershell", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", PoolStringArray(script_parts).join("; ")]}
+	var args = ["-p"]
+	for path in paths:
+		args.append(str(path))
+	return {"command": "mkdir", "args": args}
+
+
+func _download_command(url: String, target_path: String) -> Dictionary:
+	if OS.get_name() == "Windows":
+		var script = "Invoke-WebRequest -UseBasicParsing -Uri '%s' -OutFile '%s'" % [_ps_quote(url), _ps_quote(target_path)]
+		return {"command": "powershell", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script]}
+	return {"command": "curl", "args": ["-L", "--fail", url, "-o", target_path]}
+
+
+func _verify_sha256_command(archive_path: String, sha_path: String) -> Dictionary:
+	if OS.get_name() == "Windows":
+		var script = "$expected = ((Get-Content -LiteralPath '%s' -Raw).Trim().Split()[0]).ToLowerInvariant(); $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath '%s').Hash.ToLowerInvariant(); if ($expected -ne $actual) { Write-Error ('uv checksum mismatch: expected ' + $expected + ' got ' + $actual); exit 1 }" % [_ps_quote(sha_path), _ps_quote(archive_path)]
+		return {"command": "powershell", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script]}
+	var script = "expected=$(awk '{print $1}' \"$2\"); actual=$(shasum -a 256 \"$1\" 2>/dev/null | awk '{print $1}'); if [ -z \"$actual\" ]; then actual=$(sha256sum \"$1\" | awk '{print $1}'); fi; [ \"$expected\" = \"$actual\" ]"
+	return {"command": "sh", "args": ["-c", script, "verify-uv", archive_path, sha_path]}
+
+
+func _extract_archive_command(archive_path: String, extract_dir: String) -> Dictionary:
+	if OS.get_name() == "Windows":
+		var script = "Expand-Archive -LiteralPath '%s' -DestinationPath '%s' -Force" % [_ps_quote(archive_path), _ps_quote(extract_dir)]
+		return {"command": "powershell", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script]}
+	return {"command": "tar", "args": ["-xzf", archive_path, "-C", extract_dir]}
+
+
+func _ps_quote(value: String) -> String:
+	return value.replace("'", "''")
 
 
 func _command_exists(command: String) -> bool:

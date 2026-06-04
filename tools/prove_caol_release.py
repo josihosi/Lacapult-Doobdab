@@ -24,8 +24,6 @@ FILTERS = {
     "Windows": ["_windows.zip"],
 }
 
-PREFERRED_CAOL_TAGS = ("caol-cdda-master-2026-05-25-1954", "v0.2.0")
-
 CURATED_CAOL_TAG_PREFIXES = (
     "caol-cdda-master",
     "caol-ctlg-master",
@@ -71,17 +69,12 @@ def select_asset(release: dict[str, Any], system: str) -> dict[str, Any]:
 
 def is_curated_caol_release(release: dict[str, Any]) -> bool:
     tag = release.get("tag_name", "")
-    return tag in PREFERRED_CAOL_TAGS or any(tag.startswith(prefix) for prefix in CURATED_CAOL_TAG_PREFIXES)
+    return any(tag.startswith(prefix) for prefix in CURATED_CAOL_TAG_PREFIXES)
 
 
 def curated_releases_in_ui_order(releases: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ordered = []
     seen = set()
-    for preferred_tag in PREFERRED_CAOL_TAGS:
-        for release in releases:
-            if release.get("tag_name", "") == preferred_tag and preferred_tag not in seen:
-                ordered.append(release)
-                seen.add(preferred_tag)
     for prefix in CURATED_CAOL_TAG_PREFIXES:
         installable = []
         blocked = []
@@ -101,18 +94,9 @@ def curated_releases_in_ui_order(releases: list[dict[str, Any]]) -> list[dict[st
 
 
 def order_for_ui(releases: list[dict[str, Any]], system: str) -> list[dict[str, Any]]:
-    preferred = []
     installable = []
     blocked = []
     seen = set()
-
-    for preferred_tag in PREFERRED_CAOL_TAGS:
-        for release in releases:
-            tag_name = release.get("tag_name", "")
-            if tag_name == preferred_tag and tag_name not in seen:
-                asset_result = select_asset(release, system)
-                preferred.append((release, asset_result))
-                seen.add(tag_name)
 
     for prefix in CURATED_CAOL_TAG_PREFIXES:
         for release in releases:
@@ -127,7 +111,7 @@ def order_for_ui(releases: list[dict[str, Any]], system: str) -> list[dict[str, 
             seen.add(tag_name)
 
     shaped = []
-    for release, asset_result in preferred + installable + blocked:
+    for release, asset_result in installable + blocked:
         shaped.append(
             {
                 "tag_name": release.get("tag_name", ""),
@@ -144,7 +128,7 @@ def main() -> int:
     parser.add_argument(
         "--all-platforms",
         action="store_true",
-        help="prove Linux, macOS, and Windows preferred C-AOL asset filters instead of only this host",
+        help="prove Linux, macOS, and Windows C-AOL asset filters instead of only this host",
     )
     args = parser.parse_args()
 
@@ -172,7 +156,6 @@ def main() -> int:
     ]
     ui_order = order_for_ui(releases, systems[0])
     proof = {
-        "preferred_tags": PREFERRED_CAOL_TAGS,
         "allowed_tag_prefixes": CURATED_CAOL_TAG_PREFIXES,
         "curated_release_tags": [release.get("tag_name", "") for release in curated],
         "api_release_count": len(releases),
@@ -187,9 +170,8 @@ def main() -> int:
             print(f"no curated UI rows for {system}", file=sys.stderr)
             return 1
         first = system_order[0]
-        expected_first_tag = PREFERRED_CAOL_TAGS[0]
-        if first["tag_name"] != expected_first_tag or not first["installable"]:
-            print(f"{system} first row is not installable {expected_first_tag}: {first}", file=sys.stderr)
+        if not first["tag_name"].startswith("caol-cdda-master") or not first["installable"]:
+            print(f"{system} first row is not an installable caol-cdda-master release: {first}", file=sys.stderr)
             return 1
         seen_blocked = False
         for item in system_order:

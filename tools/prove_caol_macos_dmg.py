@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Controlled proof for the selected preferred C-AOL macOS DMG install shape.
+"""Controlled proof for the latest valid C-AOL macOS DMG install shape.
 
-This script fetches live release metadata, selects the same preferred macOS asset
-used by Lacapult's release proof, optionally downloads it into a local proof cache,
+This script fetches live release metadata, selects the newest valid macOS asset
+used by Catapult-Dabubu, optionally downloads it into a local proof cache,
 mounts it read-only with hdiutil, inspects the app-bundle/executable layout, and
 then detaches it. It does not launch the game, mutate an installed C-AOL config,
 use API secrets, pull models, publish releases, or contact upstream maintainers.
@@ -29,10 +29,17 @@ from typing import Any
 
 RELEASES_URL = "https://api.github.com/repos/josihosi/Cataclysm-AOL/releases"
 MACOS_FILTERS = ["_macos.dmg", "_macos.tar.gz", "_macos.zip"]
-PREFERRED_TAG = "caol-cdda-master-2026-05-25-1954"
+ALLOWED_TAG_PREFIX = "caol-cdda-master-"
 DEFAULT_CACHE_DIR = Path(".proof-cache/caol-dmg")
 INFO_FILENAME = "catapult_install_info.json"
 LACAPULT_CAOL_EXECUTABLE_NAMES = ["cataclysm-tiles", "cataclysm-tiles.exe", "Cataclysm-AOL"]
+EXPECTED_MANUAL_SCENARIOS = [
+    "manual.cannibal_night_pack_mcw",
+    "manual.intact_camp_shakedown_mcw",
+    "manual.mixed_hostile_siege_mcw",
+    "manual.writhing_stalker_hit_fade_mcw",
+    "manual.zombie_rider_open_field_mcw",
+]
 
 
 def fetch_releases() -> list[dict[str, Any]]:
@@ -42,18 +49,18 @@ def fetch_releases() -> list[dict[str, Any]]:
 
 
 def select_macos_asset(releases: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]]]:
-    release = next((r for r in releases if r.get("tag_name") == PREFERRED_TAG), None)
-    if release is None:
-        raise RuntimeError(f"{PREFERRED_TAG} release not found")
-
-    matches = [
-        asset
-        for asset in release.get("assets", [])
-        if any(token in asset.get("name", "") for token in MACOS_FILTERS)
-    ]
-    if not matches:
-        raise RuntimeError(f"no macOS asset matching {MACOS_FILTERS} found for {PREFERRED_TAG}")
-    return release, matches[0], matches
+    for release in releases:
+        tag = str(release.get("tag_name", ""))
+        if not tag.startswith(ALLOWED_TAG_PREFIX):
+            continue
+        matches = [
+            asset
+            for asset in release.get("assets", [])
+            if any(token in asset.get("name", "") for token in MACOS_FILTERS)
+        ]
+        if matches:
+            return release, matches[0], matches
+    raise RuntimeError(f"no macOS asset matching {MACOS_FILTERS} found for {ALLOWED_TAG_PREFIX}*")
 
 
 def download_asset(asset: dict[str, Any], cache_dir: Path) -> Path:
@@ -109,7 +116,13 @@ def inspect_mount(mount_point: str) -> dict[str, Any]:
         resources_dir = app / "Contents" / "Resources"
         harness_script = resources_dir / "tools" / "openclaw_harness" / "startup_harness.py"
         harness_requirements = resources_dir / "tools" / "openclaw_harness" / "requirements.txt"
-        manual_scenario = resources_dir / "tools" / "openclaw_harness" / "scenarios" / "manual.intact_camp_shakedown_mcw.json"
+        scenario_dir = resources_dir / "tools" / "openclaw_harness" / "scenarios"
+        manual_scenarios = {
+            scenario
+            for scenario in EXPECTED_MANUAL_SCENARIOS
+            if (scenario_dir / f"{scenario}.json").is_file()
+        }
+        zzip_helper = resources_dir / "zzip"
         executable_candidates = []
         lacapult_guard_matches = []
         for search_dir in [macos_dir, resources_dir]:
@@ -139,7 +152,10 @@ def inspect_mount(mount_point: str) -> dict[str, Any]:
                 "launchable_by_lacapult_guard": bool(lacapult_guard_matches),
                 "manual_handoff_harness_present": harness_script.is_file(),
                 "manual_handoff_requirements_present": harness_requirements.is_file(),
-                "manual_handoff_scenario_present": manual_scenario.is_file(),
+                "manual_handoff_scenarios_present": sorted(manual_scenarios),
+                "manual_handoff_all_scenarios_present": manual_scenarios == set(EXPECTED_MANUAL_SCENARIOS),
+                "zzip_helper_present": zzip_helper.is_file(),
+                "zzip_helper_executable": zzip_helper.is_file() and bool(zzip_helper.stat().st_mode & 0o111),
             }
         )
 
@@ -152,7 +168,9 @@ def inspect_mount(mount_point: str) -> dict[str, Any]:
         "looks_launchable": any(app["launchable_by_lacapult_guard"] for app in app_results),
         "manual_handoff_harness_present": any(app["manual_handoff_harness_present"] for app in app_results),
         "manual_handoff_requirements_present": any(app["manual_handoff_requirements_present"] for app in app_results),
-        "manual_handoff_scenario_present": any(app["manual_handoff_scenario_present"] for app in app_results),
+        "manual_handoff_all_scenarios_present": any(app["manual_handoff_all_scenarios_present"] for app in app_results),
+        "zzip_helper_present": any(app["zzip_helper_present"] for app in app_results),
+        "zzip_helper_executable": any(app["zzip_helper_executable"] for app in app_results),
     }
 
 
@@ -336,7 +354,7 @@ def main() -> int:
         proof["mounted"] = True
         proof["mount_inspection"] = inspect_mount(mount_point)
         if args.install_sandbox:
-            proof["sandbox_install"] = sandbox_install_from_mount(mount_point, release.get("name") or PREFERRED_TAG)
+            proof["sandbox_install"] = sandbox_install_from_mount(mount_point, release.get("name") or release.get("tag_name") or "caol")
     finally:
         if mount_point:
             detach_dmg(mount_point)
@@ -349,7 +367,9 @@ def main() -> int:
     for key in (
         "manual_handoff_harness_present",
         "manual_handoff_requirements_present",
-        "manual_handoff_scenario_present",
+        "manual_handoff_all_scenarios_present",
+        "zzip_helper_present",
+        "zzip_helper_executable",
     ):
         if not proof.get("mount_inspection", {}).get(key):
             print(f"Mounted DMG is missing required manual handoff payload: {key}", file=sys.stderr)

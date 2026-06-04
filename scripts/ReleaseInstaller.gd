@@ -5,6 +5,14 @@ signal operation_started
 signal operation_finished
 signal game_updated
 
+const REQUIRED_CAOL_MANUAL_SCENARIOS = [
+	"manual.cannibal_night_pack_mcw",
+	"manual.intact_camp_shakedown_mcw",
+	"manual.mixed_hostile_siege_mcw",
+	"manual.writhing_stalker_hit_fade_mcw",
+	"manual.zombie_rider_open_field_mcw",
+]
+
 
 func install_release(release_info: Dictionary, game: String, update_in: String = "") -> void:
 
@@ -53,6 +61,12 @@ func install_release(release_info: Dictionary, game: String, update_in: String =
 				emit_signal("operation_finished")
 				return
 
+			var preflight = _post_extract_preflight(extracted_root, game)
+			if not preflight.get("ok", false):
+				Status.post("Install preflight failed for %s: %s" % [release_info["name"], preflight.get("message", "unknown failure")], Enums.MSG_ERROR)
+				emit_signal("operation_finished")
+				return
+
 			Helpers.create_info_file(extracted_root, release_info["name"])
 
 			var target_dir: String
@@ -80,6 +94,7 @@ func install_release(release_info: Dictionary, game: String, update_in: String =
 				Status.post(tr("msg_game_updated"))
 				emit_signal("game_updated")
 			else:
+				Settings.store("active_install_" + game, release_info["name"])
 				Status.post(tr("msg_game_installed"))
 		else:
 			Status.post(tr("msg_install_extract_failed") % FS.last_extract_result, Enums.MSG_ERROR)
@@ -167,6 +182,55 @@ func _looks_like_game_directory(dir_path: String) -> bool:
 
 	# If we found at least 2 typical game directories, it's likely the game root
 	return found_dirs >= 2
+
+
+func _post_extract_preflight(dir_path: String, game: String) -> Dictionary:
+	if game != "caol":
+		return {"ok": true, "message": "not_caol"}
+	if not _looks_like_game_directory(dir_path):
+		return {"ok": false, "message": "game executable or game data directories were not found"}
+	var roots = _caol_resource_roots_for_install(dir_path)
+	var missing = []
+	var harness_script = "tools/openclaw_harness/startup_harness.py"
+	var harness_requirements = "tools/openclaw_harness/requirements.txt"
+	if not _any_resource_file_exists(roots, harness_script):
+		missing.append(harness_script)
+	if not _any_resource_file_exists(roots, harness_requirements):
+		missing.append(harness_requirements)
+	var zzip_name = "zzip.exe" if OS.get_name() == "Windows" else "zzip"
+	if not _any_resource_file_exists(roots, zzip_name):
+		missing.append(zzip_name)
+	for scenario in REQUIRED_CAOL_MANUAL_SCENARIOS:
+		var scenario_path = "tools/openclaw_harness/scenarios/%s.json" % scenario
+		if not _any_resource_file_exists(roots, scenario_path):
+			missing.append(scenario_path)
+	if missing.size() > 0:
+		return {"ok": false, "message": "missing required C-AOL payload: %s" % PoolStringArray(missing).join(", ")}
+	return {"ok": true, "message": "caol_payload_ok"}
+
+
+func _caol_resource_roots_for_install(dir_path: String) -> Array:
+	var roots = [dir_path]
+	var d = Directory.new()
+	if dir_path.ends_with(".app"):
+		roots.append(dir_path.plus_file("Contents").plus_file("Resources"))
+	else:
+		for item in FS.list_dir(dir_path):
+			if item.ends_with(".app"):
+				roots.append(dir_path.plus_file(item).plus_file("Contents").plus_file("Resources"))
+	var existing = []
+	for root in roots:
+		if d.dir_exists(root):
+			existing.append(root)
+	return existing
+
+
+func _any_resource_file_exists(roots: Array, relative_path: String) -> bool:
+	var d = Directory.new()
+	for root in roots:
+		if d.file_exists(str(root).plus_file(relative_path)):
+			return true
+	return false
 
 
 func _set_executable_permissions(install_dir: String) -> void:
