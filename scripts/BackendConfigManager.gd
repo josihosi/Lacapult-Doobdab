@@ -394,6 +394,11 @@ func build_python_venv_setup_plan(python_path: String = "") -> Dictionary:
 	var ensure_dirs = _ensure_toolchain_dirs_command(prepare_dirs)
 	var uv_command = uv_plan.get("uv_command", "")
 	var venv_python_command = _venv_python_command(target)
+	var python_install_args = ["python", "install", MANAGED_CPYTHON_VERSION, "--managed-python", "--install-dir", uv_plan.get("python_install_dir", ""), "--no-bin"]
+	var python_install_preview = "%s python install %s --managed-python --install-dir %s --no-bin" % [uv_command, MANAGED_CPYTHON_VERSION, uv_plan.get("python_install_dir", "")]
+	if OS.get_name() == "Windows":
+		python_install_args.append("--no-registry")
+		python_install_preview += " --no-registry"
 	var commands = [
 		{
 			"phase": "prepare_uv_toolchain_dirs",
@@ -433,8 +438,8 @@ func build_python_venv_setup_plan(python_path: String = "") -> Dictionary:
 		{
 			"phase": "install_managed_cpython",
 			"command": uv_command,
-			"args": ["python", "install", MANAGED_CPYTHON_VERSION, "--managed-python", "--install-dir", uv_plan.get("python_install_dir", ""), "--no-bin", "--no-registry"],
-			"preview": "%s python install %s --managed-python --install-dir %s --no-bin --no-registry" % [uv_command, MANAGED_CPYTHON_VERSION, uv_plan.get("python_install_dir", "")],
+			"args": python_install_args,
+			"preview": python_install_preview,
 			"purpose": "Install the pinned app-local managed CPython used by C-AOL runner.py and manual handoffs."
 		},
 		{
