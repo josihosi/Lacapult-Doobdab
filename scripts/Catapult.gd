@@ -177,6 +177,11 @@ func _ensure_cli_smoke_active_caol_install() -> void:
 			if typeof(info) == TYPE_DICTIONARY and info.has("name"):
 				Settings.store("active_install_caol", str(info["name"]))
 				return
+		elif d.file_exists(install_dir.plus_file("tools").plus_file("openclaw_harness").plus_file("startup_harness.py")):
+			var smoke_name = "CLI smoke C-AOL install"
+			Helpers.create_info_file(install_dir, smoke_name)
+			Settings.store("active_install_caol", smoke_name)
+			return
 
 
 func _write_cli_smoke_result(output_path: String, result: Dictionary) -> void:

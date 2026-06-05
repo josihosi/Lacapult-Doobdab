@@ -385,7 +385,8 @@ func build_python_venv_setup_plan(python_path: String = "") -> Dictionary:
 	var input_path = python_path.strip_edges()
 	var target = input_path
 	if target == "" or _looks_like_python_executable_path(target):
-		target = Paths.config.plus_file("caol-llm-python-venv")
+		var config_dir = Paths.config
+		target = config_dir.plus_file("caol-llm-python-venv") if config_dir != "" else ""
 	var uv_plan = _build_uv_toolchain_plan()
 	var prepare_dirs = uv_plan.get("toolchain_dirs", [])
 	if target.get_base_dir() != "":
@@ -478,6 +479,9 @@ func run_python_venv_setup(python_path: String = "", proof_only: bool = false) -
 	if proof_only:
 		var proof_result = write_python_venv_setup_intent(plan.get("target_path", ""), false, -1, "proof_only_no_venv_no_pip_mutation", plan, [])
 		return {"status": proof_result, "plan": plan, "performed_external_install": false, "proof_only": true}
+	var config_dir_status = _ensure_backend_config_dir()
+	if not config_dir_status.get("ok", false):
+		return {"status": config_dir_status.get("status", "config_dir_error"), "plan": plan, "performed_external_install": false, "proof_only": false, "exit_code": -1, "results": []}
 	var results = []
 	var failed = false
 	var exit_code = 0
