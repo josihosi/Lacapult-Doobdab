@@ -1,7 +1,7 @@
 extends Node
 
 
-const _SETTINGS_FILENAME = "lacapult_settings.json"
+const _SETTINGS_FILENAME = "dabubu_settings.json"
 
 const _HARDCODED_DEFAULTS = {
 	"version": "0.2.0-dev",

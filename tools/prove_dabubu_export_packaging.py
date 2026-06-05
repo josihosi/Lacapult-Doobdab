@@ -29,7 +29,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 PRESET_FILE = ROOT / "export_presets.cfg"
-OUTPUT_ROOT = ROOT / ".proof-cache" / "lacapult-export"
+OUTPUT_ROOT = ROOT / ".proof-cache" / "dabubu-export"
 
 PACK_PRESETS = [
     ("macOS Pack", "Mac OSX", "Catapult-Dabubu-macos.pck"),

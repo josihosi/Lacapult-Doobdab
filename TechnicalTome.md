@@ -5,7 +5,7 @@ Durable technical notes for Catapult-Dabubu.
 ## Product
 
 Catapult-Dabubu is a C-AOL installer and setup helper derived from Dabdoob/Catapult.
-The old Lacapult planning/canon workflow is retired. Current work follows the command-center `AGENTS.md` instructions and the live user request.
+The old planning/canon workflow is retired. Current work follows the command-center `AGENTS.md` instructions and the live user request.
 
 Public repo URL is still `https://github.com/josihosi/Lacapult-Doobdab` until the repository is renamed.
 
@@ -56,6 +56,7 @@ The Windows `uv` archive extracts `uv.exe` at the archive root. macOS/Linux uv a
 
 The setup path must stay app-local:
 
+- settings file: `dabubu_settings.json`
 - uv cache: `utils/uv-toolchain/cache`
 - uv binary: `utils/uv-toolchain/uv-0.11.19`
 - managed Python: `utils/uv-toolchain/python`

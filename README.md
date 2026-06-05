@@ -4,44 +4,57 @@
 
 It is derived from [Hihahahalol's Dabdoob / Catapult_Dabdoob](https://github.com/Hihahahalol/Catapult_Dabdoob), which is based on [qrrk's Catapult launcher](https://github.com/qrrk/Catapult). The inherited launcher code remains MIT licensed; see `LICENSE` and `ATTRIBUTION.md`.
 
-> Current development target: fetch and install the current C-AOL CDDA master test release assets, expose the first backend setup selector for API/Ollama/OpenVINO, and keep packaging/installability blockers honest before any public release.
+## Current Contract
 
-## What v0 is meant to do
+Dabubu is the installer. A fresh Windows, macOS, or Linux machine should be able to download Dabubu, install the matching C-AOL `caol-cdda-master-*` release through the Game tab, run `Set up Python venv`, and use the Playtest tab's packaged manual scenarios.
 
-- Show C-AOL as the only first-class game target.
-- Fetch releases from `josihosi/Cataclysm-AOL`.
-- Select platform-appropriate assets:
-  - Linux: `_linux.tar.gz`
-  - Windows: `_windows.zip`
-  - macOS: `_macos.dmg` (with future tolerance for `_macos.tar.gz` / `_macos.zip`)
-- Reuse Dabdoob's install/update path while preserving saves, config, mods, soundpacks, and tilesets where possible.
-- Provide v0-safe backend setup/config/status for:
-  - API backend, storing provider/model/API-key env-var names only, checking Python/AnyLLM readiness without using secrets.
-  - Ollama backend, checking local command/server/model-list state without pulling models.
-  - OpenVINO backend, Windows-first for v0, checking Python imports/model-dir/device metadata without installing runtimes or downloading models.
-- Preserve inherited mod/soundpack/tileset support while C-AOL-specific compatibility work is investigated and clearly marked as supported, untested, broken, or unknown for C-AOL.
+The current C-AOL install preflight expects:
 
-## Development status
+- C-AOL executable
+- `data`
+- `gfx`
+- `tools/openclaw_harness/startup_harness.py`
+- `tools/openclaw_harness/requirements.txt`
+- root `zzip.exe` on Windows, root `zzip` on macOS/Linux
+- exactly five packaged `manual.*` handoff scenarios
 
-This repository is early development. It is public for transparency and collaboration, but no packaged Catapult-Dabubu release exists yet.
+`Set up Python venv` is not a bundled venv. Dabubu downloads `uv` `0.11.19`, installs managed CPython `3.13.13` app-locally, creates `caol/userdata/config/caol-llm-python-venv`, installs the active C-AOL harness requirements, and stores the venv Python path. It does not mutate global `PATH` and does not require system Python.
 
-## Installation
+## Manual Playtest
 
-No Catapult-Dabubu public packaged release exists yet. For development, open the Godot project locally and run `scenes/Catapult.tscn` if a compatible Godot 3 binary is available.
+The Playtest tab uses C-AOL's packaged `tools/openclaw_harness/startup_harness.py`.
 
-Do not treat the raw Godot project or generated `.pck` files as user-facing installers. The current local proof can produce unsigned macOS/Linux/Windows app/package artifacts, but signed/notarized/public releases and normal-player install QA are still separate release work.
+Expected manual scenarios:
 
-## Release-prep validation
+- `manual.cannibal_night_pack_mcw`
+- `manual.intact_camp_shakedown_mcw`
+- `manual.mixed_hostile_siege_mcw`
+- `manual.writhing_stalker_hit_fade_mcw`
+- `manual.zombie_rider_open_field_mcw`
 
-Run `python3 tools/prove_lacapult_export_packaging.py` for the current local packaging proof. It exports Godot PCK packs plus real unsigned macOS/Linux/Windows app/executable artifacts into ignored `.proof-cache/` output, creates unsigned archive/package shapes, records sizes/hashes/shape checks in a manifest, and restores temporary export presets.
+Manual handoff should prepare the fixture/profile, validate the target world/save, launch C-AOL, write a handoff report/PID, and leave the game open for human play. It must not depend on screenshots, OCR, Peekaboo, or GUI automation.
 
-As of the current local proof, Godot 3.6.2 plus installed export templates can assemble the cross-platform PCK packs and local unsigned app/package artifacts. Signing, notarization, GitHub release publication, upstream contact, OpenVINO runtime setup, model pulls, and API-secret smoke tests are separate decisions and are not performed by this proof.
+## Development
 
-## Backend setup validation
+Open the Godot project locally and run `scenes/Catapult.tscn` with a compatible Godot 3 binary.
 
-Run `python3 tools/prove_caol_backend_contract.py` for the current backend contract proof. It audits the local C-AOL checkout, verifies Catapult-Dabubu's API/Ollama/OpenVINO option mapping, and writes sandbox copies of C-AOL `config/options.json` under `.proof-cache/caol-backend-contract/` for all three backend modes.
+Package proof command:
 
-Current local backend status: setup/config/status/apply-proof is good for v0; live readiness still depends on the user's environment. AnyLLM/API and Ollama/llama-family are intended to work on Windows/macOS/Linux when their dependencies are installed. OpenVINO is Windows-first for v0 and should be presented that way. This Mac currently has Ollama running, but the default Python is missing `any_llm` and OpenVINO packages, so API/OpenVINO need a configured Python/venv plus secrets/model files before live inference can honestly work.
+```bash
+python3 tools/prove_dabubu_export_packaging.py
+```
+
+The proof exports unsigned Windows/macOS/Linux app artifacts into ignored `.proof-cache/` output, records sizes and hashes, and restores temporary export presets.
+
+## Release Gate
+
+Before handing a Dabubu release to Josef:
+
+- Build Windows/macOS/Linux packages from the final commit.
+- Upload release assets to GitHub.
+- Download the published GitHub asset back; do not only test a local build folder.
+- On Windows, extract into a short isolated folder, install/extract a real C-AOL release into `caol/game0`, run the exported `Catapult-Dabubu.exe` venv setup smoke, and remove the temp folder after success or failure.
+- Confirm the smoke reaches `python_venv_setup_ok`.
 
 ## Credits
 
