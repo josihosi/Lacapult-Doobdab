@@ -57,6 +57,8 @@ const VERSION_CHECK_URL = "" # Catapult-Dabubu public self-update is disabled un
 const CAOL_NONPORTABLE_DYLIB_PREFIXES = ["/opt/local/", "/usr/local/", "/opt/homebrew/"]
 const CAOL_REPAIR_FREETYPE_SOURCE = "res://resources/caol_macos_repair/libfreetype.6.dylib"
 const CAOL_REPAIR_LIBPNG_SOURCE = "res://resources/caol_macos_repair/libpng16.16.dylib"
+const CLI_SMOKE_PYTHON_VENV_ARG = "--dabubu-smoke-python-venv"
+const CLI_SMOKE_OUTPUT_ARG = "--dabubu-smoke-output"
 var _latest_version = ""
 var _is_update_available = false
 var _release_page_url = ""
@@ -97,6 +99,8 @@ func _get_github_auth_headers() -> PoolStringArray:
 
 
 func _ready() -> void:
+	if _run_cli_smoke_if_requested():
+		return
 	
 	# Add the HTTPRequest node for version checking
 	add_child(_version_check_request)
@@ -128,6 +132,60 @@ func _ready() -> void:
 	
 	# Automatically check for updates on startup
 	_on_BtnCheck_pressed()
+
+
+func _run_cli_smoke_if_requested() -> bool:
+	var args = OS.get_cmdline_args()
+	if args.find(CLI_SMOKE_PYTHON_VENV_ARG) < 0:
+		return false
+	_ensure_cli_smoke_active_caol_install()
+	var result = BackendConfig.run_python_venv_setup("", false)
+	result["cli_smoke"] = "python_venv"
+	result["active_install_caol"] = Settings.read("active_install_caol")
+	result["game_dir"] = Paths.game_dir
+	result["own_dir"] = Paths.own_dir
+	var output_path = _cmdline_value(args, CLI_SMOKE_OUTPUT_ARG)
+	if output_path != "":
+		_write_cli_smoke_result(output_path, result)
+	print(JSON.print(result, "  "))
+	var status = str(result.get("status", ""))
+	get_tree().quit(0 if status == "ok" or status == "python_venv_setup_ok" else 1)
+	return true
+
+
+func _cmdline_value(args: Array, key: String) -> String:
+	var idx = args.find(key)
+	if idx < 0 or idx + 1 >= args.size():
+		return ""
+	return str(args[idx + 1])
+
+
+func _ensure_cli_smoke_active_caol_install() -> void:
+	Settings.store("game", "caol")
+	var _summary = Paths.installs_summary
+	if str(Settings.read("active_install_caol")).strip_edges() != "":
+		return
+	var base_dir = Paths.own_dir.plus_file("caol")
+	var d = Directory.new()
+	if not d.dir_exists(base_dir):
+		return
+	for subdir in FS.list_dir(base_dir):
+		var install_dir = base_dir.plus_file(subdir)
+		var info_path = install_dir.plus_file(Helpers.INFO_FILENAME)
+		if d.file_exists(info_path):
+			var info = Helpers.load_json_file(info_path)
+			if typeof(info) == TYPE_DICTIONARY and info.has("name"):
+				Settings.store("active_install_caol", str(info["name"]))
+				return
+
+
+func _write_cli_smoke_result(output_path: String, result: Dictionary) -> void:
+	var parent = output_path.get_base_dir()
+	if parent != "":
+		var d = Directory.new()
+		if not d.dir_exists(parent):
+			d.make_dir_recursive(parent)
+	Helpers.save_to_json_file(result, output_path)
 
 
 func _save_control_min_sizes() -> void:

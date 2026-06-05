@@ -126,6 +126,8 @@ func build_api_setup_plan(provider_id: String, python_path: String = "") -> Dict
 		"python_command": venv_python_command,
 		"package_spec": package_spec,
 		"harness_requirements_path": resolve_active_install_openclaw_harness_requirements_path(),
+		"uv_cache_dir": venv_plan.get("uv_cache_dir", ""),
+		"uv_python_install_dir": venv_plan.get("uv_python_install_dir", ""),
 		"commands": commands,
 		"command": PoolStringArray(preview).join("\n"),
 		"requires_confirmation": true,
@@ -149,6 +151,7 @@ func run_api_setup(provider_id: String, python_path: String = "", proof_only: bo
 	var results = []
 	var failed = false
 	var exit_code = 0
+	var previous_uv_env = _apply_uv_toolchain_environment(plan)
 	for step in plan.get("commands", []):
 		var output = []
 		exit_code = OS.execute(step.get("command", ""), step.get("args", []), true, output, true)
@@ -157,6 +160,7 @@ func run_api_setup(provider_id: String, python_path: String = "", proof_only: bo
 		if exit_code != 0:
 			failed = true
 			break
+	_restore_uv_toolchain_environment(previous_uv_env)
 	var failed_phase = results[results.size() - 1].get("phase", "api_setup") if results.size() > 0 else "api_setup"
 	var summary = "api_venv_harness_and_anyllm_install_ok" if not failed else "%s_failed" % failed_phase
 	var write_result = write_api_setup_intent(provider_id, python_path, true, exit_code, summary, results)
@@ -383,15 +387,19 @@ func build_python_venv_setup_plan(python_path: String = "") -> Dictionary:
 	if target == "" or _looks_like_python_executable_path(target):
 		target = Paths.config.plus_file("caol-llm-python-venv")
 	var uv_plan = _build_uv_toolchain_plan()
+	var prepare_dirs = uv_plan.get("toolchain_dirs", [])
+	if target.get_base_dir() != "":
+		prepare_dirs.append(target.get_base_dir())
+	var ensure_dirs = _ensure_toolchain_dirs_command(prepare_dirs)
 	var uv_command = uv_plan.get("uv_command", "")
 	var venv_python_command = _venv_python_command(target)
 	var commands = [
 		{
 			"phase": "prepare_uv_toolchain_dirs",
-			"command": uv_plan.get("ensure_dirs_command", ""),
-			"args": uv_plan.get("ensure_dirs_args", []),
-			"preview": "prepare app-managed uv/CPython directories under %s" % Paths.own_dir.plus_file("utils").plus_file("uv-toolchain"),
-			"purpose": "Create app-local toolchain directories without changing global PATH."
+			"command": ensure_dirs.get("command", ""),
+			"args": ensure_dirs.get("args", []),
+			"preview": "prepare uv, CPython, and venv directories under %s" % Paths.own_dir,
+			"purpose": "Create app-local setup directories without changing global PATH."
 		},
 		{
 			"phase": "download_uv",
@@ -424,8 +432,8 @@ func build_python_venv_setup_plan(python_path: String = "") -> Dictionary:
 		{
 			"phase": "install_managed_cpython",
 			"command": uv_command,
-			"args": ["python", "install", MANAGED_CPYTHON_VERSION, "--managed-python", "--install-dir", uv_plan.get("python_install_dir", "")],
-			"preview": "%s python install %s --managed-python --install-dir %s" % [uv_command, MANAGED_CPYTHON_VERSION, uv_plan.get("python_install_dir", "")],
+			"args": ["python", "install", MANAGED_CPYTHON_VERSION, "--managed-python", "--install-dir", uv_plan.get("python_install_dir", ""), "--no-bin", "--no-registry"],
+			"preview": "%s python install %s --managed-python --install-dir %s --no-bin --no-registry" % [uv_command, MANAGED_CPYTHON_VERSION, uv_plan.get("python_install_dir", "")],
 			"purpose": "Install the pinned app-local managed CPython used by C-AOL runner.py and manual handoffs."
 		},
 		{
@@ -458,6 +466,8 @@ func build_python_venv_setup_plan(python_path: String = "") -> Dictionary:
 		"commands": commands,
 		"phase_order": phase_order,
 		"harness_requirements_path": resolve_active_install_openclaw_harness_requirements_path(),
+		"uv_cache_dir": uv_plan.get("cache_dir", ""),
+		"uv_python_install_dir": uv_plan.get("python_install_dir", ""),
 		"requires_confirmation": true,
 		"automated_proof_policy": "plan_only_no_uv_download_no_python_install_no_venv_no_pip_mutation"
 	}
@@ -471,6 +481,7 @@ func run_python_venv_setup(python_path: String = "", proof_only: bool = false) -
 	var results = []
 	var failed = false
 	var exit_code = 0
+	var previous_uv_env = _apply_uv_toolchain_environment(plan)
 	for step in plan.get("commands", []):
 		var output = []
 		exit_code = OS.execute(step.get("command", ""), step.get("args", []), true, output, true)
@@ -478,6 +489,7 @@ func run_python_venv_setup(python_path: String = "", proof_only: bool = false) -
 		if exit_code != 0:
 			failed = true
 			break
+	_restore_uv_toolchain_environment(previous_uv_env)
 	var failed_phase = results[results.size() - 1].get("phase", "python_venv") if results.size() > 0 else "python_venv"
 	var summary = "python_venv_and_harness_requirements_setup_ok" if not failed else "%s_failed" % failed_phase
 	var write_result = write_python_venv_setup_intent(plan.get("target_path", ""), true, exit_code, summary, plan, results)
@@ -1196,6 +1208,25 @@ func _caol_resource_roots() -> Array:
 	return roots
 
 
+func _apply_uv_toolchain_environment(plan: Dictionary) -> Dictionary:
+	var previous = {
+		"UV_CACHE_DIR": OS.get_environment("UV_CACHE_DIR"),
+		"UV_PYTHON_INSTALL_DIR": OS.get_environment("UV_PYTHON_INSTALL_DIR")
+	}
+	var cache_dir = str(plan.get("uv_cache_dir", "")).strip_edges()
+	if cache_dir != "":
+		OS.set_environment("UV_CACHE_DIR", cache_dir)
+	var python_install_dir = str(plan.get("uv_python_install_dir", "")).strip_edges()
+	if python_install_dir != "":
+		OS.set_environment("UV_PYTHON_INSTALL_DIR", python_install_dir)
+	return previous
+
+
+func _restore_uv_toolchain_environment(previous: Dictionary) -> void:
+	OS.set_environment("UV_CACHE_DIR", str(previous.get("UV_CACHE_DIR", "")))
+	OS.set_environment("UV_PYTHON_INSTALL_DIR", str(previous.get("UV_PYTHON_INSTALL_DIR", "")))
+
+
 func _build_openclaw_harness_requirements_step(venv_python_command: String) -> Dictionary:
 	var requirements_path = resolve_active_install_openclaw_harness_requirements_path()
 	if requirements_path == "":
@@ -1220,7 +1251,6 @@ func _build_uv_toolchain_plan() -> Dictionary:
 	var asset_url = UV_RELEASE_BASE_URL + "/" + asset_name
 	var sha_url = UV_RELEASE_BASE_URL + "/" + asset_name + ".sha256"
 	var uv_command = _uv_executable_path(uv_extract_dir)
-	var ensure_dirs = _ensure_toolchain_dirs_command([cache_dir, uv_extract_dir, python_install_dir])
 	var download = _download_command(asset_url, archive_path)
 	var download_sha = _download_command(sha_url, sha_path)
 	var verify = _verify_sha256_command(archive_path, sha_path)
@@ -1235,8 +1265,7 @@ func _build_uv_toolchain_plan() -> Dictionary:
 		"uv_extract_dir": uv_extract_dir,
 		"uv_command": uv_command,
 		"python_install_dir": python_install_dir,
-		"ensure_dirs_command": ensure_dirs.get("command", ""),
-		"ensure_dirs_args": ensure_dirs.get("args", []),
+		"toolchain_dirs": [cache_dir, uv_extract_dir, python_install_dir],
 		"download_command": download.get("command", ""),
 		"download_args": download.get("args", []),
 		"download_sha_args": download_sha.get("args", []),
@@ -1285,6 +1314,8 @@ func _machine_arch() -> String:
 
 func _uv_executable_path(uv_extract_dir: String) -> String:
 	var exe_name = "uv.exe" if OS.get_name() == "Windows" else "uv"
+	if OS.get_name() == "Windows":
+		return uv_extract_dir.plus_file(exe_name)
 	var nested_dir = uv_extract_dir.plus_file(_uv_asset_name().replace(".tar.gz", "").replace(".zip", ""))
 	return nested_dir.plus_file(exe_name)
 
@@ -1294,7 +1325,7 @@ func _ensure_toolchain_dirs_command(paths: Array) -> Dictionary:
 		var script_parts = []
 		for path in paths:
 			script_parts.append("New-Item -ItemType Directory -Force -Path '%s' | Out-Null" % _ps_quote(str(path)))
-		return {"command": "powershell", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", PoolStringArray(script_parts).join("; ")]}
+		return {"command": _windows_powershell_executable(), "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", PoolStringArray(script_parts).join("; ")]}
 	var args = ["-p"]
 	for path in paths:
 		args.append(str(path))
@@ -1304,14 +1335,14 @@ func _ensure_toolchain_dirs_command(paths: Array) -> Dictionary:
 func _download_command(url: String, target_path: String) -> Dictionary:
 	if OS.get_name() == "Windows":
 		var script = "Invoke-WebRequest -UseBasicParsing -Uri '%s' -OutFile '%s'" % [_ps_quote(url), _ps_quote(target_path)]
-		return {"command": "powershell", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script]}
+		return {"command": _windows_powershell_executable(), "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script]}
 	return {"command": "curl", "args": ["-L", "--fail", url, "-o", target_path]}
 
 
 func _verify_sha256_command(archive_path: String, sha_path: String) -> Dictionary:
 	if OS.get_name() == "Windows":
 		var script = "$expected = ((Get-Content -LiteralPath '%s' -Raw).Trim().Split()[0]).ToLowerInvariant(); $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath '%s').Hash.ToLowerInvariant(); if ($expected -ne $actual) { Write-Error ('uv checksum mismatch: expected ' + $expected + ' got ' + $actual); exit 1 }" % [_ps_quote(sha_path), _ps_quote(archive_path)]
-		return {"command": "powershell", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script]}
+		return {"command": _windows_powershell_executable(), "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script]}
 	var script = "expected=$(awk '{print $1}' \"$2\"); actual=$(shasum -a 256 \"$1\" 2>/dev/null | awk '{print $1}'); if [ -z \"$actual\" ]; then actual=$(sha256sum \"$1\" | awk '{print $1}'); fi; [ \"$expected\" = \"$actual\" ]"
 	return {"command": "sh", "args": ["-c", script, "verify-uv", archive_path, sha_path]}
 
@@ -1319,12 +1350,22 @@ func _verify_sha256_command(archive_path: String, sha_path: String) -> Dictionar
 func _extract_archive_command(archive_path: String, extract_dir: String) -> Dictionary:
 	if OS.get_name() == "Windows":
 		var script = "Expand-Archive -LiteralPath '%s' -DestinationPath '%s' -Force" % [_ps_quote(archive_path), _ps_quote(extract_dir)]
-		return {"command": "powershell", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script]}
+		return {"command": _windows_powershell_executable(), "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script]}
 	return {"command": "tar", "args": ["-xzf", archive_path, "-C", extract_dir]}
 
 
 func _ps_quote(value: String) -> String:
 	return value.replace("'", "''")
+
+
+func _windows_powershell_executable() -> String:
+	var system_root = OS.get_environment("SystemRoot")
+	if system_root == "":
+		system_root = "C:\\Windows"
+	var candidate = system_root.plus_file("System32").plus_file("WindowsPowerShell").plus_file("v1.0").plus_file("powershell.exe")
+	if File.new().file_exists(candidate):
+		return candidate
+	return "powershell.exe"
 
 
 func _command_exists(command: String) -> bool:
@@ -1344,7 +1385,7 @@ func _venv_python_command(target_path: String) -> String:
 func _windows_total_ram_mb() -> int:
 	var output = []
 	var code = "$m=(Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory; [math]::Round($m/1MB)"
-	var exit_code = OS.execute("powershell", ["-NoProfile", "-Command", code], true, output, true)
+	var exit_code = OS.execute(_windows_powershell_executable(), ["-NoProfile", "-Command", code], true, output, true)
 	if exit_code != 0:
 		return 0
 	return int("\n".join(output).strip_edges())
@@ -1353,7 +1394,7 @@ func _windows_total_ram_mb() -> int:
 func _windows_max_vram_mb() -> int:
 	var output = []
 	var code = "$m=(Get-CimInstance Win32_VideoController | Measure-Object AdapterRAM -Maximum).Maximum; if ($m) { [math]::Round($m/1MB) } else { 0 }"
-	var exit_code = OS.execute("powershell", ["-NoProfile", "-Command", code], true, output, true)
+	var exit_code = OS.execute(_windows_powershell_executable(), ["-NoProfile", "-Command", code], true, output, true)
 	if exit_code != 0:
 		return 0
 	return int("\n".join(output).strip_edges())
@@ -1362,7 +1403,7 @@ func _windows_max_vram_mb() -> int:
 func _windows_gpu_names() -> Array:
 	var output = []
 	var code = "Get-CimInstance Win32_VideoController | ForEach-Object { ($_.Name + ' | ' + $_.VideoProcessor + ' | ' + $_.AdapterCompatibility) }"
-	var exit_code = OS.execute("powershell", ["-NoProfile", "-Command", code], true, output, true)
+	var exit_code = OS.execute(_windows_powershell_executable(), ["-NoProfile", "-Command", code], true, output, true)
 	if exit_code != 0:
 		return []
 	var names = []

@@ -161,7 +161,7 @@ func _build_controls() -> void:
 	python_row.add_child(_backend_python_path)
 	_install_python_button = Button.new()
 	_install_python_button.text = "Set up Python venv"
-	_install_python_button.hint_tooltip = "Downloads pinned uv, installs app-managed CPython, creates the shared runner.py/debug-handoff venv, and installs packaged harness requirements.\nNo system Python or PATH change is required."
+	_install_python_button.hint_tooltip = "Creates the app-managed Python venv and installs the active C-AOL harness requirements."
 	_install_python_button.connect("pressed", self, "_on_ConfirmPythonVenvInstall_pressed")
 	python_row.add_child(_install_python_button)
 
@@ -289,7 +289,7 @@ func _refresh_backend_setup_controls() -> void:
 		choice_row.visible = false
 		model_row.visible = true
 		_install_python_button.text = "Set up Python venv"
-		_install_python_button.hint_tooltip = "Advanced: uses pinned uv and app-managed CPython for the shared runner.py/debug-handoff venv. The main API setup action also installs AnyLLM packages."
+		_install_python_button.hint_tooltip = "Creates the shared C-AOL Python venv and installs harness requirements."
 		_install_button.text = "Set up API / AnyLLM"
 		_install_button.hint_tooltip = "Saves options, then asks before creating/updating the venv and installing harness plus AnyLLM/provider packages into it.\nNo API call or API-secret read is performed."
 		_runner_test_button.text = "Test API runner"
@@ -316,7 +316,7 @@ func _refresh_backend_setup_controls() -> void:
 		choice_row.visible = true
 		model_row.visible = false
 		_install_python_button.text = "Set up Python venv"
-		_install_python_button.hint_tooltip = "Uses pinned uv and app-managed CPython to create/update the shared runner.py/debug-handoff venv and install harness requirements.\nOllama itself and model pulls use Install Ollama / model."
+		_install_python_button.hint_tooltip = "Creates the shared C-AOL Python venv and installs harness requirements."
 		_install_button.text = "Install Ollama / model"
 		_install_button.hint_tooltip = "Saves options, then asks before installing Ollama or pulling the selected model.\nAutomated proof records intent only."
 		_runner_test_button.text = "Test Ollama runner"
@@ -351,7 +351,7 @@ func _set_backend_status(mode: String, raw_status: String, prefix: String = "") 
 			_set_status_rows(_api_status_lights, _api_status_rows(raw_status))
 		lines.append("Secret policy: env-var name only; pasted keys are session-only and cleared after use. Check makes no API call.")
 		lines.append("Runner test: confirmation-gated; proof mode invokes C-AOL runner.py with --dry-run and no API call.")
-		lines.append("Setup path: uses pinned uv plus app-managed CPython to create/update the venv, installs harness requirements and AnyLLM/provider packages, then use Check.")
+		lines.append("Setup: Python venv first; API setup adds AnyLLM/provider packages.")
 	elif mode == "ollama":
 		if _ollama_status_lights != null:
 			_set_status_rows(_ollama_status_lights, _ollama_status_rows())
@@ -696,7 +696,7 @@ func _confirmation_text_for_mode(mode: String) -> String:
 		var plan = BackendConfig.build_python_venv_setup_plan(_backend_python_path.text if _backend_python_path != null else "")
 		var proof_note = "\n\nProof mode is enabled for this run, so Catapult-Dabubu records the venv intent only." if _external_setup_proof_only_enabled() else ""
 		var api_note = "\n\nAPI note: this does not install AnyLLM/provider packages; use the main API setup action for those dependencies." if Settings.read("backend_mode") == "api" else ""
-		return "Confirm Python venv setup.\n\nPlanned command after approval:\n%s\n\nThis downloads pinned uv %s, verifies its checksum, installs app-managed CPython %s, creates/updates the shared venv, and installs packaged harness requirements from the active C-AOL install.\nNo system Python or global PATH change is required. It does not pull Ollama models or make backend calls.%s%s" % [plan.get("command", plan.get("command_preview", "uv venv")), str(plan.get("uv_version", "")), str(plan.get("managed_python_version", "")), api_note, proof_note]
+		return "Set up Python venv?\n\nTarget:\n%s\n\nSteps:\n%s\n\nUses uv %s and Python %s. No system Python or PATH changes.%s%s" % [plan.get("target_path", ""), plan.get("command_preview", "uv venv"), str(plan.get("uv_version", "")), str(plan.get("managed_python_version", "")), api_note, proof_note]
 	return "Confirm before running an external backend setup action. This proof build records the intent only and does not run package managers or download models."
 
 func _api_setup_proof_only_enabled() -> bool:
@@ -769,14 +769,14 @@ func _on_ExternalBackendAction_confirmed() -> void:
 	elif _pending_confirm_action == "python_venv":
 		var proof_only = _external_setup_proof_only_enabled()
 		if not proof_only:
-			_set_external_action_progress(Settings.read("backend_mode"), "Downloading pinned uv, installing app-managed CPython, creating/updating the shared runner.py/debug-handoff Python venv, and installing harness requirements. Keep Catapult-Dabubu open; this may take a while.")
+			_set_external_action_progress(Settings.read("backend_mode"), "Setting up the app-managed Python venv. Keep Catapult-Dabubu open.")
 			yield(get_tree(), "idle_frame")
 		var setup_result = BackendConfig.run_python_venv_setup(_backend_python_path.text if _backend_python_path != null else "", proof_only)
 		var status = setup_result.get("status", "python_venv_setup_unknown")
 		if status != "ok" and status != "python_venv_setup_ok":
 			_set_backend_status(Settings.read("backend_mode"), status, "Python venv setup failed" if not proof_only else "Python venv intent failed")
-			post_message = "Python venv setup failed." if not proof_only else "Python venv proof intent failed; no venv was created."
-			Status.post(post_message)
+			post_message = _python_venv_setup_failure_message(setup_result, proof_only)
+			Status.post(post_message, Enums.MSG_ERROR)
 			return
 		var python_command = setup_result.get("plan", {}).get("venv_python_command", "")
 		if python_command != "":
@@ -787,7 +787,7 @@ func _on_ExternalBackendAction_confirmed() -> void:
 			post_message = "Python venv setup intent recorded in proof mode; no venv was created."
 		else:
 			_set_backend_status(Settings.read("backend_mode"), _check_current_backend_status(), "Python venv setup finished")
-			post_message = "Python venv setup command finished after confirmation; it created/updated the app-managed runner.py/debug-handoff venv and installed harness requirements. Run the main API setup if AnyLLM packages still need repair."
+			post_message = "Python venv setup finished. Harness requirements are installed."
 	else:
 		_backend_status.text = "Confirmed guided setup intent for %s. No external package install, model pull, API call, or real machine mutation was performed by this action.\n%s" % [_pending_confirm_action, _backend_status.text]
 	Status.post(post_message)
@@ -831,6 +831,22 @@ func _api_setup_failure_message(setup_result: Dictionary, proof_only: bool) -> S
 	var message = "C-AOL API backend setup failed during %s (exit %s). No API call or API-secret read was performed." % [phase, exit_code]
 	if detail != "":
 		message += "\nPackage setup output:\n%s" % detail
+	return message
+
+
+func _python_venv_setup_failure_message(setup_result: Dictionary, proof_only: bool) -> String:
+	if proof_only:
+		return "Python venv proof intent failed; no venv was created."
+	var failed_result = {}
+	var results = setup_result.get("results", [])
+	if results.size() > 0:
+		failed_result = results[results.size() - 1]
+	var phase = str(failed_result.get("phase", "python_venv_setup"))
+	var exit_code = str(failed_result.get("exit_code", setup_result.get("exit_code", "unknown")))
+	var detail = str(failed_result.get("output_summary", "")).strip_edges()
+	var message = "Python venv setup failed during %s (exit %s)." % [phase, exit_code]
+	if detail != "":
+		message += "\nSetup output:\n%s" % detail
 	return message
 
 
